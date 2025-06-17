@@ -2,13 +2,27 @@ use crate::vec::*;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
-pub struct Map<T: Debug + PartialEq> {
+pub struct Map<T>
+where
+	T: Default + Debug + PartialEq + Clone,
+{
 	pub width: usize,
 	pub height: usize,
 	pub values: Vec<T>,
 }
 
-impl<T: Debug + PartialEq> Map<T> {
+impl<T> Map<T>
+where
+	T: Default + Debug + PartialEq + Clone,
+{
+	pub fn new(width: usize, height: usize) -> Self {
+		Self {
+			width,
+			height,
+			values: vec![T::default(); width * height],
+		}
+	}
+
 	pub fn in_bounds(&self, pos: &Vec2) -> bool {
 		let Vec2 { x, y } = *pos;
 		x >= 0 && y >= 0 && y < self.height as i32 && x < self.width as i32
@@ -65,7 +79,10 @@ pub struct ProxyMap {
 }
 
 impl ProxyMap {
-	pub fn convert<T: Debug + PartialEq>(self, parser: fn(String) -> Vec<T>) -> Map<T> {
+	pub fn convert<T>(self, parser: fn(String) -> Vec<T>) -> Map<T>
+	where
+		T: Default + Debug + PartialEq + Clone,
+	{
 		Map {
 			width: self.width,
 			height: self.height,
