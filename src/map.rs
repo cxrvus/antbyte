@@ -1,10 +1,7 @@
 use crate::vec::*;
 
 #[derive(Debug, Clone)]
-pub struct Map<T>
-where
-	T: Default + PartialEq + Clone,
-{
+pub struct Map<T> {
 	pub width: usize,
 	pub height: usize,
 	pub values: Vec<T>,
@@ -12,13 +9,13 @@ where
 
 impl<T> Map<T>
 where
-	T: Default + PartialEq + Clone,
+	T: Default,
 {
 	pub fn new(width: usize, height: usize) -> Self {
 		Self {
 			width,
 			height,
-			values: vec![T::default(); width * height],
+			values: (0..width * height).map(|_| T::default()).collect(),
 		}
 	}
 
@@ -45,15 +42,6 @@ where
 		}
 	}
 
-	pub fn find_all(&self, target: T) -> Vec<Vec2u> {
-		self.values
-			.iter()
-			.enumerate()
-			.filter(|(_, value)| **value == target)
-			.map(|(i, _)| self.get_pos(i).unwrap())
-			.collect()
-	}
-
 	pub fn get_pos(&self, i: usize) -> Option<Vec2u> {
 		self.values.get(i)?;
 		Some(Vec2u {
@@ -68,16 +56,19 @@ where
 			y: self.height,
 		}
 	}
+}
 
-	pub fn get_row(&self, i: usize) -> Option<Vec<&T>> {
-		if i >= self.height {
-			None
-		} else {
-			let start = i * self.width;
-			let end = (i + 1) * self.width;
-			let row = self.values[start..end].iter().collect::<Vec<&T>>();
-			Some(row)
-		}
+impl<T> Map<T>
+where
+	T: Default + PartialEq,
+{
+	pub fn find_all(&self, target: T) -> Vec<Vec2u> {
+		self.values
+			.iter()
+			.enumerate()
+			.filter(|(_, value)| **value == target)
+			.map(|(i, _)| self.get_pos(i).unwrap())
+			.collect()
 	}
 }
 
@@ -89,10 +80,7 @@ pub struct ProxyMap {
 }
 
 impl ProxyMap {
-	pub fn convert<T>(self, parser: fn(String) -> Vec<T>) -> Map<T>
-	where
-		T: Default + PartialEq + Clone,
-	{
+	pub fn convert<T>(self, parser: fn(String) -> Vec<T>) -> Map<T> {
 		Map {
 			width: self.width,
 			height: self.height,
