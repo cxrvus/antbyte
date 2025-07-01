@@ -1,10 +1,9 @@
 use crate::vec::*;
-use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
 pub struct Map<T>
 where
-	T: Default + Debug + PartialEq + Clone,
+	T: Default + PartialEq + Clone,
 {
 	pub width: usize,
 	pub height: usize,
@@ -13,7 +12,7 @@ where
 
 impl<T> Map<T>
 where
-	T: Default + Debug + PartialEq + Clone,
+	T: Default + PartialEq + Clone,
 {
 	pub fn new(width: usize, height: usize) -> Self {
 		Self {
@@ -42,7 +41,7 @@ where
 			let Vec2u { x, y } = pos.unsign().unwrap();
 			self.values[y * self.width + x] = value;
 		} else {
-			panic!("map index is out of range: {:?} = {:?}", pos, value)
+			panic!("map index is out of range: {:?}", pos)
 		}
 	}
 
@@ -81,7 +80,7 @@ pub struct ProxyMap {
 impl ProxyMap {
 	pub fn convert<T>(self, parser: fn(String) -> Vec<T>) -> Map<T>
 	where
-		T: Default + Debug + PartialEq + Clone,
+		T: Default + PartialEq + Clone,
 	{
 		Map {
 			width: self.width,
