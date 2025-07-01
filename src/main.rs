@@ -1,7 +1,10 @@
 use crate::{map::Map, vec::Vec2};
 
+pub mod ant;
+pub mod bitvec;
 pub mod map;
 pub mod vec;
+pub mod world;
 
 fn main() {
 	let mut board = Map::<u8>::new(8, 8);
