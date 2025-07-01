@@ -68,6 +68,17 @@ where
 			y: self.height,
 		}
 	}
+
+	pub fn get_row(&self, i: usize) -> Option<Vec<&T>> {
+		if i >= self.height {
+			None
+		} else {
+			let start = i * self.width;
+			let end = (i + 1) * self.width;
+			let row = self.values[start..end].iter().collect::<Vec<&T>>();
+			Some(row)
+		}
+	}
 }
 
 #[derive(Debug)]
