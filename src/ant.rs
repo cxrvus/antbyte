@@ -1,30 +1,39 @@
 use crate::bitvec::BitVec;
 
+pub enum Variant {
+	Queen,
+	Worker,
+}
+
 pub struct Ant {
-	brain: Network,
+	brain: Circuit,
 	age: u8,
-	is_queen: bool,
+	variant: Variant,
 }
 
-pub struct Network {
+pub struct Circuit {
 	inputs: u8,
-	outputs: u8,
-	input_weights: Weights,
-	hidden_layers: Vec<HiddenLayer>,
+	layers: Vec<Layer>,
 }
 
-pub struct HiddenLayer {
+impl Circuit {
+	pub fn tick(input: BitVec) -> BitVec {
+		todo!()
+	}
+}
+
+pub struct Layer {
 	neurons: Vec<Neuron>,
-	weights: Weights,
+	weights: Matrix,
 	carries: BitVec,
 }
 
-pub struct Weights(Vec<BitVec>);
+pub struct Matrix(Vec<BitVec>);
 
 pub enum Neuron {
 	Or,
 	And,
 	Nor,
 	Nand,
-	Network(usize),
+	Circuit(usize),
 }

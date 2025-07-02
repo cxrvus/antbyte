@@ -1,10 +1,10 @@
-use crate::ant::{Ant, Network};
+use crate::ant::{Ant, Circuit};
 use crate::map::Map;
 
 pub struct WorldConfig {
 	size_x: u8,
 	size_y: u8,
-	networks: Vec<Network>,
+	networks: Vec<Circuit>,
 	noise_seed: u32, // todo
 }
 
