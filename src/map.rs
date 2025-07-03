@@ -1,4 +1,4 @@
-use crate::vec::*;
+use crate::vec2::*;
 
 #[derive(Debug, Clone)]
 pub struct Map<T> {

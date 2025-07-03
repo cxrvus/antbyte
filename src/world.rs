@@ -2,8 +2,8 @@ use crate::ant::{Ant, Circuit};
 use crate::map::Map;
 
 pub struct WorldConfig {
-	size_x: u8,
-	size_y: u8,
+	size_x: usize,
+	size_y: usize,
 	networks: Vec<Circuit>,
 	noise_seed: u32, // todo
 }
@@ -25,8 +25,8 @@ impl World {
 
 		let state = WorldState {
 			frame: 0,
-			cells: Map::new(size_x as usize, size_y as usize),
-			ants: Map::new(size_x as usize, size_y as usize),
+			cells: Map::new(size_x, size_y),
+			ants: Map::new(size_x, size_y),
 		};
 
 		Self { config, state }

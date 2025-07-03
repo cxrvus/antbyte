@@ -1,9 +1,9 @@
-use crate::{map::Map, vec::Vec2};
+use crate::{map::Map, vec2::Vec2};
 
 pub mod ant;
 pub mod bitvec;
 pub mod map;
-pub mod vec;
+pub mod vec2;
 pub mod world;
 
 fn main() {
