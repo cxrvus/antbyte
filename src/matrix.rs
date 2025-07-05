@@ -1,13 +1,13 @@
 use crate::vec2::*;
 
 #[derive(Debug, Clone)]
-pub struct Map<T> {
+pub struct Matrix<T> {
 	pub width: usize,
 	pub height: usize,
 	pub values: Vec<T>,
 }
 
-impl<T> Map<T>
+impl<T> Matrix<T>
 where
 	T: Default,
 {
@@ -58,7 +58,7 @@ where
 	}
 }
 
-impl<T> Map<T>
+impl<T> Matrix<T>
 where
 	T: Default + PartialEq,
 {
@@ -73,15 +73,15 @@ where
 }
 
 #[derive(Debug)]
-pub struct ProxyMap {
+pub struct ProxyMatrix {
 	pub width: usize,
 	pub height: usize,
 	pub string: String,
 }
 
-impl ProxyMap {
-	pub fn convert<T>(self, parser: fn(String) -> Vec<T>) -> Map<T> {
-		Map {
+impl ProxyMatrix {
+	pub fn convert<T>(self, parser: fn(String) -> Vec<T>) -> Matrix<T> {
+		Matrix {
 			width: self.width,
 			height: self.height,
 			values: parser(self.string),
@@ -89,7 +89,7 @@ impl ProxyMap {
 	}
 }
 
-impl From<&str> for ProxyMap {
+impl From<&str> for ProxyMatrix {
 	fn from(value: &str) -> Self {
 		let lines = value.trim().lines();
 

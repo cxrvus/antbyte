@@ -1,5 +1,5 @@
 use crate::ant::{Ant, Circuit};
-use crate::map::Map;
+use crate::matrix::Matrix;
 
 pub struct WorldConfig {
 	size_x: usize,
@@ -10,8 +10,8 @@ pub struct WorldConfig {
 
 struct WorldState {
 	frame: u32,
-	cells: Map<bool>, // => color depth = 1
-	ants: Map<Option<Ant>>,
+	cells: Matrix<bool>, // => color depth = 1
+	ants: Matrix<Option<Ant>>,
 }
 
 pub struct World {
@@ -25,8 +25,8 @@ impl World {
 
 		let state = WorldState {
 			frame: 0,
-			cells: Map::new(size_x, size_y),
-			ants: Map::new(size_x, size_y),
+			cells: Matrix::new(size_x, size_y),
+			ants: Matrix::new(size_x, size_y),
 		};
 
 		Self { config, state }
