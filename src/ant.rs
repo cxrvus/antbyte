@@ -1,14 +1,24 @@
 use crate::bitvec::BitVec;
 
 pub enum Variant {
-	Queen,
 	Worker,
+	Queen,
 }
 
 pub struct Ant {
 	brain: Circuit,
 	age: u8,
 	variant: Variant,
+}
+
+impl Ant {
+	pub fn new(circuit: Circuit) -> Self {
+		Self {
+			brain: circuit,
+			age: 0,
+			variant: Variant::Worker,
+		}
+	}
 }
 
 #[derive(Clone)]
@@ -26,7 +36,7 @@ impl Circuit {
 			.map(|&bit| BitVec::from(bit))
 			.collect::<Vec<_>>();
 
-		let mut last_layer_values = spread_input.clone();
+		let mut last_layer_values = spread_input;
 
 		for layer in &self.layers {
 			let mut current_layer_results: Vec<BitVec> = vec![];
@@ -56,19 +66,30 @@ pub struct Layer(pub Vec<Neuron>);
 
 #[derive(Clone)]
 pub struct Neuron {
-	weights: BitVec,
 	function: NeuronFunction,
+	weights: BitVec,
 	// todo: add has_carry_out: bool
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub enum NeuronFunction {
+	Gate(Gate),
+	Circuit(Circuit),
+}
+
+impl Default for NeuronFunction {
+	fn default() -> Self {
+		NeuronFunction::Gate(Gate::default())
+	}
+}
+
+#[derive(Clone, Default)]
+pub enum Gate {
 	#[default]
 	Or,
 	And,
 	Nor,
 	Nand,
-	Circuit(Circuit),
 }
 
 impl Neuron {
@@ -82,10 +103,13 @@ impl Neuron {
 		};
 
 		match &self.function {
-			NeuronFunction::Or => input.or_sum().into(),
-			NeuronFunction::And => input.and_sum().into(),
-			NeuronFunction::Nor => (!input.or_sum()).into(),
-			NeuronFunction::Nand => (!input.and_sum()).into(),
+			NeuronFunction::Gate(gate) => match gate {
+				Gate::Or => input.or_sum(),
+				Gate::And => input.and_sum(),
+				Gate::Nor => !input.or_sum(),
+				Gate::Nand => !input.and_sum(),
+			}
+			.into(),
 			NeuronFunction::Circuit(circuit) => circuit.tick(&input),
 		}
 	}
