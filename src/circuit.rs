@@ -31,21 +31,43 @@ impl Layer {
 		let mut layer_output = BitVec::new();
 
 		for neuron_index in 0..self.neuron_count {
-			// todo: get current neuron weights
-			// todo: apply to input (XOR bit0, AND bit1)
-			// todo: OR-sum
+			let neuron_weights = self.weights.get_row(neuron_index).unwrap().clone();
+			assert_eq!(neuron_weights.len(), input.len());
 
-			let neuron_output = todo!();
+			let weighted_input = Self::apply_weights(input, neuron_weights);
+			let neuron_output = weighted_input.or_sum();
 			layer_output.push(neuron_output);
-			// idea: implement carry out
 		}
 
 		layer_output
 	}
+
+	fn apply_weights(input: &BitVec, weights: Vec<&Weight>) -> BitVec {
+		// todo: optimize using bitwise XOR and AND
+
+		let mut output = BitVec::new();
+
+		for (i, input_bit) in input.iter().enumerate() {
+			let weight = weights[i];
+
+			let output_bit = match (weight, input_bit) {
+				(Weight::Zero, _) => false,
+				(Weight::Pos, true) => true,
+				(Weight::Pos, false) => false,
+				(Weight::Neg, true) => false,
+				(Weight::Neg, false) => true,
+			};
+
+			output.push(output_bit);
+		}
+
+		output
+	}
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub enum Weight {
+	#[default]
 	Zero = 0,
 	Pos = 1,
 	Neg = 3,
@@ -58,10 +80,6 @@ impl Weight {
 			Self::Pos => Self::Neg,
 			Self::Neg => Self::Pos,
 		};
-	}
-
-	pub fn apply(&self, input: BitVec) -> BitVec {
-		todo!()
 	}
 }
 
