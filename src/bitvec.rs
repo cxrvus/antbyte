@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 #[derive(Clone)]
 pub struct BitVec(Vec<bool>);
@@ -79,6 +79,12 @@ impl Deref for BitVec {
 
 	fn deref(&self) -> &Self::Target {
 		&self.0
+	}
+}
+
+impl DerefMut for BitVec {
+	fn deref_mut(&mut self) -> &mut Self::Target {
+		&mut self.0
 	}
 }
 
