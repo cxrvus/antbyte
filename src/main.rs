@@ -2,6 +2,7 @@ use crate::{matrix::Matrix, vec2::Vec2};
 
 pub mod ant;
 pub mod bitvec;
+pub mod circuit;
 pub mod matrix;
 pub mod vec2;
 pub mod world;

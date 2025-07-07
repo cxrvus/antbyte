@@ -1,4 +1,5 @@
-use crate::ant::{Ant, Circuit};
+use crate::ant::Ant;
+use crate::circuit::Circuit;
 use crate::matrix::Matrix;
 
 pub struct WorldConfig {
