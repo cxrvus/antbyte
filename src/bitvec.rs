@@ -100,3 +100,5 @@ impl From<bool> for BitVec {
 		BitVec(vec![value])
 	}
 }
+
+// todo: add tests

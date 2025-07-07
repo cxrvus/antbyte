@@ -64,3 +64,5 @@ impl Weight {
 		todo!()
 	}
 }
+
+// todo: add tests
