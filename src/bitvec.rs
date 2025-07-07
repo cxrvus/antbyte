@@ -95,9 +95,16 @@ impl From<Vec<bool>> for BitVec {
 	}
 }
 
-impl From<bool> for BitVec {
-	fn from(value: bool) -> Self {
-		BitVec(vec![value])
+impl From<u8> for BitVec {
+	fn from(value: u8) -> Self {
+		let mut bits = Vec::with_capacity(8);
+		for i in (0..8).rev() {
+			bits.push(((value >> i) & 1) != 0);
+		}
+
+		// trim leading zeros
+		let first_one = bits.iter().position(|&b| b).unwrap_or(7);
+		BitVec(bits[first_one..].to_vec())
 	}
 }
 
