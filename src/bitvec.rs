@@ -1,7 +1,7 @@
 use std::ops::{Deref, DerefMut};
 
 // todo: optimize using u32 instead of Vec<bool>
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct BitVec(Vec<bool>);
 
 impl BitVec {

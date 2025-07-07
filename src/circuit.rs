@@ -65,7 +65,7 @@ impl Layer {
 	}
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub enum Weight {
 	#[default]
 	Zero = 0,
@@ -96,3 +96,29 @@ pub fn string_to_weights(weight_str: String) -> Vec<Weight> {
 }
 
 // todo: add tests
+#[cfg(test)]
+mod tests {
+	use crate::{
+		bitvec::BitVec,
+		circuit::{Circuit, Layer, string_to_weights},
+		matrix::ProxyMatrix,
+	};
+
+	#[test]
+	fn or() {
+		let circuit = Circuit {
+			inputs: 2,
+			layers: vec![Layer {
+				neuron_count: 1,
+				weights: ProxyMatrix {
+					width: 2,
+					height: 1,
+					string: "++".into(),
+				}
+				.convert(string_to_weights),
+			}],
+		};
+
+		assert_eq!(circuit.tick(&BitVec::from(vec![false, false])), 0u8.into())
+	}
+}
