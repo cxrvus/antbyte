@@ -83,4 +83,16 @@ impl Weight {
 	}
 }
 
+pub fn string_to_weights(weight_str: String) -> Vec<Weight> {
+	weight_str
+		.chars()
+		.map(|c| match c {
+			'.' => Weight::Zero,
+			'+' => Weight::Pos,
+			'-' => Weight::Neg,
+			other => panic!("unknown weight symbol: {other}"),
+		})
+		.collect()
+}
+
 // todo: add tests
