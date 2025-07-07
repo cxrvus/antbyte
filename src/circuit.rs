@@ -1,4 +1,4 @@
-use crate::bitvec::BitVec;
+use crate::{bitvec::BitVec, matrix::Matrix};
 
 #[derive(Clone)]
 pub struct Circuit {
@@ -10,103 +10,57 @@ impl Circuit {
 	pub fn tick(&self, input: &BitVec) -> BitVec {
 		assert_eq!(input.len(), self.inputs);
 
-		let spread_input = input
-			.iter()
-			.map(|&bit| BitVec::from(bit))
-			.collect::<Vec<_>>();
-
-		let mut last_layer_values = spread_input;
+		let mut layer_input = input.clone();
 
 		for layer in &self.layers {
-			let mut current_layer_results: Vec<BitVec> = vec![];
-			for (n, neuron) in layer.0.iter().enumerate() {
-				let neuron_result = neuron.tick(&last_layer_values[n]);
-				current_layer_results.push(neuron_result);
-				// todo: handle carry out
-			}
-			last_layer_values = current_layer_results;
+			layer_input = layer.tick(&layer_input);
 		}
 
-		last_layer_values
-			.iter()
-			.map(|bit_vec| {
-				bit_vec
-					.unary()
-					.expect("output layer neurons may only have unary outputs")
-				// todo: validate this assertion on struct creation
-			})
-			.collect::<Vec<_>>()
-			.into()
+		layer_input
 	}
 }
 
 #[derive(Clone)]
-pub struct Layer(pub Vec<Neuron>);
-
-#[derive(Clone)]
-pub struct Neuron {
-	function: NeuronFunction,
-	weights: BitVec,
-	// todo: add has_carry_out: bool
+pub struct Layer {
+	neuron_count: usize,
+	weights: Matrix<Weight>,
 }
 
-#[derive(Clone)]
-pub enum NeuronFunction {
-	Gate(Gate),
-	Circuit(Circuit),
-}
-
-impl Default for NeuronFunction {
-	fn default() -> Self {
-		NeuronFunction::Gate(Gate::default())
-	}
-}
-
-#[derive(Clone, Default)]
-pub enum Gate {
-	#[default]
-	Or,
-	And,
-	Nor,
-	Nand,
-}
-
-impl Neuron {
+impl Layer {
 	pub fn tick(&self, input: &BitVec) -> BitVec {
-		let input = match input.unary() {
-			Some(enable) => input.gated_buffer(enable),
-			None => match &self.function {
-				NeuronFunction::Circuit(_) => self.sub_circuit_mask(input),
-				_ => self.primitive_mask(input),
-			},
-		};
+		let mut layer_output = BitVec::new();
 
-		match &self.function {
-			NeuronFunction::Gate(gate) => match gate {
-				Gate::Or => input.or_sum(),
-				Gate::And => input.and_sum(),
-				Gate::Nor => !input.or_sum(),
-				Gate::Nand => !input.and_sum(),
-			}
-			.into(),
-			NeuronFunction::Circuit(circuit) => circuit.tick(&input),
+		for neuron_index in 0..self.neuron_count {
+			// todo: get current neuron weights
+			// todo: apply to input (XOR bit0, AND bit1)
+			// todo: OR-sum
+
+			let neuron_output = todo!();
+			layer_output.push(neuron_output);
+			// idea: implement carry out
 		}
+
+		layer_output
+	}
+}
+
+#[derive(Clone)]
+pub enum Weight {
+	Zero = 0,
+	Pos = 1,
+	Neg = 3,
+}
+
+impl Weight {
+	pub fn flip(&mut self) {
+		*self = match self {
+			Self::Zero => Self::Zero,
+			Self::Pos => Self::Neg,
+			Self::Neg => Self::Pos,
+		};
 	}
 
-	fn primitive_mask(&self, input: &BitVec) -> BitVec {
-		input.and(&self.weights)
-	}
-
-	fn sub_circuit_mask(&self, input: &BitVec) -> BitVec {
-		let Self { weights, .. } = &self;
-
-		assert_eq!(input.len(), weights.len());
-
-		input
-			.iter()
-			.zip(weights.iter())
-			.filter_map(|(input_bit, weight)| if *weight { Some(*input_bit) } else { None })
-			.collect::<Vec<_>>()
-			.into()
+	pub fn apply(&self, input: BitVec) -> BitVec {
+		todo!()
 	}
 }

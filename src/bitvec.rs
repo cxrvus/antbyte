@@ -1,5 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
+// todo: optimize using u32 instead of Vec<bool>
 #[derive(Clone)]
 pub struct BitVec(Vec<bool>);
 
