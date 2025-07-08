@@ -1,6 +1,5 @@
-use crate::ant::Ant;
-use crate::circuit::Circuit;
-use crate::matrix::Matrix;
+use crate::ant::{Ant, circuit::Circuit};
+use crate::util::matrix::Matrix;
 
 pub struct WorldConfig {
 	size_x: usize,

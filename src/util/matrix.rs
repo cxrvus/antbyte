@@ -1,4 +1,4 @@
-use crate::vec2::*;
+use crate::util::vec2::*;
 
 #[derive(Debug, Clone)]
 pub struct Matrix<T> {

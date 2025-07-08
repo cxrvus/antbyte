@@ -1,4 +1,5 @@
-use crate::circuit::Circuit;
+pub mod circuit;
+use circuit::Circuit;
 
 pub enum Variant {
 	Worker,

@@ -1,4 +1,4 @@
-use crate::{bitvec::BitVec, matrix::Matrix};
+use crate::util::{bitvec::BitVec, matrix::Matrix};
 
 #[derive(Clone)]
 pub struct Circuit {
@@ -99,9 +99,8 @@ pub fn string_to_weights(weight_str: String) -> Vec<Weight> {
 #[cfg(test)]
 mod tests {
 	use crate::{
-		bitvec::BitVec,
-		circuit::{Circuit, Layer, string_to_weights},
-		matrix::ProxyMatrix,
+		ant::circuit::{Circuit, Layer, string_to_weights},
+		util::{bitvec::BitVec, matrix::ProxyMatrix},
 	};
 
 	#[test]
