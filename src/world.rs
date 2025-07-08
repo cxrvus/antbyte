@@ -4,7 +4,7 @@ use crate::util::matrix::Matrix;
 pub struct WorldConfig {
 	size_x: usize,
 	size_y: usize,
-	networks: Vec<Circuit>,
+	circuit: Vec<Circuit>,
 	noise_seed: u32, // todo
 }
 
