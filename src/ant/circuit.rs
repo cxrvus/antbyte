@@ -7,6 +7,12 @@ pub struct Circuit {
 }
 
 impl Circuit {
+	pub fn new(inputs: usize, layers: Vec<Layer>) -> Self {
+		// todo: assert correct weight dimensions in layers
+
+		Self { inputs, layers }
+	}
+
 	pub fn tick(&self, input: &BitVec) -> BitVec {
 		assert_eq!(input.len(), self.inputs);
 
@@ -22,15 +28,19 @@ impl Circuit {
 
 #[derive(Clone)]
 pub struct Layer {
-	neuron_count: usize,
+	size: usize,
 	weights: Matrix<Weight>,
 }
 
 impl Layer {
+	pub fn new(size: usize, weights: Matrix<Weight>) -> Self {
+		Self { size, weights }
+	}
+
 	pub fn tick(&self, input: &BitVec) -> BitVec {
 		let mut layer_output = BitVec::new();
 
-		for neuron_index in 0..self.neuron_count {
+		for neuron_index in 0..self.size {
 			let neuron_weights = self.weights.get_row(neuron_index).unwrap().clone();
 			assert_eq!(neuron_weights.len(), input.len());
 
@@ -108,7 +118,7 @@ mod tests {
 		let circuit = Circuit {
 			inputs: 2,
 			layers: vec![Layer {
-				neuron_count: 1,
+				size: 1,
 				weights: ProxyMatrix {
 					width: 2,
 					height: 1,
