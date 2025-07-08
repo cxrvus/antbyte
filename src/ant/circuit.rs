@@ -128,6 +128,12 @@ mod tests {
 		assert_eq!(or.tick(&vec![false, true].into()), true.into());
 		assert_eq!(or.tick(&vec![true, false].into()), true.into());
 		assert_eq!(or.tick(&vec![true, true].into()), true.into());
+
+		let or3 = Parser::parse("+++".into()).unwrap();
+
+		assert_eq!(or3.tick(&vec![false, false, false].into()), false.into());
+		assert_eq!(or3.tick(&vec![false, true, false].into()), true.into());
+		assert_eq!(or3.tick(&vec![true, true, true].into()), true.into());
 	}
 
 	#[test]
@@ -138,5 +144,11 @@ mod tests {
 		assert_eq!(and.tick(&vec![false, true].into()), false.into());
 		assert_eq!(and.tick(&vec![true, false].into()), false.into());
 		assert_eq!(and.tick(&vec![true, true].into()), true.into());
+
+		let and3 = Parser::parse("---;;-".into()).unwrap();
+
+		assert_eq!(and3.tick(&vec![false, false, false].into()), false.into());
+		assert_eq!(and3.tick(&vec![false, true, false].into()), false.into());
+		assert_eq!(and3.tick(&vec![true, true, true].into()), true.into());
 	}
 }
