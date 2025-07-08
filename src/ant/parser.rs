@@ -1,5 +1,5 @@
 use crate::{
-	ant::circuit::{self, Circuit, Layer, Weight},
+	ant::circuit::{Circuit, Layer, Weight},
 	util::matrix::Matrix,
 };
 use anyhow::{Result, anyhow};
