@@ -102,41 +102,41 @@ impl Weight {
 // todo: add tests
 #[cfg(test)]
 mod tests {
-	use crate::{ant::parser::Parser, util::bitvec::BitVec};
+	use crate::ant::parser::Parser;
 
 	#[test]
 	fn buf() {
 		let buf = Parser::parse("+".into()).unwrap();
 
-		assert_eq!(buf.tick(&BitVec::from(vec![false])), false.into());
-		assert_eq!(buf.tick(&BitVec::from(vec![true])), true.into());
+		assert_eq!(buf.tick(&false.into()), false.into());
+		assert_eq!(buf.tick(&true.into()), true.into());
 	}
 
 	#[test]
 	fn not() {
 		let not = Parser::parse("-".into()).unwrap();
 
-		assert_eq!(not.tick(&BitVec::from(vec![false])), true.into());
-		assert_eq!(not.tick(&BitVec::from(vec![true])), false.into());
+		assert_eq!(not.tick(&vec![false].into()), true.into());
+		assert_eq!(not.tick(&vec![true].into()), false.into());
 	}
 
 	#[test]
 	fn or() {
 		let or = Parser::parse("++".into()).unwrap();
 
-		assert_eq!(or.tick(&BitVec::from(vec![false, false])), false.into());
-		assert_eq!(or.tick(&BitVec::from(vec![false, true])), true.into());
-		assert_eq!(or.tick(&BitVec::from(vec![true, false])), true.into());
-		assert_eq!(or.tick(&BitVec::from(vec![true, true])), true.into());
+		assert_eq!(or.tick(&vec![false, false].into()), false.into());
+		assert_eq!(or.tick(&vec![false, true].into()), true.into());
+		assert_eq!(or.tick(&vec![true, false].into()), true.into());
+		assert_eq!(or.tick(&vec![true, true].into()), true.into());
 	}
 
 	#[test]
 	fn and() {
 		let and = Parser::parse("--;;-".into()).unwrap();
 
-		assert_eq!(and.tick(&BitVec::from(vec![false, false])), false.into());
-		assert_eq!(and.tick(&BitVec::from(vec![false, true])), false.into());
-		assert_eq!(and.tick(&BitVec::from(vec![true, false])), false.into());
-		assert_eq!(and.tick(&BitVec::from(vec![true, true])), true.into());
+		assert_eq!(and.tick(&vec![false, false].into()), false.into());
+		assert_eq!(and.tick(&vec![false, true].into()), false.into());
+		assert_eq!(and.tick(&vec![true, false].into()), false.into());
+		assert_eq!(and.tick(&vec![true, true].into()), true.into());
 	}
 }
