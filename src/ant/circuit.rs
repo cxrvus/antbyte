@@ -2,19 +2,22 @@ use crate::util::{bitvec::BitVec, matrix::Matrix};
 
 #[derive(Clone)]
 pub struct Circuit {
-	inputs: usize,
 	layers: Vec<Layer>,
 }
 
 impl Circuit {
-	pub fn new(inputs: usize, layers: Vec<Layer>) -> Self {
+	pub fn new(layers: Vec<Layer>) -> Self {
 		// todo: assert correct weight dimensions in layers
 
-		Self { inputs, layers }
+		Self { layers }
+	}
+
+	pub fn input_count(&self) -> usize {
+		self.layers[0].weights.width
 	}
 
 	pub fn tick(&self, input: &BitVec) -> BitVec {
-		assert_eq!(input.len(), self.inputs);
+		assert_eq!(input.len(), self.input_count());
 
 		let mut layer_input = input.clone();
 
@@ -28,19 +31,22 @@ impl Circuit {
 
 #[derive(Clone)]
 pub struct Layer {
-	size: usize,
 	weights: Matrix<Weight>,
 }
 
 impl Layer {
-	pub fn new(size: usize, weights: Matrix<Weight>) -> Self {
-		Self { size, weights }
+	pub fn new(weights: Matrix<Weight>) -> Self {
+		Self { weights }
+	}
+
+	pub fn neuron_count(&self) -> usize {
+		self.weights.height
 	}
 
 	pub fn tick(&self, input: &BitVec) -> BitVec {
 		let mut layer_output = BitVec::new();
 
-		for neuron_index in 0..self.size {
+		for neuron_index in 0..self.neuron_count() {
 			let neuron_weights = self.weights.get_row(neuron_index).unwrap().clone();
 			assert_eq!(neuron_weights.len(), input.len());
 
