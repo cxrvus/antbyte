@@ -7,15 +7,14 @@ pub struct Matrix<T> {
 	pub values: Vec<T>,
 }
 
-impl<T> Matrix<T>
-where
-	T: Default,
-{
-	pub fn new(width: usize, height: usize) -> Self {
+impl<T> Matrix<T> {
+	pub fn with_values(width: usize, height: usize, values: Vec<T>) -> Self {
+		assert_eq!(values.len(), width * height);
+
 		Self {
 			width,
 			height,
-			values: (0..width * height).map(|_| T::default()).collect(),
+			values,
 		}
 	}
 
@@ -76,6 +75,19 @@ where
 				.map(|row| &self.values[row * self.width + i])
 				.collect::<Vec<&T>>();
 			Some(col)
+		}
+	}
+}
+
+impl<T> Matrix<T>
+where
+	T: Default,
+{
+	pub fn new(width: usize, height: usize) -> Self {
+		Self {
+			width,
+			height,
+			values: (0..width * height).map(|_| T::default()).collect(),
 		}
 	}
 }
