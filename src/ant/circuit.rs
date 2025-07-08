@@ -105,12 +105,38 @@ mod tests {
 	use crate::{ant::parser::Parser, util::bitvec::BitVec};
 
 	#[test]
-	fn or() {
-		let c = Parser::parse("++".into()).unwrap();
+	fn buf() {
+		let buf = Parser::parse("+".into()).unwrap();
 
-		assert_eq!(c.tick(&BitVec::from(vec![false, false])), false.into());
-		assert_eq!(c.tick(&BitVec::from(vec![false, true])), true.into());
-		assert_eq!(c.tick(&BitVec::from(vec![true, false])), true.into());
-		assert_eq!(c.tick(&BitVec::from(vec![true, true])), true.into());
+		assert_eq!(buf.tick(&BitVec::from(vec![false])), false.into());
+		assert_eq!(buf.tick(&BitVec::from(vec![true])), true.into());
+	}
+
+	#[test]
+	fn not() {
+		let not = Parser::parse("-".into()).unwrap();
+
+		assert_eq!(not.tick(&BitVec::from(vec![false])), true.into());
+		assert_eq!(not.tick(&BitVec::from(vec![true])), false.into());
+	}
+
+	#[test]
+	fn or() {
+		let or = Parser::parse("++".into()).unwrap();
+
+		assert_eq!(or.tick(&BitVec::from(vec![false, false])), false.into());
+		assert_eq!(or.tick(&BitVec::from(vec![false, true])), true.into());
+		assert_eq!(or.tick(&BitVec::from(vec![true, false])), true.into());
+		assert_eq!(or.tick(&BitVec::from(vec![true, true])), true.into());
+	}
+
+	#[test]
+	fn and() {
+		let and = Parser::parse("--;;-".into()).unwrap();
+
+		assert_eq!(and.tick(&BitVec::from(vec![false, false])), false.into());
+		assert_eq!(and.tick(&BitVec::from(vec![false, true])), false.into());
+		assert_eq!(and.tick(&BitVec::from(vec![true, false])), false.into());
+		assert_eq!(and.tick(&BitVec::from(vec![true, true])), true.into());
 	}
 }
