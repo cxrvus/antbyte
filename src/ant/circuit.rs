@@ -99,41 +99,18 @@ impl Weight {
 	}
 }
 
-pub fn string_to_weights(weight_str: String) -> Vec<Weight> {
-	weight_str
-		.chars()
-		.map(|c| match c {
-			'.' => Weight::Zero,
-			'+' => Weight::Pos,
-			'-' => Weight::Neg,
-			other => panic!("unknown weight symbol: {other}"),
-		})
-		.collect()
-}
-
 // todo: add tests
 #[cfg(test)]
 mod tests {
-	use crate::{
-		ant::circuit::{Circuit, Layer, string_to_weights},
-		util::{bitvec::BitVec, matrix::ProxyMatrix},
-	};
+	use crate::{ant::parser::Parser, util::bitvec::BitVec};
 
 	#[test]
 	fn or() {
-		let circuit = Circuit {
-			inputs: 2,
-			layers: vec![Layer {
-				size: 1,
-				weights: ProxyMatrix {
-					width: 2,
-					height: 1,
-					string: "++".into(),
-				}
-				.convert(string_to_weights),
-			}],
-		};
+		let c = Parser::parse("++".into()).unwrap();
 
-		assert_eq!(circuit.tick(&BitVec::from(vec![false, false])), 0u8.into())
+		assert_eq!(c.tick(&BitVec::from(vec![false, false])), false.into());
+		assert_eq!(c.tick(&BitVec::from(vec![false, true])), true.into());
+		assert_eq!(c.tick(&BitVec::from(vec![true, false])), true.into());
+		assert_eq!(c.tick(&BitVec::from(vec![true, true])), true.into());
 	}
 }

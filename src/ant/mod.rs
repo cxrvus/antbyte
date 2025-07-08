@@ -1,4 +1,6 @@
 pub mod circuit;
+pub mod parser;
+
 use circuit::Circuit;
 
 pub enum Variant {
