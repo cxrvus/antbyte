@@ -95,6 +95,12 @@ impl From<Vec<bool>> for BitVec {
 	}
 }
 
+impl From<bool> for BitVec {
+	fn from(value: bool) -> Self {
+		BitVec(vec![value])
+	}
+}
+
 impl From<u8> for BitVec {
 	fn from(value: u8) -> Self {
 		let mut bits = Vec::with_capacity(8);
