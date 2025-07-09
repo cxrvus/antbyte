@@ -151,4 +151,14 @@ mod tests {
 		assert_eq!(and3.tick(&vec![false, true, false].into()), false.into());
 		assert_eq!(and3.tick(&vec![true, true, true].into()), true.into());
 	}
+
+	#[test]
+	fn xor() {
+		let xor = Parser::parse("-+;+-;;--".into()).unwrap();
+
+		assert_eq!(xor.tick(&vec![false, false].into()), false.into());
+		assert_eq!(xor.tick(&vec![false, true].into()), true.into());
+		assert_eq!(xor.tick(&vec![true, false].into()), true.into());
+		assert_eq!(xor.tick(&vec![true, true].into()), false.into());
+	}
 }
