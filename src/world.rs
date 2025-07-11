@@ -4,13 +4,15 @@ use crate::util::matrix::Matrix;
 pub struct WorldConfig {
 	size_x: usize,
 	size_y: usize,
-	circuit: Vec<Circuit>,
-	noise_seed: u32, // todo
+	circuits: Vec<Circuit>,
+	noise_seed: Option<u32>, // todo: add rand crate
 }
+
+type Cells = Matrix<u8>;
 
 struct WorldState {
 	frame: u32,
-	cells: Matrix<bool>, // => color depth = 1
+	cells: Cells,
 	ants: Matrix<Option<Ant>>,
 }
 
@@ -30,6 +32,16 @@ impl World {
 		};
 
 		Self { config, state }
+	}
+
+	pub fn tick(&mut self) {
+		self.state.frame += 1;
+
+		todo!()
+	}
+
+	pub fn cells(&self) -> &Cells {
+		&self.state.cells
 	}
 }
 
