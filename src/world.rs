@@ -44,21 +44,3 @@ impl World {
 		&self.state.cells
 	}
 }
-
-pub enum Stimulus {
-	Time, // cyclic
-	Age,
-	Cell,
-	NextCell,
-	Memory,
-	Noise,    // randomness
-	Constant, // always true
-}
-
-pub enum Reaction {
-	Cell,
-	MemoryValue,
-	MemoryWrite,
-	Direction,
-	Velocity,
-}
