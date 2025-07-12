@@ -1,63 +1,62 @@
 pub mod circuit;
 pub mod parser;
 
+use crate::util::{bitvec::BitVec, vec2::Vec2};
 use circuit::Circuit;
 
-pub enum Variant {
-	Worker,
-	Queen,
-}
-
+#[derive(Default)]
 pub struct Ant {
 	brain: Circuit,
-	age: u8,
-	variant: Variant,
+	is_queen: bool,
+	age: u32,
+	memory: BitVec,
+	dir: Vec2,
 }
 
 impl Ant {
 	pub fn new(circuit: Circuit) -> Self {
 		Self {
 			brain: circuit,
-			age: 0,
-			variant: Variant::Worker,
+			..Default::default()
 		}
+	}
+
+	pub fn tick(&self, sensors: Sensors) -> Actions {
+		let sensor_bits: BitVec = sensors.into();
+		let action_bits = self.brain.tick(&sensor_bits);
+		action_bits.into()
 	}
 }
 
-#[rustfmt::skip]
-pub enum Stimulus {
-	/// (bit) always true
-	Constant 	= 0b00000001, 
-	/// global time, cyclic
-	Time 		= 0b00000010,
-	/// time since spawn, cyclic
-	Age 		= 0b00000100,
-	/// current cell value
-	Cell 		= 0b00001000,
-	/// value of cell cell that is ahead
-	NextCell 	= 0b00010000,
-	/// (8 + 6 bits) memory value
-	Memory		= 0b00100000,
-	/// random byte
-	Noise		= 0b01000000,
-	/// (bit) is other ant ahead
-	Ant			= 0b10000000,
+pub struct Sensors {
+	time: u8,
+	age: u8,
+	current_cell: u8,
+	next_cell: u8,
+	memory: u8,
+	random: u8,
+	ant: bool,
 }
 
-#[rustfmt::skip]
-pub enum Action {
-	/// (8 bits)
-	CellValue		= 0b00000001,
-	/// (bit)
-	CellWrite		= 0b00000010,
-	/// (8 + 6 bits)
-	MemoryValue		= 0b00000100,
-	/// (bit)
-	MemoryWrite		= 0b00001000,
-	/// (2 bit XY + 1 to move)
-	Direction		= 0b00010000,
-	/// (bit)
-	Die				= 0b01000000,
-	/// Queen only (3 bit ID + 1 to spawn)
-	Spawn			= 0b10000000,
+impl From<Sensors> for BitVec {
+	fn from(value: Sensors) -> Self {
+		todo!()
+	}
+}
+
+pub struct Actions {
+	direction: u8,
+	cell_value: u8,
+	cell_write: u8,
+	memory_value: u8,
+	memory_write: u8,
+	despawn: bool,
+	/// Queen Only
+	spawn: u8,
+}
+
+impl From<BitVec> for Actions {
+	fn from(value: BitVec) -> Self {
+		todo!()
+	}
 }

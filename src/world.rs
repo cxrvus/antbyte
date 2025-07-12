@@ -5,6 +5,8 @@ pub struct WorldConfig {
 	size_x: usize,
 	size_y: usize,
 	circuits: Vec<Circuit>,
+	cyclic: bool,
+	centered: bool,
 	noise_seed: Option<u32>, // todo: add rand crate
 }
 

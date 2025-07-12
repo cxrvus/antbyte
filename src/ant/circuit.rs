@@ -1,6 +1,6 @@
 use crate::util::{bitvec::BitVec, matrix::Matrix};
 
-#[derive(Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct Circuit {
 	layers: Vec<Layer>,
 }
@@ -29,7 +29,7 @@ impl Circuit {
 	}
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Layer {
 	weights: Matrix<Weight>,
 }
@@ -99,7 +99,6 @@ impl Weight {
 	}
 }
 
-// todo: add tests
 #[cfg(test)]
 mod tests {
 	use crate::ant::parser::Parser;

@@ -13,10 +13,6 @@ impl BitVec {
 		BitVec(vec![value; count])
 	}
 
-	pub fn unary(&self) -> Option<bool> {
-		if self.len() == 1 { Some(self[0]) } else { None }
-	}
-
 	pub fn gated_buffer(&self, enable: bool) -> Self {
 		match enable {
 			true => self.clone(),
