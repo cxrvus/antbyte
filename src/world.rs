@@ -1,11 +1,24 @@
 use crate::ant::{Ant, circuit::Circuit};
 use crate::util::matrix::Matrix;
 
+pub enum OutputMode {
+	Hex,
+	// todo: Ascii(u8),
+	// todo: VGA(u8),
+}
+
+pub enum BorderMode {
+	Collide,
+	Despawn,
+	// todo: Cycle,
+	// todo: Wrap,
+}
+
 pub struct WorldConfig {
 	size_x: usize,
 	size_y: usize,
 	circuits: Vec<Circuit>,
-	cyclic: bool,
+	border_mode: BorderMode,
 	centered: bool,
 	noise_seed: Option<u32>, // todo: add rand crate
 }
@@ -15,7 +28,7 @@ type Cells = Matrix<u8>;
 struct WorldState {
 	frame: u32,
 	cells: Cells,
-	ants: Matrix<Option<Ant>>,
+	ants: Vec<Ant>,
 }
 
 pub struct World {
@@ -30,7 +43,7 @@ impl World {
 		let state = WorldState {
 			frame: 0,
 			cells: Matrix::new(size_x, size_y),
-			ants: Matrix::new(size_x, size_y),
+			ants: vec![],
 		};
 
 		Self { config, state }
