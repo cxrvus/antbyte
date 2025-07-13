@@ -1,7 +1,4 @@
-use crate::{
-	ant::circuit::{Circuit, Layer, Weight},
-	util::matrix::Matrix,
-};
+use crate::ant::circuit::{Circuit, Layer, WeightVec};
 use anyhow::{Result, anyhow};
 
 pub struct Parser;
@@ -9,7 +6,7 @@ pub struct Parser;
 impl Parser {
 	pub fn parse(code: String) -> Result<Circuit> {
 		// ';' can be used in place of a linebreak
-		let code = code.replace(";", "\n");
+		let code = code.replace(';', "\n");
 
 		let sections = code.split("\n\n");
 		let mut layers: Vec<Layer> = vec![];
@@ -19,33 +16,46 @@ impl Parser {
 			layers.push(layer);
 		}
 
-		let circuit = Circuit::new(layers);
+		let input_count = code.find('\n').unwrap_or(code.len());
+		let circuit = Circuit::new(input_count, layers);
 		Ok(circuit)
 	}
 
 	fn parse_layer(matrix_str: &str) -> Result<Layer> {
 		let lines = matrix_str.trim().lines();
-		let height = lines.clone().count();
-		let width = lines.clone().next().unwrap().len();
+		let neuron_count = lines.clone().count() as u8;
 
-		let mut weights: Vec<Weight> = vec![];
+		assert!(neuron_count > 0);
+		assert!(neuron_count <= 32);
+
+		let mut weight_matrix: Vec<WeightVec> = vec![];
 
 		for line in lines {
 			let line = line.trim();
 
-			for symbol in line.chars() {
-				let weight = match symbol {
-					'.' => Ok(Weight::Zero),
-					'+' => Ok(Weight::Pos),
-					'-' => Ok(Weight::Neg),
+			assert!(line.chars().count() > 0);
+			assert!(line.chars().count() <= 32);
+
+			let mut inversion = 0u32;
+			let mut mask = 0u32;
+
+			for (i, symbol) in line.chars().enumerate() {
+				let weight_bits = match symbol {
+					'.' => Ok((0, 0)),
+					'+' => Ok((0, 1)),
+					'-' => Ok((1, 1)),
 					other => Err(anyhow!("unknown weight symbol: {other}")),
 				}?;
 
-				weights.push(weight);
+				inversion |= weight_bits.0 << i;
+				mask |= weight_bits.1 << i;
 			}
+
+			let weights = WeightVec::new(inversion, mask);
+			weight_matrix.push(weights);
 		}
 
-		let layer = Layer::new(Matrix::with_values(width, height, weights));
+		let layer = Layer::new(weight_matrix);
 		Ok(layer)
 	}
 }

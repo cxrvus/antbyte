@@ -1,7 +1,7 @@
 pub mod circuit;
 pub mod parser;
 
-use crate::util::{bitvec::BitVec, vec2::Vec2};
+use crate::util::vec2::Vec2;
 use circuit::Circuit;
 
 #[derive(Default)]
@@ -9,7 +9,7 @@ pub struct Ant {
 	brain: Circuit,
 	is_queen: bool,
 	age: u32,
-	memory: BitVec,
+	memory: u32,
 	dir: Vec2,
 }
 
@@ -22,8 +22,8 @@ impl Ant {
 	}
 
 	pub fn tick(&self, sensors: Sensors) -> Actions {
-		let sensor_bits: BitVec = sensors.into();
-		let action_bits = self.brain.tick(&sensor_bits);
+		let sensor_bits: u32 = sensors.into();
+		let action_bits = self.brain.tick(sensor_bits);
 		action_bits.into()
 	}
 }
@@ -44,7 +44,7 @@ pub struct Sensors {
 	cell_change: bool,
 }
 
-impl From<Sensors> for BitVec {
+impl From<Sensors> for u32 {
 	fn from(value: Sensors) -> Self {
 		todo!()
 	}
@@ -61,8 +61,8 @@ pub struct Actions {
 	spawn: u8,
 }
 
-impl From<BitVec> for Actions {
-	fn from(value: BitVec) -> Self {
+impl From<u32> for Actions {
+	fn from(value: u32) -> Self {
 		todo!()
 	}
 }
