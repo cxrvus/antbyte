@@ -28,14 +28,20 @@ impl Ant {
 	}
 }
 
+pub struct SensorSet {
+	clock_mask: u8,
+	cell_mask: u8,
+	rand_bit_count: u8,
+	spawn_bit_count: u8,
+}
+
 pub struct Sensors {
-	time: u8,
-	age: u8,
-	current_cell: u8,
+	clock: u8,
 	next_cell: u8,
 	memory: u8,
 	random: u8,
 	ant: bool,
+	cell_change: bool,
 }
 
 impl From<Sensors> for BitVec {
@@ -47,9 +53,9 @@ impl From<Sensors> for BitVec {
 pub struct Actions {
 	direction: u8,
 	cell_value: u8,
-	cell_write: u8,
+	cell_write: bool,
 	memory_value: u8,
-	memory_write: u8,
+	memory_write: bool,
 	despawn: bool,
 	/// Queen Only
 	spawn: u8,
