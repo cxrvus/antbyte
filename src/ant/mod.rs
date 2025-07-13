@@ -5,32 +5,40 @@ use crate::util::vec2::Vec2;
 use circuit::Circuit;
 
 #[derive(Default)]
-pub struct Ant {
-	brain: Circuit,
+pub struct AntConfig {
+	sensors: SensorConfig,
+	config: Circuit,
 	is_queen: bool,
+}
+
+#[derive(Default)]
+pub struct Ant {
+	config: AntConfig,
 	age: u32,
 	memory: u32,
 	dir: Vec2,
 }
 
 impl Ant {
-	pub fn new(circuit: Circuit) -> Self {
+	pub fn new(config: AntConfig) -> Self {
 		Self {
-			brain: circuit,
+			config,
 			..Default::default()
 		}
 	}
 
 	pub fn tick(&self, sensors: Sensors) -> Actions {
 		let sensor_bits: u32 = sensors.into();
-		let action_bits = self.brain.tick(sensor_bits);
+		let action_bits = self.config.config.tick(sensor_bits);
 		action_bits.into()
 	}
 }
 
-pub struct SensorSet {
+#[derive(Default)]
+pub struct SensorConfig {
 	clock_mask: u8,
 	cell_mask: u8,
+	cell_write_mask: u8,
 	rand_bit_count: u8,
 	spawn_bit_count: u8,
 }
@@ -38,7 +46,7 @@ pub struct SensorSet {
 pub struct Sensors {
 	clock: u8,
 	next_cell: u8,
-	memory: u8,
+	memory: u32,
 	random: u8,
 	ant: bool,
 	cell_change: bool,

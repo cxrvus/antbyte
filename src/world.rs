@@ -15,9 +15,9 @@ pub enum BorderMode {
 }
 
 pub struct WorldConfig {
-	size_x: usize,
-	size_y: usize,
-	circuits: Vec<Circuit>,
+	width: usize,
+	height: usize,
+	ant_states: Vec<Circuit>,
 	border_mode: BorderMode,
 	centered: bool,
 	noise_seed: Option<u32>, // todo: add rand crate
@@ -38,11 +38,11 @@ pub struct World {
 
 impl World {
 	pub fn new(config: WorldConfig) -> Self {
-		let WorldConfig { size_x, size_y, .. } = config;
+		let WorldConfig { width, height, .. } = config;
 
 		let state = WorldState {
 			frame: 0,
-			cells: Matrix::new(size_x, size_y),
+			cells: Matrix::new(width, height),
 			ants: vec![],
 		};
 
