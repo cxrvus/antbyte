@@ -7,8 +7,8 @@ use circuit::Circuit;
 
 #[derive(Default)]
 pub struct AntConfig {
-	sensors: Sensors,
-	actions: Actions,
+	sensors: Vec<Sensor>,
+	actions: Vec<Action>,
 	config: Circuit,
 	is_queen: bool,
 }
@@ -29,37 +29,37 @@ impl Ant {
 		}
 	}
 
-	pub fn tick(&self) -> Actions {
+	pub fn tick(&self) -> Action {
 		let sensor_bits: u32 = self.config.sensors.compact(sensor_config)
 		let action_bits = self.config.config.tick(sensor_bits);
 		action_bits.into()
 	}
 }
 
-#[derive(Default, PartialEq, PartialOrd)]
-pub struct Sensors {
-	Clock: u8,
-	NextCell: u8,
+#[derive(PartialEq, PartialOrd)]
+pub enum Sensor {
+	Clock(u8),
+	NextCell(u8),
 	// todo: implement sensor fields
-	// Memory: u32,
-	// Random: u8,
-	// Ant: bool,
-	// CellChange: bool,
+	// Memory(u32),
+	// Random(u8),
+	// Ant(bool),
+	// CellChange(bool),
 }
 
-impl Sensors {
+impl Sensor {
 	pub fn compact(&self, sensor_config: Self) -> Result<u32> {
 		let mut bits = 0u32;
 		let mut budget = 32u32;
 
-		Self::insert_bits(&mut bits, &mut budget, self.Clock, sensor_config.Clock, 8)?;
-		Self::insert_bits(
-			&mut bits,
-			&mut budget,
-			self.NextCell,
-			sensor_config.NextCell,
-			8,
-		)?;
+		// Self::insert_bits(&mut bits, &mut budget, self.Clock, sensor_config.Clock, 8)?;
+		// Self::insert_bits(
+		// 	&mut bits,
+		// 	&mut budget,
+		// 	self.NextCell,
+		// 	sensor_config.NextCell,
+		// 	8,
+		// )?;
 
 		Ok(bits)
 	}
@@ -94,21 +94,15 @@ impl Sensors {
 	}
 }
 
-#[derive(Default, PartialEq, PartialOrd)]
-pub struct Actions {
-	direction: u8,
-	cell_value: u8,
-	cell_write: bool,
+#[derive(PartialEq, PartialOrd)]
+pub enum Action {
+	Direction(u8),
+	CellValue(u8),
+	CellWrite(bool),
 	// todo: implement action fields
-	// memory_value: u8,
-	// memory_write: bool,
-	// despawn: bool,
+	// MemoryValue(u8),
+	// MemoryWrite(bool),
+	// Despawn(bool),
 	// /// Queen Only
-	// spawn: u8,
-}
-
-impl From<u32> for Actions {
-	fn from(value: u32) -> Self {
-		todo!()
-	}
+	// Spawn(u8),
 }
