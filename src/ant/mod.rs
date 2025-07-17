@@ -1,14 +1,16 @@
 pub mod circuit;
 pub mod parser;
 
+use std::collections::HashSet;
+
 use crate::util::vec2::Vec2;
 use anyhow::{Result, anyhow};
 use circuit::Circuit;
 
 #[derive(Default)]
 pub struct AntConfig {
-	sensors: Vec<Sensor>,
-	actions: Vec<Action>,
+	sensors: BitCompactorSet<SensorType>,
+	actions: BitCompactorSet<ActionType>,
 	config: Circuit,
 	is_queen: bool,
 }
@@ -36,15 +38,23 @@ impl Ant {
 	}
 }
 
+#[derive(Default)]
+pub struct BitCompactorSet<T> (Vec<BitCompactor<T>>);
+
+pub struct BitCompactor<T> {
+	class: T,
+	bit_count: u32,
+}
+
 #[derive(PartialEq, PartialOrd)]
-pub enum Sensor {
-	Clock(u8),
-	NextCell(u8),
+pub enum SensorType {
+	Clock,
+	NextCell,
 	// todo: implement sensor fields
-	// Memory(u32),
-	// Random(u8),
-	// Ant(bool),
-	// CellChange(bool),
+	// Memory,
+	// Random,
+	// Ant,
+	// CellChange,
 }
 
 impl Sensor {
@@ -95,14 +105,14 @@ impl Sensor {
 }
 
 #[derive(PartialEq, PartialOrd)]
-pub enum Action {
-	Direction(u8),
-	CellValue(u8),
-	CellWrite(bool),
+pub enum ActionType {
+	Direction,
+	CellValue,
+	CellWrite,
 	// todo: implement action fields
-	// MemoryValue(u8),
-	// MemoryWrite(bool),
-	// Despawn(bool),
+	// MemoryValue,
+	// MemoryWrite,
+	// Despawn,
 	// /// Queen Only
-	// Spawn(u8),
+	// Spawn,
 }
