@@ -1,12 +1,6 @@
 use crate::ant::{Ant, circuit::Circuit};
 use crate::util::matrix::Matrix;
 
-pub enum OutputMode {
-	Hex,
-	// todo: Ascii(u8),
-	// todo: VGA(u8),
-}
-
 pub enum BorderMode {
 	Collide,
 	Despawn,
