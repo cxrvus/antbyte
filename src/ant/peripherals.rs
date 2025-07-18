@@ -2,13 +2,12 @@ use std::ops::Deref;
 
 use anyhow::{Result, anyhow};
 
-#[derive(Default)]
 pub struct PeripheralSet<P> {
 	peripherals: Vec<Peripheral<P>>,
 	reversed: bool,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct Peripheral<P> {
 	peripheral_type: P,
 	bit_count: u32,
@@ -106,9 +105,8 @@ pub trait Capped {
 	fn cap(&self) -> u32;
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Default)]
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub enum InputType {
-	#[default]
 	Clock,
 	CurrentCell,
 	NextCell,
@@ -132,7 +130,7 @@ impl Capped for InputType {
 
 // TODO: output order is extremely important
 // todo: check queen / worker privileges using specified Peripheral sets
-#[derive(PartialEq, Eq, PartialOrd, Ord, Default)]
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub enum OutputType {
 	// todo: implement outputs
 	/// Worker Only
@@ -140,7 +138,6 @@ pub enum OutputType {
 	/// Worker Only
 	ClearCell,
 	/// 2 bits rotation + 1 bit velocity
-	#[default]
 	Direction,
 	// SetMemory,
 	// EnableMemory,

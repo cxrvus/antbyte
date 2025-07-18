@@ -1,4 +1,4 @@
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct Circuit {
 	layers: Vec<Layer>,
 	input_count: usize,
@@ -47,7 +47,7 @@ impl Layer {
 		let mut layer_output = 0;
 
 		for neuron_index in 0..self.neuron_count() {
-			let neuron_weights = &self.weights[neuron_index as usize];
+			let neuron_weights = &self.weights[neuron_index];
 			let weighted_input = neuron_weights.apply(input);
 			let neuron_output = (weighted_input != 0) as u32;
 
@@ -58,7 +58,7 @@ impl Layer {
 	}
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct WeightVec {
 	inversion: u32,
 	mask: u32,
