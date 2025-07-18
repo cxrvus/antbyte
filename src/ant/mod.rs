@@ -1,8 +1,6 @@
 pub mod circuit;
 pub mod parser;
 
-use std::collections::HashSet;
-
 use crate::util::vec2::Vec2;
 use anyhow::{Result, anyhow};
 use circuit::Circuit;
@@ -16,9 +14,9 @@ pub enum AntType {
 
 #[derive(Default)]
 pub struct AntConfig {
-	sensors: BitCompactorSet<SensorType>,
-	actions: BitCompactorSet<ActionType>,
-	config: Circuit,
+	inputs: Vec<Peripheral<InputType>>,
+	outputs: Vec<Peripheral<OutputType>>,
+	circuit: Circuit,
 	ant_type: AntType,
 }
 
@@ -39,23 +37,21 @@ impl Ant {
 	}
 
 	pub fn tick(&self) -> Action {
-		let sensor_bits: u32 = self.config.sensors.compact(sensor_config)
-		let action_bits = self.config.config.tick(sensor_bits);
+		let sensor_bits: u32 = self.config.inputs.compact(sensor_config);
+		let action_bits = self.config.circuit.tick(sensor_bits);
 		action_bits.into()
 	}
 }
 
-#[derive(Default)]
-pub struct BitCompactorSet<T> (Vec<BitCompactor<T>>);
-
-pub struct BitCompactor<T> {
-	class: T,
+pub struct Peripheral<P> {
+	peripheral: P,
 	bit_count: u32,
 }
 
 #[derive(PartialEq, PartialOrd)]
-pub enum SensorType {
+pub enum InputType {
 	Clock,
+	CurrentCell,
 	NextCell,
 	// todo: implement sensor fields
 	// Memory,
@@ -111,15 +107,20 @@ impl Sensor {
 	}
 }
 
+// todo: check queen / worker privileges using specified Peripheral sets
 #[derive(PartialEq, PartialOrd)]
-pub enum ActionType {
-	Direction,
-	CellValue,
-	CellWrite,
+pub enum OutputType {
 	// todo: implement action fields
-	// MemoryValue,
-	// MemoryWrite,
-	// Despawn,
+	/// 2 bits rotation + 1 bit velocity
+	Direction,
+	/// Worker Only
+	SetCell,
+	/// Worker Only
+	ClearCell,
+	// SetMemory,
+	// EnableMemory,
 	// /// Queen Only
-	// Spawn,
+	// Hatch,
+	// /// Queen Only
+	// Kill,
 }
