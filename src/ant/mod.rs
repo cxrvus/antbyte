@@ -67,7 +67,7 @@ impl Ant {
 		let (pos, dir) = (self.pos.sign(), self.get_dir_vec());
 		let new_pos = pos + dir;
 
-		if world.state.cells.in_bounds(&new_pos) {
+		if world.cells.in_bounds(&new_pos) {
 			Some(new_pos)
 		} else {
 			use BorderMode::*;
@@ -83,7 +83,7 @@ impl Ant {
 			let new_pos = new_pos.unsign().unwrap();
 
 			// ant collision check
-			if !world.state.ants.iter().any(|ant| ant.pos == new_pos) {
+			if !world.ants.iter().any(|ant| ant.pos == new_pos) {
 				self.pos = new_pos;
 			}
 		} else if let BorderMode::Despawn = world.border_mode() {
@@ -116,10 +116,10 @@ impl Ant {
 			// getting the input value
 			let input_value: u32 = match peripheral {
 				Clock => self.age % 0x100,
-				CurrentCell => (*world.state.cells.at(&self.pos.sign()).unwrap()).into(),
+				CurrentCell => (*world.cells.at(&self.pos.sign()).unwrap()).into(),
 				NextCell => self
 					.next_pos(world)
-					.map(|pos| *world.state.cells.at(&pos).unwrap())
+					.map(|pos| *world.cells.at(&pos).unwrap())
 					.unwrap_or(0u8)
 					.into(),
 			};
@@ -157,10 +157,10 @@ impl Ant {
 					}
 				}
 				SetCell if output_value != 0 => {
-					world.state.cells.set_at(&self.pos.sign(), 1);
+					world.cells.set_at(&self.pos.sign(), 1);
 				}
 				ClearCell if output_value != 0 => {
-					world.state.cells.set_at(&self.pos.sign(), 0);
+					world.cells.set_at(&self.pos.sign(), 0);
 				}
 				_ => {}
 			};

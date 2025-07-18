@@ -1,4 +1,7 @@
-use std::rc::Rc;
+use std::{
+	ops::{Deref, DerefMut},
+	rc::Rc,
+};
 
 use crate::{
 	ant::{Ant, Archetype},
@@ -53,11 +56,11 @@ impl World {
 	}
 
 	pub fn tick(&mut self) {
-		self.state.frame += 1;
+		self.frame += 1;
 
 		let mut world_image = self.clone();
 
-		for ant in self.state.ants.iter_mut().filter(|ant| ant.is_alive()) {
+		for ant in self.ants.iter_mut().filter(|ant| ant.is_alive()) {
 			ant.tick(&mut world_image);
 			todo!();
 		}
@@ -71,5 +74,19 @@ impl World {
 
 	pub fn get_archetype(&self, id: usize) -> Option<&Archetype> {
 		self.config.archetypes.get(id)
+	}
+}
+
+impl Deref for World {
+	type Target = WorldState;
+
+	fn deref(&self) -> &Self::Target {
+		&self.state
+	}
+}
+
+impl DerefMut for World {
+	fn deref_mut(&mut self) -> &mut Self::Target {
+		&mut self.state
 	}
 }
