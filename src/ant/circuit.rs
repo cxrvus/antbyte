@@ -6,7 +6,7 @@ pub struct Circuit {
 
 impl Circuit {
 	pub fn new(input_count: usize, layers: Vec<Layer>) -> Self {
-		// todo: assert correct weight dimensions in layers
+		// todo: assert correct wire dimensions in layers
 
 		Self {
 			input_count,
@@ -31,25 +31,25 @@ impl Circuit {
 
 #[derive(Clone, Debug)]
 pub struct Layer {
-	weights: Vec<WeightVec>,
+	wires: Vec<WireArray>,
 }
 
 impl Layer {
-	pub fn new(weights: Vec<WeightVec>) -> Self {
-		Self { weights }
+	pub fn new(wires: Vec<WireArray>) -> Self {
+		Self { wires }
 	}
 
 	pub fn neuron_count(&self) -> usize {
-		self.weights.len()
+		self.wires.len()
 	}
 
 	pub fn tick(&self, input: u32) -> u32 {
 		let mut layer_output = 0;
 
 		for neuron_index in 0..self.neuron_count() {
-			let neuron_weights = &self.weights[neuron_index];
-			let weighted_input = neuron_weights.apply(input);
-			let neuron_output = (weighted_input != 0) as u32;
+			let neuron_wires = &self.wires[neuron_index];
+			let wired_input = neuron_wires.apply(input);
+			let neuron_output = (wired_input != 0) as u32;
 
 			layer_output |= neuron_output << neuron_index;
 		}
@@ -59,12 +59,12 @@ impl Layer {
 }
 
 #[derive(Clone, Debug)]
-pub struct WeightVec {
+pub struct WireArray {
 	inversion: u32,
 	mask: u32,
 }
 
-impl WeightVec {
+impl WireArray {
 	pub fn new(inversion: u32, mask: u32) -> Self {
 		// todo: validate
 		Self { inversion, mask }

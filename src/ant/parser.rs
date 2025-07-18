@@ -1,4 +1,4 @@
-use crate::ant::circuit::{Circuit, Layer, WeightVec};
+use crate::ant::circuit::{Circuit, Layer, WireArray};
 use anyhow::{Result, anyhow};
 
 pub struct Parser;
@@ -28,7 +28,7 @@ impl Parser {
 		assert!(neuron_count > 0);
 		assert!(neuron_count <= 32);
 
-		let mut weight_matrix: Vec<WeightVec> = vec![];
+		let mut wire_matrix: Vec<WireArray> = vec![];
 
 		for line in lines {
 			let line = line.trim();
@@ -40,22 +40,22 @@ impl Parser {
 			let mut mask = 0u32;
 
 			for (i, symbol) in line.chars().enumerate() {
-				let weight_bits = match symbol {
+				let wire_bits = match symbol {
 					'.' => Ok((0, 0)),
 					'+' => Ok((0, 1)),
 					'-' => Ok((1, 1)),
-					other => Err(anyhow!("unknown weight symbol: {other}")),
+					other => Err(anyhow!("unknown wire symbol: {other}")),
 				}?;
 
-				inversion |= weight_bits.0 << i;
-				mask |= weight_bits.1 << i;
+				inversion |= wire_bits.0 << i;
+				mask |= wire_bits.1 << i;
 			}
 
-			let weights = WeightVec::new(inversion, mask);
-			weight_matrix.push(weights);
+			let wires = WireArray::new(inversion, mask);
+			wire_matrix.push(wires);
 		}
 
-		let layer = Layer::new(weight_matrix);
+		let layer = Layer::new(wire_matrix);
 		Ok(layer)
 	}
 }
