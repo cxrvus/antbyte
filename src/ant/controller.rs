@@ -1,5 +1,10 @@
 use anyhow::{Error, Result, anyhow};
 
+pub trait Controller {
+	fn input(&self, input_type: InputType) -> impl Into<u32>;
+	fn output(&mut self, output_type: OutputType, value: impl Into<u32>);
+}
+
 #[derive(Default)]
 pub struct PeripheralSet<P>(Vec<Peripheral<P>>)
 where
