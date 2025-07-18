@@ -9,25 +9,21 @@ use crate::{
 };
 use circuit::Circuit;
 
-#[derive(Default)]
 pub enum AntType {
-	#[default]
 	Worker,
 	Queen,
 }
 
-#[derive(Default)]
 pub struct Archetype {
+	ant_type: AntType,
+	circuit: Circuit,
 	inputs: PeripheralSet<InputType>,
 	outputs: PeripheralSet<OutputType>,
-	circuit: Circuit,
-	ant_type: AntType,
 }
 
-#[derive(Default, Clone)]
+#[derive(Clone, Default)]
 pub struct Ant {
-	instance_id: usize,
-	archetype_id: usize,
+	archetype: usize,
 	alive: bool,
 	pos: Vec2u,
 	/// cardinal direction - number between 0 and 3
@@ -37,12 +33,12 @@ pub struct Ant {
 }
 
 impl Ant {
-	pub fn new() -> Self {
-		Self::default()
-	}
-
-	pub fn id(&self) -> usize {
-		self.instance_id
+	pub fn new(archetype: usize) -> Self {
+		Self {
+			archetype,
+			alive: true,
+			..Default::default()
+		}
 	}
 
 	pub fn die(&mut self) {
@@ -99,7 +95,7 @@ impl Ant {
 			circuit,
 			..
 		} = world_image
-			.get_archetype(self.archetype_id)
+			.get_archetype(self.archetype)
 			.expect("invalid Archetype ID");
 
 		let mut condensed_input = 0u32;
