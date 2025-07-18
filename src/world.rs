@@ -82,8 +82,8 @@ impl World {
 		&self.config.border_mode
 	}
 
-	pub fn get_archetype(&self, id: usize) -> Option<&Archetype> {
-		self.config.archetypes.get(id)
+	pub fn get_archetype(&self, id: u32) -> Option<&Archetype> {
+		self.config.archetypes.get(id as usize)
 	}
 
 	pub fn rng(&mut self) -> u32 {

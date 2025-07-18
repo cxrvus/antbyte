@@ -73,7 +73,7 @@ impl Register {
 
 #[derive(Clone, Default)]
 pub struct Ant {
-	archetype: usize,
+	archetype: u32,
 	alive: bool,
 	pos: Vec2u,
 	/// cardinal direction - number between 0 and 3
@@ -83,7 +83,7 @@ pub struct Ant {
 }
 
 impl Ant {
-	pub fn new(archetype: usize) -> Self {
+	pub fn new(archetype: u32) -> Self {
 		Self {
 			archetype,
 			alive: true,
