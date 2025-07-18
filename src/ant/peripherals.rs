@@ -1,9 +1,12 @@
 use std::ops::Deref;
 
-use anyhow::{Error, Result, anyhow};
+use anyhow::{Result, anyhow};
 
 #[derive(Default)]
-pub struct PeripheralSet<P>(Vec<Peripheral<P>>);
+pub struct PeripheralSet<P> {
+	peripherals: Vec<Peripheral<P>>,
+	reversed: bool,
+}
 
 #[derive(Clone, Default)]
 pub struct Peripheral<P> {
@@ -11,14 +14,43 @@ pub struct Peripheral<P> {
 	pub bit_count: u32,
 }
 
-impl<P> PeripheralSet<P> {
+impl<P> PeripheralSet<P>
+where
+	P: PartialEq + Eq + PartialOrd + Ord,
+{
+	pub fn new(peripherals: Vec<Peripheral<P>>, reversed: bool) -> Result<Self> {
+		let mut peripherals = Self {
+			peripherals,
+			reversed,
+		};
+
+		peripherals.validate()?;
+		peripherals.sort();
+
+		Ok(peripherals)
+	}
+
+	fn sort(&mut self) {
+		self.peripherals
+			.sort_unstable_by(|a, b| a.peripheral.cmp(&b.peripheral));
+
+		if self.reversed {
+			self.peripherals.reverse();
+		}
+	}
+
 	const CAPACITY: u32 = 32;
 
-	pub fn validate_capacity(&self) -> Result<()> {
-		let bit_count = self.0.iter().map(|p| p.bit_count).sum::<u32>();
+	pub fn validate(&self) -> Result<()> {
+		let bit_count_total = self.iter().map(|p| p.bit_count).sum::<u32>();
 
-		if bit_count > Self::CAPACITY {
+		if bit_count_total > Self::CAPACITY {
 			Err(anyhow!("maximum peripheral bit capacity exceeded"))
+		} else if self
+			.iter()
+			.any(|p| self.iter().filter(|q| p.peripheral == q.peripheral).count() > 1)
+		{
+			Err(anyhow!("duplicate peripherals found"))
 		} else {
 			Ok(())
 		}
@@ -31,32 +63,7 @@ impl<P> Deref for PeripheralSet<P> {
 	type Target = Vec<Peripheral<P>>;
 
 	fn deref(&self) -> &Self::Target {
-		&self.0
-	}
-}
-
-impl<P> TryFrom<Vec<Peripheral<P>>> for PeripheralSet<P>
-where
-	P: PartialEq + Eq + PartialOrd + Ord + Default,
-{
-	type Error = Error;
-
-	fn try_from(peripherals: Vec<Peripheral<P>>) -> Result<Self> {
-		let mut peripherals = peripherals;
-		peripherals.sort_unstable_by(|a, b| a.peripheral.cmp(&b.peripheral));
-		let peripherals = Self(peripherals);
-
-		if peripherals.0.iter().any(|p| {
-			peripherals
-				.0
-				.iter()
-				.filter(|q| p.peripheral == q.peripheral)
-				.count() > 1
-		}) {
-			Err(anyhow!("duplicate peripherals found"))
-		} else {
-			Ok(peripherals)
-		}
+		&self.peripherals
 	}
 }
 

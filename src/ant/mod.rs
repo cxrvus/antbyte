@@ -50,8 +50,6 @@ impl Ant {
 			..
 		} = self.archetype.deref();
 
-		inputs.validate_capacity().unwrap();
-
 		let mut condensed_input = 0u32;
 
 		for input in inputs.iter() {
@@ -92,7 +90,6 @@ impl Ant {
 
 			use OutputType::*;
 
-			// TODO: gotta do this in reverse actually (or just reverse the output order)
 			let output_value = condensed_output & 1u32.unbounded_shl(*bit_count).wrapping_sub(1);
 
 			match peripheral {
