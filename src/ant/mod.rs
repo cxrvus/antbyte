@@ -108,12 +108,12 @@ impl Ant {
 		self.dir = (self.dir + dir) % 4;
 	}
 
-	pub fn next_pos(&self, world: &World) -> Option<Vec2> {
+	pub fn next_pos(&self, world: &World) -> Option<Vec2u> {
 		let (pos, dir) = (self.pos.sign(), self.get_dir_vec());
 		let new_pos = pos + dir;
 
 		if world.cells.in_bounds(&new_pos) {
-			Some(new_pos)
+			Some(new_pos.unsign().unwrap())
 		} else {
 			use BorderMode::*;
 
@@ -125,8 +125,6 @@ impl Ant {
 
 	pub fn move_tick(&mut self, world: &World) {
 		if let Some(new_pos) = self.next_pos(world) {
-			let new_pos = new_pos.unsign().unwrap();
-
 			// ant collision check
 			if !world.ants.iter().any(|ant| ant.pos == new_pos) {
 				self.pos = new_pos;
@@ -137,7 +135,7 @@ impl Ant {
 	}
 
 	fn get_target_ant<'a>(&self, world: &'a mut World) -> Option<&'a mut Ant> {
-		let pos = self.next_pos(world)?.unsign().unwrap();
+		let pos = self.next_pos(world)?;
 		world.ants.iter_mut().find(|ant| ant.pos == pos)
 	}
 
@@ -171,7 +169,7 @@ impl Ant {
 				CurrentCell => (*world.cells.at(&self.pos.sign()).unwrap()).into(),
 				NextCell => self
 					.next_pos(world)
-					.map(|pos| *world.cells.at(&pos).unwrap())
+					.map(|pos| *world.cells.at(&pos.sign()).unwrap())
 					.unwrap_or(0u8)
 					.into(),
 				Memory => self.memory.current,
@@ -214,7 +212,7 @@ impl Ant {
 				EnableMemory => self.memory.overwrite(),
 				Hatch => {
 					if let Some(pos) = self.next_pos(world) {
-						Self::spawn(world, value, pos.unsign().unwrap());
+						Self::spawn(world, value, pos);
 					}
 				}
 				Kill => {
