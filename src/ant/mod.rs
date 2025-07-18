@@ -8,11 +8,18 @@ use anyhow::{Result, anyhow};
 use circuit::Circuit;
 
 #[derive(Default)]
+pub enum AntType {
+	#[default]
+	Worker,
+	Queen,
+}
+
+#[derive(Default)]
 pub struct AntConfig {
 	sensors: BitCompactorSet<SensorType>,
 	actions: BitCompactorSet<ActionType>,
 	config: Circuit,
-	is_queen: bool,
+	ant_type: AntType,
 }
 
 #[derive(Default)]
