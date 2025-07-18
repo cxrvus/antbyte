@@ -60,14 +60,21 @@ where
 		};
 
 		peripherals.validate()?;
-		peripherals.sort();
+		peripherals.normalize();
 
 		Ok(peripherals)
 	}
 
-	fn sort(&mut self) {
-		self.peripherals
-			.sort_unstable_by(|a, b| a.peripheral_type.cmp(&b.peripheral_type));
+	fn normalize(&mut self) {
+		// remove empty peripherals
+		let mut peripherals: Vec<&Peripheral<P>> = self
+			.peripherals
+			.iter()
+			.filter(|x| x.bit_count > 0)
+			.collect();
+
+		// sort
+		peripherals.sort_unstable_by(|a, b| a.peripheral_type.cmp(&b.peripheral_type));
 
 		if self.reversed {
 			self.peripherals.reverse();
