@@ -1,6 +1,7 @@
 use crate::util::{matrix::Matrix, vec2::Vec2};
 
 pub mod ant;
+pub mod circuit;
 pub mod util;
 pub mod world;
 

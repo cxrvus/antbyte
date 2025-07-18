@@ -1,4 +1,4 @@
-use crate::ant::circuit::{Circuit, Layer, WireArray};
+use crate::circuit::{Circuit, Layer, WireArray};
 use anyhow::{Result, anyhow};
 
 pub struct Parser;

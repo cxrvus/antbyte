@@ -1,8 +1,8 @@
 use anyhow::{Result, anyhow};
 
-use crate::ant::{
+use crate::{
+	ant::peripherals::{InputType, OutputType, PeripheralSet, PeripheralType},
 	circuit::Circuit,
-	peripherals::{InputType, OutputType, PeripheralSet, PeripheralType},
 };
 
 #[derive(Debug)]
