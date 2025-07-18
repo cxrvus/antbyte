@@ -15,7 +15,7 @@ pub struct Peripheral<P> {
 
 impl<P> Peripheral<P>
 where
-	P: Capped,
+	P: PeripheralType,
 {
 	pub fn new(peripheral_type: P, bit_count: u32) -> Result<Self> {
 		let peripheral = Self {
@@ -49,7 +49,7 @@ where
 
 impl<P> PeripheralSet<P>
 where
-	P: PartialEq + Eq + PartialOrd + Ord + Capped,
+	P: PartialEq + Eq + PartialOrd + Ord + PeripheralType,
 {
 	pub fn new(peripherals: Vec<Peripheral<P>>, reversed: bool) -> Result<Self> {
 		let mut peripherals = Self {
@@ -101,7 +101,7 @@ impl<P> Deref for PeripheralSet<P> {
 	}
 }
 
-pub trait Capped {
+pub trait PeripheralType {
 	fn cap(&self) -> u32;
 }
 
@@ -117,7 +117,7 @@ pub enum InputType {
 	// CellChange,
 }
 
-impl Capped for InputType {
+impl PeripheralType for InputType {
 	fn cap(&self) -> u32 {
 		8
 
@@ -148,7 +148,7 @@ pub enum OutputType {
 	// Die,
 }
 
-impl Capped for OutputType {
+impl PeripheralType for OutputType {
 	fn cap(&self) -> u32 {
 		use OutputType::*;
 
