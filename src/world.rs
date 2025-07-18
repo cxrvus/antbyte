@@ -52,12 +52,16 @@ impl World {
 			StdRng::from_seed(rand::random::<[u8; 32]>())
 		};
 
-		let state = WorldState {
+		let mut state = WorldState {
 			rng,
 			frame: 0,
 			cells: Matrix::new(width, height),
 			ants: vec![],
 		};
+
+		if !config.archetypes.is_empty() {
+			state.ants.push(Ant::new(0));
+		}
 
 		Self {
 			config: Rc::new(config),
