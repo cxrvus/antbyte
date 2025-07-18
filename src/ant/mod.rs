@@ -32,9 +32,8 @@ pub struct Ant {
 	pos: Vec2u,
 	/// cardinal direction - number between 0 and 3
 	dir: u8,
-	moving: bool,
 	age: u32,
-	memory: u32,
+	// memory: u32,
 }
 
 impl Ant {

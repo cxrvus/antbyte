@@ -65,7 +65,7 @@ impl World {
 			todo!();
 		}
 
-		todo!()
+		*self = world_image;
 	}
 
 	pub fn border_mode(&self) -> &BorderMode {
