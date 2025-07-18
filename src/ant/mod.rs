@@ -2,7 +2,7 @@ pub mod circuit;
 pub mod parser;
 
 use crate::util::vec2::Vec2;
-use anyhow::{Result, anyhow};
+use anyhow::{Error, Result, anyhow};
 use circuit::Circuit;
 
 #[derive(Default)]
@@ -14,8 +14,8 @@ pub enum AntType {
 
 #[derive(Default)]
 pub struct AntConfig {
-	inputs: Vec<Peripheral<InputType>>,
-	outputs: Vec<Peripheral<OutputType>>,
+	inputs: PeripheralSet<InputType>,
+	outputs: PeripheralSet<OutputType>,
 	circuit: Circuit,
 	ant_type: AntType,
 }
@@ -36,20 +36,74 @@ impl Ant {
 		}
 	}
 
-	pub fn tick(&self) -> Action {
-		let sensor_bits: u32 = self.config.inputs.compact(sensor_config);
-		let action_bits = self.config.circuit.tick(sensor_bits);
-		action_bits.into()
+	pub fn tick(&self) -> u32 {
+		let input_bits: u32 = self.config.inputs.compact();
+		let output_bits = self.config.circuit.tick(input_bits);
+		output_bits.into()
 	}
 }
 
-pub struct Peripheral<P> {
+#[derive(Default)]
+pub struct PeripheralSet<P>(Vec<Peripheral<P>>)
+where
+	P: PartialEq + PartialOrd + Default;
+
+#[derive(Default)]
+pub struct Peripheral<P>
+where
+	P: PartialEq + PartialOrd + Default,
+{
 	peripheral: P,
-	bit_count: u32,
+	/// can be used as either the actual value (Output) or as the desired bit count (Input)
+	value: u32,
 }
 
-#[derive(PartialEq, PartialOrd)]
+impl<P> PeripheralSet<P>
+where
+	P: PartialEq + PartialOrd + Default,
+{
+	fn validate_capacity(&self) -> bool {
+		self.0.iter().map(|p| p.value).sum::<u32>() <= 32
+	}
+
+	// todo: implement CRUD
+}
+
+impl<P> TryFrom<Vec<Peripheral<P>>> for PeripheralSet<P>
+where
+	P: PartialEq + PartialOrd + Default,
+{
+	type Error = Error;
+
+	fn try_from(peripherals: Vec<Peripheral<P>>) -> Result<Self> {
+		if peripherals.iter().any(|p| {
+			peripherals
+				.iter()
+				.filter(|q| p.peripheral == q.peripheral)
+				.count() > 1
+		}) {
+			Err(anyhow!("duplicate peripherals found"))
+		} else {
+			Ok(Self(peripherals))
+		}
+	}
+}
+
+impl PeripheralSet<InputType> {
+	pub fn compact(&self) -> u32 {
+		todo!()
+	}
+}
+
+impl PeripheralSet<OutputType> {
+	pub fn inflate(&self, output: u32) -> Self {
+		todo!()
+	}
+}
+
+#[derive(PartialEq, PartialOrd, Default)]
 pub enum InputType {
+	#[default]
 	Clock,
 	CurrentCell,
 	NextCell,
@@ -60,7 +114,30 @@ pub enum InputType {
 	// CellChange,
 }
 
-impl Sensor {
+// todo: check queen / worker privileges using specified Peripheral sets
+#[derive(PartialEq, PartialOrd, Default)]
+pub enum OutputType {
+	// todo: implement action fields
+	/// 2 bits rotation + 1 bit velocity
+	#[default]
+	Direction,
+	/// Worker Only
+	SetCell,
+	/// Worker Only
+	ClearCell,
+	// SetMemory,
+	// EnableMemory,
+	// /// Queen Only
+	// Hatch,
+	// /// Queen Only
+	// Kill,
+}
+
+// todo: recycle --------------------------------------------------------------
+
+struct Sensor_Deprecated;
+
+impl Sensor_Deprecated {
 	pub fn compact(&self, sensor_config: Self) -> Result<u32> {
 		let mut bits = 0u32;
 		let mut budget = 32u32;
@@ -105,22 +182,4 @@ impl Sensor {
 			Ok(())
 		}
 	}
-}
-
-// todo: check queen / worker privileges using specified Peripheral sets
-#[derive(PartialEq, PartialOrd)]
-pub enum OutputType {
-	// todo: implement action fields
-	/// 2 bits rotation + 1 bit velocity
-	Direction,
-	/// Worker Only
-	SetCell,
-	/// Worker Only
-	ClearCell,
-	// SetMemory,
-	// EnableMemory,
-	// /// Queen Only
-	// Hatch,
-	// /// Queen Only
-	// Kill,
 }
