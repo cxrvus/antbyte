@@ -168,7 +168,7 @@ impl Ant {
 					.unwrap_or(0u8)
 					.into(),
 				Memory => self.memory.current,
-				Random => todo!(),
+				Random => world.rng(),
 				Ant => self.get_target_ant(world).is_some().into(),
 			};
 

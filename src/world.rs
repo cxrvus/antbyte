@@ -1,3 +1,5 @@
+use rand::{Rng, SeedableRng, rngs::StdRng};
+
 use std::{
 	ops::{Deref, DerefMut},
 	rc::Rc,
@@ -28,6 +30,7 @@ pub struct WorldConfig {
 
 #[derive(Clone)]
 pub struct WorldState {
+	rng: StdRng,
 	frame: u32,
 	pub cells: Cells,
 	pub ants: Vec<Ant>,
@@ -43,7 +46,14 @@ impl World {
 	pub fn new(config: WorldConfig) -> Self {
 		let WorldConfig { width, height, .. } = config;
 
+		let rng = if let Some(seed) = config.noise_seed {
+			StdRng::seed_from_u64(seed as u64)
+		} else {
+			StdRng::from_seed(rand::random::<[u8; 32]>())
+		};
+
 		let state = WorldState {
+			rng,
 			frame: 0,
 			cells: Matrix::new(width, height),
 			ants: vec![],
@@ -74,6 +84,10 @@ impl World {
 
 	pub fn get_archetype(&self, id: usize) -> Option<&Archetype> {
 		self.config.archetypes.get(id)
+	}
+
+	pub fn rng(&mut self) -> u32 {
+		self.rng.random()
 	}
 }
 
