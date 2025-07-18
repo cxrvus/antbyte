@@ -2,10 +2,12 @@ pub mod circuit;
 pub mod parser;
 pub mod peripherals;
 
+use std::{ops::Deref, rc::Rc};
+
 use crate::{
 	ant::peripherals::*,
 	util::vec2::{Vec2, Vec2u},
-	world::{World, WorldState},
+	world::World,
 };
 use circuit::Circuit;
 
@@ -27,7 +29,7 @@ pub struct Archetype {
 #[derive(Default, Clone)]
 pub struct Ant {
 	id: usize,
-	archetype_id: usize,
+	archetype: Rc<Archetype>,
 	pos: Vec2u,
 	dir: Vec2,
 	moving: bool,
@@ -45,8 +47,8 @@ impl Ant {
 			inputs,
 			outputs,
 			circuit,
-			ant_type,
-		} = world.get_archetype(self.archetype_id);
+			..
+		} = self.archetype.deref();
 
 		inputs.validate_capacity().unwrap();
 
