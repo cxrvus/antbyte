@@ -2,6 +2,8 @@ use std::ops::Deref;
 
 use anyhow::{Result, anyhow};
 
+use crate::ant::AntType;
+
 pub struct PeripheralSet<P> {
 	peripherals: Vec<Peripheral<P>>,
 	reversed: bool,
@@ -103,9 +105,12 @@ impl<P> Deref for PeripheralSet<P> {
 
 pub trait PeripheralType {
 	fn cap(&self) -> u32;
+	fn is_legal(&self, ant_type: &AntType) -> bool {
+		true
+	}
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum InputType {
 	Clock,
 	CurrentCell,
@@ -130,7 +135,7 @@ impl PeripheralType for InputType {
 
 // TODO: output order is extremely important
 // todo: check queen / worker privileges using specified Peripheral sets
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum OutputType {
 	// todo: implement outputs
 	/// Worker Only
@@ -156,6 +161,14 @@ impl PeripheralType for OutputType {
 			SetCell => 1, // todo: what color depth per ant?
 			ClearCell => 1,
 			Direction => 3,
+		}
+	}
+
+	fn is_legal(&self, ant_type: &AntType) -> bool {
+		match (ant_type, self) {
+			(AntType::Queen, Self::SetCell | Self::ClearCell) => false,
+			// (AntType::Worker, Self::Hatch | Self::Kill) => false,
+			_ => true,
 		}
 	}
 }
