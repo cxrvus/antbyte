@@ -85,17 +85,18 @@ pub enum InputType {
 #[derive(PartialEq, Eq, PartialOrd, Ord, Default)]
 pub enum OutputType {
 	// todo: implement action fields
-	/// 2 bits rotation + 1 bit velocity
-	#[default]
-	Direction,
 	/// Worker Only
 	SetCell,
 	/// Worker Only
 	ClearCell,
+	/// 2 bits rotation + 1 bit velocity
+	#[default]
+	Direction,
 	// SetMemory,
 	// EnableMemory,
 	// /// Queen Only
 	// Hatch,
 	// /// Queen Only
 	// Kill,
+	// Die,
 }

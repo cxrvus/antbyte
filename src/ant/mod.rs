@@ -2,12 +2,10 @@ pub mod circuit;
 pub mod parser;
 pub mod peripherals;
 
-use std::{ops::Deref, rc::Rc};
-
 use crate::{
 	ant::peripherals::*,
 	util::vec2::{Vec2, Vec2u},
-	world::World,
+	world::{BorderMode, World},
 };
 use circuit::Circuit;
 
@@ -28,10 +26,12 @@ pub struct Archetype {
 
 #[derive(Default, Clone)]
 pub struct Ant {
-	id: usize,
-	archetype: Rc<Archetype>,
+	instance_id: usize,
+	archetype_id: usize,
+	alive: bool,
 	pos: Vec2u,
-	dir: Vec2,
+	/// cardinal direction - number between 0 and 3
+	dir: u8,
 	moving: bool,
 	age: u32,
 	memory: u32,
@@ -42,13 +42,66 @@ impl Ant {
 		Self::default()
 	}
 
-	pub fn tick(&self, world: &mut World) {
+	pub fn id(&self) -> usize {
+		self.instance_id
+	}
+
+	pub fn die(&mut self) {
+		self.alive = false;
+	}
+
+	pub fn is_alive(&self) -> bool {
+		self.alive
+	}
+
+	pub fn get_dir_vec(&self) -> Vec2 {
+		assert!(self.dir < 4);
+		Vec2::cardinal()[self.dir as usize]
+	}
+
+	pub fn set_dir(&mut self, dir: u8) {
+		self.dir = (self.dir + dir) % 4;
+	}
+
+	pub fn next_pos(&self, world: &World) -> Option<Vec2> {
+		let (pos, dir) = (self.pos.sign(), self.get_dir_vec());
+		let new_pos = pos + dir;
+
+		if world.state.cells.in_bounds(&new_pos) {
+			Some(new_pos)
+		} else {
+			use BorderMode::*;
+
+			match world.border_mode() {
+				Collide | Despawn => None,
+			}
+		}
+	}
+
+	pub fn move_tick(&mut self, world: &World) {
+		if let Some(new_pos) = self.next_pos(world) {
+			let new_pos = new_pos.unsign().unwrap();
+
+			// ant collision check
+			if !world.state.ants.iter().any(|ant| ant.pos == new_pos) {
+				self.pos = new_pos;
+			}
+		} else if let BorderMode::Despawn = world.border_mode() {
+			self.die();
+		}
+	}
+
+	pub fn tick(&mut self, world: &mut World) {
+		let world_image = world.clone();
+
 		let Archetype {
 			inputs,
 			outputs,
 			circuit,
 			..
-		} = self.archetype.deref();
+		} = world_image
+			.get_archetype(self.archetype_id)
+			.expect("invalid Archetype ID");
 
 		let mut condensed_input = 0u32;
 
@@ -62,19 +115,18 @@ impl Ant {
 
 			// getting the input value
 			let input_value: u32 = match peripheral {
-				Clock => self.age % 0xff,
+				Clock => self.age % 0x100,
 				CurrentCell => (*world.state.cells.at(&self.pos.sign()).unwrap()).into(),
-				NextCell => (*world
-					.state
-					.cells
-					// fixme: account for out-of-bounds
-					.at(&(self.pos.sign() + self.dir))
-					.unwrap())
-				.into(),
+				NextCell => self
+					.next_pos(world)
+					.map(|pos| *world.state.cells.at(&pos).unwrap())
+					.unwrap_or(0u8)
+					.into(),
 			};
 
-			// condensing the input into a u32
-			let masked_input_value = input_value & 1u32.unbounded_shl(*bit_count).wrapping_sub(1);
+			// condensing the input values into a single u32 value
+			let mask = 1u32.unbounded_shl(*bit_count).wrapping_sub(1);
+			let masked_input_value = input_value & mask;
 			condensed_input <<= bit_count;
 			condensed_input |= masked_input_value;
 		}
@@ -90,15 +142,30 @@ impl Ant {
 
 			use OutputType::*;
 
-			let output_value = condensed_output & 1u32.unbounded_shl(*bit_count).wrapping_sub(1);
+			// inflating the output bits into multiple u32 values
+			let mask = 1u32.unbounded_shl(*bit_count).wrapping_sub(1);
+			let output_value = condensed_output & mask;
 
 			match peripheral {
-				Direction => todo!(),
-				SetCell => todo!(),
-				ClearCell => todo!(),
+				Direction => {
+					let moving = output_value & 1 == 1;
+					let rotations = (output_value >> 1) as u8;
+					self.set_dir(self.dir + rotations);
+
+					if moving {
+						self.move_tick(world);
+					}
+				}
+				SetCell if output_value != 0 => {
+					world.state.cells.set_at(&self.pos.sign(), 1);
+				}
+				ClearCell if output_value != 0 => {
+					world.state.cells.set_at(&self.pos.sign(), 0);
+				}
+				_ => {}
 			};
 
-			condensed_output >>= bit_count;
+			condensed_output >>= *bit_count;
 		}
 	}
 }

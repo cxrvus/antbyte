@@ -57,7 +57,7 @@ impl World {
 
 		let mut world_image = self.clone();
 
-		for ant in &self.state.ants {
+		for ant in self.state.ants.iter_mut().filter(|ant| ant.is_alive()) {
 			ant.tick(&mut world_image);
 			todo!();
 		}
@@ -65,10 +65,11 @@ impl World {
 		todo!()
 	}
 
-	pub fn get_archetype(&self, id: usize) -> &Archetype {
-		self.config
-			.archetypes
-			.get(id)
-			.expect("invalid archetype ID: {id}")
+	pub fn border_mode(&self) -> &BorderMode {
+		&self.config.border_mode
+	}
+
+	pub fn get_archetype(&self, id: usize) -> Option<&Archetype> {
+		self.config.archetypes.get(id)
 	}
 }
