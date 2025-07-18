@@ -46,6 +46,16 @@ impl World {
 	pub fn tick(&mut self) {
 		self.state.frame += 1;
 
+		for ant in &self.state.ants {
+			let config = ant.config();
+
+			for input in config.inputs {
+				todo!()
+			}
+			let input_bits: u32 = config.inputs.compact();
+			todo!();
+		}
+
 		todo!()
 	}
 
