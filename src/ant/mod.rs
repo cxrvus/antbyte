@@ -141,6 +141,13 @@ impl Ant {
 		world.ants.iter_mut().find(|ant| ant.pos == pos)
 	}
 
+	fn spawn(world: &mut World, archetype: u32, pos: Vec2u) {
+		if world.get_archetype(archetype).is_some() {
+			let mut ant = Ant::new(archetype);
+			ant.pos = pos;
+		}
+	}
+
 	pub fn tick(&mut self, world: &mut World) {
 		let world_image = world.clone();
 
@@ -205,7 +212,11 @@ impl Ant {
 				ClearCell if value != 0 => world.cells.set_at(&self.pos.sign(), 0),
 				SetMemory => self.memory.next = value,
 				EnableMemory => self.memory.overwrite(),
-				Hatch => todo!(),
+				Hatch => {
+					if let Some(pos) = self.next_pos(world) {
+						Self::spawn(world, value, pos.unsign().unwrap());
+					}
+				}
 				Kill => {
 					if let Some(ant) = self.get_target_ant(world) {
 						ant.die();
