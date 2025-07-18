@@ -106,6 +106,7 @@ impl<P> Deref for PeripheralSet<P> {
 pub trait PeripheralType {
 	fn cap(&self) -> u32;
 	fn is_legal(&self, ant_type: &AntType) -> bool {
+		_ = ant_type;
 		true
 	}
 }
@@ -116,10 +117,9 @@ pub enum InputType {
 	CurrentCell,
 	NextCell,
 	// todo: implement inputs
-	// Memory,
-	// Random,
-	// Ant,
-	// CellChange,
+	Memory,
+	Random,
+	Ant,
 }
 
 impl PeripheralType for InputType {
@@ -144,13 +144,13 @@ pub enum OutputType {
 	ClearCell,
 	/// 2 bits rotation + 1 bit velocity
 	Direction,
-	// SetMemory,
-	// EnableMemory,
-	// /// Queen Only
-	// Hatch,
-	// /// Queen Only
-	// Kill,
-	// Die,
+	SetMemory,
+	EnableMemory,
+	/// Queen Only
+	Hatch,
+	/// Queen Only
+	Kill,
+	Die,
 }
 
 impl PeripheralType for OutputType {
@@ -158,9 +158,14 @@ impl PeripheralType for OutputType {
 		use OutputType::*;
 
 		match self {
-			SetCell => 1, // todo: what color depth per ant?
+			SetCell => 1,
 			ClearCell => 1,
 			Direction => 3,
+			SetMemory => 8,
+			EnableMemory => 1,
+			Hatch => 4,
+			Kill => 1,
+			Die => 1,
 		}
 	}
 

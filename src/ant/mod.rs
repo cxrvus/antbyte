@@ -60,6 +60,18 @@ impl Archetype {
 }
 
 #[derive(Clone, Default)]
+pub struct Register {
+	current: u32,
+	next: u32,
+}
+
+impl Register {
+	fn overwrite(&mut self) {
+		self.current = self.next;
+	}
+}
+
+#[derive(Clone, Default)]
 pub struct Ant {
 	archetype: usize,
 	alive: bool,
@@ -67,7 +79,7 @@ pub struct Ant {
 	/// cardinal direction - number between 0 and 3
 	dir: u8,
 	age: u32,
-	// memory: u32,
+	memory: Register,
 }
 
 impl Ant {
@@ -124,6 +136,11 @@ impl Ant {
 		}
 	}
 
+	fn get_target_ant<'a>(&self, world: &'a mut World) -> Option<&'a mut Ant> {
+		let pos = self.next_pos(world)?.unsign().unwrap();
+		world.ants.iter_mut().find(|ant| ant.pos == pos)
+	}
+
 	pub fn tick(&mut self, world: &mut World) {
 		let world_image = world.clone();
 
@@ -150,6 +167,9 @@ impl Ant {
 					.map(|pos| *world.cells.at(&pos).unwrap())
 					.unwrap_or(0u8)
 					.into(),
+				Memory => self.memory.current,
+				Random => todo!(),
+				Ant => self.get_target_ant(world).is_some().into(),
 			};
 
 			// condensing the input values into a single u32 value
@@ -169,24 +189,29 @@ impl Ant {
 			// inflating the output bits into multiple u32 values
 			let bit_count = output.bit_count();
 			let mask = 1u32.unbounded_shl(bit_count).wrapping_sub(1);
-			let output_value = condensed_output & mask;
+			let value = condensed_output & mask;
 
 			match output.peripheral_type() {
 				Direction => {
-					let moving = output_value & 1 == 1;
-					let rotations = (output_value >> 1) as u8;
+					let moving = value & 1 == 1;
+					let rotations = (value >> 1) as u8;
 					self.set_dir(self.dir + rotations);
 
 					if moving {
 						self.move_tick(world);
 					}
 				}
-				SetCell if output_value != 0 => {
-					world.cells.set_at(&self.pos.sign(), 1);
+				SetCell if value != 0 => world.cells.set_at(&self.pos.sign(), 1),
+				ClearCell if value != 0 => world.cells.set_at(&self.pos.sign(), 0),
+				SetMemory => self.memory.next = value,
+				EnableMemory => self.memory.overwrite(),
+				Hatch => todo!(),
+				Kill => {
+					if let Some(ant) = self.get_target_ant(world) {
+						ant.die();
+					}
 				}
-				ClearCell if output_value != 0 => {
-					world.cells.set_at(&self.pos.sign(), 0);
-				}
+				Die => self.die(),
 				_ => {}
 			};
 
