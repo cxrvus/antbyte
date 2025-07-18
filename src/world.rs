@@ -6,7 +6,7 @@ use std::{
 };
 
 use crate::{
-	ant::{Ant, Archetype},
+	ant::{Ant, archetype::Archetype},
 	util::matrix::Matrix,
 };
 
