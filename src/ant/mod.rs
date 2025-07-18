@@ -106,15 +106,10 @@ impl Ant {
 		let mut condensed_input = 0u32;
 
 		for input in inputs.iter() {
-			let Peripheral {
-				peripheral,
-				bit_count,
-			} = input;
-
 			use InputType::*;
 
 			// getting the input value
-			let input_value: u32 = match peripheral {
+			let input_value: u32 = match input.peripheral_type() {
 				Clock => self.age % 0x100,
 				CurrentCell => (*world.cells.at(&self.pos.sign()).unwrap()).into(),
 				NextCell => self
@@ -125,7 +120,8 @@ impl Ant {
 			};
 
 			// condensing the input values into a single u32 value
-			let mask = 1u32.unbounded_shl(*bit_count).wrapping_sub(1);
+			let bit_count = input.bit_count();
+			let mask = 1u32.unbounded_shl(bit_count).wrapping_sub(1);
 			let masked_input_value = input_value & mask;
 			condensed_input <<= bit_count;
 			condensed_input |= masked_input_value;
@@ -135,18 +131,14 @@ impl Ant {
 		let mut condensed_output = circuit.tick(condensed_input);
 
 		for output in outputs.iter() {
-			let Peripheral {
-				peripheral,
-				bit_count,
-			} = output;
-
 			use OutputType::*;
 
 			// inflating the output bits into multiple u32 values
-			let mask = 1u32.unbounded_shl(*bit_count).wrapping_sub(1);
+			let bit_count = output.bit_count();
+			let mask = 1u32.unbounded_shl(bit_count).wrapping_sub(1);
 			let output_value = condensed_output & mask;
 
-			match peripheral {
+			match output.peripheral_type() {
 				Direction => {
 					let moving = output_value & 1 == 1;
 					let rotations = (output_value >> 1) as u8;
@@ -165,7 +157,7 @@ impl Ant {
 				_ => {}
 			};
 
-			condensed_output >>= *bit_count;
+			condensed_output >>= bit_count;
 		}
 	}
 }
