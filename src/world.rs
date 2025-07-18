@@ -22,8 +22,8 @@ pub struct WorldConfig {
 	width: usize,
 	height: usize,
 	border_mode: BorderMode,
-	centered: bool,
 	noise_seed: Option<u32>, // todo: add rand crate
+	                         // todo: add ant starting position enum
 }
 
 #[derive(Clone)]

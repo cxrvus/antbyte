@@ -37,7 +37,7 @@ impl<T> Matrix<T> {
 			let Vec2u { x, y } = pos.unsign().unwrap();
 			self.values[y * self.width + x] = value;
 		} else {
-			panic!("map index is out of range: {:?}", pos)
+			panic!("map index is out of range: {pos:?}")
 		}
 	}
 
