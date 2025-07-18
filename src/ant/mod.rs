@@ -1,8 +1,8 @@
 pub mod circuit;
+pub mod controller;
 pub mod parser;
-pub mod peripherals;
 
-use crate::{ant::peripherals::*, util::vec2::Vec2};
+use crate::{ant::controller::*, util::vec2::Vec2};
 use circuit::Circuit;
 
 #[derive(Default)]
