@@ -19,14 +19,23 @@ fn main() {
 	});
 }
 
+/// use this for debugging
+const TEST_PATH: Option<&'static str> = None;
+
+/// use this for debugging
+const AUTO_LOOP: bool = false;
+
 fn setup() -> Result<()> {
 	let args: Vec<String> = env::args().collect();
 
-	if args.len() != 2 {
+	if TEST_PATH.is_none() && args.len() != 2 {
 		return Err(anyhow!("Usage: {} <ant_file>", args[0]));
 	}
 
-	let path = &args[1];
+	let path = match TEST_PATH {
+		Some(path) => path,
+		None => &args[1],
+	};
 
 	if !path.ends_with(".ant") {
 		return Err(anyhow!("ant files need to have the .ant extension"));
@@ -39,9 +48,6 @@ fn setup() -> Result<()> {
 
 	update(code).map_err(|e| anyhow!("<!> {e:?}"))
 }
-
-/// set this to true for debugging
-const AUTO_LOOP: bool = false;
 
 fn update(code: String) -> Result<()> {
 	println!("{code}");
