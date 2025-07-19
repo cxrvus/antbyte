@@ -73,7 +73,7 @@ fn world_to_string(world: &World) -> String {
 			.ants
 			.iter()
 			.filter(|ant| ant.is_alive())
-			.find(|ant| ant.pos() == pos);
+			.find(|ant| ant.pos == pos);
 
 		let cell_char = match cell {
 			0 => '.',

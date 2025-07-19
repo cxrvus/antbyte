@@ -12,7 +12,7 @@ use crate::{
 pub struct Ant {
 	archetype: u32,
 	alive: bool,
-	pos: Vec2u,
+	pub pos: Vec2u,
 	/// cardinal direction - number between 0 and 3
 	dir: u8,
 	age: u32,
@@ -26,10 +26,6 @@ impl Ant {
 			alive: true,
 			..Default::default()
 		}
-	}
-
-	pub fn pos(&self) -> Vec2u {
-		self.pos
 	}
 
 	pub fn die(&mut self) {
