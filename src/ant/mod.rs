@@ -42,7 +42,7 @@ impl Ant {
 	}
 
 	pub fn set_dir(&mut self, dir: u8) {
-		self.dir = (self.dir + dir) % 4;
+		self.dir = dir % 4;
 	}
 
 	pub fn next_pos(&self, world: &World) -> Option<Vec2u> {
