@@ -46,8 +46,8 @@ fn update(code: String) -> Result<()> {
 	let mut world = create_world(code)?;
 
 	loop {
-		println!("{}", world.frame());
-		println!("{}\n", world_to_string(&world));
+		println!("{:0>10}", world.frame());
+		println!("{}\n\n", world_to_string(&world));
 
 		io::stderr().flush().unwrap();
 		let mut input = String::new();
