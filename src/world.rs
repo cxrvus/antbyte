@@ -49,7 +49,7 @@ impl Default for WorldConfig {
 #[derive(Clone)]
 pub struct WorldState {
 	rng: StdRng,
-	frame: u32,
+	frame: usize,
 	pub cells: Cells,
 	pub ants: Vec<Ant>,
 }
@@ -104,7 +104,6 @@ impl World {
 
 		for ant in self.ants.iter_mut().filter(|ant| ant.is_alive()) {
 			ant.tick(&mut world_image);
-			todo!();
 		}
 
 		*self = world_image;
@@ -120,6 +119,10 @@ impl World {
 
 	pub fn rng(&mut self) -> u32 {
 		self.rng.random()
+	}
+
+	pub fn frame(&self) -> usize {
+		self.frame
 	}
 }
 
