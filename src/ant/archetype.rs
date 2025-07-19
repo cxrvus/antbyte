@@ -41,7 +41,7 @@ impl Archetype {
 		if let Some(x) = self
 			.outputs
 			.iter()
-			.find(|x| x.peripheral_type().is_legal(&self.ant_type))
+			.find(|x| !x.peripheral_type().is_legal(&self.ant_type))
 		{
 			Err(anyhow!(
 				"illegal {:?} for {:?}",
