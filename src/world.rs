@@ -1,6 +1,7 @@
 use rand::{Rng, SeedableRng, rngs::StdRng};
 
 use std::{
+	mem::take,
 	ops::{Deref, DerefMut},
 	rc::Rc,
 };
@@ -101,9 +102,16 @@ impl World {
 		self.frame += 1;
 
 		let mut world_image = self.clone();
+		let mut i = 0;
 
-		for ant in self.ants.iter_mut().filter(|ant| ant.is_alive()) {
-			ant.tick(&mut world_image);
+		while i < world_image.ants.len() {
+			if world_image.ants[i].is_alive() {
+				let mut ant = take(&mut world_image.ants[i]);
+				ant.tick(&mut world_image);
+				world_image.ants[i] = ant;
+			}
+
+			i += 1;
 		}
 
 		*self = world_image;
