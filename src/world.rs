@@ -28,6 +28,18 @@ pub struct WorldConfig {
 	                         // todo: add ant starting position enum
 }
 
+impl Default for WorldConfig {
+	fn default() -> Self {
+		Self {
+			archetypes: vec![],
+			width: 16,
+			height: 16,
+			border_mode: BorderMode::Collide,
+			noise_seed: None,
+		}
+	}
+}
+
 #[derive(Clone)]
 pub struct WorldState {
 	rng: StdRng,
