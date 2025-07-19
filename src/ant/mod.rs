@@ -149,8 +149,10 @@ impl Ant {
 				SetMemory => self.memory.next = value,
 				EnableMemory => self.memory.overwrite(),
 				Hatch => {
-					if let Some(pos) = self.next_pos(world) {
-						Self::spawn(world, value, pos);
+					if let Some(pos) = self.next_pos(world)
+						&& value > 0
+					{
+						Self::spawn(world, value - 1, pos);
 					}
 				}
 				Kill => {
