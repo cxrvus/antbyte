@@ -40,18 +40,27 @@ fn setup() -> Result<()> {
 	update(code).map_err(|e| anyhow!("<!> {e:?}"))
 }
 
+/// set this to true for debugging
+const AUTO_LOOP: bool = false;
+
 fn update(code: String) -> Result<()> {
 	println!("{code}");
-
 	let mut world = create_world(code)?;
+	let mut auto_loop = AUTO_LOOP;
 
 	loop {
 		println!("{:0>10}", world.frame());
 		println!("{}\n\n", world_to_string(&world));
 
-		io::stderr().flush().unwrap();
-		let mut input = String::new();
-		io::stdin().read_line(&mut input).unwrap();
+		if !auto_loop {
+			io::stderr().flush().unwrap();
+			let mut input = String::new();
+
+			io::stdin().read_line(&mut input).unwrap();
+			if input.trim() == "a" {
+				auto_loop = true;
+			}
+		}
 
 		world.tick();
 	}
