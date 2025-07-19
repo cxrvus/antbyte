@@ -20,7 +20,7 @@ pub enum BorderMode {
 type Cells = Matrix<u8>;
 
 pub struct WorldConfig {
-	archetypes: Vec<Archetype>,
+	pub archetypes: Vec<Archetype>,
 	width: usize,
 	height: usize,
 	border_mode: BorderMode,
