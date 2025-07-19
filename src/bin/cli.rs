@@ -23,11 +23,17 @@ fn setup() -> Result<()> {
 	let args: Vec<String> = env::args().collect();
 
 	if args.len() != 2 {
-		return Err(anyhow!("Usage: {} <input_file>", args[0]));
+		return Err(anyhow!("Usage: {} <ant_file>", args[0]));
 	}
 
-	let code = fs::read_to_string(&args[1])
-		.map_err(|e| anyhow!("Error reading file {}: {}", args[1], e))?;
+	let path = &args[1];
+
+	if !path.ends_with(".ant") {
+		return Err(anyhow!("ant files need to have the .ant extension"));
+	}
+
+	let code =
+		fs::read_to_string(path).map_err(|e| anyhow!("Error reading file {}: {}", args[1], e))?;
 
 	println!("<<ANTBYTE>>\n");
 
