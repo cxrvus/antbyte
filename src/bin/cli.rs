@@ -61,14 +61,33 @@ fn create_world(code: String) -> Result<World> {
 }
 
 fn world_to_string(world: &World) -> String {
-	world
-		.cells
-		.values
-		.iter()
-		.map(|cell| if *cell == 0 { ".." } else { "##" })
-		.collect::<Vec<_>>()
-		.chunks(world.cells.width)
-		.map(|chunk| chunk.join(""))
-		.collect::<Vec<_>>()
-		.join("\n")
+	let mut string = String::new();
+
+	for (i, cell) in world.cells.values.iter().enumerate() {
+		if i % world.cells.width == 0 {
+			string.push('\n');
+		}
+
+		let pos = world.cells.get_pos(i).unwrap();
+		let ant = world
+			.ants
+			.iter()
+			.filter(|ant| ant.is_alive())
+			.find(|ant| ant.pos() == pos);
+
+		let cell_char = match cell {
+			0 => '.',
+			_ => '#',
+		};
+
+		let ant_char = match ant {
+			None => cell_char,
+			Some(ant) => ant.get_dir_vec().as_char(),
+		};
+
+		string.push(ant_char);
+		string.push(cell_char);
+	}
+
+	string
 }

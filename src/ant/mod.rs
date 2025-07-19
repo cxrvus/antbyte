@@ -28,6 +28,10 @@ impl Ant {
 		}
 	}
 
+	pub fn pos(&self) -> Vec2u {
+		self.pos
+	}
+
 	pub fn die(&mut self) {
 		self.alive = false;
 	}
