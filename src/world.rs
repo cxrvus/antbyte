@@ -38,8 +38,8 @@ impl Default for WorldConfig {
 	fn default() -> Self {
 		Self {
 			archetypes: vec![],
-			width: 16,
-			height: 16,
+			width: 32,
+			height: 32,
 			border_mode: BorderMode::Collide,
 			starting_pos: StartingPos::Center,
 			noise_seed: None,
