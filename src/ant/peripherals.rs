@@ -15,6 +15,9 @@ pub struct Peripheral<P> {
 	bit_count: u32,
 }
 
+pub type Input = Peripheral<InputType>;
+pub type Output = Peripheral<OutputType>;
+
 impl<P> Peripheral<P>
 where
 	P: PeripheralType,
@@ -49,11 +52,23 @@ where
 	}
 }
 
+impl PeripheralSet<InputType> {
+	pub fn inputs(peripherals: Vec<Peripheral<InputType>>) -> Result<Self> {
+		Self::new(peripherals, true)
+	}
+}
+
+impl PeripheralSet<OutputType> {
+	pub fn outputs(peripherals: Vec<Peripheral<OutputType>>) -> Result<Self> {
+		Self::new(peripherals, false)
+	}
+}
+
 impl<P> PeripheralSet<P>
 where
 	P: PartialEq + Eq + PartialOrd + Ord + PeripheralType,
 {
-	pub fn new(peripherals: Vec<Peripheral<P>>, reversed: bool) -> Result<Self> {
+	fn new(peripherals: Vec<Peripheral<P>>, reversed: bool) -> Result<Self> {
 		let mut peripherals = Self {
 			peripherals,
 			reversed,
