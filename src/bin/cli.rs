@@ -1,4 +1,6 @@
-use std::io::{self, IsTerminal, Read};
+use std::env;
+use std::fs;
+use std::io::{self, Write};
 
 use antbyte::{
 	ant::{
@@ -11,32 +13,36 @@ use antbyte::{
 use anyhow::Result;
 
 fn main() {
-	if io::stdin().is_terminal() {
-		eprintln!("<!> no pipe input detected. please pipe data into this command.");
+	let args: Vec<String> = env::args().collect();
+	if args.len() != 2 {
+		eprintln!("Usage: {} <input_file>", args[0]);
 		std::process::exit(1);
 	}
 
+	let code = fs::read_to_string(&args[1]).unwrap_or_else(|e| {
+		eprintln!("Error reading file {}: {}", args[1], e);
+		std::process::exit(1);
+	});
+
 	println!("<<ANTBYTE>>\n");
-
-	let mut buffer = String::new();
-
-	match io::stdin().read_to_string(&mut buffer) {
-		Ok(_) => execute(buffer).unwrap_or_else(|e| eprintln!("<!> {e:?}")),
-		Err(e) => {
-			eprintln!("error reading from stdin: {e}");
-			std::process::exit(1);
-		}
-	}
+	execute(code).unwrap_or_else(|e| eprintln!("<!> {e:?}"));
 }
 
 fn execute(code: String) -> Result<()> {
 	println!("{code}");
 
-	let world = create_world(code)?;
+	let mut world = create_world(code)?;
 
-	println!("{}\n", world_to_string(&world));
+	loop {
+		println!("{}", world.frame());
+		println!("{}\n", world_to_string(&world));
 
-	Ok(())
+		io::stderr().flush().unwrap();
+		let mut input = String::new();
+		io::stdin().read_line(&mut input).unwrap();
+
+		world.tick();
+	}
 }
 
 fn create_world(code: String) -> Result<World> {
