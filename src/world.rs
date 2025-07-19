@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
 	ant::{Ant, archetype::Archetype},
-	util::matrix::Matrix,
+	util::{matrix::Matrix, vec2::Vec2u},
 };
 
 pub enum BorderMode {
@@ -17,6 +17,11 @@ pub enum BorderMode {
 	// todo: Wrap,
 }
 
+pub enum StartingPos {
+	TopLeft,
+	Center,
+}
+
 type Cells = Matrix<u8>;
 
 pub struct WorldConfig {
@@ -24,8 +29,8 @@ pub struct WorldConfig {
 	width: usize,
 	height: usize,
 	border_mode: BorderMode,
+	starting_pos: StartingPos,
 	noise_seed: Option<u32>, // todo: add rand crate
-	                         // todo: add ant starting position enum
 }
 
 impl Default for WorldConfig {
@@ -35,6 +40,7 @@ impl Default for WorldConfig {
 			width: 16,
 			height: 16,
 			border_mode: BorderMode::Collide,
+			starting_pos: StartingPos::Center,
 			noise_seed: None,
 		}
 	}
@@ -72,7 +78,17 @@ impl World {
 		};
 
 		if !config.archetypes.is_empty() {
-			state.ants.push(Ant::new(0));
+			let starting_pos = match config.starting_pos {
+				StartingPos::TopLeft => Vec2u::ZERO,
+				StartingPos::Center => Vec2u {
+					x: config.width / 2,
+					y: config.height / 2,
+				},
+			};
+
+			let mut ant = Ant::new(0);
+			ant.pos = starting_pos;
+			state.ants.push(ant);
 		}
 
 		Self {

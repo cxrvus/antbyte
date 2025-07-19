@@ -60,6 +60,10 @@ impl Vec2u {
 			y: y as i32,
 		}
 	}
+
+	pub const X: Self = Self { x: 1, y: 0 };
+	pub const Y: Self = Self { x: 0, y: 1 };
+	pub const ZERO: Self = Self { x: 0, y: 0 };
 }
 
 impl ops::Add<Vec2u> for Vec2u {
