@@ -80,6 +80,7 @@ impl Ant {
 		if world.get_archetype(archetype).is_some() {
 			let mut ant = Ant::new(archetype);
 			ant.pos = pos;
+			world.ants.push(ant);
 		}
 	}
 

@@ -46,7 +46,7 @@ fn setup() -> Result<()> {
 
 	println!("<<ANTBYTE>>\n");
 
-	update(code).map_err(|e| anyhow!("<!> {e:?}"))
+	update(code)
 }
 
 fn update(code: String) -> Result<()> {

@@ -180,7 +180,7 @@ impl PeripheralType for OutputType {
 		use OutputType::*;
 
 		match self {
-			SetCell => 1,
+			SetCell => 4,
 			ClearCell => 1,
 			Direction => 3,
 			SetMemory => 8,
