@@ -80,7 +80,7 @@ fn create_world(code: String) -> Result<World> {
 	let inputs: Vec<Input> = vec![Input::new(Random, 3)?];
 	let inputs = PeripheralSet::inputs(inputs)?;
 
-	let outputs: Vec<Output> = vec![Output::new(Direction, 3)?, Output::new(Hatch, 1)?];
+	let outputs: Vec<Output> = vec![Output::new(Direction, 3)?];
 	let outputs = PeripheralSet::outputs(outputs)?;
 
 	let circuit = Parser::parse(code)?;
