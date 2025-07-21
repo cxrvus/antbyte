@@ -1,7 +1,6 @@
 use rand::{Rng, SeedableRng, rngs::StdRng};
 
 use std::{
-	mem::take,
 	ops::{Deref, DerefMut},
 	rc::Rc,
 };
@@ -35,7 +34,7 @@ pub struct WorldConfig {
 	height: usize,
 	border_mode: BorderMode,
 	starting_pos: StartingPos,
-	noise_seed: Option<u32>, // todo: add rand crate
+	noise_seed: Option<u32>,
 }
 
 impl Default for WorldConfig {
@@ -55,7 +54,9 @@ impl Default for WorldConfig {
 pub struct WorldState {
 	rng: StdRng,
 	frame: usize,
+	// todo: ant cache matrix
 	pub cells: Cells,
+	// todo: limit ant count
 	pub ants: Vec<Ant>,
 }
 
@@ -103,13 +104,16 @@ impl World {
 	}
 
 	pub fn tick(&mut self) {
+		// todo: optimize - remove cloning (here and in ant_tick)
 		self.frame += 1;
+
 		let mut world_frame = self.clone();
 
 		for (i, ant) in self.ants.iter().enumerate() {
 			let ant = world_frame.ant_tick(ant);
 			world_frame.ants[i] = ant;
 		}
+
 		*self = world_frame;
 	}
 

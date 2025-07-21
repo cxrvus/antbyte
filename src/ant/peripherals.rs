@@ -138,7 +138,6 @@ pub enum InputType {
 	Clock,
 	CurrentCell,
 	NextCell,
-	// todo: implement inputs
 	Memory,
 	Random,
 	Ant,
@@ -155,15 +154,13 @@ impl PeripheralType for InputType {
 	}
 }
 
-// TODO: output order is extremely important
-// todo: check queen / worker privileges using specified Peripheral sets
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum OutputType {
-	// todo: implement outputs
 	/// Worker Only
 	SetCell,
 	/// Worker Only
 	ClearCell,
+	// todo: split up into 3 separate bits
 	/// 2 bits rotation + 1 bit velocity
 	Direction,
 	SetMemory,

@@ -3,11 +3,12 @@ pub mod parser;
 pub mod peripherals;
 
 use crate::{
-	ant::{archetype::*, peripherals::*},
+	ant::archetype::*,
 	util::vec2::{Vec2, Vec2u},
 	world::{BorderMode, World},
 };
 
+// idea: improve data encapsulation
 #[derive(Clone, Copy, Default)]
 pub struct Ant {
 	pub archetype: u32,
@@ -19,6 +20,7 @@ pub struct Ant {
 	pub memory: Register,
 }
 
+// todo: move methods to world
 impl Ant {
 	pub fn new(archetype: u32) -> Self {
 		Self {
