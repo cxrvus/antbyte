@@ -77,10 +77,10 @@ fn create_world(code: String) -> Result<World> {
 	use InputType::*;
 	use OutputType::*;
 
-	let inputs: Vec<Input> = vec![Input::new(Random, 3)?];
+	let inputs: Vec<Input> = vec![Input::new(Random, 4)?];
 	let inputs = PeripheralSet::inputs(inputs)?;
 
-	let outputs: Vec<Output> = vec![Output::new(Direction, 3)?];
+	let outputs: Vec<Output> = vec![Output::new(Direction, 3)?, Output::new(Hatch, 1)?];
 	let outputs = PeripheralSet::outputs(outputs)?;
 
 	let circuit = Parser::parse(code)?;
@@ -106,7 +106,7 @@ fn world_to_string(world: &World) -> String {
 		let ant = world
 			.ants
 			.iter()
-			.filter(|ant| ant.is_alive())
+			.filter(|ant| ant.alive)
 			.find(|ant| ant.pos == pos);
 
 		let cell_char = match cell {
