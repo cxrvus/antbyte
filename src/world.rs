@@ -110,9 +110,8 @@ impl World {
 
 		while i < world_image.ants.len() {
 			if world_image.ants[i].alive {
-				let mut ant = world_image.ants[i];
-				self.ant_tick(&mut ant);
-				world_image.ants[i] = ant;
+				let ant = &mut world_image.ants[i];
+				self.ant_tick(ant);
 			}
 
 			i += 1;
