@@ -54,7 +54,7 @@ impl Archetype {
 	}
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy, Default)]
 pub struct Register {
 	pub current: u32,
 	pub next: u32,

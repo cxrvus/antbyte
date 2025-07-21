@@ -8,7 +8,7 @@ use crate::{
 	world::{BorderMode, World},
 };
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy, Default)]
 pub struct Ant {
 	pub archetype: u32,
 	pub alive: bool,

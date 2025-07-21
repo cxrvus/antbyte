@@ -104,23 +104,16 @@ impl World {
 
 	pub fn tick(&mut self) {
 		self.frame += 1;
+		let mut world_frame = self.clone();
 
-		let mut world_image = self.clone();
-		let mut i = 0;
-
-		while i < world_image.ants.len() {
-			if world_image.ants[i].alive {
-				let ant = &mut world_image.ants[i];
-				self.ant_tick(ant);
-			}
-
-			i += 1;
+		for (i, ant) in self.ants.iter().enumerate() {
+			let ant = world_frame.ant_tick(ant);
+			world_frame.ants[i] = ant;
 		}
-
-		*self = world_image;
+		*self = world_frame;
 	}
 
-	pub fn ant_tick(&mut self, ant: &mut Ant) {
+	pub fn ant_tick(&mut self, ant: &Ant) -> Ant {
 		let world_image = self.clone();
 
 		let Archetype {
@@ -162,6 +155,8 @@ impl World {
 		// calculating the output
 		let mut condensed_output = circuit.tick(condensed_input);
 
+		let mut ant = *ant;
+
 		for output in outputs.iter() {
 			use OutputType::*;
 
@@ -202,6 +197,8 @@ impl World {
 
 			condensed_output >>= bit_count;
 		}
+
+		ant
 	}
 
 	pub fn border_mode(&self) -> &BorderMode {
