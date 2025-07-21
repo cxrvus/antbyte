@@ -1,3 +1,5 @@
+use anyhow::{Error, Result, anyhow};
+
 #[derive(Clone, Debug)]
 pub struct Circuit {
 	layers: Vec<Layer>,
@@ -26,6 +28,68 @@ impl Circuit {
 		}
 
 		layer_input
+	}
+}
+
+impl TryFrom<&str> for Circuit {
+	type Error = Error;
+
+	fn try_from(value: &str) -> std::result::Result<Self, Self::Error> {
+		Self::try_from(value.to_string())
+	}
+}
+
+impl TryFrom<String> for Circuit {
+	type Error = Error;
+
+	fn try_from(code: String) -> Result<Circuit> {
+		// ';' can be used in place of a linebreak
+		let code = code.replace(';', "\n");
+
+		let sections = code.split("\n\n");
+		let mut layers: Vec<Layer> = vec![];
+
+		for section in sections {
+			let lines = section.trim().lines();
+			let neuron_count = lines.clone().count() as u8;
+
+			assert!(neuron_count > 0);
+			assert!(neuron_count <= 32);
+
+			let mut wire_matrix: Vec<WireArray> = vec![];
+
+			for line in lines {
+				let line = line.trim();
+
+				assert!(line.chars().count() > 0);
+				assert!(line.chars().count() <= 32);
+
+				let mut inversion = 0u32;
+				let mut mask = 0u32;
+
+				for (i, symbol) in line.chars().enumerate() {
+					let wire_bits = match symbol {
+						'.' => Ok((0, 0)),
+						'+' => Ok((0, 1)),
+						'-' => Ok((1, 1)),
+						other => Err(anyhow!("unknown wire symbol: {other}")),
+					}?;
+
+					inversion |= wire_bits.0 << i;
+					mask |= wire_bits.1 << i;
+				}
+
+				let wires = WireArray::new(inversion, mask);
+				wire_matrix.push(wires);
+			}
+
+			let layer = Layer::new(wire_matrix);
+			layers.push(layer);
+		}
+
+		let input_count = code.find('\n').unwrap_or(code.len());
+		let circuit = Circuit::new(input_count, layers);
+		Ok(circuit)
 	}
 }
 
@@ -77,11 +141,11 @@ impl WireArray {
 
 #[cfg(test)]
 mod tests {
-	use crate::ant::parser::Parser;
+	use crate::circuit::Circuit;
 
 	#[test]
 	fn buf() {
-		let buf = Parser::parse("+".into()).unwrap();
+		let buf = Circuit::try_from("+").unwrap();
 
 		assert_eq!(buf.tick(0), 0);
 		assert_eq!(buf.tick(1), 1);
@@ -89,7 +153,7 @@ mod tests {
 
 	#[test]
 	fn not() {
-		let not = Parser::parse("-".into()).unwrap();
+		let not = Circuit::try_from("-").unwrap();
 
 		assert_eq!(not.tick(0), 1);
 		assert_eq!(not.tick(1), 0);
@@ -97,14 +161,14 @@ mod tests {
 
 	#[test]
 	fn or() {
-		let or = Parser::parse("++".into()).unwrap();
+		let or = Circuit::try_from("++").unwrap();
 
 		assert_eq!(or.tick(0b00), 0);
 		assert_eq!(or.tick(0b01), 1);
 		assert_eq!(or.tick(0b10), 1);
 		assert_eq!(or.tick(0b11), 1);
 
-		let or3 = Parser::parse("+++".into()).unwrap();
+		let or3 = Circuit::try_from("+++").unwrap();
 
 		assert_eq!(or3.tick(0b000), 0);
 		assert_eq!(or3.tick(0b010), 1);
@@ -113,14 +177,14 @@ mod tests {
 
 	#[test]
 	fn and() {
-		let and = Parser::parse("--;;-".into()).unwrap();
+		let and = Circuit::try_from("--;;-").unwrap();
 
 		assert_eq!(and.tick(0b00), 0);
 		assert_eq!(and.tick(0b01), 0);
 		assert_eq!(and.tick(0b10), 0);
 		assert_eq!(and.tick(0b11), 1);
 
-		let and3 = Parser::parse("---;;-".into()).unwrap();
+		let and3 = Circuit::try_from("---;;-").unwrap();
 
 		assert_eq!(and3.tick(0b000), 0);
 		assert_eq!(and3.tick(0b010), 0);
@@ -129,7 +193,7 @@ mod tests {
 
 	#[test]
 	fn xor() {
-		let xor = Parser::parse("-+;+-;;--".into()).unwrap();
+		let xor = Circuit::try_from("-+;+-;;--").unwrap();
 
 		assert_eq!(xor.tick(0b00), 0);
 		assert_eq!(xor.tick(0b01), 1);

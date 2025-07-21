@@ -2,10 +2,10 @@ use std::env;
 use std::fs;
 use std::io::{self, Write};
 
+use antbyte::circuit::Circuit;
 use antbyte::{
 	ant::{
 		archetype::{AntType, Archetype},
-		parser::Parser,
 		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
 	},
 	world::{World, WorldConfig},
@@ -83,7 +83,7 @@ fn create_world(code: String) -> Result<World> {
 	let outputs: Vec<Output> = vec![Output::new(Direction, 3)?, Output::new(Hatch, 1)?];
 	let outputs = PeripheralSet::outputs(outputs)?;
 
-	let circuit = Parser::parse(code)?;
+	let circuit = Circuit::try_from(code)?;
 
 	let archetype = Archetype::new(AntType::Worker, circuit, inputs, outputs)?;
 
