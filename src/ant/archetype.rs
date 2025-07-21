@@ -12,10 +12,10 @@ pub enum AntType {
 }
 
 pub struct Archetype {
-	pub(super) ant_type: AntType,
-	pub(super) circuit: Circuit,
-	pub(super) inputs: PeripheralSet<InputType>,
-	pub(super) outputs: PeripheralSet<OutputType>,
+	pub ant_type: AntType,
+	pub circuit: Circuit,
+	pub inputs: PeripheralSet<InputType>,
+	pub outputs: PeripheralSet<OutputType>,
 }
 
 impl Archetype {
