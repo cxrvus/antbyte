@@ -2,6 +2,7 @@ use std::env;
 use std::fs;
 use std::io::{self, Write};
 
+use antbyte::ant::parser::Parser;
 use antbyte::circuit::Circuit;
 use antbyte::{
 	ant::{
@@ -20,8 +21,9 @@ fn main() {
 }
 
 /// use this for debugging
-// const TEST_PATH: Option<&'static str> = Some("ant_code/test.ant");
-const TEST_PATH: Option<&'static str> = None;
+// TODO
+const TEST_PATH: Option<&'static str> = Some("ant_code/test.ant");
+// const TEST_PATH: Option<&'static str> = None;
 
 /// use this for debugging
 const AUTO_LOOP: bool = false;
@@ -52,6 +54,11 @@ fn setup() -> Result<()> {
 
 fn update(code: String) -> Result<()> {
 	println!("{code}");
+
+	// TODO: temporary
+	Parser::parse(code)?;
+	return Ok(());
+
 	let mut world = create_world(code)?;
 	let mut auto_loop = AUTO_LOOP;
 
