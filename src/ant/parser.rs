@@ -7,8 +7,6 @@ pub struct ParsedWorld;
 pub struct Parser;
 
 impl Parser {
-	const PATTERN: &'static str = r"=>|[a-zA-Z]\w*|[#={}(),;1]|-|\s+|.+";
-
 	pub fn parse(code: String) -> Result<ParsedWorld> {
 		let tokens = Self::tokenize(code);
 
@@ -16,10 +14,12 @@ impl Parser {
 		todo!()
 	}
 
+	// todo: write tests
 	fn tokenize(code: String) -> Vec<Token> {
+		let pattern = format!(r"{}|{}|\s+|.+", Token::SYMBOL, Token::IDENT);
 		let whitespace_re = Regex::new(r"\s+").unwrap();
 
-		Regex::new(Self::PATTERN)
+		Regex::new(&pattern)
 			.unwrap()
 			.find_iter(&code)
 			.map(|x| x.as_str())
@@ -33,13 +33,40 @@ impl Parser {
 pub enum Token {
 	Invalid(String),
 	Ident(String),
+	Comment,
+	Equals,
+	BraceLeft,
+	BraceRight,
+	ParenthesisLeft,
+	ParenthesisRight,
+	Comma,
+	Semicolon,
+	True,
+	Invert,
+}
+
+impl Token {
+	pub const IDENT: &'static str = r"[a-zA-Z]\w*";
+	pub const SYMBOL: &'static str = r"=>|[#={}(),;1]|-";
 }
 
 impl From<&str> for Token {
 	fn from(value: &str) -> Self {
-		// idea: optimize - use string slices instead of strings
-
-		// TODO
-		Token::Ident(value.to_string())
+		match value {
+			"#" => Token::Comment,
+			"=" => Token::Equals,
+			"{" => Token::BraceLeft,
+			"}" => Token::BraceRight,
+			"(" => Token::ParenthesisLeft,
+			")" => Token::ParenthesisRight,
+			"," => Token::Comma,
+			";" => Token::Semicolon,
+			"1" => Token::True,
+			"-" => Token::Invert,
+			ident if Regex::new(Self::IDENT).unwrap().is_match(ident) => {
+				Token::Ident(ident.to_string())
+			}
+			other => Token::Invalid(other.to_string()),
+		}
 	}
 }
