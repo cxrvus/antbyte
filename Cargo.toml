@@ -10,3 +10,4 @@ path = "src/bin/cli.rs"
 [dependencies]
 anyhow = "*"
 rand = "*"
+regex = "*"
