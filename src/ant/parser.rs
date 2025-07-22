@@ -1,13 +1,40 @@
-use crate::circuit::{Circuit, Layer, WireArray};
+use crate::{
+	ant::archetype::{AntType, Archetype},
+	circuit::{Circuit, Layer, WireArray},
+	world::{World, WorldConfig},
+};
 use anyhow::{Result, anyhow};
 use regex::Regex;
 
-pub struct ParsedWorld;
+struct ParsedCircuit {
+	circuit_type: CircuitType,
+	assignments: Vec<Assignment>,
+}
+
+enum CircuitType {
+	Ant(AntType),
+	Sub,
+}
+
+struct Assignment {
+	lhs: String,
+	rhs: Value,
+}
+
+enum Value {
+	Ident(String),
+	Call(Call),
+}
+
+struct Call {
+	function: String,
+	parameters: Vec<Value>,
+}
 
 pub struct Parser;
 
 impl Parser {
-	pub fn parse(code: String) -> Result<ParsedWorld> {
+	pub fn parse(code: String) -> Result<WorldConfig> {
 		let tokens = Self::tokenize(code);
 
 		dbg!(tokens);
