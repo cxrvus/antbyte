@@ -21,47 +21,31 @@ enum CircuitType {
 struct Assignment {
 	lhs: String,
 	// TODO: should be Value instead of Vec<Token>
-	rhs: Vec<Token>,
+	rhs: Expression,
 }
 
-enum Value {
-	Ident(String),
-	Call(Call),
-}
-
-struct Call {
-	function: String,
-	parameters: Vec<Value>,
-}
-
-#[derive(Default)]
-enum Scope {
-	#[default]
-	Global,
-	Circuit,
+#[derive(Debug)]
+struct Expression {
+	ident: String,
+	/// is a function if Some, else input / hidden layer neuron
+	parameters: Option<Vec<Expression>>,
 }
 
 #[derive(Default)]
 pub struct Parser {
 	tokens: Vec<Token>,
 	world: WorldConfig,
-	scope: Scope,
 	circuits: Vec<ParsedCircuit>,
 }
 
 type Target = WorldConfig;
 
 impl Parser {
-	// idea: dynamically generate expected token list using a matrix
-	#[inline]
-	fn unexpected(unexpected: Token, expected: &str) -> Error {
-		anyhow!("unexpected token: {unexpected:?}, expected {expected}")
-	}
-
 	pub fn parse(code: String) -> Result<Target> {
 		let mut tokens = Self::tokenize(code);
 		tokens.reverse();
 
+		// TODO: wrap in parse_mut again (self instead of parser)
 		let mut parser = Self {
 			tokens,
 			..Default::default()
@@ -69,15 +53,12 @@ impl Parser {
 
 		loop {
 			let statement = match parser.next_token() {
-				Token::Text(text) => text,
+				Token::Ident(ident) => ident,
 				Token::EndOfFile => break,
 				other => return Err(Self::unexpected(other, "statement")),
 			};
 
-			let ident = match parser.next_token() {
-				Token::Text(text) => text,
-				other => return Err(Self::unexpected(other, "identifier")),
-			};
+			let ident = parser.parse_ident()?;
 
 			match parser.next_token() {
 				Token::Assign => {}
@@ -111,22 +92,11 @@ impl Parser {
 		let mut assignments: Vec<Assignment> = vec![];
 
 		loop {
-			let lhs = match self.next_token() {
-				Token::Text(ident) => ident,
-				other => return Err(Self::unexpected(other, "identifier")),
-			};
+			let lhs = self.parse_ident()?;
 
 			self.expect_next(Token::Assign)?;
 
-			let mut rhs = vec![];
-
-			loop {
-				match self.next_token() {
-					Token::Semicolon => break,
-					// TODO: stricter
-					other => rhs.push(other),
-				}
-			}
+			let mut rhs = self.parse_expression()?;
 
 			assignments.push(Assignment { lhs, rhs });
 
@@ -156,6 +126,13 @@ impl Parser {
 		self.tokens.pop().unwrap_or_default()
 	}
 
+	// idea: get token index for better error clarity
+	// idea: dynamically generate expected token list using a matrix
+	#[inline]
+	fn unexpected(unexpected: Token, expected: &str) -> Error {
+		anyhow!("unexpected token: {unexpected:?}, expected {expected}")
+	}
+
 	fn expect(actual: Token, expected: Token) -> Result<()> {
 		if actual != expected {
 			Err(Self::unexpected(actual, format!("{expected:?}").as_str()))
@@ -168,6 +145,16 @@ impl Parser {
 		Self::expect(self.next_token(), expected)
 	}
 
+	fn parse_ident(&mut self) -> Result<String> {
+		let token = self.next_token();
+
+		if let Token::Ident(ident) = token {
+			Ok(ident)
+		} else {
+			Err(Self::unexpected(token, "identifier"))
+		}
+	}
+
 	fn parse_ident_list(&mut self) -> Result<Vec<String>> {
 		let mut identifiers: Vec<String> = vec![];
 		let mut expect_ident = true;
@@ -176,24 +163,37 @@ impl Parser {
 			let token = self.next_token();
 
 			if expect_ident {
-				if let Token::Text(text) = token {
-					identifiers.push(text)
-				} else {
-					return Err(Self::unexpected(token, "identifier"));
-				}
-			} else {
-				if !matches!(token, Token::Comma) {
-					self.tokens.push(token);
-					return Ok(identifiers);
-				}
+				let ident = self.parse_ident()?;
+				identifiers.push(ident);
+			} else if !matches!(token, Token::Comma) {
+				self.tokens.push(token);
+				return Ok(identifiers);
 			}
+
 			expect_ident = !expect_ident;
 		}
 	}
 
+	fn parse_expression(&mut self) -> Result<Expression> {
+		let ident = self.parse_ident()?;
+		let mut exp = Expression {
+			ident,
+			parameters: None,
+		};
+
+		loop {
+			match self.next_token() {
+				Token::Semicolon => break,
+				_ => todo!(),
+			}
+		}
+
+		Ok(exp)
+	}
+
 	// todo: write tests
 	fn tokenize(code: String) -> Vec<Token> {
-		let pattern = format!(r"{}|{}|\s+|.+", Token::SYMBOL, Token::IDENT);
+		let pattern = format!(r"{}|{}|\s+|.+", Token::SYMBOL_PTN, Token::IDENT_PTN);
 		let whitespace_re = Regex::new(r"\s+").unwrap();
 
 		Regex::new(&pattern)
@@ -212,7 +212,7 @@ pub enum Token {
 	#[default]
 	EndOfFile,
 	Invalid(String),
-	Text(String),
+	Ident(String),
 	Arrow,
 	Comment,
 	Assign,
@@ -227,8 +227,8 @@ pub enum Token {
 }
 
 impl Token {
-	pub const IDENT: &'static str = r"[a-zA-Z]\w*";
-	pub const SYMBOL: &'static str = r"=>|[#={}(),;1]|-";
+	pub const IDENT_PTN: &'static str = r"[a-zA-Z]\w*";
+	pub const SYMBOL_PTN: &'static str = r"=>|[#={}(),;1]|-";
 }
 
 impl From<&str> for Token {
@@ -245,8 +245,8 @@ impl From<&str> for Token {
 			";" => Token::Semicolon,
 			"1" => Token::True,
 			"-" => Token::Invert,
-			ident if Regex::new(Self::IDENT).unwrap().is_match(ident) => {
-				Token::Text(ident.to_string())
+			ident if Regex::new(Self::IDENT_PTN).unwrap().is_match(ident) => {
+				Token::Ident(ident.to_string())
 			}
 			other => Token::Invalid(other.to_string()),
 		}
