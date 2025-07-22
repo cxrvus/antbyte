@@ -1,0 +1,5 @@
+queen ant = R0, R1, R2 => DX, DY, MOV {
+	DX = R0;
+	DY = R1;
+	MOV = R2;
+}
