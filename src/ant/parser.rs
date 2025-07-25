@@ -40,6 +40,11 @@ pub struct Parser {
 
 type Target = WorldConfig;
 
+enum Assumption {
+	Correct,
+	Incorrect(Token),
+}
+
 impl Parser {
 	pub fn parse(code: String) -> Result<Target> {
 		let mut tokens = Self::tokenize(code);
@@ -143,6 +148,16 @@ impl Parser {
 
 	fn expect_next(&mut self, expected: Token) -> Result<()> {
 		Self::expect(self.next_token(), expected)
+	}
+
+	fn assume_next(&mut self, expected: Token) -> Assumption {
+		let actual = self.next_token();
+		if actual == expected {
+			Assumption::Correct
+		} else {
+			self.tokens.push(actual.clone());
+			Assumption::Incorrect(actual)
+		}
 	}
 
 	fn next_ident(&mut self) -> Result<String> {
