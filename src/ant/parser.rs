@@ -19,8 +19,7 @@ enum CircuitType {
 
 #[derive(Debug)]
 struct Assignment {
-	lhs: String,
-	// TODO: should be Value instead of Vec<Token>
+	lhs: Vec<String>,
 	rhs: Expression,
 }
 
@@ -97,13 +96,14 @@ impl Parser {
 		let mut assignments: Vec<Assignment> = vec![];
 
 		loop {
-			let lhs = self.next_ident()?;
+			let lhs = self.next_ident_list()?;
 
 			self.expect_next(Token::Assign)?;
 
-			let mut rhs = self.next_expression()?;
-
+			let rhs = self.next_expression()?;
 			assignments.push(Assignment { lhs, rhs });
+
+			self.expect_next(Token::Semicolon)?;
 
 			if let Assumption::Correct = self.assume_next(Token::BraceRight) {
 				break;
@@ -186,15 +186,19 @@ impl Parser {
 
 	fn next_expression(&mut self) -> Result<Expression> {
 		let ident = self.next_ident()?;
+
 		let mut exp = Expression {
 			ident,
 			parameters: None,
 		};
 
 		loop {
-			match self.next_token() {
-				Token::Semicolon => break,
-				_ => todo!(),
+			// TODO: don't double check for semicolon inside of Expression parsing
+			// => this should be handled on the Assignment level
+
+			if let semicolon @ Token::Semicolon = self.next_token() {
+				self.tokens.push(semicolon);
+				break;
 			}
 		}
 
