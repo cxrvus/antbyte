@@ -105,12 +105,8 @@ impl Parser {
 
 			assignments.push(Assignment { lhs, rhs });
 
-			let token = self.next_token();
-
-			if let Token::BraceRight = token {
+			if let Assumption::Correct = self.assume_next(Token::BraceRight) {
 				break;
-			} else {
-				self.tokens.push(token);
 			}
 		}
 
@@ -175,13 +171,12 @@ impl Parser {
 		let mut expect_ident = true;
 
 		loop {
-			let token = self.next_token();
+			// let token = self.next_token();
 
 			if expect_ident {
 				let ident = self.next_ident()?;
 				identifiers.push(ident);
-			} else if !matches!(token, Token::Comma) {
-				self.tokens.push(token);
+			} else if let Assumption::Incorrect(_) = self.assume_next(Token::Comma) {
 				return Ok(identifiers);
 			}
 
