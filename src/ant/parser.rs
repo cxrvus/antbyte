@@ -58,7 +58,7 @@ impl Parser {
 				other => return Err(Self::unexpected(other, "statement")),
 			};
 
-			let ident = parser.parse_ident()?;
+			let ident = parser.next_ident()?;
 
 			match parser.next_token() {
 				Token::Assign => {}
@@ -81,22 +81,22 @@ impl Parser {
 	}
 
 	fn parse_circuit(&mut self, name: String, circuit_type: CircuitType) -> Result<()> {
-		let inputs = self.parse_ident_list()?;
+		let inputs = self.next_ident_list()?;
 
 		self.expect_next(Token::Arrow)?;
 
-		let outputs: Vec<String> = self.parse_ident_list()?;
+		let outputs: Vec<String> = self.next_ident_list()?;
 
 		self.expect_next(Token::BraceLeft)?;
 
 		let mut assignments: Vec<Assignment> = vec![];
 
 		loop {
-			let lhs = self.parse_ident()?;
+			let lhs = self.next_ident()?;
 
 			self.expect_next(Token::Assign)?;
 
-			let mut rhs = self.parse_expression()?;
+			let mut rhs = self.next_expression()?;
 
 			assignments.push(Assignment { lhs, rhs });
 
@@ -145,7 +145,7 @@ impl Parser {
 		Self::expect(self.next_token(), expected)
 	}
 
-	fn parse_ident(&mut self) -> Result<String> {
+	fn next_ident(&mut self) -> Result<String> {
 		let token = self.next_token();
 
 		if let Token::Ident(ident) = token {
@@ -155,7 +155,7 @@ impl Parser {
 		}
 	}
 
-	fn parse_ident_list(&mut self) -> Result<Vec<String>> {
+	fn next_ident_list(&mut self) -> Result<Vec<String>> {
 		let mut identifiers: Vec<String> = vec![];
 		let mut expect_ident = true;
 
@@ -163,7 +163,7 @@ impl Parser {
 			let token = self.next_token();
 
 			if expect_ident {
-				let ident = self.parse_ident()?;
+				let ident = self.next_ident()?;
 				identifiers.push(ident);
 			} else if !matches!(token, Token::Comma) {
 				self.tokens.push(token);
@@ -174,8 +174,8 @@ impl Parser {
 		}
 	}
 
-	fn parse_expression(&mut self) -> Result<Expression> {
-		let ident = self.parse_ident()?;
+	fn next_expression(&mut self) -> Result<Expression> {
+		let ident = self.next_ident()?;
 		let mut exp = Expression {
 			ident,
 			parameters: None,
