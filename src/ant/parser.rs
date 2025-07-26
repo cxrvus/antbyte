@@ -81,13 +81,18 @@ impl Parser {
 				other => return Err(Self::unexpected(other, "'='")),
 			};
 
-			match statement.as_str() {
-				"set" => todo!("set world config field"),
-				"queen" => parser.parse_circuit(ident, CircuitType::Ant(AntType::Queen)),
-				"worker" => parser.parse_circuit(ident, CircuitType::Ant(AntType::Worker)),
-				"fn" => parser.parse_circuit(ident, CircuitType::Sub),
-				other => return Err(anyhow!("invalid statement: {other}")),
-			}?;
+			if statement.as_str() == "set" {
+				todo!("set world config field");
+			} else if let Some(circuit_type) = match statement.as_str() {
+				"queen" => Some(CircuitType::Ant(AntType::Queen)),
+				"worker" => Some(CircuitType::Ant(AntType::Worker)),
+				"fn" => Some(CircuitType::Sub),
+				_ => None,
+			} {
+				parser.parse_circuit(ident, circuit_type)?;
+			} else {
+				return Err(anyhow!("invalid statement: {statement}"));
+			}
 		}
 
 		// TODO
