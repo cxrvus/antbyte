@@ -1,4 +1,4 @@
-use crate::{ant::archetype::AntType, world::WorldConfig};
+use crate::ant::archetype::AntType;
 use anyhow::{Error, Ok, Result, anyhow};
 use regex::Regex;
 
@@ -46,11 +46,9 @@ enum Value { Ident(String), Int(u32) }
 #[derive(Default)]
 pub struct Parser {
 	tokens: Vec<Token>,
-	world: WorldConfig,
-	circuits: Vec<ParsedCircuit>,
 }
 
-type Target = WorldConfig;
+type Target = ParsedWorld;
 
 #[rustfmt::skip]
 enum Assumption { Correct, Incorrect(Token) }
@@ -61,10 +59,11 @@ impl Parser {
 		tokens.reverse();
 
 		// TODO: wrap in parse_mut again (self instead of parser)
-		let mut parser = Self {
-			tokens,
-			..Default::default()
-		};
+
+		let mut circuits: Vec<ParsedCircuit> = vec![];
+		// let mut settings: Vec<Setting> = vec![] // <-- todo
+
+		let mut parser = Self { tokens };
 
 		loop {
 			let statement = match parser.next_token() {
@@ -89,19 +88,22 @@ impl Parser {
 				"fn" => Some(CircuitType::Sub),
 				_ => None,
 			} {
-				parser.parse_circuit(ident, circuit_type)?;
+				let circuit = parser.parse_circuit(ident, circuit_type)?;
+				circuits.push(circuit);
 			} else {
 				return Err(anyhow!("invalid statement: {statement}"));
 			}
 		}
 
-		// TODO
-		dbg!(parser.circuits);
+		let world = ParsedWorld {
+			settings: vec![], // todo
+			circuits,
+		};
 
-		Ok(parser.world)
+		Ok(dbg!(world))
 	}
 
-	fn parse_circuit(&mut self, name: String, circuit_type: CircuitType) -> Result<()> {
+	fn parse_circuit(&mut self, name: String, circuit_type: CircuitType) -> Result<ParsedCircuit> {
 		let inputs = self.next_ident_list()?;
 
 		self.expect_next(Token::Arrow)?;
@@ -135,8 +137,7 @@ impl Parser {
 			assignments,
 		};
 
-		self.circuits.push(circuit);
-		Ok(())
+		Ok(circuit)
 	}
 
 	#[inline]
