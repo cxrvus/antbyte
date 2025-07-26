@@ -3,6 +3,12 @@ use anyhow::{Error, Ok, Result, anyhow};
 use regex::Regex;
 
 #[derive(Debug)]
+pub struct ParsedWorld {
+	settings: Vec<Setting>,
+	circuits: Vec<ParsedCircuit>,
+}
+
+#[derive(Debug)]
 struct ParsedCircuit {
 	name: String,
 	circuit_type: CircuitType,
@@ -28,6 +34,14 @@ struct Expression {
 	/// is a function if Some, else input / hidden layer neuron
 	parameters: Option<Vec<Expression>>,
 }
+
+#[rustfmt::skip]
+#[derive(Debug)]
+struct Setting { key: String, value: Value }
+
+#[rustfmt::skip]
+#[derive(Debug)]
+enum Value { Ident(String), Int(u32) }
 
 #[derive(Default)]
 pub struct Parser {
