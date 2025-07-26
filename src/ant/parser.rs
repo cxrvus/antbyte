@@ -97,7 +97,7 @@ impl Parser {
 		}
 
 		let world = ParsedWorld {
-			settings: vec![], // todo
+			settings: vec![],
 			circuits,
 		};
 
@@ -146,8 +146,6 @@ impl Parser {
 		self.tokens.pop().unwrap_or_default()
 	}
 
-	// idea: get token index for better error clarity
-	// idea: dynamically generate expected token list using a matrix
 	#[inline]
 	fn unexpected(unexpected: Token, expected: &str) -> Error {
 		anyhow!("unexpected token: {unexpected:?}, expected {expected}")
@@ -327,6 +325,7 @@ impl Parser {
 	}
 }
 
+// idea: add Token.line and show in error handling
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Token {
 	// ## Expressions

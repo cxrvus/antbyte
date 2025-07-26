@@ -14,7 +14,7 @@ use crate::{
 	util::{matrix::Matrix, vec2::Vec2u},
 };
 
-// todo: add Cycle & Wrap
+// idea: add Cycle & Wrap
 #[rustfmt::skip]
 pub enum BorderMode { Collide, Despawn }
 

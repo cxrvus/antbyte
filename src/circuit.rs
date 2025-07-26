@@ -130,7 +130,6 @@ pub struct WireArray {
 
 impl WireArray {
 	pub fn new(inversion: u32, mask: u32) -> Self {
-		// todo: validate
 		Self { inversion, mask }
 	}
 
