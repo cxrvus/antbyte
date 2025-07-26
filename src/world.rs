@@ -14,17 +14,12 @@ use crate::{
 	util::{matrix::Matrix, vec2::Vec2u},
 };
 
-pub enum BorderMode {
-	Collide,
-	Despawn,
-	// todo: Cycle,
-	// todo: Wrap,
-}
+// todo: add Cycle & Wrap
+#[rustfmt::skip]
+pub enum BorderMode { Collide, Despawn }
 
-pub enum StartingPos {
-	TopLeft,
-	Center,
-}
+#[rustfmt::skip]
+pub enum StartingPos { TopLeft, Center }
 
 type Cells = Matrix<u8>;
 

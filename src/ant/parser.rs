@@ -11,11 +11,9 @@ struct ParsedCircuit {
 	assignments: Vec<Assignment>,
 }
 
+#[rustfmt::skip]
 #[derive(Debug)]
-enum CircuitType {
-	Ant(AntType),
-	Sub,
-}
+enum CircuitType { Ant(AntType), Sub }
 
 #[derive(Debug)]
 struct Assignment {
@@ -40,10 +38,8 @@ pub struct Parser {
 
 type Target = WorldConfig;
 
-enum Assumption {
-	Correct,
-	Incorrect(Token),
-}
+#[rustfmt::skip]
+enum Assumption { Correct, Incorrect(Token) }
 
 impl Parser {
 	pub fn parse(code: String) -> Result<Target> {
@@ -60,6 +56,7 @@ impl Parser {
 			let statement = match parser.next_token() {
 				Token::Ident(ident) => ident,
 				Token::EndOfFile => break,
+				// fixme: better error handling - parsing goes on even if statement is invalid
 				other => return Err(Self::unexpected(other, "statement")),
 			};
 

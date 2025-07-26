@@ -5,11 +5,9 @@ use crate::{
 	circuit::Circuit,
 };
 
+#[rustfmt::skip]
 #[derive(Debug)]
-pub enum AntType {
-	Worker,
-	Queen,
-}
+pub enum AntType { Worker, Queen }
 
 pub struct Archetype {
 	pub ant_type: AntType,
