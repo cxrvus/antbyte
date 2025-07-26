@@ -26,6 +26,7 @@ struct Assignment {
 #[derive(Debug)]
 struct Expression {
 	ident: String,
+	invert: bool,
 	/// is a function if Some, else input / hidden layer neuron
 	parameters: Option<Vec<Expression>>,
 }
@@ -185,24 +186,111 @@ impl Parser {
 	}
 
 	fn next_expression(&mut self) -> Result<Expression> {
-		let ident = self.next_ident()?;
-
-		let mut exp = Expression {
-			ident,
-			parameters: None,
-		};
+		let mut invert = false;
+		let mut current_token = Token::ParenthesisLeft;
+		let mut expression_sets: Vec<Vec<Expression>> = vec![];
 
 		loop {
-			// TODO: don't double check for semicolon inside of Expression parsing
-			// => this should be handled on the Assignment level
+			let next_token = self.next_token();
 
-			if let semicolon @ Token::Semicolon = self.next_token() {
-				self.tokens.push(semicolon);
-				break;
+			if !Self::validate_exp_token(&current_token, &next_token) {
+				let expected = Self::expected_exp_tokens(&current_token);
+				let expected_msg = format!("either: {expected:?}");
+				return Err(Self::unexpected(current_token, &expected_msg));
 			}
-		}
 
-		Ok(exp)
+			match &next_token {
+				Token::Ident(ident) => {
+					let new_exp = Expression {
+						ident: ident.clone(),
+						invert,
+						parameters: None,
+					};
+
+					if let Some(current_set) = expression_sets.last_mut() {
+						current_set.push(new_exp);
+					} else {
+						expression_sets.push(vec![new_exp]);
+					}
+
+					invert = false; // reset
+				}
+
+				Token::Invert => {
+					invert = true;
+				}
+
+				Token::ParenthesisLeft => {
+					expression_sets.push(vec![]);
+				}
+
+				Token::ParenthesisRight => {
+					// if this panics, there might be an error in validate_exp_tokens()
+
+					let parameters = expression_sets.pop().unwrap();
+
+					if let Some(prev_set) = expression_sets.last_mut() {
+						let func = prev_set.last_mut().unwrap();
+						func.parameters = Some(parameters);
+					} else {
+						return Err(anyhow!("unmatched right parentheses"));
+					}
+				}
+
+				Token::Comma => {}
+
+				semicolon @ Token::Semicolon => {
+					// re-add semicolon for assignment parsing
+					self.tokens.push(semicolon.clone());
+
+					return if expression_sets.len() == 1 {
+						Ok(expression_sets.pop().unwrap().pop().unwrap())
+					} else {
+						Err(anyhow!(
+							"unmatched left parentheses (depth = {})",
+							expression_sets.len()
+						))
+					};
+				}
+
+				other => {
+					panic!("impossible token in expression: {other:?}, after {current_token:?}")
+				}
+			};
+
+			current_token = next_token;
+		}
+	}
+
+	fn validate_exp_token(current: &Token, next: &Token) -> bool {
+		use Token::*;
+
+		matches!(
+			(current, next),
+			(
+				Ident(_),
+				ParenthesisLeft | ParenthesisRight | Comma | Semicolon
+			) | (Invert, Ident(_))
+				| (ParenthesisLeft, Ident(_) | Invert | ParenthesisRight)
+				| (ParenthesisRight, ParenthesisRight | Comma | Semicolon)
+				| (Comma, Ident(_) | Invert)
+		)
+	}
+
+	fn expected_exp_tokens(current: &Token) -> Vec<Token> {
+		use Token::*;
+
+		[
+			Ident("_".into()),
+			Invert,
+			ParenthesisLeft,
+			ParenthesisRight,
+			Comma,
+			Semicolon,
+		]
+		.into_iter()
+		.filter(|next| Self::validate_exp_token(current, next))
+		.collect()
 	}
 
 	// todo: write tests
@@ -223,25 +311,30 @@ impl Parser {
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Token {
-	#[default]
-	EndOfFile,
-	Invalid(String),
+	// ## Expressions
 	Ident(String),
-	Arrow,
-	Comment,
-	Assign,
-	BraceLeft,
-	BraceRight,
+	Invert,
 	ParenthesisLeft,
 	ParenthesisRight,
 	Comma,
+
+	// ## Assignments / Circuits
 	Semicolon,
-	True,
-	Invert,
+	Assign,
+	Arrow,
+	BraceLeft,
+	BraceRight,
+
+	// ## Other
+	Invalid(String),
+	// todo: implement comments & add string value
+	Comment,
+	#[default]
+	EndOfFile,
 }
 
 impl Token {
-	pub const IDENT_PTN: &'static str = r"[a-zA-Z]\w*";
+	pub const IDENT_PTN: &'static str = r"(\d{1,3}|([a-zA-Z]\w*))";
 	pub const SYMBOL_PTN: &'static str = r"=>|[#={}(),;1]|-";
 }
 
@@ -257,7 +350,6 @@ impl From<&str> for Token {
 			")" => Token::ParenthesisRight,
 			"," => Token::Comma,
 			";" => Token::Semicolon,
-			"1" => Token::True,
 			"-" => Token::Invert,
 			ident if Regex::new(Self::IDENT_PTN).unwrap().is_match(ident) => {
 				Token::Ident(ident.to_string())
