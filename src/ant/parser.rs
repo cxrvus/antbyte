@@ -57,25 +57,26 @@ impl Parser {
 	pub fn parse(code: String) -> Result<Target> {
 		let mut tokens = Self::tokenize(code);
 		tokens.reverse();
+		let mut parser = Self { tokens };
 
-		// TODO: wrap in parse_mut again (self instead of parser)
+		parser.parse_mut()
+	}
 
+	fn parse_mut(&mut self) -> Result<Target> {
 		let mut circuits: Vec<ParsedCircuit> = vec![];
 		// let mut settings: Vec<Setting> = vec![] // <-- todo
 
-		let mut parser = Self { tokens };
-
 		loop {
-			let statement = match parser.next_token() {
+			let statement = match self.next_token() {
 				Token::Ident(ident) => ident,
 				Token::EndOfFile => break,
 				// fixme: better error handling - parsing goes on even if statement is invalid
 				other => return Err(Self::unexpected(other, "statement")),
 			};
 
-			let ident = parser.next_ident()?;
+			let ident = self.next_ident()?;
 
-			match parser.next_token() {
+			match self.next_token() {
 				Token::Assign => {}
 				other => return Err(Self::unexpected(other, "'='")),
 			};
@@ -88,7 +89,7 @@ impl Parser {
 				"fn" => Some(CircuitType::Sub),
 				_ => None,
 			} {
-				let circuit = parser.parse_circuit(ident, circuit_type)?;
+				let circuit = self.parse_circuit(ident, circuit_type)?;
 				circuits.push(circuit);
 			} else {
 				return Err(anyhow!("invalid statement: {statement}"));
