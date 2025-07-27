@@ -1,5 +1,5 @@
 ## Compiler
-- todo: create module
+- todo: create module (super to parser)
 - todo: resolve functions
 - todo: normalize / resolve to ORs
   - could maybe just use functions

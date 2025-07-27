@@ -328,8 +328,12 @@ impl Parser {
 // idea: add Token.line and show in error handling
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Token {
+	// ## Values
+	// todo: add String and Number tokens and remove Value struct (for Settings)
+
 	// ## Expressions
 	Ident(String),
+	// todo: let it be Invert(bool), so that a *buffer* ("+") is possible
 	Invert,
 	ParenthesisLeft,
 	ParenthesisRight,
