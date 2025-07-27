@@ -8,7 +8,7 @@ pub struct Circuit {
 
 impl Circuit {
 	pub fn new(input_count: usize, layers: Vec<Layer>) -> Self {
-		// todo: assert correct wire dimensions in layers
+		// todo: assert correct neuron wire dimensions in layers
 
 		Self {
 			input_count,
@@ -56,7 +56,7 @@ impl TryFrom<String> for Circuit {
 			assert!(neuron_count > 0);
 			assert!(neuron_count <= 32);
 
-			let mut wire_matrix: Vec<WireArray> = vec![];
+			let mut neurons: Vec<Neuron> = vec![];
 
 			for line in lines {
 				let line = line.trim();
@@ -79,11 +79,11 @@ impl TryFrom<String> for Circuit {
 					mask |= wire_bits.1 << i;
 				}
 
-				let wires = WireArray::new(inversion, mask);
-				wire_matrix.push(wires);
+				let neuron = Neuron::new(inversion, mask);
+				neurons.push(neuron);
 			}
 
-			let layer = Layer::new(wire_matrix);
+			let layer = Layer::new(neurons);
 			layers.push(layer);
 		}
 
@@ -95,25 +95,24 @@ impl TryFrom<String> for Circuit {
 
 #[derive(Clone, Debug)]
 pub struct Layer {
-	wires: Vec<WireArray>,
+	neurons: Vec<Neuron>,
 }
 
 impl Layer {
-	pub fn new(wires: Vec<WireArray>) -> Self {
-		Self { wires }
+	pub fn new(neurons: Vec<Neuron>) -> Self {
+		Self { neurons }
 	}
 
 	pub fn neuron_count(&self) -> usize {
-		self.wires.len()
+		self.neurons.len()
 	}
 
 	pub fn tick(&self, input: u32) -> u32 {
 		let mut layer_output = 0;
 
 		for neuron_index in 0..self.neuron_count() {
-			let neuron_wires = &self.wires[neuron_index];
-			let wired_input = neuron_wires.apply(input);
-			let neuron_output = (wired_input != 0) as u32;
+			let neuron = &self.neurons[neuron_index];
+			let neuron_output = neuron.tick(input) as u32;
 
 			layer_output |= neuron_output << neuron_index;
 		}
@@ -123,18 +122,18 @@ impl Layer {
 }
 
 #[derive(Clone, Debug)]
-pub struct WireArray {
+pub struct Neuron {
 	inversion: u32,
 	mask: u32,
 }
 
-impl WireArray {
+impl Neuron {
 	pub fn new(inversion: u32, mask: u32) -> Self {
 		Self { inversion, mask }
 	}
 
-	pub fn apply(&self, value: u32) -> u32 {
-		(value ^ self.inversion) & self.mask
+	pub fn tick(&self, value: u32) -> bool {
+		((value ^ self.inversion) & self.mask) != 0
 	}
 }
 
