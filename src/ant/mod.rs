@@ -1,5 +1,4 @@
 pub mod archetype;
-pub mod parser;
 pub mod peripherals;
 
 use crate::{

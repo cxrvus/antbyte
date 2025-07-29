@@ -2,8 +2,8 @@ use std::env;
 use std::fs;
 use std::io::{self, Write};
 
-use antbyte::ant::parser::Parser;
 use antbyte::circuit::Circuit;
+use antbyte::compiler::parser::Parser;
 use antbyte::{
 	ant::{
 		archetype::{AntType, Archetype},
