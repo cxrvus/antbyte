@@ -32,7 +32,7 @@ struct Expression {
 	ident: String,
 	invert: bool,
 	/// is a function if Some, else input / hidden layer neuron
-	parameters: Option<Vec<Expression>>,
+	parameters: Option<Vec<Self>>,
 }
 
 #[rustfmt::skip]
