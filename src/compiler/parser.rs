@@ -3,13 +3,18 @@ use anyhow::{Error, Ok, Result, anyhow};
 use regex::Regex;
 
 #[derive(Debug)]
-pub struct ParsedWorld {
-	settings: Vec<Setting>,
-	circuits: Vec<ParsedCircuit>,
+pub enum Statement {
+	Set(Setting),
+	Declare(ParsedCircuit),
 }
 
 #[derive(Debug)]
-struct ParsedCircuit {
+pub struct ParsedWorld {
+	statements: Vec<Statement>,
+}
+
+#[derive(Debug)]
+pub struct ParsedCircuit {
 	name: String,
 	circuit_type: CircuitType,
 	inputs: Vec<String>,
@@ -19,16 +24,16 @@ struct ParsedCircuit {
 
 #[rustfmt::skip]
 #[derive(Debug)]
-enum CircuitType { Ant(AntType), Sub }
+pub enum CircuitType { Ant(AntType), Sub }
 
 #[derive(Debug)]
-struct Assignment {
+pub struct Assignment {
 	lhs: Vec<String>,
 	rhs: Expression,
 }
 
 #[derive(Debug)]
-struct Expression {
+pub struct Expression {
 	ident: String,
 	invert: bool,
 	/// is a function if Some, else input / hidden layer neuron
@@ -37,11 +42,11 @@ struct Expression {
 
 #[rustfmt::skip]
 #[derive(Debug)]
-struct Setting { key: String, value: Value }
+pub struct Setting { key: String, value: Token }
 
+// idea: remove Assumption
 #[rustfmt::skip]
-#[derive(Debug)]
-enum Value { Ident(String), Int(u32) }
+enum Assumption { Correct, Incorrect(Token) }
 
 #[derive(Default)]
 pub struct Parser {
@@ -50,21 +55,17 @@ pub struct Parser {
 
 type Target = ParsedWorld;
 
-#[rustfmt::skip]
-enum Assumption { Correct, Incorrect(Token) }
-
 impl Parser {
 	pub fn parse(code: String) -> Result<Target> {
 		let mut tokens = Self::tokenize(code);
 		tokens.reverse();
 		let mut parser = Self { tokens };
 
-		parser.parse_mut()
+		parser.parse_world()
 	}
 
-	fn parse_mut(&mut self) -> Result<Target> {
-		let mut circuits: Vec<ParsedCircuit> = vec![];
-		// let mut settings: Vec<Setting> = vec![] // <-- todo
+	fn parse_world(&mut self) -> Result<Target> {
+		let mut statements: Vec<Statement> = vec![];
 
 		loop {
 			let statement = match self.next_token() {
@@ -82,7 +83,7 @@ impl Parser {
 			};
 
 			if statement.as_str() == "set" {
-				todo!("set world config field");
+				todo!("push Setting");
 			} else if let Some(circuit_type) = match statement.as_str() {
 				"queen" => Some(CircuitType::Ant(AntType::Queen)),
 				"worker" => Some(CircuitType::Ant(AntType::Worker)),
@@ -90,16 +91,13 @@ impl Parser {
 				_ => None,
 			} {
 				let circuit = self.parse_circuit(ident, circuit_type)?;
-				circuits.push(circuit);
+				statements.push(Statement::Declare(circuit));
 			} else {
 				return Err(anyhow!("invalid statement: {statement}"));
 			}
 		}
 
-		let world = ParsedWorld {
-			settings: vec![],
-			circuits,
-		};
+		let world = ParsedWorld { statements };
 
 		Ok(dbg!(world))
 	}
@@ -328,11 +326,9 @@ impl Parser {
 // idea: add Token.line and show in error handling
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Token {
-	// ## Values
-	// todo: add String and Number tokens and remove Value struct (for Settings)
+	Ident(String),
 
 	// ## Expressions
-	Ident(String),
 	// todo: let it be Invert(bool), so that a *buffer* ("+") is possible
 	Invert,
 	ParenthesisLeft,
@@ -346,10 +342,15 @@ pub enum Token {
 	BraceLeft,
 	BraceRight,
 
+	// ## Values
+	// todo: implement
+	String(String),
+	Number(u32),
+
 	// ## Other
 	Invalid(String),
-	// todo: implement comments & add string value
-	Comment,
+	Comment, // todo: implement
+
 	#[default]
 	EndOfFile,
 }
