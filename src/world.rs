@@ -134,9 +134,9 @@ impl World {
 
 			// getting the input value
 			let input_value: u32 = match input.peripheral_type() {
-				Clock => ant.age % 0x100,
-				CurrentCell => (*self.cells.at(&ant.pos.sign()).unwrap()).into(),
-				NextCell => ant
+				Time => ant.age % 0x100,
+				Cell => (*self.cells.at(&ant.pos.sign()).unwrap()).into(),
+				CellNext => ant
 					.next_pos(self)
 					.map(|pos| *self.cells.at(&pos.sign()).unwrap())
 					.unwrap_or(0u8)
@@ -177,11 +177,11 @@ impl World {
 						ant.move_tick(self);
 					}
 				}
-				SetCell if value != 0 => self.cells.set_at(&ant.pos.sign(), 1),
-				ClearCell if value != 0 => self.cells.set_at(&ant.pos.sign(), 0),
-				SetMemory => ant.memory.next = value,
-				EnableMemory => ant.memory.overwrite(),
-				Hatch => {
+				CellWrite if value != 0 => self.cells.set_at(&ant.pos.sign(), 1),
+				CellClear if value != 0 => self.cells.set_at(&ant.pos.sign(), 0),
+				MemoryWrite => ant.memory.next = value,
+				MemoryEnable => ant.memory.overwrite(),
+				Spawn => {
 					if let Some(pos) = ant.next_pos(self)
 						&& value > 0
 					{

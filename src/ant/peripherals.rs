@@ -140,9 +140,9 @@ pub trait PeripheralType {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum InputType {
-	Clock,
-	CurrentCell,
-	NextCell,
+	Time,
+	Cell,
+	CellNext,
 	Memory,
 	Random,
 	Ant,
@@ -151,9 +151,9 @@ pub enum InputType {
 impl PeripheralType for InputType {
 	fn cap(&self) -> u32 {
 		match self {
-			InputType::Clock => 8,
-			InputType::CurrentCell => CELL_CAP,
-			InputType::NextCell => CELL_CAP,
+			InputType::Time => 8,
+			InputType::Cell => CELL_CAP,
+			InputType::CellNext => CELL_CAP,
 			InputType::Memory => MEM_CAP,
 			InputType::Random => 8,
 			InputType::Ant => 1,
@@ -165,9 +165,9 @@ impl PeripheralType for InputType {
 		let value = indent.to_ascii_lowercase();
 
 		match value.as_str() {
-			"t" => Some(Clock),
-			"c" => Some(CurrentCell),
-			"cn" => Some(NextCell),
+			"t" => Some(Time),
+			"c" => Some(Cell),
+			"cn" => Some(CellNext),
 			"m" => Some(Memory),
 			"r" => Some(Random),
 			"ant" => Some(Ant),
@@ -179,16 +179,16 @@ impl PeripheralType for InputType {
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum OutputType {
 	/// Worker Only
-	SetCell,
+	CellWrite,
 	/// Worker Only
-	ClearCell,
+	CellClear,
 	// todo: split up into 3 separate bits
 	/// 2 bits rotation + 1 bit velocity
 	Direction,
-	SetMemory,
-	EnableMemory,
+	MemoryWrite,
+	MemoryEnable,
 	/// Queen Only
-	Hatch,
+	Spawn,
 	/// Queen Only
 	Kill,
 	Die,
@@ -199,12 +199,12 @@ impl PeripheralType for OutputType {
 		use OutputType::*;
 
 		match self {
-			SetCell => CELL_CAP,
-			ClearCell => 1,
+			CellWrite => CELL_CAP,
+			CellClear => 1,
 			Direction => 3,
-			SetMemory => MEM_CAP,
-			EnableMemory => 1,
-			Hatch => 4,
+			MemoryWrite => MEM_CAP,
+			MemoryEnable => 1,
+			Spawn => 4,
 			Kill => 1,
 			Die => 1,
 		}
@@ -212,7 +212,7 @@ impl PeripheralType for OutputType {
 
 	fn is_legal(&self, ant_type: &AntType) -> bool {
 		match (ant_type, self) {
-			(AntType::Queen, Self::SetCell | Self::ClearCell) => false,
+			(AntType::Queen, Self::CellWrite | Self::CellClear) => false,
 			// (AntType::Worker, Self::Hatch | Self::Kill) => false,
 			_ => true,
 		}
@@ -223,12 +223,13 @@ impl PeripheralType for OutputType {
 		let value = indent.to_ascii_lowercase();
 
 		match value.as_str() {
-			"cx" => Some(SetCell),
-			"cc" => Some(ClearCell),
+			"cx" => Some(CellWrite),
+			"cq" => Some(CellClear),
 			"dir" => Some(Direction),
-			"mx" => Some(SetMemory),
-			"mm" => Some(EnableMemory),
-			"a" => Some(Hatch),
+			"mx" => Some(MemoryWrite),
+			// todo: MemoryClear (MQ) instead of MemoryEnable
+			"mm" => Some(MemoryEnable),
+			"spx" => Some(Spawn),
 			"kill" => Some(Kill),
 			"die" => Some(Die),
 			_ => None,
