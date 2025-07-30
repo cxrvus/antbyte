@@ -1,5 +1,5 @@
 use crate::ant::archetype::AntType;
-use anyhow::{Error, Ok, Result, anyhow};
+use anyhow::{Error, Result, anyhow};
 use regex::Regex;
 
 #[derive(Debug)]
@@ -83,7 +83,8 @@ impl Parser {
 			};
 
 			if statement.as_str() == "set" {
-				todo!("push Setting");
+				let setting = self.parse_setting(ident)?;
+				statements.push(Statement::Set(setting));
 			} else if let Some(circuit_type) = match statement.as_str() {
 				"queen" => Some(CircuitType::Ant(AntType::Queen)),
 				"worker" => Some(CircuitType::Ant(AntType::Worker)),
@@ -100,6 +101,17 @@ impl Parser {
 		let world = ParsedWorld { statements };
 
 		Ok(dbg!(world))
+	}
+
+	fn parse_setting(&mut self, key: String) -> Result<Setting> {
+		self.assume_next(Token::Assign);
+		let value = self.next_token();
+		self.expect_next(Token::Semicolon)?;
+
+		match value {
+			Token::Ident(_) | Token::Number(_) => Ok(Setting { key, value }),
+			other => Err(Self::unexpected(other, "value (identifier or number)")),
+		}
 	}
 
 	fn parse_circuit(&mut self, name: String, circuit_type: CircuitType) -> Result<ParsedCircuit> {
