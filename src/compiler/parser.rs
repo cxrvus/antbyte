@@ -14,11 +14,11 @@ pub struct ParsedWorld {
 
 #[derive(Debug)]
 pub struct ParsedCircuit {
-	name: String,
-	circuit_type: CircuitType,
-	inputs: Vec<String>,
-	outputs: Vec<String>,
-	assignments: Vec<Assignment>,
+	pub name: String,
+	pub circuit_type: CircuitType,
+	pub inputs: Vec<String>,
+	pub outputs: Vec<String>,
+	pub assignments: Vec<Assignment>,
 }
 
 #[rustfmt::skip]

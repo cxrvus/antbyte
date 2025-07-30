@@ -1,4 +1,10 @@
+use std::process::Output;
+
 use crate::{
+	ant::{
+		archetype::Archetype,
+		peripherals::{Input, InputType, Peripheral, PeripheralSet},
+	},
 	compiler::{
 		parser::{ParsedCircuit, Parser, Setting, Statement},
 		token::Token,
@@ -10,21 +16,45 @@ use anyhow::{Error, Result, anyhow};
 pub mod parser;
 pub mod token;
 
+const PERIPH_PTN: &str = r"^([A_Z]{1,4})([0-9a-f])?$";
+
 pub fn compile(code: String) -> Result<WorldConfig> {
 	let parsed_world = Parser::parse(code)?;
 
 	let mut config = WorldConfig::default();
-	let mut circuits = Vec::<ParsedCircuit>::new();
+	let mut parsed_circuits: Vec<ParsedCircuit> = vec![];
 
 	for statement in parsed_world.statements {
 		match statement {
 			Statement::Set(setting) => set_setting(&mut config, setting)?,
-			Statement::Declare(circuit) => circuits.push(circuit),
+			Statement::Declare(circuit) => parsed_circuits.push(circuit),
 		}
 	}
 
-	for circuit in circuits {
-		todo!()
+	for parsed_circuit in parsed_circuits {
+		match parsed_circuit.circuit_type {
+			parser::CircuitType::Ant(ant_type) => {
+				let mut inputs: Vec<Input>;
+				let mut outputs: Vec<Output>;
+
+				for parsed_input in parsed_circuit.inputs {}
+
+				for parsed_output in parsed_circuit.outputs {}
+
+				let archetype = Archetype {
+					ant_type,
+					circuit: todo!(),
+					inputs: PeripheralSet::inputs(inputs)?,
+					outputs: todo!(),
+				};
+
+				config.archetypes.push(archetype);
+			}
+
+			parser::CircuitType::Sub => {
+				todo!()
+			}
+		};
 	}
 
 	dbg!(&config);
