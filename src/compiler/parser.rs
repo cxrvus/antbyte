@@ -318,21 +318,6 @@ impl Parser {
 		.filter(|next| Self::validate_exp_token(current, next))
 		.collect()
 	}
-
-	// todo: write tests
-	fn tokenize(code: String) -> Vec<Token> {
-		let pattern = format!(r"{}|{}|\s+|.+", Token::SYMBOL_PTN, Token::IDENT_PTN);
-		let whitespace_re = Regex::new(r"\s+").unwrap();
-
-		Regex::new(&pattern)
-			.unwrap()
-			.find_iter(&code)
-			.map(|x| x.as_str())
-			.filter(|x| !whitespace_re.is_match(x))
-			.map(Token::from)
-			// .chain([Token::EndOfFile])
-			.collect::<Vec<_>>()
-	}
 }
 
 // idea: add Token.line and show in error handling
@@ -368,8 +353,36 @@ pub enum Token {
 }
 
 impl Token {
-	pub const IDENT_PTN: &'static str = r"(\d{1,3}|([a-zA-Z]\w*))";
-	pub const SYMBOL_PTN: &'static str = r"=>|[#={}(),;1]|-";
+	// idea: allow hex numbers
+	const NUMBER_PTN: &'static str = r"\d{1,3}";
+	const IDENT_PTN: &'static str = r"[a-zA-Z_]\w*";
+	const SYMBOL_PTN: &'static str = r"=>|[#={}(),;1]|-";
+
+	const SPACE_PTN: &'static str = r"\s+";
+	const WILD_PTN: &'static str = r".+";
+
+	// todo: write tests
+	pub fn tokenize(code: String) -> Vec<Self> {
+		let pattern = [
+			Self::NUMBER_PTN,
+			Self::IDENT_PTN,
+			Self::SYMBOL_PTN,
+			Self::SPACE_PTN,
+			Self::WILD_PTN,
+		]
+		.join("|");
+
+		let whitespace_re = Regex::new(Self::SPACE_PTN).unwrap();
+
+		Regex::new(&pattern)
+			.unwrap()
+			.find_iter(&code)
+			.map(|x| x.as_str())
+			.filter(|x| !whitespace_re.is_match(x))
+			.map(Token::from)
+			// .chain([Token::EndOfFile])
+			.collect::<Vec<_>>()
+	}
 }
 
 impl From<&str> for Token {
