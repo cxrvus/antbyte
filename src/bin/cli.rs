@@ -3,7 +3,7 @@ use std::fs;
 use std::io::{self, Write};
 
 use antbyte::circuit::Circuit;
-use antbyte::compiler::parser::Parser;
+use antbyte::compiler::compile;
 use antbyte::{
 	ant::{
 		archetype::{AntType, Archetype},
@@ -56,7 +56,7 @@ fn update(code: String) -> Result<()> {
 	println!("{code}");
 
 	// TODO: temporary
-	Parser::parse(code)?;
+	compile(code)?;
 	return Ok(());
 
 	let mut world = create_world(code)?;

@@ -4,12 +4,13 @@ use anyhow::{Result, anyhow};
 
 use crate::ant::AntType;
 
+#[derive(Debug)]
 pub struct PeripheralSet<P> {
 	peripherals: Vec<Peripheral<P>>,
 	reversed: bool,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Peripheral<P> {
 	peripheral_type: P,
 	bit_count: u32,

@@ -9,7 +9,7 @@ pub enum Statement {
 
 #[derive(Debug)]
 pub struct ParsedWorld {
-	statements: Vec<Statement>,
+	pub statements: Vec<Statement>,
 }
 
 #[derive(Debug)]
@@ -41,7 +41,7 @@ pub struct Expression {
 
 #[rustfmt::skip]
 #[derive(Debug)]
-pub struct Setting { key: String, value: Token }
+pub struct Setting { pub key: String, pub value: Token }
 
 // idea: remove Assumption
 #[rustfmt::skip]

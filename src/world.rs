@@ -16,20 +16,23 @@ use crate::{
 
 // idea: add Cycle & Wrap
 #[rustfmt::skip]
+#[derive(Debug)]
 pub enum BorderMode { Collide, Despawn }
 
 #[rustfmt::skip]
+#[derive(Debug)]
 pub enum StartingPos { TopLeft, Center }
 
 type Cells = Matrix<u8>;
 
+#[derive(Debug)]
 pub struct WorldConfig {
 	pub archetypes: Vec<Archetype>,
-	width: usize,
-	height: usize,
-	border_mode: BorderMode,
-	starting_pos: StartingPos,
-	noise_seed: Option<u32>,
+	pub width: usize,
+	pub height: usize,
+	pub border_mode: BorderMode,
+	pub starting_pos: StartingPos,
+	pub noise_seed: Option<u32>,
 }
 
 impl Default for WorldConfig {

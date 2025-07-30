@@ -9,6 +9,7 @@ use crate::{
 #[derive(Debug)]
 pub enum AntType { Worker, Queen }
 
+#[derive(Debug)]
 pub struct Archetype {
 	pub ant_type: AntType,
 	pub circuit: Circuit,
