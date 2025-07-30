@@ -57,7 +57,7 @@ type Target = ParsedWorld;
 
 impl Parser {
 	pub fn parse(code: String) -> Result<Target> {
-		let mut tokens = Self::tokenize(code);
+		let mut tokens = Token::tokenize(code);
 		tokens.reverse();
 		let mut parser = Self { tokens };
 
@@ -400,6 +400,13 @@ impl From<&str> for Token {
 			"-" => Token::Invert,
 			ident if Regex::new(Self::IDENT_PTN).unwrap().is_match(ident) => {
 				Token::Ident(ident.to_string())
+			}
+			number if Regex::new(Self::NUMBER_PTN).unwrap().is_match(number) => {
+				let number = number.parse::<u32>();
+				match number {
+					Ok(number) => Token::Number(number),
+					Err(error) => Token::Invalid(error.to_string()),
+				}
 			}
 			other => Token::Invalid(other.to_string()),
 		}
