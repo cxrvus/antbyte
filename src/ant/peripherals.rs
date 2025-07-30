@@ -126,7 +126,9 @@ impl<P> Deref for PeripheralSet<P> {
 	}
 }
 
-pub trait PeripheralType {
+pub const CELL_CAP: u32 = 4;
+pub const MEM_CAP: u32 = 16;
+
 	fn cap(&self) -> u32;
 	fn is_legal(&self, ant_type: &AntType) -> bool {
 		_ = ant_type;
@@ -146,12 +148,14 @@ pub enum InputType {
 
 impl PeripheralType for InputType {
 	fn cap(&self) -> u32 {
-		8
-
-		// use InputType::*;
-		// match self {
-		// 	_ => 8,
-		// }
+		match self {
+			InputType::Clock => 8,
+			InputType::CurrentCell => CELL_CAP,
+			InputType::NextCell => CELL_CAP,
+			InputType::Memory => MEM_CAP,
+			InputType::Random => 8,
+			InputType::Ant => 1,
+		}
 	}
 }
 
@@ -178,10 +182,10 @@ impl PeripheralType for OutputType {
 		use OutputType::*;
 
 		match self {
-			SetCell => 4,
+			SetCell => CELL_CAP,
 			ClearCell => 1,
 			Direction => 3,
-			SetMemory => 8,
+			SetMemory => MEM_CAP,
 			EnableMemory => 1,
 			Hatch => 4,
 			Kill => 1,
