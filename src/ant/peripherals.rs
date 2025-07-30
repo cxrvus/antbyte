@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use anyhow::{Result, anyhow};
+use anyhow::{Error, Result, anyhow};
 
 use crate::ant::AntType;
 
@@ -129,7 +129,9 @@ impl<P> Deref for PeripheralSet<P> {
 pub const CELL_CAP: u32 = 4;
 pub const MEM_CAP: u32 = 16;
 
+pub trait PeripheralType {
 	fn cap(&self) -> u32;
+	fn from_ident(ident: String) -> Option<impl PeripheralType>;
 	fn is_legal(&self, ant_type: &AntType) -> bool {
 		_ = ant_type;
 		true
@@ -155,6 +157,21 @@ impl PeripheralType for InputType {
 			InputType::Memory => MEM_CAP,
 			InputType::Random => 8,
 			InputType::Ant => 1,
+		}
+	}
+
+	fn from_ident(indent: String) -> Option<impl PeripheralType> {
+		use InputType::*;
+		let value = indent.to_ascii_lowercase();
+
+		match value.as_str() {
+			"t" => Some(Clock),
+			"c" => Some(CurrentCell),
+			"cn" => Some(NextCell),
+			"m" => Some(Memory),
+			"r" => Some(Random),
+			"ant" => Some(Ant),
+			_ => None,
 		}
 	}
 }
@@ -198,6 +215,23 @@ impl PeripheralType for OutputType {
 			(AntType::Queen, Self::SetCell | Self::ClearCell) => false,
 			// (AntType::Worker, Self::Hatch | Self::Kill) => false,
 			_ => true,
+		}
+	}
+
+	fn from_ident(indent: String) -> Option<impl PeripheralType> {
+		use OutputType::*;
+		let value = indent.to_ascii_lowercase();
+
+		match value.as_str() {
+			"cx" => Some(SetCell),
+			"cc" => Some(ClearCell),
+			"dir" => Some(Direction),
+			"mx" => Some(SetMemory),
+			"mm" => Some(EnableMemory),
+			"a" => Some(Hatch),
+			"kill" => Some(Kill),
+			"die" => Some(Die),
+			_ => None,
 		}
 	}
 }
