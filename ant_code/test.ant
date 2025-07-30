@@ -1,5 +1,8 @@
+set height = 16;
+set width = 16;
+
 queen ant = R0, R1, R2 => DX, DY, MOV {
-	DX = R0;
+	DX = or(-R0, R1);
 	DY = R1;
 	MOV = R2;
 }
