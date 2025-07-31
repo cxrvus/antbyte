@@ -13,7 +13,7 @@ pub struct PeripheralSet<P> {
 #[derive(Clone, Debug)]
 pub struct Peripheral<P> {
 	peripheral_type: P,
-	bit_count: u32,
+	bit: u32,
 }
 
 pub type Input = Peripheral<InputType>;
@@ -23,10 +23,10 @@ impl<P> Peripheral<P>
 where
 	P: PeripheralType,
 {
-	pub fn new(peripheral_type: P, bit_count: u32) -> Result<Self> {
+	pub fn new(peripheral_type: P, bit: u32) -> Result<Self> {
 		let peripheral = Self {
 			peripheral_type,
-			bit_count,
+			bit,
 		};
 
 		peripheral.validate()?;
@@ -35,7 +35,7 @@ where
 	}
 
 	pub fn validate(&self) -> Result<()> {
-		let (bit_count, cap) = (self.bit_count, self.peripheral_type.cap());
+		let (bit_count, cap) = (self.bit, self.peripheral_type.cap());
 
 		if bit_count > cap {
 			Err(anyhow!("bit count exceeding cap: {bit_count} > {cap}"))
@@ -49,7 +49,7 @@ where
 	}
 
 	pub fn bit_count(&self) -> u32 {
-		self.bit_count
+		self.bit
 	}
 }
 
@@ -83,11 +83,8 @@ where
 
 	fn normalize(&mut self) {
 		// remove empty peripherals
-		let mut peripherals: Vec<&Peripheral<P>> = self
-			.peripherals
-			.iter()
-			.filter(|x| x.bit_count > 0)
-			.collect();
+		let mut peripherals: Vec<&Peripheral<P>> =
+			self.peripherals.iter().filter(|x| x.bit > 0).collect();
 
 		// sort
 		peripherals.sort_unstable_by(|a, b| a.peripheral_type.cmp(&b.peripheral_type));
@@ -100,7 +97,7 @@ where
 	const CAPACITY: u32 = 32;
 
 	pub fn validate(&self) -> Result<()> {
-		let bit_count_total = self.iter().map(|p| p.bit_count).sum::<u32>();
+		let bit_count_total = self.iter().map(|p| p.bit).sum::<u32>();
 
 		if bit_count_total > Self::CAPACITY {
 			Err(anyhow!("maximum peripheral bit capacity exceeded"))
