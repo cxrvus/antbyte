@@ -147,7 +147,7 @@ impl World {
 			};
 
 			// condensing the input values into a single u32 value
-			let bit_count = input.bit_count();
+			let bit_count = input.bit();
 			let mask = 1u32.unbounded_shl(bit_count).wrapping_sub(1);
 			let masked_input_value = input_value & mask;
 			condensed_input <<= bit_count;
@@ -163,7 +163,7 @@ impl World {
 			use OutputType::*;
 
 			// inflating the output bits into multiple u32 values
-			let bit_count = output.bit_count();
+			let bit_count = output.bit();
 			let mask = 1u32.unbounded_shl(bit_count).wrapping_sub(1);
 			let value = condensed_output & mask;
 

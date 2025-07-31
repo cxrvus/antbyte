@@ -8,7 +8,7 @@ use crate::ant::AntType;
 #[derive(Debug)]
 pub struct PeripheralSet<P> {
 	peripherals: Vec<Peripheral<P>>,
-	reversed: bool,
+	is_inputs: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -88,20 +88,20 @@ where
 		&self.peripheral_type
 	}
 
-	pub fn bit_count(&self) -> u32 {
+	pub fn bit(&self) -> u32 {
 		self.bit
 	}
 }
 
 impl PeripheralSet<InputType> {
 	pub fn inputs(peripherals: Vec<Peripheral<InputType>>) -> Result<Self> {
-		Self::new(peripherals, true)
+		Self::from_spec(peripherals, true)
 	}
 }
 
 impl PeripheralSet<OutputType> {
 	pub fn outputs(peripherals: Vec<Peripheral<OutputType>>) -> Result<Self> {
-		Self::new(peripherals, false)
+		Self::from_spec(peripherals, false)
 	}
 }
 
@@ -109,10 +109,10 @@ impl<P> PeripheralSet<P>
 where
 	P: PartialEq + Eq + PartialOrd + Ord + PeripheralType,
 {
-	fn new(peripherals: Vec<Peripheral<P>>, reversed: bool) -> Result<Self> {
+	fn from_spec(peripheral_spec: Vec<Peripheral<P>>, is_inputs: bool) -> Result<Self> {
 		let mut peripherals = Self {
-			peripherals,
-			reversed,
+			peripherals: peripheral_spec,
+			is_inputs,
 		};
 
 		peripherals.validate()?;
@@ -129,7 +129,7 @@ where
 		// sort
 		peripherals.sort_unstable_by(|a, b| a.peripheral_type.cmp(&b.peripheral_type));
 
-		if self.reversed {
+		if self.is_inputs {
 			self.peripherals.reverse();
 		}
 	}
@@ -150,6 +150,28 @@ where
 		} else {
 			Ok(())
 		}
+	}
+
+	/// takes a vector with all the used peripherals and returns a Set
+	/// containing the ones with highest bits respectively
+	pub fn from_used(used_peripherals: Vec<Peripheral<P>>, is_inputs: bool) -> Result<Self> {
+		let mut specs: Vec<Peripheral<P>> = vec![];
+
+		used_peripherals.into_iter().for_each(|peripheral| {
+			if let Some(collision_index) = specs.iter().position(|x| {
+				x.peripheral_type() == peripheral.peripheral_type() && x.bit() < peripheral.bit()
+			}) {
+				specs[collision_index] = peripheral;
+			} else {
+				specs.push(peripheral);
+			}
+		});
+
+		// increase each bit specifier by 1,
+		// because we need the capacity, not just the highest bit index
+		specs.iter_mut().for_each(|spec| spec.bit += 1);
+
+		Self::from_spec(specs, is_inputs)
 	}
 
 	// todo: implement CRUD

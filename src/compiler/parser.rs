@@ -16,8 +16,8 @@ pub struct ParsedWorld {
 pub struct ParsedCircuit {
 	pub name: String,
 	pub circuit_type: CircuitType,
-	pub inputs: Vec<String>,
-	pub outputs: Vec<String>,
+	pub used_inputs: Vec<String>,
+	pub used_outputs: Vec<String>,
 	pub assignments: Vec<Assignment>,
 }
 
@@ -142,8 +142,8 @@ impl Parser {
 		let circuit = ParsedCircuit {
 			name,
 			circuit_type,
-			inputs,
-			outputs,
+			used_inputs: inputs,
+			used_outputs: outputs,
 			assignments,
 		};
 

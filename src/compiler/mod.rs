@@ -1,7 +1,7 @@
 use crate::{
 	ant::{
 		archetype::Archetype,
-		peripherals::{Input, InputType, Output, Peripheral, PeripheralSet},
+		peripherals::{Input, Output, PeripheralSet},
 	},
 	compiler::{
 		parser::{ParsedCircuit, Parser, Setting, Statement},
@@ -30,25 +30,30 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 	for parsed_circuit in parsed_circuits {
 		match parsed_circuit.circuit_type {
 			parser::CircuitType::Ant(ant_type) => {
-				let inputs = parsed_circuit
-					.inputs
+				let used_inputs = parsed_circuit
+					.used_inputs
 					.into_iter()
 					.map(Input::from_ident)
-					.collect::<Result<_>>()?;
+					.collect::<Result<Vec<_>>>()?;
 
-				let outputs = parsed_circuit
-					.outputs
+				let used_outputs = parsed_circuit
+					.used_outputs
 					.into_iter()
 					.map(Output::from_ident)
-					.collect::<Result<_>>()?;
+					.collect::<Result<Vec<_>>>()?;
 
-				dbg!(&inputs, &outputs);
+				dbg!(&used_inputs, &used_outputs);
+
+				let input_spec = PeripheralSet::from_used(used_inputs, true)?;
+				let output_spec = PeripheralSet::from_used(used_outputs, true)?;
+
+				dbg!(&input_spec, &output_spec);
 
 				let archetype = Archetype {
 					ant_type,
 					circuit: todo!(),
-					outputs: PeripheralSet::outputs(outputs)?,
-					inputs: PeripheralSet::inputs(inputs)?,
+					outputs: output_spec,
+					inputs: input_spec,
 				};
 
 				config.archetypes.push(archetype);
