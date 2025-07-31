@@ -1,9 +1,7 @@
-use std::process::Output;
-
 use crate::{
 	ant::{
 		archetype::Archetype,
-		peripherals::{Input, InputType, Peripheral, PeripheralSet},
+		peripherals::{Input, InputType, Output, Peripheral, PeripheralSet},
 	},
 	compiler::{
 		parser::{ParsedCircuit, Parser, Setting, Statement},
@@ -32,18 +30,25 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 	for parsed_circuit in parsed_circuits {
 		match parsed_circuit.circuit_type {
 			parser::CircuitType::Ant(ant_type) => {
-				let mut inputs: Vec<Input>;
-				let mut outputs: Vec<Output>;
+				let inputs = parsed_circuit
+					.inputs
+					.into_iter()
+					.map(Input::from_ident)
+					.collect::<Result<_>>()?;
 
-				for parsed_input in parsed_circuit.inputs {}
+				let outputs = parsed_circuit
+					.outputs
+					.into_iter()
+					.map(Output::from_ident)
+					.collect::<Result<_>>()?;
 
-				for parsed_output in parsed_circuit.outputs {}
+				dbg!(&inputs, &outputs);
 
 				let archetype = Archetype {
 					ant_type,
 					circuit: todo!(),
+					outputs: PeripheralSet::outputs(outputs)?,
 					inputs: PeripheralSet::inputs(inputs)?,
-					outputs: todo!(),
 				};
 
 				config.archetypes.push(archetype);
