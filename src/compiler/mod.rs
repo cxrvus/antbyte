@@ -16,8 +16,6 @@ use anyhow::{Error, Result, anyhow};
 pub mod parser;
 pub mod token;
 
-const PERIPH_PTN: &str = r"^([A_Z]{1,4})([0-9a-f])?$";
-
 pub fn compile(code: String) -> Result<WorldConfig> {
 	let parsed_world = Parser::parse(code)?;
 

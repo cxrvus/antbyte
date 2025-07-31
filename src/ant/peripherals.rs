@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
-use anyhow::{Error, Result, anyhow};
+use anyhow::{Error, Ok, Result, anyhow};
+use regex::Regex;
 
 use crate::ant::AntType;
 
@@ -35,13 +36,52 @@ where
 	}
 
 	pub fn validate(&self) -> Result<()> {
-		let (bit_count, cap) = (self.bit, self.peripheral_type.cap());
+		let (bit_index, cap) = (self.bit, self.peripheral_type.cap());
 
-		if bit_count > cap {
-			Err(anyhow!("bit count exceeding cap: {bit_count} > {cap}"))
+		if bit_index > cap {
+			Err(anyhow!("bit index exceeding cap: {bit_index} > {cap}"))
 		} else {
 			Ok(())
 		}
+	}
+
+	const PERIPH_PTN: &str = r"^([A-Z]{1,4})([0-9a-f])?$";
+
+	pub fn from_ident(ident: String) -> Result<Self> {
+		let re = Regex::new(Self::PERIPH_PTN).unwrap();
+
+		// let (periph_string, bit_index) =
+		let captures = re
+			.captures(&ident)
+			.ok_or(anyhow!("'{ident}' is not a valid peripheral"))?;
+
+		let type_ident = captures.get(1).unwrap().as_str();
+
+		let p_type = P::from_ident(&type_ident.to_ascii_lowercase())
+			.ok_or(anyhow!("'{type_ident}' is not a valid peripheral type"))?;
+
+		let bit_index = captures
+			.get(2)
+			.map(|m| u32::from_str_radix(m.as_str(), 16).unwrap());
+
+		let cap = p_type.cap();
+
+		if let Some(bit_index) = bit_index {
+			if cap == 1 {
+				return Err(anyhow!(
+					"may not have a bit index in one-bit peripherals\n(in '{ident}')"
+				));
+			} else if bit_index >= cap {
+				return Err(anyhow!(
+					"bit index may not exceed peripheral bit capacity:\n{bit_index} >= {cap}\n(in '{ident}')"
+				));
+			}
+		};
+
+		Ok(Self {
+			peripheral_type: p_type,
+			bit: bit_index.unwrap_or_default(),
+		})
 	}
 
 	pub fn peripheral_type(&self) -> &P {
@@ -126,9 +166,9 @@ impl<P> Deref for PeripheralSet<P> {
 pub const CELL_CAP: u32 = 4;
 pub const MEM_CAP: u32 = 16;
 
-pub trait PeripheralType {
+pub trait PeripheralType: Sized {
 	fn cap(&self) -> u32;
-	fn from_ident(ident: String) -> Option<impl PeripheralType>;
+	fn from_ident(ident: &str) -> Option<Self>;
 	fn is_legal(&self, ant_type: &AntType) -> bool {
 		_ = ant_type;
 		true
@@ -157,11 +197,10 @@ impl PeripheralType for InputType {
 		}
 	}
 
-	fn from_ident(indent: String) -> Option<impl PeripheralType> {
+	fn from_ident(ident: &str) -> Option<Self> {
 		use InputType::*;
-		let value = indent.to_ascii_lowercase();
 
-		match value.as_str() {
+		match ident {
 			"t" => Some(Time),
 			"c" => Some(Cell),
 			"cn" => Some(CellNext),
@@ -215,14 +254,13 @@ impl PeripheralType for OutputType {
 		}
 	}
 
-	fn from_ident(indent: String) -> Option<impl PeripheralType> {
+	fn from_ident(ident: &str) -> Option<Self> {
 		use OutputType::*;
-		let value = indent.to_ascii_lowercase();
 
-		match value.as_str() {
+		match ident {
 			"cx" => Some(CellWrite),
 			"cq" => Some(CellClear),
-			"dir" => Some(Direction),
+			"d" => Some(Direction),
 			"mx" => Some(MemoryWrite),
 			// todo: MemoryClear (MQ) instead of MemoryEnable
 			"mm" => Some(MemoryEnable),

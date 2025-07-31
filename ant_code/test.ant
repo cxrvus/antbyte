@@ -1,8 +1,8 @@
 set height = 16;
 set width = 16;
 
-queen ant = R0, R1, R2 => DX, DY, MOV {
-	DX = or(-R0, R1);
-	DY = R1;
-	MOV = R2;
+queen ant = R0, R1, R2 => D0, D1, D2 {
+	D0 = or(-R0, R1);
+	D1 = R1;
+	D2 = R2;
 }
