@@ -1,9 +1,9 @@
-## Compiler
-- todo: create module (super to parser)
+## Parser
+- todo: add Graphs
+- todo: normalize / insert buffers
 - todo: resolve functions
-- todo: normalize / resolve to ORs
-  - could maybe just use functions
-- todo: convert syntax trees to circuits
+- todo: resolve all gates to ORs
+- todo: convert Graphs to Circuits
 
 ## Other
 - idea: use thiserror instead of anyhow

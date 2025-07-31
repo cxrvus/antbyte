@@ -3,19 +3,19 @@ use crate::{
 		archetype::Archetype,
 		peripherals::{Input, Output, PeripheralSet},
 	},
-	compiler::{
-		parser::{ParsedCircuit, Parser, Setting, Statement},
+	parser::{
+		lexer::{Lexer, ParsedCircuit, Setting, Statement},
 		token::Token,
 	},
 	world::WorldConfig,
 };
 use anyhow::{Error, Result, anyhow};
 
-pub mod parser;
+pub mod lexer;
 pub mod token;
 
-pub fn compile(code: String) -> Result<WorldConfig> {
-	let parsed_world = Parser::parse(code)?;
+pub fn parse(code: String) -> Result<WorldConfig> {
+	let parsed_world = Lexer::parse(code)?;
 
 	let mut config = WorldConfig::default();
 	let mut parsed_circuits: Vec<ParsedCircuit> = vec![];
@@ -29,7 +29,7 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 
 	for parsed_circuit in parsed_circuits {
 		match parsed_circuit.circuit_type {
-			parser::CircuitType::Ant(ant_type) => {
+			lexer::CircuitType::Ant(ant_type) => {
 				let used_inputs = parsed_circuit
 					.used_inputs
 					.into_iter()
@@ -59,7 +59,7 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 				config.archetypes.push(archetype);
 			}
 
-			parser::CircuitType::Sub => {
+			lexer::CircuitType::Sub => {
 				todo!()
 			}
 		};
