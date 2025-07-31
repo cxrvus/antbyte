@@ -64,7 +64,7 @@ impl TryFrom<String> for Circuit {
 				assert!(line.chars().count() > 0);
 				assert!(line.chars().count() <= 32);
 
-				let mut inversion = 0u32;
+				let mut sign = 0u32;
 				let mut mask = 0u32;
 
 				for (i, symbol) in line.chars().enumerate() {
@@ -75,11 +75,11 @@ impl TryFrom<String> for Circuit {
 						other => Err(anyhow!("unknown wire symbol: {other}")),
 					}?;
 
-					inversion |= wire_bits.0 << i;
+					sign |= wire_bits.0 << i;
 					mask |= wire_bits.1 << i;
 				}
 
-				let neuron = Neuron::new(inversion, mask);
+				let neuron = Neuron::new(sign, mask);
 				neurons.push(neuron);
 			}
 
@@ -123,17 +123,17 @@ impl Layer {
 
 #[derive(Clone, Debug)]
 pub struct Neuron {
-	inversion: u32,
+	sign: u32,
 	mask: u32,
 }
 
 impl Neuron {
-	pub fn new(inversion: u32, mask: u32) -> Self {
-		Self { inversion, mask }
+	pub fn new(sign: u32, mask: u32) -> Self {
+		Self { sign, mask }
 	}
 
 	pub fn tick(&self, value: u32) -> bool {
-		((value ^ self.inversion) & self.mask) != 0
+		((value ^ self.sign) & self.mask) != 0
 	}
 }
 
