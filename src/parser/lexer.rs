@@ -34,7 +34,7 @@ pub struct Assignment {
 #[derive(Debug)]
 pub struct Expression {
 	ident: String,
-	invert: bool,
+	sign: bool,
 	/// is a function if Some, else input / hidden layer neuron
 	parameters: Option<Vec<Self>>,
 }
@@ -211,7 +211,7 @@ impl Lexer {
 	}
 
 	fn next_expression(&mut self) -> Result<Expression> {
-		let mut invert = false;
+		let mut sign = false;
 		let mut current_token = Token::ParenthesisLeft;
 		let mut expression_sets: Vec<Vec<Expression>> = vec![];
 
@@ -228,7 +228,7 @@ impl Lexer {
 				Token::Ident(ident) => {
 					let new_exp = Expression {
 						ident: ident.clone(),
-						invert,
+						sign,
 						parameters: None,
 					};
 
@@ -238,11 +238,11 @@ impl Lexer {
 						expression_sets.push(vec![new_exp]);
 					}
 
-					invert = false; // reset
+					sign = false; // reset
 				}
 
 				Token::Invert => {
-					invert = true;
+					sign = true;
 				}
 
 				Token::ParenthesisLeft => {
