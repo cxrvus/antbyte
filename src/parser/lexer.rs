@@ -27,14 +27,14 @@ pub enum CircuitType { Ant(AntType), Sub }
 
 #[derive(Debug)]
 pub struct Assignment {
-	lhs: Vec<String>,
-	rhs: Expression,
+	pub lhs: Vec<String>,
+	pub rhs: Expression,
 }
 
 #[derive(Debug)]
 pub struct Expression {
-	ident: String,
-	sign: bool,
+	pub ident: String,
+	pub sign: bool,
 	/// is a function if Some, else input / hidden layer neuron
 	parameters: Option<Vec<Self>>,
 }

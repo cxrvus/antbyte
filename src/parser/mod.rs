@@ -1,10 +1,13 @@
+use std::collections::HashMap;
+
 use crate::{
 	ant::{
 		archetype::Archetype,
 		peripherals::{Input, Output, PeripheralSet},
 	},
+	circuit::{self, Circuit},
 	parser::{
-		lexer::{Lexer, ParsedCircuit, Setting, Statement},
+		lexer::{CircuitType, Lexer, ParsedCircuit, Setting, Statement},
 		token::Token,
 	},
 	world::WorldConfig,
@@ -13,6 +16,13 @@ use anyhow::{Error, Result, anyhow};
 
 pub mod lexer;
 pub mod token;
+
+struct Graph(Vec<GraphLayer>);
+struct GraphLayer(Vec<Node>);
+struct Node {
+	sign: bool,
+	wires: Vec<u32>,
+}
 
 pub fn parse(code: String) -> Result<WorldConfig> {
 	let parsed_world = Lexer::parse(code)?;
@@ -27,41 +37,43 @@ pub fn parse(code: String) -> Result<WorldConfig> {
 		}
 	}
 
+	let mut circuits = HashMap::<String, Circuit>::new();
+	let mut call_stack = Vec::<(String, Circuit)>::new();
+
 	for parsed_circuit in parsed_circuits {
-		match parsed_circuit.circuit_type {
-			lexer::CircuitType::Ant(ant_type) => {
-				let used_inputs = parsed_circuit
-					.used_inputs
-					.into_iter()
-					.map(Input::from_ident)
-					.collect::<Result<Vec<_>>>()?;
+		let circuit = Circuit::new(0, vec![]); // TODO;
 
-				let used_outputs = parsed_circuit
-					.used_outputs
-					.into_iter()
-					.map(Output::from_ident)
-					.collect::<Result<Vec<_>>>()?;
+		for assignment in parsed_circuit.assignments {
+			todo!()
+		}
 
-				dbg!(&used_inputs, &used_outputs);
+		if let CircuitType::Ant(ant_type) = parsed_circuit.circuit_type {
+			let used_inputs = parsed_circuit
+				.used_inputs
+				.into_iter()
+				.map(Input::from_ident)
+				.collect::<Result<Vec<_>>>()?;
 
-				let input_spec = PeripheralSet::from_used(used_inputs, true)?;
-				let output_spec = PeripheralSet::from_used(used_outputs, true)?;
+			let input_spec = PeripheralSet::from_used(used_inputs, true)?;
 
-				dbg!(&input_spec, &output_spec);
+			let used_outputs = parsed_circuit
+				.used_outputs
+				.into_iter()
+				.map(Output::from_ident)
+				.collect::<Result<Vec<_>>>()?;
 
-				let archetype = Archetype {
-					ant_type,
-					circuit: todo!(),
-					outputs: output_spec,
-					inputs: input_spec,
-				};
+			let output_spec = PeripheralSet::from_used(used_outputs, true)?;
 
-				config.archetypes.push(archetype);
-			}
+			// TODO: fill peripherals with sorted inputs from specs, instead of unsorted user-given peripherals
 
-			lexer::CircuitType::Sub => {
-				todo!()
-			}
+			let archetype = Archetype {
+				ant_type,
+				circuit,
+				outputs: output_spec,
+				inputs: input_spec,
+			};
+
+			config.archetypes.push(archetype);
 		};
 	}
 
