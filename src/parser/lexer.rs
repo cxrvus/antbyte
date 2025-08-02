@@ -221,7 +221,7 @@ impl Lexer {
 			if !Self::validate_exp_token(&current_token, &next_token) {
 				let expected = Self::expected_exp_tokens(&current_token);
 				let expected_msg = format!("either: {expected:?}");
-				return Err(Self::unexpected(current_token, &expected_msg));
+				return Err(Self::unexpected(next_token, &expected_msg));
 			}
 
 			match &next_token {
