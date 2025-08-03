@@ -1,9 +1,10 @@
 ## Parser
-- todo: add Graphs
+- todo: resolve functions (Assignment level)
+- todo: resolve ANDs to ORs
+- todo: turn into unnormalized Graph
 - todo: normalize / insert buffers
-- todo: resolve functions
-- todo: resolve all gates to ORs
-- todo: convert Graphs to Circuits
+- todo: fill in INs & OUTs for Ants
+- todo: convert normalized Graphs to Circuits
 
 ## Other
-- idea: use thiserror instead of anyhow
+- todo: use thiserror instead of anyhow

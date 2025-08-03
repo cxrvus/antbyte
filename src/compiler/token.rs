@@ -20,8 +20,7 @@ pub enum Token {
 	BraceRight,
 
 	// ## Values
-	// todo: implement
-	String(String),
+	String(String), // todo: implement
 	Number(u32),
 
 	// ## Other
