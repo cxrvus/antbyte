@@ -1,6 +1,5 @@
 use super::{
-	CircuitType, ParsedWorld, Parser, Setting, Statement, circuit_parser::parse_circuit,
-	token::Token,
+	CircuitType, ParsedWorld, Parser, Statement, circuit_parser::parse_circuit, token::Token,
 };
 use crate::ant::archetype::AntType;
 use anyhow::{Result, anyhow};
@@ -24,16 +23,16 @@ pub fn parse_world(parser: &mut Parser) -> Result<ParsedWorld> {
 		};
 
 		if statement.as_str() == "set" {
-			let setting = parse_setting(parser, ident)?;
-			statements.push(Statement::Set(setting));
+			let (key, value) = parse_setting(parser, ident)?;
+			statements.push(Statement::Set(key, value));
 		} else if let Some(circuit_type) = match statement.as_str() {
 			"queen" => Some(CircuitType::Ant(AntType::Queen)),
 			"worker" => Some(CircuitType::Ant(AntType::Worker)),
 			"fn" => Some(CircuitType::Sub),
 			_ => None,
 		} {
-			let circuit = parse_circuit(parser, ident, circuit_type)?;
-			statements.push(Statement::Declare(circuit));
+			let circuit = parse_circuit(parser, circuit_type)?;
+			statements.push(Statement::Declare(ident, circuit));
 		} else {
 			return Err(anyhow!("invalid statement: {statement}"));
 		}
@@ -44,13 +43,13 @@ pub fn parse_world(parser: &mut Parser) -> Result<ParsedWorld> {
 	Ok(dbg!(world))
 }
 
-fn parse_setting(parser: &mut Parser, key: String) -> Result<Setting> {
+fn parse_setting(parser: &mut Parser, key: String) -> Result<(String, Token)> {
 	parser.assume_next(Token::Assign);
 	let value = parser.next_token();
 	parser.expect_next(Token::Semicolon)?;
 
 	match value {
-		Token::Ident(_) | Token::Number(_) => Ok(Setting { key, value }),
+		Token::Ident(_) | Token::Number(_) => Ok((key, value)),
 		other => Err(Parser::unexpected(other, "value (identifier or number)")),
 	}
 }

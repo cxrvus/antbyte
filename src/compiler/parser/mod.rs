@@ -9,8 +9,8 @@ pub mod token;
 
 #[derive(Debug)]
 pub enum Statement {
-	Set(Setting),
-	Declare(ParsedCircuit),
+	Set(String, Token),
+	Declare(String, ParsedCircuit),
 }
 
 #[derive(Debug)]
@@ -20,7 +20,6 @@ pub struct ParsedWorld {
 
 #[derive(Debug)]
 pub struct ParsedCircuit {
-	pub name: String,
 	pub circuit_type: CircuitType,
 	pub used_inputs: Vec<String>,
 	pub used_outputs: Vec<String>,
@@ -44,10 +43,6 @@ pub struct Expression {
 	/// is a function if Some, else input / hidden layer neuron
 	parameters: Option<Vec<Self>>,
 }
-
-#[rustfmt::skip]
-#[derive(Debug)]
-pub struct Setting { pub key: String, pub value: Token }
 
 #[derive(Default)]
 pub struct Parser {

@@ -6,7 +6,7 @@ use crate::{
 		peripherals::{Input, Output, PeripheralSet},
 	},
 	circuit::Circuit,
-	compiler::parser::{CircuitType, ParsedCircuit, Parser, Setting, Statement, token::Token},
+	compiler::parser::{CircuitType, ParsedCircuit, Parser, Statement, token::Token},
 	world::WorldConfig,
 };
 use anyhow::{Error, Result, anyhow};
@@ -24,12 +24,16 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 	let parsed_world = Parser::new(code).parse_world()?;
 
 	let mut config = WorldConfig::default();
-	let mut parsed_circuits: Vec<ParsedCircuit> = vec![];
+	let mut parsed_circuits: HashMap<String, ParsedCircuit> = HashMap::new();
 
 	for statement in parsed_world.statements {
 		match statement {
-			Statement::Set(setting) => set_setting(&mut config, setting)?,
-			Statement::Declare(circuit) => parsed_circuits.push(circuit),
+			Statement::Set(key, value) => set_setting(&mut config, key, value)?,
+			Statement::Declare(name, circuit) => {
+				if parsed_circuits.insert(name.clone(), circuit).is_some() {
+					return Err(anyhow!("circuit name '{name}' used more than once"));
+				}
+			}
 		}
 	}
 
@@ -38,6 +42,7 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 
 	for parsed_circuit in parsed_circuits {
 		let circuit = Circuit::new(0, vec![]); // TODO;
+		let (name, parsed_circuit) = parsed_circuit;
 
 		for assignment in parsed_circuit.assignments {
 			todo!()
@@ -78,9 +83,7 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 	Ok(config)
 }
 
-fn set_setting(config: &mut WorldConfig, setting: Setting) -> Result<()> {
-	let Setting { key, value } = setting;
-
+fn set_setting(config: &mut WorldConfig, key: String, value: Token) -> Result<()> {
 	let key = key.to_ascii_lowercase();
 
 	// todo: implement all WorldConfig properties
