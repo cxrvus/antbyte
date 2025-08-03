@@ -3,7 +3,7 @@ use std::fs;
 use std::io::{self, Write};
 
 use antbyte::circuit::Circuit;
-use antbyte::parser::parse;
+use antbyte::compiler::parse;
 use antbyte::{
 	ant::{
 		archetype::{AntType, Archetype},

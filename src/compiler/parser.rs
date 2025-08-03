@@ -1,4 +1,4 @@
-use crate::{ant::archetype::AntType, parser::token::Token};
+use crate::{ant::archetype::AntType, compiler::token::Token};
 use anyhow::{Error, Result, anyhow};
 
 #[derive(Debug)]
@@ -48,13 +48,13 @@ pub struct Setting { pub key: String, pub value: Token }
 enum Assumption { Correct, Incorrect(Token) }
 
 #[derive(Default)]
-pub struct Lexer {
+pub struct Parser {
 	tokens: Vec<Token>,
 }
 
 type Target = ParsedWorld;
 
-impl Lexer {
+impl Parser {
 	pub fn parse(code: String) -> Result<Target> {
 		let mut tokens = Token::tokenize(code);
 		tokens.reverse();

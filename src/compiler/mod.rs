@@ -6,15 +6,15 @@ use crate::{
 		peripherals::{Input, Output, PeripheralSet},
 	},
 	circuit::{self, Circuit},
-	parser::{
-		lexer::{CircuitType, Lexer, ParsedCircuit, Setting, Statement},
+	compiler::{
+		parser::{CircuitType, ParsedCircuit, Parser, Setting, Statement},
 		token::Token,
 	},
 	world::WorldConfig,
 };
 use anyhow::{Error, Result, anyhow};
 
-pub mod lexer;
+pub mod parser;
 pub mod token;
 
 struct Graph(Vec<GraphLayer>);
@@ -25,7 +25,7 @@ struct Node {
 }
 
 pub fn parse(code: String) -> Result<WorldConfig> {
-	let parsed_world = Lexer::parse(code)?;
+	let parsed_world = Parser::parse(code)?;
 
 	let mut config = WorldConfig::default();
 	let mut parsed_circuits: Vec<ParsedCircuit> = vec![];
