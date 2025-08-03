@@ -1,9 +1,8 @@
-use std::ops::Deref;
-
-use anyhow::{Error, Ok, Result, anyhow};
-use regex::Regex;
-
 use crate::ant::AntType;
+
+use anyhow::{Ok, Result, anyhow};
+use regex::Regex;
+use std::ops::Deref;
 
 #[derive(Debug)]
 pub struct PeripheralSet<P> {

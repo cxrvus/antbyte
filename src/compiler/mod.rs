@@ -9,7 +9,7 @@ use crate::{
 	compiler::parser::{CircuitType, ParsedCircuit, Parser, Statement, token::Token},
 	world::WorldConfig,
 };
-use anyhow::{Error, Result, anyhow};
+use anyhow::{Result, anyhow};
 
 pub mod parser;
 

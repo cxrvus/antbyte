@@ -1,6 +1,7 @@
-use std::env;
-use std::fs;
-use std::io::{self, Write};
+use std::{
+	env, fs,
+	io::{self, Write},
+};
 
 use antbyte::{
 	ant::{
@@ -11,6 +12,7 @@ use antbyte::{
 	compiler::compile,
 	world::{World, WorldConfig},
 };
+
 use anyhow::{Result, anyhow};
 
 fn main() {
