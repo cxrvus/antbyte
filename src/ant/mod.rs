@@ -7,7 +7,7 @@ use crate::{
 	world::{BorderMode, World},
 };
 
-// idea: improve scope (no pub fields)
+// todo: improve scope (no pub fields) - also in Archetype
 #[derive(Clone, Copy, Default)]
 pub struct Ant {
 	pub archetype: u32,
