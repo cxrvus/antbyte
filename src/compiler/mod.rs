@@ -37,16 +37,10 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 		}
 	}
 
-	let mut circuits = HashMap::<String, Circuit>::new();
-	let mut call_stack = Vec::<(String, Circuit)>::new();
-
+	// create Archetypes
 	for parsed_circuit in parsed_circuits {
 		let circuit = Circuit::new(0, vec![]); // TODO;
-		let (name, parsed_circuit) = parsed_circuit;
-
-		for assignment in parsed_circuit.assignments {
-			todo!()
-		}
+		let (_, parsed_circuit) = parsed_circuit;
 
 		if let CircuitType::Ant(ant_type) = parsed_circuit.circuit_type {
 			let used_inputs = parsed_circuit
@@ -81,6 +75,13 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 	dbg!(&config);
 
 	Ok(config)
+}
+
+fn resolve_calls(circuits: &mut HashMap<String, ParsedCircuit>) -> Result<()> {
+	let mut call_stack = Vec::<(String, Circuit)>::new();
+
+	todo!();
+	// Ok(())
 }
 
 fn set_setting(config: &mut WorldConfig, key: String, value: Token) -> Result<()> {
