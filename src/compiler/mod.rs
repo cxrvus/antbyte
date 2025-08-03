@@ -5,17 +5,13 @@ use crate::{
 		archetype::Archetype,
 		peripherals::{Input, Output, PeripheralSet},
 	},
-	circuit::{self, Circuit},
-	compiler::{
-		parser::{CircuitType, ParsedCircuit, Parser, Setting, Statement},
-		token::Token,
-	},
+	circuit::Circuit,
+	compiler::parser::{CircuitType, ParsedCircuit, Parser, Setting, Statement, token::Token},
 	world::WorldConfig,
 };
 use anyhow::{Error, Result, anyhow};
 
 pub mod parser;
-pub mod token;
 
 struct Graph(Vec<GraphLayer>);
 struct GraphLayer(Vec<Node>);
@@ -24,8 +20,8 @@ struct Node {
 	wires: Vec<u32>,
 }
 
-pub fn parse(code: String) -> Result<WorldConfig> {
-	let parsed_world = Parser::parse(code)?;
+pub fn compile(code: String) -> Result<WorldConfig> {
+	let parsed_world = Parser::new(code).parse_world()?;
 
 	let mut config = WorldConfig::default();
 	let mut parsed_circuits: Vec<ParsedCircuit> = vec![];

@@ -2,13 +2,13 @@ use std::env;
 use std::fs;
 use std::io::{self, Write};
 
-use antbyte::circuit::Circuit;
-use antbyte::compiler::parse;
 use antbyte::{
 	ant::{
 		archetype::{AntType, Archetype},
 		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
 	},
+	circuit::Circuit,
+	compiler::compile,
 	world::{World, WorldConfig},
 };
 use anyhow::{Result, anyhow};
@@ -56,7 +56,7 @@ fn update(code: String) -> Result<()> {
 	println!("{code}");
 
 	// TODO: temporary
-	parse(code)?;
+	compile(code)?;
 	return Ok(());
 
 	let mut world = create_world(code)?;
