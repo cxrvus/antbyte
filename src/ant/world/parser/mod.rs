@@ -1,4 +1,5 @@
-use crate::{ant::archetype::AntType, parser::token::Token};
+use self::token::Token;
+use crate::ant::archetype::AntType;
 use anyhow::{Error, Result, anyhow};
 
 mod circuit_parser;

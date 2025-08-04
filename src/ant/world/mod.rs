@@ -1,3 +1,5 @@
+pub mod parser;
+
 use rand::{Rng, SeedableRng, rngs::StdRng};
 
 use std::{

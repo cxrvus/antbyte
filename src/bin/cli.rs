@@ -7,10 +7,9 @@ use antbyte::{
 	ant::{
 		archetype::{AntType, Archetype},
 		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
-		world::{World, WorldConfig},
+		world::{World, WorldConfig, parser::compiler},
 	},
 	circuit::Circuit,
-	parser::compiler::compile,
 };
 
 use anyhow::{Result, anyhow};
@@ -58,7 +57,7 @@ fn update(code: String) -> Result<()> {
 	println!("{code}");
 
 	// TODO: temporary
-	compile(code)?;
+	compiler::compile(code)?;
 	return Ok(());
 
 	let mut world = create_world(code)?;
