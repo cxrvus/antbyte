@@ -11,6 +11,7 @@ pub enum Token {
 	ParenthesisLeft,
 	ParenthesisRight,
 	Comma,
+	// todo: implement constant ONE (resolve to `-or()`)
 
 	// ## Assignments / Circuits
 	Semicolon,
