@@ -9,7 +9,7 @@ use antbyte::{
 		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
 	},
 	circuit::Circuit,
-	compiler::compile,
+	parser::compiler::compile,
 	world::{World, WorldConfig},
 };
 

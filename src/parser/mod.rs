@@ -1,10 +1,11 @@
-use crate::{ant::archetype::AntType, compiler::parser::token::Token};
+use crate::{ant::archetype::AntType, parser::token::Token};
 use anyhow::{Error, Result, anyhow};
 
 mod circuit_parser;
 mod expression_parser;
 mod world_parser;
 
+pub mod compiler;
 pub mod token;
 
 #[derive(Debug)]
