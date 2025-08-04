@@ -243,7 +243,7 @@ pub enum OutputType {
 	/// 2 bits rotation + 1 bit velocity
 	Direction,
 	MemoryWrite,
-	MemoryEnable,
+	MemoryClear,
 	/// Queen Only
 	Spawn,
 	/// Queen Only
@@ -260,7 +260,7 @@ impl PeripheralType for OutputType {
 			CellClear => 1,
 			Direction => 3,
 			MemoryWrite => MEM_CAP,
-			MemoryEnable => 1,
+			MemoryClear => 1,
 			Spawn => 4,
 			Kill => 1,
 			Die => 1,
@@ -268,10 +268,9 @@ impl PeripheralType for OutputType {
 	}
 
 	fn is_legal(&self, ant_type: &AntType) -> bool {
-		match (ant_type, self) {
-			(AntType::Queen, Self::CellWrite | Self::CellClear) => false,
-			// (AntType::Worker, Self::Hatch | Self::Kill) => false,
-			_ => true,
+		!match ant_type {
+			AntType::Worker => matches!(Self::Spawn, Self::Kill),
+			AntType::Queen => matches!(Self::CellWrite, Self::CellClear),
 		}
 	}
 
@@ -283,8 +282,7 @@ impl PeripheralType for OutputType {
 			"cq" => Some(CellClear),
 			"d" => Some(Direction),
 			"mx" => Some(MemoryWrite),
-			// todo: MemoryClear (MQ) instead of MemoryEnable
-			"mm" => Some(MemoryEnable),
+			"mq" => Some(MemoryClear),
 			"spx" => Some(Spawn),
 			"kill" => Some(Kill),
 			"die" => Some(Die),

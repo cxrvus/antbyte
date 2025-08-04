@@ -27,7 +27,7 @@ pub struct Ant {
 	/// cardinal direction - number between 0 and 3
 	pub dir: u8,
 	pub age: u32,
-	pub memory: Register,
+	pub memory: u32,
 }
 
 // todo: move methods to world
@@ -99,17 +99,5 @@ impl Archetype {
 		} else {
 			Ok(())
 		}
-	}
-}
-
-#[derive(Clone, Copy, Default)]
-pub struct Register {
-	pub current: u32,
-	pub next: u32,
-}
-
-impl Register {
-	pub fn overwrite(&mut self) {
-		self.current = self.next;
 	}
 }

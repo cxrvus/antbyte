@@ -29,7 +29,7 @@ impl World {
 					.map(|pos| *self.cells.at(&pos.sign()).unwrap())
 					.unwrap_or(0u8)
 					.into(),
-				Memory => ant.memory.current,
+				Memory => ant.memory,
 				Random => self.rng(),
 				Ant => self.get_target_ant(ant).is_some().into(),
 			};
@@ -65,10 +65,10 @@ impl World {
 						self.move_tick(&mut ant);
 					}
 				}
-				CellWrite if value != 0 => self.cells.set_at(&ant.pos.sign(), 1),
-				CellClear if value != 0 => self.cells.set_at(&ant.pos.sign(), 0),
-				MemoryWrite => ant.memory.next = value,
-				MemoryEnable => ant.memory.overwrite(),
+				CellWrite if value != 0 => self.cells.set_at(&ant.pos.sign(), value as u8),
+				CellClear if value == 1 => self.cells.set_at(&ant.pos.sign(), 0),
+				MemoryWrite if value != 0 => ant.memory = value,
+				MemoryClear if value == 1 => ant.memory = 0,
 				Spawn => {
 					if let Some(pos) = self.next_pos(&ant)
 						&& value > 0
