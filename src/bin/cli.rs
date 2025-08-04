@@ -7,10 +7,10 @@ use antbyte::{
 	ant::{
 		archetype::{AntType, Archetype},
 		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
+		world::{World, WorldConfig},
 	},
 	circuit::Circuit,
 	parser::compiler::compile,
-	world::{World, WorldConfig},
 };
 
 use anyhow::{Result, anyhow};

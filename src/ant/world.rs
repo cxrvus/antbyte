@@ -7,21 +7,12 @@ use std::{
 
 use crate::{
 	ant::{
-		Ant,
+		Ant, BorderMode, StartingPos,
 		archetype::Archetype,
 		peripherals::{InputType, OutputType},
 	},
 	util::{matrix::Matrix, vec2::Vec2u},
 };
-
-// idea: add Cycle & Wrap
-#[rustfmt::skip]
-#[derive(Debug)]
-pub enum BorderMode { Collide, Despawn }
-
-#[rustfmt::skip]
-#[derive(Debug)]
-pub enum StartingPos { TopLeft, Center }
 
 type Cells = Matrix<u8>;
 

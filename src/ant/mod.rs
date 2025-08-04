@@ -1,13 +1,20 @@
 pub mod archetype;
 pub mod peripherals;
+pub mod world;
 
-use crate::{
-	ant::archetype::*,
-	util::vec2::{Vec2, Vec2u},
-	world::{BorderMode, World},
-};
+// TODO: better module structure
+use self::{archetype::*, world::World};
+use crate::util::vec2::{Vec2, Vec2u};
 
-// todo: improve scope (no pub fields) - also in Archetype
+// idea: add Cycle & Wrap
+#[rustfmt::skip]
+#[derive(Debug)]
+pub enum BorderMode { Collide, Despawn }
+
+#[rustfmt::skip]
+#[derive(Debug)]
+pub enum StartingPos { TopLeft, Center }
+
 #[derive(Clone, Copy, Default)]
 pub struct Ant {
 	pub archetype: u32,

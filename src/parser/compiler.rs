@@ -6,9 +6,9 @@ use crate::{
 	ant::{
 		archetype::Archetype,
 		peripherals::{Input, Output, PeripheralSet},
+		world::WorldConfig,
 	},
 	circuit::{self, Circuit},
-	world::WorldConfig,
 };
 use anyhow::{Result, anyhow};
 
