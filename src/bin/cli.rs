@@ -23,7 +23,7 @@ fn main() {
 
 /// use this for debugging
 // TODO
-const TEST_PATH: Option<&'static str> = Some("ant_code/test.ant");
+const TEST_PATH: Option<&'static str> = Some("antlets/test.ant");
 // const TEST_PATH: Option<&'static str> = None;
 
 /// use this for debugging
