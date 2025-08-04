@@ -5,7 +5,7 @@ use std::{
 
 use antbyte::{
 	ant::{
-		archetype::{AntType, Archetype},
+		AntType, Archetype,
 		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
 		world::{World, WorldConfig, parser::compiler},
 	},
@@ -103,16 +103,17 @@ fn create_world(code: String) -> Result<World> {
 }
 
 fn world_to_string(world: &World) -> String {
+	let cells = world.cells();
 	let mut string = String::new();
 
-	for (i, cell) in world.cells.values.iter().enumerate() {
-		if i % world.cells.width == 0 {
+	for (i, cell) in cells.values.iter().enumerate() {
+		if i % cells.width == 0 {
 			string.push('\n');
 		}
 
-		let pos = world.cells.get_pos(i).unwrap();
+		let pos = cells.get_pos(i).unwrap();
 		let ant = world
-			.ants
+			.ants()
 			.iter()
 			.filter(|ant| ant.alive)
 			.find(|ant| ant.pos == pos);

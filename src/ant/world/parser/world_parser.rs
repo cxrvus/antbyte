@@ -1,46 +1,46 @@
-use super::{
-	CircuitType, ParsedWorld, Parser, Statement, circuit_parser::parse_circuit, token::Token,
-};
-use crate::ant::archetype::AntType;
+use super::{CircuitType, ParsedWorld, Parser, Statement, Token};
+use crate::ant::AntType;
 use anyhow::{Result, anyhow};
 
-pub fn parse_world(parser: &mut Parser) -> Result<ParsedWorld> {
-	let mut statements: Vec<Statement> = vec![];
+impl Parser {
+	pub(super) fn parse_world(&mut self) -> Result<ParsedWorld> {
+		let mut statements: Vec<Statement> = vec![];
 
-	loop {
-		let statement = match parser.next_token() {
-			Token::Ident(ident) => ident,
-			Token::EndOfFile => break,
-			// fixme: better error handling - parsing goes on even if statement is invalid
-			other => return Err(Parser::unexpected(other, "statement")),
-		};
+		loop {
+			let statement = match self.next_token() {
+				Token::Ident(ident) => ident,
+				Token::EndOfFile => break,
+				// fixme: better error handling - parsing goes on even if statement is invalid
+				other => return Err(Parser::unexpected(other, "statement")),
+			};
 
-		let ident = parser.next_ident()?;
+			let ident = self.next_ident()?;
 
-		match parser.next_token() {
-			Token::Assign => {}
-			other => return Err(Parser::unexpected(other, "'='")),
-		};
+			match self.next_token() {
+				Token::Assign => {}
+				other => return Err(Parser::unexpected(other, "'='")),
+			};
 
-		if statement.as_str() == "set" {
-			let (key, value) = parse_setting(parser, ident)?;
-			statements.push(Statement::Set(key, value));
-		} else if let Some(circuit_type) = match statement.as_str() {
-			"queen" => Some(CircuitType::Ant(AntType::Queen)),
-			"worker" => Some(CircuitType::Ant(AntType::Worker)),
-			"fn" => Some(CircuitType::Sub),
-			_ => None,
-		} {
-			let circuit = parse_circuit(parser, circuit_type)?;
-			statements.push(Statement::Declare(ident, circuit));
-		} else {
-			return Err(anyhow!("invalid statement: {statement}"));
+			if statement.as_str() == "set" {
+				let (key, value) = parse_setting(self, ident)?;
+				statements.push(Statement::Set(key, value));
+			} else if let Some(circuit_type) = match statement.as_str() {
+				"queen" => Some(CircuitType::Ant(AntType::Queen)),
+				"worker" => Some(CircuitType::Ant(AntType::Worker)),
+				"fn" => Some(CircuitType::Sub),
+				_ => None,
+			} {
+				let circuit = self.parse_circuit(circuit_type)?;
+				statements.push(Statement::Declare(ident, circuit));
+			} else {
+				return Err(anyhow!("invalid statement: {statement}"));
+			}
 		}
+
+		let world = ParsedWorld { statements };
+
+		Ok(dbg!(world))
 	}
-
-	let world = ParsedWorld { statements };
-
-	Ok(dbg!(world))
 }
 
 fn parse_setting(parser: &mut Parser, key: String) -> Result<(String, Token)> {

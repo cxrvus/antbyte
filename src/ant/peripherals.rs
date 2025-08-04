@@ -1,4 +1,4 @@
-use crate::ant::AntType;
+use super::AntType;
 
 use anyhow::{Ok, Result, anyhow};
 use regex::Regex;

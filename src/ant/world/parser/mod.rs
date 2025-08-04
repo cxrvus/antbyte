@@ -1,65 +1,61 @@
-use self::token::Token;
-use crate::ant::archetype::AntType;
-use anyhow::{Error, Result, anyhow};
+pub mod compiler;
 
 mod circuit_parser;
 mod expression_parser;
+mod token;
 mod world_parser;
 
-pub mod compiler;
-pub mod token;
+use self::token::Token;
+use crate::ant::AntType;
+use anyhow::{Error, Result, anyhow};
 
 #[derive(Debug)]
-pub enum Statement {
+enum Statement {
 	Set(String, Token),
 	Declare(String, ParsedCircuit),
 }
 
 #[derive(Debug)]
-pub struct ParsedWorld {
-	pub statements: Vec<Statement>,
+struct ParsedWorld {
+	statements: Vec<Statement>,
 }
 
 #[derive(Debug)]
-pub struct ParsedCircuit {
-	pub circuit_type: CircuitType,
-	pub used_inputs: Vec<String>,
-	pub used_outputs: Vec<String>,
-	pub assignments: Vec<Assignment>,
+struct ParsedCircuit {
+	circuit_type: CircuitType,
+	used_inputs: Vec<String>,
+	used_outputs: Vec<String>,
+	assignments: Vec<Assignment>,
 }
 
 #[rustfmt::skip]
 #[derive(Debug)]
-pub enum CircuitType { Ant(AntType), Sub }
+enum CircuitType { Ant(AntType), Sub }
 
 #[derive(Debug)]
-pub struct Assignment {
-	pub lhs: Vec<String>,
-	pub rhs: Expression,
+struct Assignment {
+	lhs: Vec<String>,
+	rhs: Expression,
 }
 
 #[derive(Debug)]
-pub struct Expression {
-	pub ident: String,
-	pub sign: bool,
+struct Expression {
+	ident: String,
+	sign: bool,
 	/// is a function if Some, else input / hidden layer neuron
-	pub parameters: Option<Vec<Self>>,
+	parameters: Option<Vec<Self>>,
 }
 
 #[derive(Default)]
-pub struct Parser {
+struct Parser {
 	tokens: Vec<Token>,
 }
 
 impl Parser {
-	pub fn new(code: String) -> Self {
+	fn new(code: String) -> Self {
 		let mut tokens = Token::tokenize(code);
 		tokens.reverse();
 		Self { tokens }
-	}
-
-	pub fn parse_world(&mut self) -> Result<ParsedWorld> {
-		world_parser::parse_world(self)
 	}
 
 	#[inline]

@@ -1,41 +1,41 @@
-use super::{
-	Assignment, CircuitType, ParsedCircuit, Parser, expression_parser::parse_next_exp, token::Token,
-};
+use super::{Assignment, CircuitType, ParsedCircuit, Parser, Token};
 
 use anyhow::Result;
 
-pub fn parse_circuit(parser: &mut Parser, circuit_type: CircuitType) -> Result<ParsedCircuit> {
-	let inputs = parser.next_ident_list()?;
+impl Parser {
+	pub(super) fn parse_circuit(&mut self, circuit_type: CircuitType) -> Result<ParsedCircuit> {
+		let inputs = self.next_ident_list()?;
 
-	parser.expect_next(Token::Arrow)?;
+		self.expect_next(Token::Arrow)?;
 
-	let outputs: Vec<String> = parser.next_ident_list()?;
+		let outputs: Vec<String> = self.next_ident_list()?;
 
-	parser.expect_next(Token::BraceLeft)?;
+		self.expect_next(Token::BraceLeft)?;
 
-	let mut assignments: Vec<Assignment> = vec![];
+		let mut assignments: Vec<Assignment> = vec![];
 
-	loop {
-		let lhs = parser.next_ident_list()?;
+		loop {
+			let lhs = self.next_ident_list()?;
 
-		parser.expect_next(Token::Assign)?;
+			self.expect_next(Token::Assign)?;
 
-		let rhs = parse_next_exp(parser)?;
-		assignments.push(Assignment { lhs, rhs });
+			let rhs = self.parse_next_exp()?;
+			assignments.push(Assignment { lhs, rhs });
 
-		parser.expect_next(Token::Semicolon)?;
+			self.expect_next(Token::Semicolon)?;
 
-		if parser.assume_next(Token::BraceRight) {
-			break;
+			if self.assume_next(Token::BraceRight) {
+				break;
+			}
 		}
+
+		let circuit = ParsedCircuit {
+			circuit_type,
+			used_inputs: inputs,
+			used_outputs: outputs,
+			assignments,
+		};
+
+		Ok(circuit)
 	}
-
-	let circuit = ParsedCircuit {
-		circuit_type,
-		used_inputs: inputs,
-		used_outputs: outputs,
-		assignments,
-	};
-
-	Ok(circuit)
 }

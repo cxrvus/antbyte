@@ -1,15 +1,16 @@
 use std::collections::HashMap;
 
-use super::{Assignment, CircuitType, Expression, ParsedCircuit, Parser, Statement, token::Token};
+use super::{Assignment, CircuitType, Expression, ParsedCircuit, Parser, Statement, Token};
 
 use crate::{
 	ant::{
-		archetype::Archetype,
+		Archetype,
 		peripherals::{Input, Output, PeripheralSet},
 		world::WorldConfig,
 	},
-	circuit::{self, Circuit},
+	circuit::Circuit,
 };
+
 use anyhow::{Result, anyhow};
 
 struct Graph(Vec<GraphLayer>);

@@ -1,0 +1,132 @@
+use crate::util::vec2::Vec2u;
+
+use super::{Ant, Archetype, BorderMode, InputType, OutputType, World};
+
+impl World {
+	pub(super) fn ant_tick(&mut self, ant: &Ant) -> Ant {
+		let world_image = self.clone();
+
+		let Archetype {
+			inputs,
+			outputs,
+			circuit,
+			..
+		} = world_image
+			.get_archetype(ant.archetype)
+			.expect("invalid Archetype ID");
+
+		let mut condensed_input = 0u32;
+
+		for input in inputs.iter() {
+			use InputType::*;
+
+			// getting the input value
+			let input_value: u32 = match input.peripheral_type() {
+				Time => ant.age % 0x100,
+				Cell => (*self.cells.at(&ant.pos.sign()).unwrap()).into(),
+				CellNext => self
+					.next_pos(ant)
+					.map(|pos| *self.cells.at(&pos.sign()).unwrap())
+					.unwrap_or(0u8)
+					.into(),
+				Memory => ant.memory.current,
+				Random => self.rng(),
+				Ant => self.get_target_ant(ant).is_some().into(),
+			};
+
+			// condensing the input values into a single u32 value
+			let bit_count = input.bit();
+			let mask = 1u32.unbounded_shl(bit_count).wrapping_sub(1);
+			let masked_input_value = input_value & mask;
+			condensed_input <<= bit_count;
+			condensed_input |= masked_input_value;
+		}
+
+		// calculating the output
+		let mut condensed_output = circuit.tick(condensed_input);
+
+		let mut ant = *ant;
+
+		for output in outputs.iter() {
+			use OutputType::*;
+
+			// inflating the output bits into multiple u32 values
+			let bit_count = output.bit();
+			let mask = 1u32.unbounded_shl(bit_count).wrapping_sub(1);
+			let value = condensed_output & mask;
+
+			match output.peripheral_type() {
+				Direction => {
+					let moving = value & 1 == 1;
+					let rotations = (value >> 1) as u8;
+					ant.set_dir(ant.dir + rotations);
+
+					if moving {
+						self.move_tick(&mut ant);
+					}
+				}
+				CellWrite if value != 0 => self.cells.set_at(&ant.pos.sign(), 1),
+				CellClear if value != 0 => self.cells.set_at(&ant.pos.sign(), 0),
+				MemoryWrite => ant.memory.next = value,
+				MemoryEnable => ant.memory.overwrite(),
+				Spawn => {
+					if let Some(pos) = self.next_pos(&ant)
+						&& value > 0
+					{
+						Self::spawn(self, value - 1, pos);
+					}
+				}
+				Kill => {
+					if let Some(ant) = self.get_target_ant(&ant) {
+						ant.die();
+					}
+				}
+				Die => ant.die(),
+				_ => {}
+			};
+
+			condensed_output >>= bit_count;
+		}
+
+		ant
+	}
+
+	fn next_pos(&self, ant: &Ant) -> Option<Vec2u> {
+		let (pos, dir) = (ant.pos.sign(), ant.get_dir_vec());
+		let new_pos = pos + dir;
+
+		if self.cells.in_bounds(&new_pos) {
+			Some(new_pos.unsign().unwrap())
+		} else {
+			use BorderMode::*;
+
+			match self.config.border_mode {
+				Collide | Despawn => None,
+			}
+		}
+	}
+
+	fn move_tick(&self, ant: &mut Ant) {
+		if let Some(new_pos) = self.next_pos(ant) {
+			// ant collision check
+			if !self.ants.iter().any(|ant| ant.pos == new_pos) {
+				ant.pos = new_pos;
+			}
+		} else if let BorderMode::Despawn = self.config.border_mode {
+			ant.die();
+		}
+	}
+
+	fn get_target_ant<'a>(&'a mut self, ant: &Ant) -> Option<&'a mut Ant> {
+		let pos = self.next_pos(ant)?;
+		self.ants.iter_mut().find(|ant| ant.pos == pos)
+	}
+
+	fn spawn(&mut self, archetype: u32, pos: Vec2u) {
+		if self.get_archetype(archetype).is_some() {
+			let mut ant = Ant::new(archetype);
+			ant.pos = pos;
+			self.ants.push(ant);
+		}
+	}
+}

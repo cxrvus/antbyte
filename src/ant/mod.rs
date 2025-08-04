@@ -1,10 +1,14 @@
-pub mod archetype;
 pub mod peripherals;
 pub mod world;
 
-// TODO: better module structure
-use self::{archetype::*, world::World};
-use crate::util::vec2::{Vec2, Vec2u};
+use self::peripherals::{InputType, OutputType, PeripheralSet, PeripheralType};
+
+use crate::{
+	circuit::Circuit,
+	util::vec2::{Vec2, Vec2u},
+};
+
+use anyhow::{Result, anyhow};
 
 // idea: add Cycle & Wrap
 #[rustfmt::skip]
@@ -48,43 +52,64 @@ impl Ant {
 	pub fn set_dir(&mut self, dir: u8) {
 		self.dir = dir % 4;
 	}
+}
 
-	pub fn next_pos(&self, world: &World) -> Option<Vec2u> {
-		let (pos, dir) = (self.pos.sign(), self.get_dir_vec());
-		let new_pos = pos + dir;
+#[rustfmt::skip]
+#[derive(Debug)]
+pub enum AntType { Worker, Queen }
 
-		if world.cells.in_bounds(&new_pos) {
-			Some(new_pos.unsign().unwrap())
+#[derive(Debug)]
+pub struct Archetype {
+	pub ant_type: AntType,
+	pub circuit: Circuit,
+	pub inputs: PeripheralSet<InputType>,
+	pub outputs: PeripheralSet<OutputType>,
+}
+
+impl Archetype {
+	pub fn new(
+		ant_type: AntType,
+		circuit: Circuit,
+		inputs: PeripheralSet<InputType>,
+		outputs: PeripheralSet<OutputType>,
+	) -> Result<Self> {
+		let archetype = Self {
+			ant_type,
+			circuit,
+			inputs,
+			outputs,
+		};
+
+		archetype.validate()?;
+
+		Ok(archetype)
+	}
+
+	pub fn validate(&self) -> Result<()> {
+		if let Some(x) = self
+			.outputs
+			.iter()
+			.find(|x| !x.peripheral_type().is_legal(&self.ant_type))
+		{
+			Err(anyhow!(
+				"illegal {:?} for {:?}",
+				x.peripheral_type(),
+				self.ant_type
+			))
 		} else {
-			use BorderMode::*;
-
-			match world.border_mode() {
-				Collide | Despawn => None,
-			}
+			Ok(())
 		}
 	}
+}
 
-	pub fn move_tick(&mut self, world: &World) {
-		if let Some(new_pos) = self.next_pos(world) {
-			// ant collision check
-			if !world.ants.iter().any(|ant| ant.pos == new_pos) {
-				self.pos = new_pos;
-			}
-		} else if let BorderMode::Despawn = world.border_mode() {
-			self.die();
-		}
-	}
+#[derive(Clone, Copy, Default)]
+pub struct Register {
+	pub current: u32,
+	pub next: u32,
+}
 
-	pub fn get_target_ant<'a>(&self, world: &'a mut World) -> Option<&'a mut Ant> {
-		let pos = self.next_pos(world)?;
-		world.ants.iter_mut().find(|ant| ant.pos == pos)
-	}
-
-	pub fn spawn(world: &mut World, archetype: u32, pos: Vec2u) {
-		if world.get_archetype(archetype).is_some() {
-			let mut ant = Ant::new(archetype);
-			ant.pos = pos;
-			world.ants.push(ant);
-		}
+impl Register {
+	pub fn overwrite(&mut self) {
+		self.current = self.next;
 	}
 }
