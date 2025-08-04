@@ -41,7 +41,7 @@ pub struct Expression {
 	pub ident: String,
 	pub sign: bool,
 	/// is a function if Some, else input / hidden layer neuron
-	parameters: Option<Vec<Self>>,
+	pub parameters: Option<Vec<Self>>,
 }
 
 #[derive(Default)]
