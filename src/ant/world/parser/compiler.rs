@@ -72,7 +72,7 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 		};
 	}
 
-	dbg!(&config);
+	// dbg!(&config);
 
 	Ok(config)
 }

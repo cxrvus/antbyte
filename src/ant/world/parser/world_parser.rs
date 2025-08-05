@@ -39,7 +39,9 @@ impl Parser {
 
 		let world = ParsedWorld { statements };
 
-		Ok(dbg!(world))
+		// dbg!(&world);
+
+		Ok(world)
 	}
 }
 
