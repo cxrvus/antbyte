@@ -158,6 +158,9 @@ fn flatten_circuit(
 				// verifying identifiers in the flat exp
 				let is_in_input = inputs.contains(target);
 
+				if !is_in_input {
+					*target = assignment_prefix.clone() + target;
+				}
 
 				let is_declared = is_in_input || flat_assignments.iter().any(|x| x.lhs == *target);
 
@@ -172,27 +175,38 @@ fn flatten_circuit(
 
 					return Err(error);
 				}
-
-				// prefixing the flat exp with the assignment index
 			}
 
 			// TODO: resolve function calls
 
 			// TODO: flatten assignment LHSs
 
-			dbg!(&flat_exp);
+			// dbg!(&flat_exp);
 
-			let flat_assignment = FlatAssignment {
-				lhs: flat_exp.lhs,
-				sign: flat_exp.sign,
-				wires: flat_exp.wires,
-			};
+			#[rustfmt::skip]
+			let FlatExpression { lhs, sign, wires, ..  } = flat_exp.clone();
+			let lhs = assignment_prefix.clone() + &lhs;
+			let flat_assignment = FlatAssignment { lhs, sign, wires };
 
-			flat_assignments.push(flat_assignment);
+			if let Some(dupe_assignment) = flat_assignments
+				.iter()
+				.find(|x| x.lhs == flat_assignment.lhs)
+			{
+				return Err(anyhow!(
+					"identifier '{}' can not be assigned to more than once",
+					dupe_assignment.lhs
+				));
+			} else {
+				flat_assignments.push(flat_assignment);
+			}
 		}
+
+		flat_exps.last_mut().unwrap().lhs = assignment.lhs[0].clone();
 
 		println!("\n\n\n") //TODO: remove (dbg)
 	}
+
+	dbg!(&flat_assignments);
 
 	Ok(FlattenedCircuit {
 		assignments: flat_assignments,
