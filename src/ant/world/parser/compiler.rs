@@ -189,20 +189,19 @@ fn flatten_circuit(
 			let lhs = assignment_prefix.clone() + &lhs;
 			let flat_assignment = FlatAssignment { lhs, sign, wires };
 
-			if let Some(dupe_assignment) = flat_assignments
-				.iter()
-				.find(|x| x.lhs == flat_assignment.lhs)
-			{
-				return Err(anyhow!(
-					"identifier '{}' can not be assigned to more than once",
-					dupe_assignment.lhs
-				));
-			} else {
-				flat_assignments.push(flat_assignment);
-			}
+			flat_assignments.push(flat_assignment);
 		}
 
-		flat_assignments.last_mut().unwrap().lhs = assignment.lhs[0].clone();
+		// TODO: remove the [0]
+		if let Some(dupe_assignment) = flat_assignments.iter().find(|x| x.lhs == assignment.lhs[0])
+		{
+			return Err(anyhow!(
+				"identifier '{}' can not be assigned to more than once",
+				dupe_assignment.lhs
+			));
+		} else {
+			flat_assignments.last_mut().unwrap().lhs = assignment.lhs[0].clone();
+		}
 
 		println!("\n\n\n") //TODO: remove (dbg)
 	}
