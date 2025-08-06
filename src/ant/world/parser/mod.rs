@@ -12,7 +12,7 @@ use anyhow::{Error, Result, anyhow};
 #[derive(Debug)]
 enum Statement {
 	Set(String, Token),
-	Declare(String, ParsedCircuit),
+	Declare(ParsedCircuit),
 }
 
 #[derive(Debug)]
@@ -22,6 +22,7 @@ struct ParsedWorld {
 
 #[derive(Debug)]
 struct ParsedCircuit {
+	name: String,
 	circuit_type: CircuitType,
 	used_inputs: Vec<String>,
 	used_outputs: Vec<String>,

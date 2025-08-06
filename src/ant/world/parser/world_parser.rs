@@ -30,8 +30,8 @@ impl Parser {
 				"fn" => Some(CircuitType::Sub),
 				_ => None,
 			} {
-				let circuit = self.parse_circuit(circuit_type)?;
-				statements.push(Statement::Declare(ident, circuit));
+				let circuit = self.parse_circuit(ident, circuit_type)?;
+				statements.push(Statement::Declare(circuit));
 			} else {
 				return Err(anyhow!("invalid statement: {statement}"));
 			}

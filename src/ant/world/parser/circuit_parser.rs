@@ -3,7 +3,11 @@ use super::{Assignment, CircuitType, ParsedCircuit, Parser, Token};
 use anyhow::Result;
 
 impl Parser {
-	pub(super) fn parse_circuit(&mut self, circuit_type: CircuitType) -> Result<ParsedCircuit> {
+	pub(super) fn parse_circuit(
+		&mut self,
+		name: String,
+		circuit_type: CircuitType,
+	) -> Result<ParsedCircuit> {
 		let inputs = self.next_ident_list()?;
 
 		self.expect_next(Token::Arrow)?;
@@ -30,6 +34,7 @@ impl Parser {
 		}
 
 		let circuit = ParsedCircuit {
+			name,
 			circuit_type,
 			used_inputs: inputs,
 			used_outputs: outputs,
