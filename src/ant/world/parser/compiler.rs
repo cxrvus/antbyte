@@ -94,13 +94,13 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 }
 
 fn validate_circuit_io(circuit: &ParsedCircuit) -> Result<()> {
-	if let Some(double_use) = circuit
+	if let Some(dupe_ident) = circuit
 		.used_inputs
 		.iter()
 		.find(|input| circuit.used_outputs.iter().any(|output| output == *input))
 	{
 		Err(anyhow!(
-			"identifier '{double_use}' used as both input and output"
+			"identifier '{dupe_ident}' used as both input and output"
 		))
 	} else {
 		Ok(())
@@ -113,7 +113,7 @@ struct FlattenedCircuit {
 	assignments: Vec<FlatAssignment>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct FlatExpression {
 	call: String,
 	lhs: String,
@@ -128,7 +128,7 @@ struct FlatAssignment {
 	wires: Vec<Wire>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Wire {
 	sign: bool,
 	target: String,
@@ -149,17 +149,32 @@ fn flatten_circuit(
 	let mut flat_assignments: Vec<FlatAssignment> = vec![];
 
 	for (assignment_index, assignment) in assignments.iter().enumerate() {
-		for flat_exp in flatten_expression(&assignment.rhs, &mut 0) {
-			// TODO: validate identifiers
-			// if !inputs.contains(ident) && !flattened_assignments.iter().any(|x| x.lhs == *ident) {
-			// 	return if flattened_circuits.contains_key(ident) {
-			// 		Err(anyhow!("'{ident}' is a circuit, not an input"))
-			// 	} else if outputs.contains(ident) {
-			// 		Err(anyhow!("'{ident}' is an output, not an input"))
-			// 	} else {
-			// 		Err(anyhow!("unknown identifier: '{ident}'"))
-			// 	};
-			// }
+		let assignment_prefix = format!("_as{assignment_index}");
+
+		let mut flat_exps = flatten_expression(&assignment.rhs, &mut 0);
+
+		for flat_exp in flat_exps.iter_mut() {
+			for target in flat_exp.wires.iter_mut().map(|wire| &mut wire.target) {
+				// verifying identifiers in the flat exp
+				let is_in_input = inputs.contains(target);
+
+
+				let is_declared = is_in_input || flat_assignments.iter().any(|x| x.lhs == *target);
+
+				if !is_declared {
+					let error = if flattened_circuits.contains_key(target) {
+						anyhow!("'{target}' is a circuit, not an input")
+					} else if outputs.contains(target) {
+						anyhow!("'{target}' is an output, not an input")
+					} else {
+						anyhow!("unknown identifier: '{target}'")
+					};
+
+					return Err(error);
+				}
+
+				// prefixing the flat exp with the assignment index
+			}
 
 			// TODO: resolve function calls
 
