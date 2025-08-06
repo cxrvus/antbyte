@@ -149,13 +149,14 @@ fn flatten_circuit(
 	let mut flat_assignments: Vec<FlatAssignment> = vec![];
 
 	for (assignment_index, assignment) in assignments.iter().enumerate() {
-		let assignment_prefix = format!("_as{assignment_index}");
+		let assignment_prefix = format!("_as{assignment_index:02}");
 
 		let mut flat_exps = flatten_expression(&assignment.rhs, &mut 0);
 
 		for flat_exp in flat_exps.iter_mut() {
 			for target in flat_exp.wires.iter_mut().map(|wire| &mut wire.target) {
 				// verifying identifiers in the flat exp
+
 				let is_in_input = inputs.contains(target);
 
 				if !is_in_input {
@@ -201,7 +202,7 @@ fn flatten_circuit(
 			}
 		}
 
-		flat_exps.last_mut().unwrap().lhs = assignment.lhs[0].clone();
+		flat_assignments.last_mut().unwrap().lhs = assignment.lhs[0].clone();
 
 		println!("\n\n\n") //TODO: remove (dbg)
 	}
