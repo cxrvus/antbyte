@@ -51,13 +51,6 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 		}
 	}
 
-	dbg!(
-		&flattened_circuits
-			.iter()
-			.map(|x| &x.1.assignments)
-			.collect::<Vec<_>>()
-	);
-
 	// create Archetypes
 	for flattened_circuit in flattened_circuits {
 		let circuit = flattened_circuit.1.original;
@@ -79,11 +72,14 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 
 			let output_spec = PeripheralSet::from_used(used_outputs, true)?;
 
+			// TODO: properly convert to circuit
+			let circuit = Circuit::new(0, vec![]);
+
 			// TODO: fill peripherals with sorted inputs from specs, instead of unsorted user-given peripherals
 
 			let archetype = Archetype {
 				ant_type,
-				circuit: todo!(),
+				circuit,
 				outputs: output_spec,
 				inputs: input_spec,
 			};
@@ -114,11 +110,19 @@ fn validate_circuit_io(circuit: &ParsedCircuit) -> Result<()> {
 #[derive(Debug)]
 struct FlattenedCircuit {
 	original: ParsedCircuit,
-	assignments: Vec<FlattenedAssignment>,
+	assignments: Vec<FlatAssignment>,
 }
 
 #[derive(Debug)]
-struct FlattenedAssignment {
+struct FlatExpression {
+	call: String,
+	lhs: String,
+	sign: bool,
+	wires: Vec<Wire>,
+}
+
+#[derive(Debug)]
+struct FlatAssignment {
 	lhs: String,
 	sign: bool,
 	wires: Vec<Wire>,
@@ -134,8 +138,6 @@ fn flatten_circuit(
 	circuit: ParsedCircuit,
 	flattened_circuits: &HashMap<String, FlattenedCircuit>,
 ) -> Result<FlattenedCircuit> {
-	let mut flattened_assignments: Vec<FlattenedAssignment> = vec![];
-
 	let ParsedCircuit {
 		name: circuit_name,
 		circuit_type,
@@ -144,68 +146,91 @@ fn flatten_circuit(
 		assignments,
 	} = &circuit;
 
-	let mut exp_counter = 0;
+	let mut flat_assignments: Vec<FlatAssignment> = vec![];
 
-	for Assignment {
-		lhs: assignees,
-		rhs: expression,
-	} in assignments.iter()
-	{
-		let mut assignment_stack: Vec<FlattenedAssignment> = vec![];
-		let mut exp_stack: Vec<&Expression> = vec![expression];
+	for (assignment_index, assignment) in assignments.iter().enumerate() {
+		for flat_exp in flatten_expression(&assignment.rhs, &mut 0) {
+			// TODO: validate identifiers
+			// if !inputs.contains(ident) && !flattened_assignments.iter().any(|x| x.lhs == *ident) {
+			// 	return if flattened_circuits.contains_key(ident) {
+			// 		Err(anyhow!("'{ident}' is a circuit, not an input"))
+			// 	} else if outputs.contains(ident) {
+			// 		Err(anyhow!("'{ident}' is an output, not an input"))
+			// 	} else {
+			// 		Err(anyhow!("unknown identifier: '{ident}'"))
+			// 	};
+			// }
 
-		// depth-first traversal
-		while let Some(exp) = exp_stack.pop() {
-			let Expression {
-				ident,
-				sign,
-				parameters,
-			} = exp;
+			// TODO: resolve function calls
 
-			// if it's a function call
-			if let Some(parameters) = parameters {
-				assignment_stack.push(FlattenedAssignment {
-					lhs: format!("call_{ident}_{exp_counter:03}"),
-					sign: *sign,
-					wires: vec![],
-				});
+			// TODO: flatten assignment LHSs
 
-				parameters
-					.iter()
-					.rev()
-					.for_each(|parameter| exp_stack.push(parameter));
-			} else {
-				if !inputs.contains(ident) && !flattened_assignments.iter().any(|x| x.lhs == *ident)
-				{
-					return if flattened_circuits.contains_key(ident) {
-						Err(anyhow!("'{ident}' is a circuit, not an input"))
-					} else if outputs.contains(ident) {
-						Err(anyhow!("'{ident}' is an output, not an input"))
-					} else {
-						Err(anyhow!("unknown identifier: '{ident}'"))
-					};
-				}
+			dbg!(&flat_exp);
 
-				if let Some(mut current_assignment) = assignment_stack.pop() {
-					current_assignment.wires.push(Wire {
-						sign: *sign,
-						target: ident.clone(),
-					});
-					assignment_stack.push(current_assignment);
-				}
-			}
+			let flat_assignment = FlatAssignment {
+				lhs: flat_exp.lhs,
+				sign: flat_exp.sign,
+				wires: flat_exp.wires,
+			};
 
-			exp_counter += 1;
+			flat_assignments.push(flat_assignment);
 		}
 
-		// Move all completed assignments from stack to final result
-		flattened_assignments.extend(assignment_stack);
+		println!("\n\n\n") //TODO: remove (dbg)
 	}
 
 	Ok(FlattenedCircuit {
-		assignments: flattened_assignments,
+		assignments: flat_assignments,
 		original: circuit,
 	})
+}
+
+#[inline]
+fn format_index(index: u32) -> String {
+	format!("_exp{index:02}")
+}
+
+fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatExpression> {
+	let mut flat_exps = vec![];
+
+	let (call, wires) = if let Some(parameters) = &exp.parameters {
+		let mut wires = vec![];
+
+		for sub_exp in parameters {
+			if sub_exp.parameters.is_some() {
+				flat_exps.extend(flatten_expression(sub_exp, index));
+
+				wires.push(Wire {
+					sign: sub_exp.sign,
+					target: format_index(*index - 1),
+				});
+			} else {
+				wires.push(Wire {
+					sign: sub_exp.sign,
+					target: sub_exp.ident.clone(),
+				});
+			}
+		}
+
+		(exp.ident.clone(), wires)
+	} else {
+		let wires = vec![Wire {
+			sign: exp.sign,
+			target: exp.ident.clone(),
+		}];
+
+		("or".to_string(), wires)
+	};
+
+	flat_exps.push(FlatExpression {
+		call,
+		lhs: format_index(*index),
+		sign: exp.sign,
+		wires,
+	});
+
+	*index += 1;
+	flat_exps
 }
 
 fn set_setting(config: &mut WorldConfig, key: String, value: Token) -> Result<()> {

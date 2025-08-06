@@ -7,7 +7,7 @@ fn xor = A, B => C {
 
 queen ant = R0, R1, R2 => D0, D1, D2 {
 	D0 = xor(or(-R0, R1), R2);
-	D1 = R1;
+	D1 = -R1;
 	D2 = R2;
 }
 
