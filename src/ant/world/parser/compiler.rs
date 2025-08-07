@@ -146,23 +146,19 @@ fn flatten_circuit(
 		assignments,
 	} = &circuit;
 
+	let mut exp_index = 0;
 	let mut flat_assignments: Vec<FlatAssignment> = vec![];
 
-	for (assignment_index, assignment) in assignments.iter().enumerate() {
-		let assignment_prefix = format!("_as{assignment_index:02}");
+	for assignment in assignments.iter() {
+		let mut flat_exps = flatten_expression(&assignment.rhs, &mut exp_index);
 
-		let mut flat_exps = flatten_expression(&assignment.rhs, &mut 0);
+		exp_index += 1;
 
 		for flat_exp in flat_exps.iter_mut() {
 			for target in flat_exp.wires.iter_mut().map(|wire| &mut wire.target) {
 				// verifying identifiers in the flat exp
 
 				let is_in_input = inputs.contains(target);
-
-				if !is_in_input {
-					*target = assignment_prefix.clone() + target;
-				}
-
 				let is_declared = is_in_input || flat_assignments.iter().any(|x| x.lhs == *target);
 
 				if !is_declared {
@@ -186,7 +182,6 @@ fn flatten_circuit(
 
 			#[rustfmt::skip]
 			let FlatExpression { lhs, sign, wires, ..  } = flat_exp.clone();
-			let lhs = assignment_prefix.clone() + &lhs;
 			let flat_assignment = FlatAssignment { lhs, sign, wires };
 
 			flat_assignments.push(flat_assignment);
