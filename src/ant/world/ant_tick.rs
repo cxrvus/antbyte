@@ -70,11 +70,17 @@ impl World {
 				MemoryWrite if value != 0 => ant.memory = value,
 				MemoryClear if value == 1 => ant.memory = 0,
 				Spawn => {
+					// direction gets flip, so that new ant
+					// spawns behind the queen and not in front of her
+					ant.flip_dir();
+
 					if let Some(pos) = self.next_pos(&ant)
 						&& value > 0
 					{
 						Self::spawn(self, value - 1, pos);
 					}
+
+					ant.flip_dir();
 				}
 				Kill => {
 					if let Some(ant) = self.get_target_ant(&ant) {

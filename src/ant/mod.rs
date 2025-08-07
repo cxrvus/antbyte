@@ -52,6 +52,10 @@ impl Ant {
 	pub fn set_dir(&mut self, dir: u8) {
 		self.dir = dir % 4;
 	}
+
+	pub fn flip_dir(&mut self) {
+		self.set_dir(self.dir + 2);
+	}
 }
 
 #[rustfmt::skip]
