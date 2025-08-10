@@ -35,16 +35,16 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 		}
 	}
 
-	let mut flattened_circuits: HashMap<String, FlattenedCircuit> = HashMap::new();
+	let mut flat_circuits: HashMap<String, FlatCircuit> = HashMap::new();
 
 	for circuit in parsed_circuits.into_iter() {
 		validate_circuit_io(&circuit)?;
 
 		let circuit_name = circuit.name.clone();
-		let flattened_circuit = flatten_circuit(circuit, &flattened_circuits)?;
+		let flat_circuit = flatten_circuit(circuit, &flat_circuits)?;
 
-		if flattened_circuits
-			.insert(circuit_name.clone(), flattened_circuit)
+		if flat_circuits
+			.insert(circuit_name.clone(), flat_circuit)
 			.is_some()
 		{
 			return Err(anyhow!("circuit name '{circuit_name}' used more than once"));
@@ -52,8 +52,8 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 	}
 
 	// create Archetypes
-	for flattened_circuit in flattened_circuits {
-		let circuit = flattened_circuit.1.original;
+	for flat_circuit in flat_circuits {
+		let circuit = flat_circuit.1.original;
 
 		if let CircuitType::Ant(ant_type) = circuit.circuit_type {
 			let used_inputs = circuit
@@ -108,7 +108,7 @@ fn validate_circuit_io(circuit: &ParsedCircuit) -> Result<()> {
 }
 
 #[derive(Debug)]
-struct FlattenedCircuit {
+struct FlatCircuit {
 	original: ParsedCircuit,
 	assignments: Vec<FlatAssignment>,
 }
@@ -121,11 +121,19 @@ struct FlatExpression {
 	wires: Vec<Wire>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct FlatAssignment {
 	lhs: String,
 	sign: bool,
 	wires: Vec<Wire>,
+}
+
+impl From<FlatExpression> for FlatAssignment {
+	fn from(flat_exp: FlatExpression) -> Self {
+		#[rustfmt::skip]
+		let FlatExpression { lhs, sign, wires, ..  } = flat_exp;
+		Self { lhs, sign, wires }
+	}
 }
 
 #[derive(Debug, Clone)]
@@ -136,8 +144,8 @@ struct Wire {
 
 fn flatten_circuit(
 	circuit: ParsedCircuit,
-	flattened_circuits: &HashMap<String, FlattenedCircuit>,
-) -> Result<FlattenedCircuit> {
+	flat_circuits: &HashMap<String, FlatCircuit>,
+) -> Result<FlatCircuit> {
 	let ParsedCircuit {
 		name: circuit_name,
 		circuit_type,
@@ -147,6 +155,7 @@ fn flatten_circuit(
 	} = &circuit;
 
 	let mut exp_index = 0;
+	let mut func_index = 0;
 	let mut flat_assignments: Vec<FlatAssignment> = vec![];
 
 	for assignment in assignments.iter() {
@@ -155,14 +164,14 @@ fn flatten_circuit(
 		exp_index += 1;
 
 		for flat_exp in flat_exps.iter_mut() {
+			// TODO: encapsulate this and the following statements in FlatExpression methods
+			// verifying identifiers in the flat exp
 			for target in flat_exp.wires.iter_mut().map(|wire| &mut wire.target) {
-				// verifying identifiers in the flat exp
-
 				let is_in_input = inputs.contains(target);
 				let is_declared = is_in_input || flat_assignments.iter().any(|x| x.lhs == *target);
 
 				if !is_declared {
-					let error = if flattened_circuits.contains_key(target) {
+					let error = if flat_circuits.contains_key(target) {
 						anyhow!("'{target}' is a circuit, not an input")
 					} else if outputs.contains(target) {
 						anyhow!("'{target}' is an output, not an input")
@@ -174,20 +183,88 @@ fn flatten_circuit(
 				}
 			}
 
-			// TODO: resolve function calls
+			// resolve calls
+			match flat_exp.call.as_str() {
+				"or" => {
+					// already resolved
+					flat_assignments.push(flat_exp.clone().into());
+				}
+				"and" => {
+					// TODO: resolve beforehand using separate iteration
+
+					// transform AND into OR [DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws)
+
+					flat_exp
+						.wires
+						.iter_mut()
+						.for_each(|wire| wire.sign = !wire.sign);
+					flat_exp.sign = !flat_exp.sign;
+
+					flat_assignments.push(flat_exp.clone().into());
+				}
+				call => {
+					let func = flat_circuits
+						.get(call)
+						.ok_or(anyhow!("unknown function: '{call}'"))?;
+
+					if let CircuitType::Ant(ant_type) = &func.original.circuit_type {
+						return Err(anyhow!(
+							"circuit '{call}' is a {ant_type:?}, not a function"
+						));
+					}
+
+					// TODO verify input count
+					// TODO verify output count
+
+					let var_prefix = format!("_fn_{call}{func_index:02}");
+
+					for mut func_assignment in func.assignments.clone() {
+						if let Some(output_index) = func
+							.original
+							.used_outputs
+							.iter()
+							.position(|output| *output == func_assignment.lhs)
+						{
+							func_assignment.lhs = assignment.lhs[output_index].clone();
+						} else {
+							func_assignment.lhs = var_prefix.clone() + &func_assignment.lhs;
+						}
+
+						for func_assignment_wire in func_assignment.wires.iter_mut() {
+							if let Some(func_param_index) = func
+								.original
+								.used_inputs
+								.iter()
+								.position(|input| *input == func_assignment_wire.target)
+							{
+								let input_wire = &flat_exp.wires[func_param_index];
+								func_assignment_wire.target = input_wire.target.clone();
+								func_assignment_wire.sign ^= input_wire.sign;
+							} else {
+								// TODO: create prefix_var() function
+								func_assignment_wire.target =
+									var_prefix.clone() + &func_assignment_wire.target;
+							}
+						}
+
+						flat_assignments.push(func_assignment);
+					}
+
+					func_index += 1;
+				}
+			}
 
 			// TODO: flatten assignment LHSs
 
 			// dbg!(&flat_exp);
-
-			#[rustfmt::skip]
-			let FlatExpression { lhs, sign, wires, ..  } = flat_exp.clone();
-			let flat_assignment = FlatAssignment { lhs, sign, wires };
-
-			flat_assignments.push(flat_assignment);
 		}
 
-		// TODO: remove the [0]
+		// TODO: FIX - this error gets thrown mistakenly,
+		// due to assignment insertion during function expansion
+		// => move this into the OR bock
+		// (add function that always checks if distinct before pushing?)
+
+		// TODO: remove the [0] by iterating thru LHSs
 		if let Some(dupe_assignment) = flat_assignments.iter().find(|x| x.lhs == assignment.lhs[0])
 		{
 			return Err(anyhow!(
@@ -203,7 +280,7 @@ fn flatten_circuit(
 
 	dbg!(&flat_assignments);
 
-	Ok(FlattenedCircuit {
+	Ok(FlatCircuit {
 		assignments: flat_assignments,
 		original: circuit,
 	})
