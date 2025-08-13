@@ -19,12 +19,16 @@ impl Parser {
 		let mut assignments: Vec<Assignment> = vec![];
 
 		loop {
-			let lhs = self.next_ident_list()?;
+			let assignees = self.next_ident_list()?;
 
 			self.expect_next(Token::Assign)?;
 
-			let rhs = self.parse_next_exp()?;
-			assignments.push(Assignment { lhs, rhs });
+			let expression = self.parse_next_exp()?;
+
+			assignments.push(Assignment {
+				assignees,
+				expression,
+			});
 
 			self.expect_next(Token::Semicolon)?;
 

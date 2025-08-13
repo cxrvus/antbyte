@@ -35,8 +35,8 @@ enum CircuitType { Ant(AntType), Sub }
 
 #[derive(Debug)]
 struct Assignment {
-	lhs: Vec<String>,
-	rhs: Expression,
+	assignees: Vec<String>,
+	expression: Expression,
 }
 
 #[derive(Debug)]

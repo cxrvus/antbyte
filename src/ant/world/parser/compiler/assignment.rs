@@ -7,8 +7,8 @@ use crate::ant::{
 
 impl Assignment {
 	pub(super) fn flatten(&self, start_index: &mut u32) -> Vec<FlatAssignment> {
-		let mut flat_assignments = flatten_expression(&self.rhs, start_index);
-		flat_assignments.last_mut().unwrap().lhs = self.lhs.clone();
+		let mut flat_assignments = flatten_expression(&self.expression, start_index);
+		flat_assignments.last_mut().unwrap().assignees = self.assignees.clone();
 		flat_assignments
 	}
 }
@@ -52,7 +52,7 @@ fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatAssignment> 
 
 	flat_exps.push(FlatAssignment {
 		call,
-		lhs: vec![format_index(*index)],
+		assignees: vec![format_index(*index)],
 		sign: exp.sign,
 		wires,
 	});
@@ -76,8 +76,10 @@ impl Normalizer {
 				let target = &wire.target;
 
 				let is_in_input = inputs.contains(target);
-				let is_declared =
-					is_in_input || flat_assignments.iter().any(|x| x.lhs.contains(target));
+				let is_declared = is_in_input
+					|| flat_assignments
+						.iter()
+						.any(|x| x.assignees.contains(target));
 
 				if !is_declared {
 					let error = if self.0.contains_key(target) {

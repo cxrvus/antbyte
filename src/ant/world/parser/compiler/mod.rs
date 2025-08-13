@@ -41,7 +41,7 @@ struct Node {
 #[derive(Debug, Clone)]
 struct FlatAssignment {
 	call: String,
-	lhs: Vec<String>,
+	assignees: Vec<String>,
 	sign: bool,
 	wires: Vec<Wire>,
 }
@@ -55,17 +55,17 @@ struct Wire {
 impl From<FlatAssignment> for Node {
 	fn from(flat_exp: FlatAssignment) -> Self {
 		#[rustfmt::skip]
-		let FlatAssignment { lhs, sign, wires, ..  } = flat_exp;
+		let FlatAssignment { assignees, sign, wires, ..  } = flat_exp;
 
 		assert_eq!(
-			lhs.len(),
+			assignees.len(),
 			1,
-			"FlatAssignment must have exactly one left-hand-side value\n({lhs:?})",
+			"FlatAssignment must have exactly one left-hand-side value\n({assignees:?})",
 		);
 
 		Self {
 			sign,
-			ident: lhs[0].clone(),
+			ident: assignees[0].clone(),
 			wires: wires.clone(),
 		}
 	}

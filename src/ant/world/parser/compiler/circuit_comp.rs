@@ -50,7 +50,7 @@ impl Normalizer {
 			for sub_assignment in sub_assignments {
 				match sub_assignment.call.as_str() {
 					"or" => {
-						if sub_assignment.lhs.len() != 1 {
+						if sub_assignment.assignees.len() != 1 {
 							return Err(anyhow!(
 								"the result of an OR may only be assigned to a single assignee"
 							));
@@ -66,7 +66,7 @@ impl Normalizer {
 				}
 			}
 
-			// TODO: LHS dupe check - "identifier '{}' can not be assigned to more than once",
+			// TODO: assignee dupe check - "identifier '{}' can not be assigned to more than once",
 
 			println!("\n\n\n") //TODO: remove (dbg)
 		}
@@ -110,10 +110,10 @@ impl Normalizer {
 				.iter()
 				.position(|output| *output == node.ident)
 			{
-				// LHS represents a function output
-				node.ident = assignment.lhs[output_index].clone();
+				// assignee represents a function output
+				node.ident = assignment.assignees[output_index].clone();
 			} else {
-				// LHS represents a variable
+				// assignee represents a variable
 				node.ident = var_prefix.clone() + &node.ident;
 			}
 
