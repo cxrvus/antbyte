@@ -1,6 +1,8 @@
 pub mod peripherals;
 pub mod world;
 
+pub use world::parser::compiler;
+
 use self::peripherals::{InputType, OutputType, PeripheralSet, PeripheralType};
 
 use crate::{

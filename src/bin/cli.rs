@@ -5,9 +5,9 @@ use std::{
 
 use antbyte::{
 	ant::{
-		AntType, Archetype,
+		AntType, Archetype, compiler,
 		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
-		world::{World, WorldConfig, parser::compiler},
+		world::{World, WorldConfig},
 	},
 	circuit::Circuit,
 };
