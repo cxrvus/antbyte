@@ -56,17 +56,15 @@ impl Normalizer {
 							));
 						}
 
-						nodes.push(sub_assignment.into());
+						push_nodes(&mut nodes, vec![sub_assignment.into()])?;
 					}
 					call => {
-						let expanded = self.expand_func_call(call, &sub_assignment, func_index)?;
-						nodes.extend(expanded);
 						func_index += 1;
+						let expanded = self.expand_func_call(call, &sub_assignment, func_index)?;
+						push_nodes(&mut nodes, expanded)?;
 					}
 				}
 			}
-
-			// TODO: assignee dupe check - "identifier '{}' can not be assigned to more than once",
 
 			println!("\n\n\n") //TODO: remove (dbg)
 		}
@@ -100,7 +98,7 @@ impl Normalizer {
 
 		let var_prefix = format!("_{call}{func_index:02}");
 
-		let mut expanded_assignments = vec![];
+		let mut expanded_nodes = vec![];
 
 		for mut node in func.nodes.clone() {
 			if let Some(output_index) = func
@@ -133,10 +131,10 @@ impl Normalizer {
 				}
 			}
 
-			expanded_assignments.push(node);
+			expanded_nodes.push(node);
 		}
 
-		Ok(expanded_assignments)
+		Ok(expanded_nodes)
 	}
 }
 
@@ -173,6 +171,20 @@ fn validate_call_signature(func: &FlatCircuit, assignment: &FlatAssignment) -> R
 			"function '{func_name}' has been given an invalid number of assignees\nexpected {output_count}, got {assignee_count}"
 		))
 	} else {
+		Ok(())
+	}
+}
+
+fn push_nodes(nodes: &mut Vec<Node>, new_nodes: Vec<Node>) -> Result<()> {
+	let existing_idents: Vec<_> = nodes.iter().map(|node| &node.ident).collect();
+	let mut new_idents = new_nodes.iter().map(|node| &node.ident);
+
+	if let Some(dupe_ident) = new_idents.find(|new_ident| existing_idents.contains(new_ident)) {
+		Err(anyhow!(
+			"identifier '{dupe_ident}' can not be assigned to more than once"
+		))
+	} else {
+		nodes.extend(new_nodes);
 		Ok(())
 	}
 }
