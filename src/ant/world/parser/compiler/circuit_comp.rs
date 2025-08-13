@@ -96,8 +96,7 @@ impl Normalizer {
 			));
 		}
 
-		// TODO verify input count
-		// TODO verify output count
+		validate_call_signature(func, assignment)?;
 
 		let var_prefix = format!("_{call}{func_index:02}");
 
@@ -149,6 +148,29 @@ fn validate_circuit_io(circuit: &ParsedCircuit) -> Result<()> {
 	{
 		Err(anyhow!(
 			"identifier '{dupe_ident}' used as both input and output"
+		))
+	} else {
+		Ok(())
+	}
+}
+
+fn validate_call_signature(func: &FlatCircuit, assignment: &FlatAssignment) -> Result<()> {
+	let (input_count, output_count, parameter_count, assignee_count) = (
+		func.original.inputs.len(),
+		func.original.outputs.len(),
+		assignment.wires.len(),
+		assignment.assignees.len(),
+	);
+
+	let func_name = &func.original.name;
+
+	if parameter_count != input_count {
+		Err(anyhow!(
+			"function '{func_name}' has been given an invalid number of parameter values\nexpected {input_count}, got {parameter_count}"
+		))
+	} else if assignee_count != output_count {
+		Err(anyhow!(
+			"function '{func_name}' has been given an invalid number of assignees\nexpected {output_count}, got {assignee_count}"
 		))
 	} else {
 		Ok(())
