@@ -5,6 +5,11 @@ fn xor = a, b => c {
 	c = or(and(-a, b), and(a, -b));
 }
 
+fn h_add = a, b => sum, c_out {
+	sum = xor(a, b);
+	c_out = and(a, b);
+}
+
 queen ant = R0, R1, R2 => D0, D1, D2 {
 	D0 = xor(or(-R0, R1), R2);
 	D1 = -R1;
