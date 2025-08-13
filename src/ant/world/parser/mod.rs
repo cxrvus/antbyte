@@ -24,8 +24,8 @@ struct ParsedWorld {
 struct ParsedCircuit {
 	name: String,
 	circuit_type: CircuitType,
-	used_inputs: Vec<String>,
-	used_outputs: Vec<String>,
+	inputs: Vec<String>,
+	outputs: Vec<String>,
 	assignments: Vec<Assignment>,
 }
 

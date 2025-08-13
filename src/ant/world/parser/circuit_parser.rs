@@ -36,8 +36,8 @@ impl Parser {
 		let circuit = ParsedCircuit {
 			name,
 			circuit_type,
-			used_inputs: inputs,
-			used_outputs: outputs,
+			inputs,
+			outputs,
 			assignments,
 		};
 
