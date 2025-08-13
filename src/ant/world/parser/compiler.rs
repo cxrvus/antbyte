@@ -15,9 +15,52 @@ use anyhow::{Ok, Result, anyhow};
 
 struct Graph(Vec<GraphLayer>);
 struct GraphLayer(Vec<Node>);
+
+#[derive(Debug)]
+struct FlatCircuit {
+	original: ParsedCircuit,
+	assignments: Vec<Node>,
+}
+
+#[derive(Debug, Clone)]
 struct Node {
+	lhs: String,
 	sign: bool,
-	wires: Vec<u32>,
+	wires: Vec<Wire>,
+}
+
+/// like `Assignment`, but flattened, using `Wire`s instead of recursive `Expression`s
+#[derive(Debug, Clone)]
+struct FlatAssignment {
+	call: String,
+	lhs: Vec<String>,
+	sign: bool,
+	wires: Vec<Wire>,
+}
+
+#[derive(Debug, Clone)]
+struct Wire {
+	sign: bool,
+	target: String,
+}
+
+impl From<FlatAssignment> for Node {
+	fn from(flat_exp: FlatAssignment) -> Self {
+		#[rustfmt::skip]
+		let FlatAssignment { lhs, sign, wires, ..  } = flat_exp;
+
+		assert_eq!(
+			lhs.len(),
+			1,
+			"FlatAssignment must have exactly one left-hand-side value\n({lhs:?})",
+		);
+
+		Self {
+			sign,
+			lhs: lhs[0].clone(),
+			wires: wires.clone(),
+		}
+	}
 }
 
 pub fn compile(code: String) -> Result<WorldConfig> {
@@ -107,41 +150,6 @@ fn validate_circuit_io(circuit: &ParsedCircuit) -> Result<()> {
 	}
 }
 
-#[derive(Debug)]
-struct FlatCircuit {
-	original: ParsedCircuit,
-	assignments: Vec<FlatAssignment>,
-}
-
-#[derive(Debug, Clone)]
-struct FlatExpression {
-	call: String,
-	lhs: String,
-	sign: bool,
-	wires: Vec<Wire>,
-}
-
-#[derive(Debug, Clone)]
-struct FlatAssignment {
-	lhs: String,
-	sign: bool,
-	wires: Vec<Wire>,
-}
-
-impl From<FlatExpression> for FlatAssignment {
-	fn from(flat_exp: FlatExpression) -> Self {
-		#[rustfmt::skip]
-		let FlatExpression { lhs, sign, wires, ..  } = flat_exp;
-		Self { lhs, sign, wires }
-	}
-}
-
-#[derive(Debug, Clone)]
-struct Wire {
-	sign: bool,
-	target: String,
-}
-
 fn flatten_circuit(
 	circuit: ParsedCircuit,
 	flat_circuits: &HashMap<String, FlatCircuit>,
@@ -156,7 +164,7 @@ fn flatten_circuit(
 
 	let mut exp_index = 0;
 	let mut func_index = 0;
-	let mut flat_assignments: Vec<FlatAssignment> = vec![];
+	let mut flat_assignments: Vec<Node> = vec![];
 
 	for assignment in assignments.iter() {
 		let mut flat_exps = flatten_expression(&assignment.rhs, &mut exp_index);
@@ -183,23 +191,20 @@ fn flatten_circuit(
 				}
 			}
 
-			// resolve calls
+			// transform AND into OR [DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws)
+			if flat_exp.call == "and" {
+				flat_exp
+					.wires
+					.iter_mut()
+					.for_each(|wire| wire.sign = !wire.sign);
+
+				flat_exp.sign = !flat_exp.sign;
+				flat_exp.call = "or".into();
+			}
+
+			// expand function calls
 			match flat_exp.call.as_str() {
 				"or" => {
-					// already resolved
-					flat_assignments.push(flat_exp.clone().into());
-				}
-				"and" => {
-					// TODO: resolve beforehand using separate iteration
-
-					// transform AND into OR [DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws)
-
-					flat_exp
-						.wires
-						.iter_mut()
-						.for_each(|wire| wire.sign = !wire.sign);
-					flat_exp.sign = !flat_exp.sign;
-
 					flat_assignments.push(flat_exp.clone().into());
 				}
 				call => {
@@ -216,7 +221,7 @@ fn flatten_circuit(
 					// TODO verify input count
 					// TODO verify output count
 
-					let var_prefix = format!("_fn_{call}{func_index:02}");
+					let var_prefix = format!("_{call}{func_index:02}");
 
 					for mut func_assignment in func.assignments.clone() {
 						if let Some(output_index) = func
@@ -291,7 +296,7 @@ fn format_index(index: u32) -> String {
 	format!("_exp{index:02}")
 }
 
-fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatExpression> {
+fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatAssignment> {
 	let mut flat_exps = vec![];
 
 	let (call, wires) = if let Some(parameters) = &exp.parameters {
@@ -323,9 +328,9 @@ fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatExpression> 
 		("or".to_string(), wires)
 	};
 
-	flat_exps.push(FlatExpression {
+	flat_exps.push(FlatAssignment {
 		call,
-		lhs: format_index(*index),
+		lhs: vec![format_index(*index)],
 		sign: exp.sign,
 		wires,
 	});
