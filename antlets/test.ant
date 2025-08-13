@@ -1,8 +1,8 @@
 set height = 16;
 set width = 16;
 
-fn xor = A, B => C {
-	C = or(and(-A, B), and(A, -B));
+fn xor = a, b => c {
+	c = or(and(-a, b), and(a, -b));
 }
 
 queen ant = R0, R1, R2 => D0, D1, D2 {
