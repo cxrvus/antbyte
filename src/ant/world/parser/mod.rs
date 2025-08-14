@@ -30,7 +30,7 @@ struct ParsedCircuit {
 }
 
 #[rustfmt::skip]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum CircuitType { Ant(AntType), Sub }
 
 #[derive(Debug)]

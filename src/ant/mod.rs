@@ -61,7 +61,7 @@ impl Ant {
 }
 
 #[rustfmt::skip]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum AntType { Worker, Queen }
 
 #[derive(Debug)]

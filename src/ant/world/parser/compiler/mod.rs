@@ -1,24 +1,24 @@
 mod assignment;
 mod circuit_comp;
+mod graph;
 mod settings_comp;
 
 use std::collections::HashMap;
 
 use super::{CircuitType, ParsedCircuit, Parser, Statement};
 
-use crate::{
-	ant::{
-		Archetype,
-		compiler::{circuit_comp::flatten_circuits, settings_comp::set_setting},
-		peripherals::{Input, Output, PeripheralSet},
-		world::WorldConfig,
-	},
-	circuit::Circuit,
+use crate::ant::{
+	Archetype,
+	compiler::{circuit_comp::flatten_circuits, graph::create_graph, settings_comp::set_setting},
+	world::WorldConfig,
 };
 
 use anyhow::{Ok, Result};
 
+#[derive(Debug)]
 struct Graph(Vec<GraphLayer>);
+
+#[derive(Debug)]
 struct GraphLayer(Vec<Node>);
 
 #[derive(Default)]
@@ -87,36 +87,21 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 	}
 
 	// create Archetypes
-	for flat_circuit in flatten_circuits(parsed_circuits)? {
-		let circuit = flat_circuit.1.original;
+	for (name, flat_circuit) in flatten_circuits(parsed_circuits)? {
+		let FlatCircuit {
+			original: parsed_circuit,
+			nodes,
+		} = flat_circuit;
 
-		if let CircuitType::Ant(ant_type) = circuit.circuit_type {
-			let used_inputs = circuit
-				.inputs
-				.into_iter()
-				.map(Input::from_ident)
-				.collect::<Result<Vec<_>>>()?;
-
-			let input_spec = PeripheralSet::from_used(used_inputs, true)?;
-
-			let used_outputs = circuit
-				.outputs
-				.into_iter()
-				.map(Output::from_ident)
-				.collect::<Result<Vec<_>>>()?;
-
-			let output_spec = PeripheralSet::from_used(used_outputs, true)?;
-
-			// TODO: properly convert to circuit
-			let circuit = Circuit::new(0, vec![]);
-
-			// TODO: fill peripherals with sorted inputs from specs, instead of unsorted user-given peripherals
+		if let CircuitType::Ant(ant_type) = parsed_circuit.circuit_type.clone() {
+			let graph = create_graph(parsed_circuit, &nodes)?;
+			let circuit = graph.into();
 
 			let archetype = Archetype {
-				ant_type,
+				ant_type: ant_type.clone(),
 				circuit,
-				outputs: output_spec,
-				inputs: input_spec,
+				outputs: todo!(),
+				inputs: todo!(),
 			};
 
 			config.archetypes.push(archetype);
