@@ -4,9 +4,12 @@ use anyhow::{Result, anyhow};
 
 use super::{FlatAssignment, FlatCircuit};
 
-use crate::ant::{
-	compiler::{Node, Normalizer},
-	world::parser::{CircuitType, ParsedCircuit},
+use crate::{
+	ant::{
+		compiler::{Node, Normalizer},
+		world::parser::{CircuitType, ParsedCircuit},
+	},
+	util::find_dupe,
 };
 
 pub(super) fn flatten_circuits(
@@ -56,17 +59,25 @@ impl Normalizer {
 							));
 						}
 
-						push_nodes(&mut nodes, vec![sub_assignment.into()])?;
+						nodes.push(sub_assignment.into());
 					}
 					call => {
 						func_index += 1;
 						let expanded = self.expand_func_call(call, &sub_assignment, func_index)?;
-						push_nodes(&mut nodes, expanded)?;
+						nodes.extend(expanded);
 					}
 				}
 			}
 
 			println!("\n\n\n") //TODO: remove (dbg)
+		}
+
+		let all_assignees: Vec<_> = nodes.iter().map(|node| &node.ident).collect();
+
+		if let Some(dupe_assignee) = find_dupe(&all_assignees) {
+			return Err(anyhow!(
+				"identifier '{dupe_assignee}' can not be assigned to more than once"
+			));
 		}
 
 		dbg!(&nodes);
@@ -171,20 +182,6 @@ fn validate_call_signature(func: &FlatCircuit, assignment: &FlatAssignment) -> R
 			"function '{func_name}' has been given an invalid number of assignees\nexpected {output_count}, got {assignee_count}"
 		))
 	} else {
-		Ok(())
-	}
-}
-
-fn push_nodes(nodes: &mut Vec<Node>, new_nodes: Vec<Node>) -> Result<()> {
-	let existing_idents: Vec<_> = nodes.iter().map(|node| &node.ident).collect();
-	let mut new_idents = new_nodes.iter().map(|node| &node.ident);
-
-	if let Some(dupe_ident) = new_idents.find(|new_ident| existing_idents.contains(new_ident)) {
-		Err(anyhow!(
-			"identifier '{dupe_ident}' can not be assigned to more than once"
-		))
-	} else {
-		nodes.extend(new_nodes);
 		Ok(())
 	}
 }
