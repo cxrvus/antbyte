@@ -203,7 +203,7 @@ pub enum InputType {
 	CellNext,
 	Memory,
 	Random,
-	Ant,
+	Obstacle,
 }
 
 impl PeripheralType for InputType {
@@ -214,7 +214,7 @@ impl PeripheralType for InputType {
 			InputType::CellNext => CELL_CAP,
 			InputType::Memory => MEM_CAP,
 			InputType::Random => 8,
-			InputType::Ant => 1,
+			InputType::Obstacle => 1,
 		}
 	}
 
@@ -227,7 +227,7 @@ impl PeripheralType for InputType {
 			"cn" => Some(CellNext),
 			"m" => Some(Memory),
 			"r" => Some(Random),
-			"ant" => Some(Ant),
+			"obs" => Some(Obstacle),
 			_ => None,
 		}
 	}
@@ -245,7 +245,7 @@ pub enum OutputType {
 	MemoryWrite,
 	MemoryClear,
 	/// Queen Only
-	Spawn,
+	SpawnAnt,
 	/// Queen Only
 	Kill,
 	Die,
@@ -261,7 +261,7 @@ impl PeripheralType for OutputType {
 			Direction => 3,
 			MemoryWrite => MEM_CAP,
 			MemoryClear => 1,
-			Spawn => 4,
+			SpawnAnt => 4,
 			Kill => 1,
 			Die => 1,
 		}
@@ -269,7 +269,7 @@ impl PeripheralType for OutputType {
 
 	fn is_legal(&self, ant_type: &AntType) -> bool {
 		!match ant_type {
-			AntType::Worker => matches!(Self::Spawn, Self::Kill),
+			AntType::Worker => matches!(Self::SpawnAnt, Self::Kill),
 			AntType::Queen => matches!(Self::CellWrite, Self::CellClear),
 		}
 	}
@@ -283,7 +283,7 @@ impl PeripheralType for OutputType {
 			"d" => Some(Direction),
 			"mx" => Some(MemoryWrite),
 			"mq" => Some(MemoryClear),
-			"spx" => Some(Spawn),
+			"a" => Some(SpawnAnt),
 			"kill" => Some(Kill),
 			"die" => Some(Die),
 			_ => None,

@@ -88,7 +88,7 @@ fn create_world(code: String) -> Result<World> {
 	let inputs: Vec<Input> = vec![Input::new(Random, 4)?];
 	let inputs = PeripheralSet::inputs(inputs)?;
 
-	let outputs: Vec<Output> = vec![Output::new(Direction, 3)?, Output::new(Spawn, 1)?];
+	let outputs: Vec<Output> = vec![Output::new(Direction, 3)?, Output::new(SpawnAnt, 1)?];
 	let outputs = PeripheralSet::outputs(outputs)?;
 
 	let circuit = Circuit::try_from(code)?;

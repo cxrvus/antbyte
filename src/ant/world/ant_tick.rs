@@ -31,7 +31,7 @@ impl World {
 					.into(),
 				Memory => ant.memory,
 				Random => self.rng(),
-				Ant => self.get_target_ant(ant).is_some().into(),
+				Obstacle => self.get_target_ant(ant).is_some().into(), // todo: also true if at border
 			};
 
 			// condensing the input values into a single u32 value
@@ -69,7 +69,7 @@ impl World {
 				CellClear if value == 1 => self.cells.set_at(&ant.pos.sign(), 0),
 				MemoryWrite if value != 0 => ant.memory = value,
 				MemoryClear if value == 1 => ant.memory = 0,
-				Spawn => {
+				SpawnAnt => {
 					// direction gets flip, so that new ant
 					// spawns behind the queen and not in front of her
 					ant.flip_dir();
