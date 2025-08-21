@@ -21,7 +21,7 @@ impl Parser {
 					let new_exp = Expression {
 						ident: ident.clone(),
 						sign,
-						parameters: None,
+						parameter_values: None,
 					};
 
 					if let Some(current_set) = expression_sets.last_mut() {
@@ -48,7 +48,7 @@ impl Parser {
 
 					if let Some(prev_set) = expression_sets.last_mut() {
 						let func = prev_set.last_mut().unwrap();
-						func.parameters = Some(parameters);
+						func.parameter_values = Some(parameters);
 					} else {
 						return Err(anyhow!("unmatched right parentheses"));
 					}

@@ -8,11 +8,11 @@ impl Parser {
 		name: String,
 		circuit_type: CircuitType,
 	) -> Result<ParsedCircuit> {
-		let inputs = self.next_ident_list()?;
+		let in_params = self.next_ident_list()?;
 
 		self.expect_next(Token::Arrow)?;
 
-		let outputs: Vec<String> = self.next_ident_list()?;
+		let out_params: Vec<String> = self.next_ident_list()?;
 
 		self.expect_next(Token::BraceLeft)?;
 
@@ -40,8 +40,8 @@ impl Parser {
 		let circuit = ParsedCircuit {
 			name,
 			circuit_type,
-			inputs,
-			outputs,
+			in_params,
+			out_params,
 			statements,
 		};
 

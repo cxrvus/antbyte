@@ -8,8 +8,6 @@ pub struct Circuit {
 
 impl Circuit {
 	pub fn new(input_count: usize, layers: Vec<Layer>) -> Self {
-		// todo: assert correct neuron wire dimensions in layers
-
 		Self {
 			input_count,
 			layers,
@@ -42,54 +40,8 @@ impl TryFrom<&str> for Circuit {
 impl TryFrom<String> for Circuit {
 	type Error = Error;
 
-	fn try_from(code: String) -> Result<Circuit> {
-		// ';' can be used in place of a linebreak
-		let code = code.replace(';', "\n");
-
-		let sections = code.split("\n\n");
-		let mut layers: Vec<Layer> = vec![];
-
-		for section in sections {
-			let lines = section.trim().lines();
-			let neuron_count = lines.clone().count() as u8;
-
-			assert!(neuron_count > 0);
-			assert!(neuron_count <= 32);
-
-			let mut neurons: Vec<Neuron> = vec![];
-
-			for line in lines {
-				let line = line.trim();
-
-				assert!(line.chars().count() > 0);
-				assert!(line.chars().count() <= 32);
-
-				let mut sign = 0u32;
-				let mut mask = 0u32;
-
-				for (i, symbol) in line.chars().enumerate() {
-					let wire_bits = match symbol {
-						'.' => Ok((0, 0)),
-						'+' => Ok((0, 1)),
-						'-' => Ok((1, 1)),
-						other => Err(anyhow!("unknown wire symbol: {other}")),
-					}?;
-
-					sign |= wire_bits.0 << i;
-					mask |= wire_bits.1 << i;
-				}
-
-				let neuron = Neuron::new(sign, mask);
-				neurons.push(neuron);
-			}
-
-			let layer = Layer::new(neurons);
-			layers.push(layer);
-		}
-
-		let input_count = code.find('\n').unwrap_or(code.len());
-		let circuit = Circuit::new(input_count, layers);
-		Ok(circuit)
+	fn try_from(_code: String) -> Result<Circuit> {
+		todo!("rewrite using truth table notation");
 	}
 }
 

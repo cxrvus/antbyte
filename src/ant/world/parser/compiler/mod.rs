@@ -1,5 +1,4 @@
 mod circuit_comp;
-mod graph;
 mod settings_comp;
 mod statement;
 
@@ -8,54 +7,49 @@ use std::collections::HashMap;
 use super::{CircuitType, GlobalStatement, ParsedCircuit, Parser};
 
 use crate::ant::{
-	Archetype,
-	compiler::{circuit_comp::flatten_circuits, graph::create_graph, settings_comp::set_setting},
+	compiler::{circuit_comp::flatten_circuits, settings_comp::set_setting},
 	world::WorldConfig,
 };
 
 use anyhow::{Ok, Result};
 
-#[derive(Debug)]
-struct Graph(Vec<GraphLayer>);
-
-#[derive(Debug)]
-struct GraphLayer(Vec<Node>);
-
 #[derive(Default)]
-struct Normalizer(HashMap<String, FlatCircuit>);
+struct Normalizer(HashMap<String, NormCircuit>);
 
 #[derive(Debug)]
-struct FlatCircuit {
+struct NormCircuit {
 	original: ParsedCircuit,
-	nodes: Vec<Node>,
+	norm_statements: Vec<NormStatement>,
 }
 
-#[derive(Debug, Clone)]
-struct Node {
-	ident: String,
-	sign: bool,
-	wires: Vec<Wire>,
-}
-
-/// like `Statement`, but flattened, using `Wire`s instead of recursive `Expression`s
+/// like `Statement`, but flattened, using `ParamValue`s instead of recursive `Expression`s
 #[derive(Debug, Clone)]
 struct FlatStatement {
 	call: String,
 	assignees: Vec<String>,
 	sign: bool,
-	wires: Vec<Wire>,
+	params: Vec<ParamValue>,
+}
+
+/// like `FlatStatement`, but with exactly one assignee
+/// and without `call`: all calls normalized to `OR`
+#[derive(Debug, Clone)]
+struct NormStatement {
+	assignee: String,
+	sign: bool,
+	params: Vec<ParamValue>,
 }
 
 #[derive(Debug, Clone)]
-struct Wire {
+struct ParamValue {
 	sign: bool,
 	target: String,
 }
 
-impl From<FlatStatement> for Node {
+impl From<FlatStatement> for NormStatement {
 	fn from(flat_statement: FlatStatement) -> Self {
 		#[rustfmt::skip]
-		let FlatStatement { assignees, sign, wires, ..  } = flat_statement;
+		let FlatStatement { assignees, sign, params, ..  } = flat_statement;
 
 		assert_eq!(
 			assignees.len(),
@@ -65,8 +59,8 @@ impl From<FlatStatement> for Node {
 
 		Self {
 			sign,
-			ident: assignees[0].clone(),
-			wires: wires.clone(),
+			assignee: assignees[0].clone(),
+			params: params.clone(),
 		}
 	}
 }
@@ -88,23 +82,23 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 
 	// create Archetypes
 	for (name, flat_circuit) in flatten_circuits(parsed_circuits)? {
-		let FlatCircuit {
+		let NormCircuit {
 			original: parsed_circuit,
-			nodes,
+			norm_statements,
 		} = flat_circuit;
 
 		if let CircuitType::Ant(ant_type) = parsed_circuit.circuit_type.clone() {
-			let graph = create_graph(parsed_circuit, &nodes)?;
-			let circuit = graph.into();
+			todo!("continue");
+			// TODO: convert to Circuits
 
-			let archetype = Archetype {
-				ant_type: ant_type.clone(),
-				circuit,
-				outputs: todo!(),
-				inputs: todo!(),
-			};
+			// let archetype = Archetype {
+			// 	ant_type: ant_type.clone(),
+			// 	circuit,
+			// 	outputs: todo!(),
+			// 	inputs: todo!(),
+			// };
 
-			config.archetypes.push(archetype);
+			// config.archetypes.push(archetype);
 		};
 	}
 

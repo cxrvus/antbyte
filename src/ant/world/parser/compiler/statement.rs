@@ -1,7 +1,7 @@
 use anyhow::{Result, anyhow};
 
 use crate::ant::{
-	compiler::{FlatStatement, Normalizer, Wire},
+	compiler::{FlatStatement, Normalizer, ParamValue},
 	world::parser::{Expression, ParsedCircuit, Statement},
 };
 
@@ -21,40 +21,40 @@ fn format_index(index: u32) -> String {
 fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatStatement> {
 	let mut flat_statements = vec![];
 
-	let (call, wires) = if let Some(parameters) = &exp.parameters {
-		let mut wires = vec![];
+	let (call, params) = if let Some(parameters) = &exp.parameter_values {
+		let mut params = vec![];
 
 		for sub_exp in parameters {
-			if sub_exp.parameters.is_some() {
+			if sub_exp.parameter_values.is_some() {
 				flat_statements.extend(flatten_expression(sub_exp, index));
 
-				wires.push(Wire {
+				params.push(ParamValue {
 					sign: sub_exp.sign,
 					target: format_index(*index - 1),
 				});
 			} else {
-				wires.push(Wire {
+				params.push(ParamValue {
 					sign: sub_exp.sign,
 					target: sub_exp.ident.clone(),
 				});
 			}
 		}
 
-		(exp.ident.clone(), wires)
+		(exp.ident.clone(), params)
 	} else {
-		let wires = vec![Wire {
+		let params = vec![ParamValue {
 			sign: exp.sign,
 			target: exp.ident.clone(),
 		}];
 
-		("or".to_string(), wires)
+		("or".to_string(), params)
 	};
 
 	flat_statements.push(FlatStatement {
 		call,
 		assignees: vec![format_index(*index)],
 		sign: exp.sign,
-		wires,
+		params,
 	});
 
 	*index += 1;
@@ -68,22 +68,24 @@ impl Normalizer {
 		circuit: &ParsedCircuit,
 	) -> Result<()> {
 		let ParsedCircuit {
-			inputs, outputs, ..
+			in_params,
+			out_params,
+			..
 		} = circuit;
 
 		for flat_statement in flat_statements {
-			for wire in flat_statement.wires.iter() {
-				let target = &wire.target;
+			for params in flat_statement.params.iter() {
+				let target = &params.target;
 
-				let is_in_input = inputs.contains(target);
+				let is_an_in_param = in_params.contains(target);
 				let is_declared =
-					is_in_input || flat_statements.iter().any(|x| x.assignees.contains(target));
+					is_an_in_param || flat_statements.iter().any(|x| x.assignees.contains(target));
 
 				if !is_declared {
 					let error = if self.0.contains_key(target) {
-						anyhow!("'{target}' is a circuit, not an input")
-					} else if outputs.contains(target) {
-						anyhow!("'{target}' is an output, not an input")
+						anyhow!("'{target}' is a circuit, not an value")
+					} else if out_params.contains(target) {
+						anyhow!("'{target}' is an out-param, not an value")
 					} else {
 						anyhow!("unknown identifier: '{target}'")
 					};

@@ -2,11 +2,11 @@ use std::collections::HashMap;
 
 use anyhow::{Result, anyhow};
 
-use super::{FlatCircuit, FlatStatement};
+use super::{FlatStatement, NormCircuit};
 
 use crate::{
 	ant::{
-		compiler::{Node, Normalizer},
+		compiler::{NormStatement, Normalizer},
 		world::parser::{CircuitType, ParsedCircuit},
 	},
 	util::find_dupe,
@@ -14,7 +14,7 @@ use crate::{
 
 pub(super) fn flatten_circuits(
 	parsed_circuits: Vec<ParsedCircuit>,
-) -> Result<HashMap<String, FlatCircuit>> {
+) -> Result<HashMap<String, NormCircuit>> {
 	let mut normalizer = Normalizer::default();
 
 	for circuit in parsed_circuits.into_iter() {
@@ -36,35 +36,35 @@ pub(super) fn flatten_circuits(
 }
 
 impl Normalizer {
-	fn flatten_circuit(&self, circuit: ParsedCircuit) -> Result<FlatCircuit> {
+	fn flatten_circuit(&self, circuit: ParsedCircuit) -> Result<NormCircuit> {
 		let mut exp_index = 0;
 		let mut func_index = 0;
-		let mut nodes: Vec<Node> = vec![];
+		let mut norm_statements: Vec<NormStatement> = vec![];
 
 		for statement in circuit.statements.iter() {
 			exp_index += 1;
 
-			let mut sub_statements = statement.flatten(&mut exp_index);
+			let mut flat_statements = statement.flatten(&mut exp_index);
 
-			resolve_and_gates(&mut sub_statements);
+			resolve_and_gates(&mut flat_statements);
 
-			self.validate_statements(&sub_statements, &circuit)?;
+			self.validate_statements(&flat_statements, &circuit)?;
 
-			for sub_statement in sub_statements {
-				match sub_statement.call.as_str() {
+			for flat_statement in flat_statements {
+				match flat_statement.call.as_str() {
 					"or" => {
-						if sub_statement.assignees.len() != 1 {
+						if flat_statement.assignees.len() != 1 {
 							return Err(anyhow!(
 								"the result of an OR may only be assigned to a single assignee"
 							));
 						}
 
-						nodes.push(sub_statement.into());
+						norm_statements.push(flat_statement.into());
 					}
 					call => {
 						func_index += 1;
-						let expanded = self.expand_func_call(call, &sub_statement, func_index)?;
-						nodes.extend(expanded);
+						let expanded = self.expand_func_call(call, &flat_statement, func_index)?;
+						norm_statements.extend(expanded);
 					}
 				}
 			}
@@ -72,7 +72,7 @@ impl Normalizer {
 			println!("\n\n\n") //TODO: remove (dbg)
 		}
 
-		let all_assignees: Vec<_> = nodes.iter().map(|node| &node.ident).collect();
+		let all_assignees: Vec<_> = norm_statements.iter().map(|stm| &stm.assignee).collect();
 
 		if let Some(dupe_assignee) = find_dupe(&all_assignees) {
 			return Err(anyhow!(
@@ -80,10 +80,10 @@ impl Normalizer {
 			));
 		}
 
-		dbg!(&nodes);
+		dbg!(&norm_statements);
 
-		Ok(FlatCircuit {
-			nodes,
+		Ok(NormCircuit {
+			norm_statements,
 			original: circuit,
 		})
 	}
@@ -91,9 +91,9 @@ impl Normalizer {
 	fn expand_func_call(
 		&self,
 		call: &str,
-		statement: &FlatStatement,
+		flat_statement: &FlatStatement,
 		func_index: u32,
-	) -> Result<Vec<Node>> {
+	) -> Result<Vec<NormStatement>> {
 		let func = self
 			.0
 			.get(call)
@@ -105,81 +105,82 @@ impl Normalizer {
 			));
 		}
 
-		validate_call_signature(func, statement)?;
+		validate_call_signature(func, flat_statement)?;
 
 		let var_prefix = format!("_{call}{func_index:02}");
 
-		let mut expanded_nodes = vec![];
+		let mut expanded_statements = vec![];
 
-		for mut node in func.nodes.clone() {
-			if let Some(output_index) = func
+		for mut norm_statement in func.norm_statements.clone() {
+			if let Some(out_param_index) = func
 				.original
-				.outputs
+				.out_params
 				.iter()
-				.position(|output| *output == node.ident)
+				.position(|out_param| *out_param == norm_statement.assignee)
 			{
-				// assignee represents a function output
-				node.ident = statement.assignees[output_index].clone();
+				// assignee represents a function out-param
+				norm_statement.assignee = flat_statement.assignees[out_param_index].clone();
 			} else {
 				// assignee represents a variable
-				node.ident = var_prefix.clone() + &node.ident;
+				norm_statement.assignee = var_prefix.clone() + &norm_statement.assignee;
 			}
 
-			for node_wire in node.wires.iter_mut() {
-				if let Some(func_param_index) = func
+			for param in norm_statement.params.iter_mut() {
+				if let Some(in_param_index) = func
 					.original
-					.inputs
+					.in_params
 					.iter()
-					.position(|input| *input == node_wire.target)
+					.position(|in_param| *in_param == param.target)
 				{
-					// wire targets a function input
-					let input_wire = &statement.wires[func_param_index];
-					node_wire.target = input_wire.target.clone();
-					node_wire.sign ^= input_wire.sign;
+					// value targets a function in-parameter
+					let in_param_value = &flat_statement.params[in_param_index];
+					param.target = in_param_value.target.clone();
+					param.sign ^= in_param_value.sign;
 				} else {
-					// wire targets a variable
-					node_wire.target = var_prefix.clone() + &node_wire.target;
+					// value targets a variable
+					param.target = var_prefix.clone() + &param.target;
 				}
 			}
 
-			expanded_nodes.push(node);
+			expanded_statements.push(norm_statement);
 		}
 
-		Ok(expanded_nodes)
+		Ok(expanded_statements)
 	}
 }
 
 fn validate_circuit_io(circuit: &ParsedCircuit) -> Result<()> {
-	if let Some(dupe_ident) = circuit
-		.inputs
-		.iter()
-		.find(|input| circuit.outputs.iter().any(|output| output == *input))
-	{
+	if let Some(dupe_ident) = circuit.in_params.iter().find(|in_param| {
+		circuit
+			.out_params
+			.iter()
+			.any(|out_param| out_param == *in_param)
+	}) {
 		Err(anyhow!(
-			"identifier '{dupe_ident}' used as both input and output"
+			"identifier '{dupe_ident}' used both as an in- and an out-parameter"
 		))
 	} else {
 		Ok(())
 	}
 }
 
-fn validate_call_signature(func: &FlatCircuit, statement: &FlatStatement) -> Result<()> {
-	let (input_count, output_count, parameter_count, assignee_count) = (
-		func.original.inputs.len(),
-		func.original.outputs.len(),
-		statement.wires.len(),
+fn validate_call_signature(func: &NormCircuit, statement: &FlatStatement) -> Result<()> {
+	let (in_count, out_count, param_val_count, assignee_count) = (
+		func.original.in_params.len(),
+		func.original.out_params.len(),
+		statement.params.len(),
 		statement.assignees.len(),
 	);
 
 	let func_name = &func.original.name;
 
-	if parameter_count != input_count {
+	if param_val_count != in_count {
 		Err(anyhow!(
-			"function '{func_name}' has been given an invalid number of parameter values\nexpected {input_count}, got {parameter_count}"
+			"function '{func_name}' has been given an invalid number of parameter values\nexpected {in_count}, got {param_val_count}"
 		))
-	} else if assignee_count != output_count {
+	} else if assignee_count != out_count {
 		Err(anyhow!(
-			"function '{func_name}' has been given an invalid number of assignees\nexpected {output_count}, got {assignee_count}"
+			"function '{func_name}' has been given an invalid number of assignees\nexpected {out_count}, got {assignee_count}"
 		))
 	} else {
 		Ok(())
@@ -192,7 +193,9 @@ fn resolve_and_gates(statements: &mut [FlatStatement]) {
 		.iter_mut()
 		.filter(|stm| stm.call == "and")
 		.for_each(|stm| {
-			stm.wires.iter_mut().for_each(|wire| wire.sign = !wire.sign);
+			stm.params
+				.iter_mut()
+				.for_each(|param| param.sign = !param.sign);
 
 			stm.sign = !stm.sign;
 			stm.call = "or".into();

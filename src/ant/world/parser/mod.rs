@@ -24,8 +24,8 @@ struct ParsedWorld {
 struct ParsedCircuit {
 	name: String,
 	circuit_type: CircuitType,
-	inputs: Vec<String>,
-	outputs: Vec<String>,
+	in_params: Vec<String>,
+	out_params: Vec<String>,
 	statements: Vec<Statement>,
 }
 
@@ -43,8 +43,8 @@ struct Statement {
 struct Expression {
 	ident: String,
 	sign: bool,
-	/// is a function if Some, else input / hidden layer neuron
-	parameters: Option<Vec<Self>>,
+	/// is a function if Some, else variable
+	parameter_values: Option<Vec<Self>>,
 }
 
 #[derive(Default)]
