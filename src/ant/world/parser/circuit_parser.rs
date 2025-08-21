@@ -1,4 +1,4 @@
-use super::{Assignment, CircuitType, ParsedCircuit, Parser, Token};
+use super::{CircuitType, ParsedCircuit, Parser, Statement, Token};
 
 use anyhow::Result;
 
@@ -16,7 +16,7 @@ impl Parser {
 
 		self.expect_next(Token::BraceLeft)?;
 
-		let mut assignments: Vec<Assignment> = vec![];
+		let mut statements: Vec<Statement> = vec![];
 
 		loop {
 			let assignees = self.next_ident_list()?;
@@ -25,7 +25,7 @@ impl Parser {
 
 			let expression = self.parse_next_exp()?;
 
-			assignments.push(Assignment {
+			statements.push(Statement {
 				assignees,
 				expression,
 			});
@@ -42,7 +42,7 @@ impl Parser {
 			circuit_type,
 			inputs,
 			outputs,
-			assignments,
+			statements,
 		};
 
 		Ok(circuit)

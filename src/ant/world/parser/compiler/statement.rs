@@ -1,15 +1,15 @@
 use anyhow::{Result, anyhow};
 
 use crate::ant::{
-	compiler::{FlatAssignment, Normalizer, Wire},
-	world::parser::{Assignment, Expression, ParsedCircuit},
+	compiler::{FlatStatement, Normalizer, Wire},
+	world::parser::{Expression, ParsedCircuit, Statement},
 };
 
-impl Assignment {
-	pub(super) fn flatten(&self, start_index: &mut u32) -> Vec<FlatAssignment> {
-		let mut flat_assignments = flatten_expression(&self.expression, start_index);
-		flat_assignments.last_mut().unwrap().assignees = self.assignees.clone();
-		flat_assignments
+impl Statement {
+	pub(super) fn flatten(&self, start_index: &mut u32) -> Vec<FlatStatement> {
+		let mut flat_statements = flatten_expression(&self.expression, start_index);
+		flat_statements.last_mut().unwrap().assignees = self.assignees.clone();
+		flat_statements
 	}
 }
 
@@ -18,15 +18,15 @@ fn format_index(index: u32) -> String {
 	format!("_exp{index:02}")
 }
 
-fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatAssignment> {
-	let mut flat_exps = vec![];
+fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatStatement> {
+	let mut flat_statements = vec![];
 
 	let (call, wires) = if let Some(parameters) = &exp.parameters {
 		let mut wires = vec![];
 
 		for sub_exp in parameters {
 			if sub_exp.parameters.is_some() {
-				flat_exps.extend(flatten_expression(sub_exp, index));
+				flat_statements.extend(flatten_expression(sub_exp, index));
 
 				wires.push(Wire {
 					sign: sub_exp.sign,
@@ -50,7 +50,7 @@ fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatAssignment> 
 		("or".to_string(), wires)
 	};
 
-	flat_exps.push(FlatAssignment {
+	flat_statements.push(FlatStatement {
 		call,
 		assignees: vec![format_index(*index)],
 		sign: exp.sign,
@@ -58,28 +58,26 @@ fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatAssignment> 
 	});
 
 	*index += 1;
-	flat_exps
+	flat_statements
 }
 
 impl Normalizer {
-	pub(super) fn validate_assignments(
+	pub(super) fn validate_statements(
 		&self,
-		flat_assignments: &Vec<FlatAssignment>,
+		flat_statements: &Vec<FlatStatement>,
 		circuit: &ParsedCircuit,
 	) -> Result<()> {
 		let ParsedCircuit {
 			inputs, outputs, ..
 		} = circuit;
 
-		for flat_assignment in flat_assignments {
-			for wire in flat_assignment.wires.iter() {
+		for flat_statement in flat_statements {
+			for wire in flat_statement.wires.iter() {
 				let target = &wire.target;
 
 				let is_in_input = inputs.contains(target);
-				let is_declared = is_in_input
-					|| flat_assignments
-						.iter()
-						.any(|x| x.assignees.contains(target));
+				let is_declared =
+					is_in_input || flat_statements.iter().any(|x| x.assignees.contains(target));
 
 				if !is_declared {
 					let error = if self.0.contains_key(target) {

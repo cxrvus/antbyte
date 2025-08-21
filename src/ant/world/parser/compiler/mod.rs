@@ -1,7 +1,7 @@
-mod assignment;
 mod circuit_comp;
 mod graph;
 mod settings_comp;
+mod statement;
 
 use std::collections::HashMap;
 
@@ -37,9 +37,9 @@ struct Node {
 	wires: Vec<Wire>,
 }
 
-/// like `Assignment`, but flattened, using `Wire`s instead of recursive `Expression`s
+/// like `Statement`, but flattened, using `Wire`s instead of recursive `Expression`s
 #[derive(Debug, Clone)]
-struct FlatAssignment {
+struct FlatStatement {
 	call: String,
 	assignees: Vec<String>,
 	sign: bool,
@@ -52,15 +52,15 @@ struct Wire {
 	target: String,
 }
 
-impl From<FlatAssignment> for Node {
-	fn from(flat_exp: FlatAssignment) -> Self {
+impl From<FlatStatement> for Node {
+	fn from(flat_statement: FlatStatement) -> Self {
 		#[rustfmt::skip]
-		let FlatAssignment { assignees, sign, wires, ..  } = flat_exp;
+		let FlatStatement { assignees, sign, wires, ..  } = flat_statement;
 
 		assert_eq!(
 			assignees.len(),
 			1,
-			"FlatAssignment must have exactly one left-hand-side value\n({assignees:?})",
+			"FlatStatement must have exactly one left-hand-side value\n({assignees:?})",
 		);
 
 		Self {

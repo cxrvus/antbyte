@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::{Result, anyhow};
 
-use super::{FlatAssignment, FlatCircuit};
+use super::{FlatCircuit, FlatStatement};
 
 use crate::{
 	ant::{
@@ -41,29 +41,29 @@ impl Normalizer {
 		let mut func_index = 0;
 		let mut nodes: Vec<Node> = vec![];
 
-		for assignment in circuit.assignments.iter() {
+		for statement in circuit.statements.iter() {
 			exp_index += 1;
 
-			let mut sub_assignments = assignment.flatten(&mut exp_index);
+			let mut sub_statements = statement.flatten(&mut exp_index);
 
-			resolve_and_gates(&mut sub_assignments);
+			resolve_and_gates(&mut sub_statements);
 
-			self.validate_assignments(&sub_assignments, &circuit)?;
+			self.validate_statements(&sub_statements, &circuit)?;
 
-			for sub_assignment in sub_assignments {
-				match sub_assignment.call.as_str() {
+			for sub_statement in sub_statements {
+				match sub_statement.call.as_str() {
 					"or" => {
-						if sub_assignment.assignees.len() != 1 {
+						if sub_statement.assignees.len() != 1 {
 							return Err(anyhow!(
 								"the result of an OR may only be assigned to a single assignee"
 							));
 						}
 
-						nodes.push(sub_assignment.into());
+						nodes.push(sub_statement.into());
 					}
 					call => {
 						func_index += 1;
-						let expanded = self.expand_func_call(call, &sub_assignment, func_index)?;
+						let expanded = self.expand_func_call(call, &sub_statement, func_index)?;
 						nodes.extend(expanded);
 					}
 				}
@@ -91,7 +91,7 @@ impl Normalizer {
 	fn expand_func_call(
 		&self,
 		call: &str,
-		assignment: &FlatAssignment,
+		statement: &FlatStatement,
 		func_index: u32,
 	) -> Result<Vec<Node>> {
 		let func = self
@@ -105,7 +105,7 @@ impl Normalizer {
 			));
 		}
 
-		validate_call_signature(func, assignment)?;
+		validate_call_signature(func, statement)?;
 
 		let var_prefix = format!("_{call}{func_index:02}");
 
@@ -119,7 +119,7 @@ impl Normalizer {
 				.position(|output| *output == node.ident)
 			{
 				// assignee represents a function output
-				node.ident = assignment.assignees[output_index].clone();
+				node.ident = statement.assignees[output_index].clone();
 			} else {
 				// assignee represents a variable
 				node.ident = var_prefix.clone() + &node.ident;
@@ -133,7 +133,7 @@ impl Normalizer {
 					.position(|input| *input == node_wire.target)
 				{
 					// wire targets a function input
-					let input_wire = &assignment.wires[func_param_index];
+					let input_wire = &statement.wires[func_param_index];
 					node_wire.target = input_wire.target.clone();
 					node_wire.sign ^= input_wire.sign;
 				} else {
@@ -163,12 +163,12 @@ fn validate_circuit_io(circuit: &ParsedCircuit) -> Result<()> {
 	}
 }
 
-fn validate_call_signature(func: &FlatCircuit, assignment: &FlatAssignment) -> Result<()> {
+fn validate_call_signature(func: &FlatCircuit, statement: &FlatStatement) -> Result<()> {
 	let (input_count, output_count, parameter_count, assignee_count) = (
 		func.original.inputs.len(),
 		func.original.outputs.len(),
-		assignment.wires.len(),
-		assignment.assignees.len(),
+		statement.wires.len(),
+		statement.assignees.len(),
 	);
 
 	let func_name = &func.original.name;
@@ -187,17 +187,14 @@ fn validate_call_signature(func: &FlatCircuit, assignment: &FlatAssignment) -> R
 }
 
 /// transform AND into OR ([DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws))
-fn resolve_and_gates(assignments: &mut [FlatAssignment]) {
-	assignments
+fn resolve_and_gates(statements: &mut [FlatStatement]) {
+	statements
 		.iter_mut()
-		.filter(|assignment| assignment.call == "and")
-		.for_each(|assignment| {
-			assignment
-				.wires
-				.iter_mut()
-				.for_each(|wire| wire.sign = !wire.sign);
+		.filter(|stm| stm.call == "and")
+		.for_each(|stm| {
+			stm.wires.iter_mut().for_each(|wire| wire.sign = !wire.sign);
 
-			assignment.sign = !assignment.sign;
-			assignment.call = "or".into();
+			stm.sign = !stm.sign;
+			stm.call = "or".into();
 		});
 }

@@ -26,7 +26,7 @@ struct ParsedCircuit {
 	circuit_type: CircuitType,
 	inputs: Vec<String>,
 	outputs: Vec<String>,
-	assignments: Vec<Assignment>,
+	statements: Vec<Statement>,
 }
 
 #[rustfmt::skip]
@@ -34,7 +34,7 @@ struct ParsedCircuit {
 enum CircuitType { Ant(AntType), Sub }
 
 #[derive(Debug)]
-struct Assignment {
+struct Statement {
 	assignees: Vec<String>,
 	expression: Expression,
 }

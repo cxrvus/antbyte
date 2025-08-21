@@ -13,7 +13,7 @@ pub enum Token {
 	Comma,
 	// todo: implement constant ONE (resolve to `-or()`)
 
-	// ## Assignments / Circuits
+	// ## Statements / Circuits
 	Semicolon,
 	Assign,
 	Arrow,
