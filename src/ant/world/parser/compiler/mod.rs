@@ -5,7 +5,7 @@ mod settings_comp;
 
 use std::collections::HashMap;
 
-use super::{CircuitType, ParsedCircuit, Parser, Statement};
+use super::{CircuitType, GlobalStatement, ParsedCircuit, Parser};
 
 use crate::ant::{
 	Archetype,
@@ -77,10 +77,10 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 	let mut config = WorldConfig::default();
 	let mut parsed_circuits: Vec<ParsedCircuit> = vec![];
 
-	for statement in parsed_world.statements {
-		match statement {
-			Statement::Set(key, value) => set_setting(&mut config, key, value)?,
-			Statement::Declare(circuit) => {
+	for global_statement in parsed_world.statements {
+		match global_statement {
+			GlobalStatement::Set(key, value) => set_setting(&mut config, key, value)?,
+			GlobalStatement::Declare(circuit) => {
 				parsed_circuits.push(circuit);
 			}
 		}

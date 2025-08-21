@@ -10,14 +10,14 @@ use crate::ant::AntType;
 use anyhow::{Error, Result, anyhow};
 
 #[derive(Debug)]
-enum Statement {
+enum GlobalStatement {
 	Set(String, Token),
 	Declare(ParsedCircuit),
 }
 
 #[derive(Debug)]
 struct ParsedWorld {
-	statements: Vec<Statement>,
+	statements: Vec<GlobalStatement>,
 }
 
 #[derive(Debug)]

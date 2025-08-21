@@ -6,7 +6,7 @@ pub fn set_setting(config: &mut WorldConfig, key: String, value: Token) -> Resul
 	let key = key.to_ascii_lowercase();
 
 	// todo: implement all WorldConfig properties
-	// idea: more elegant match statement
+	// idea: more elegant match block
 	match key.as_str() {
 		key @ "width" | key @ "height" => {
 			if let Token::Number(number) = value {

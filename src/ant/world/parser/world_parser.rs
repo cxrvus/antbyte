@@ -1,17 +1,17 @@
-use super::{CircuitType, ParsedWorld, Parser, Statement, Token};
+use super::{CircuitType, GlobalStatement, ParsedWorld, Parser, Token};
 use crate::ant::AntType;
 use anyhow::{Result, anyhow};
 
 impl Parser {
 	pub(super) fn parse_world(&mut self) -> Result<ParsedWorld> {
-		let mut statements: Vec<Statement> = vec![];
+		let mut global_statements: Vec<GlobalStatement> = vec![];
 
 		loop {
-			let statement = match self.next_token() {
+			let statement_type = match self.next_token() {
 				Token::Ident(ident) => ident,
 				Token::EndOfFile => break,
 				// fixme: better error handling - parsing goes on even if statement is invalid
-				other => return Err(Parser::unexpected(other, "statement")),
+				other => return Err(Parser::unexpected(other, "global statement")),
 			};
 
 			let ident = self.next_ident()?;
@@ -21,23 +21,25 @@ impl Parser {
 				other => return Err(Parser::unexpected(other, "'='")),
 			};
 
-			if statement.as_str() == "set" {
+			if statement_type.as_str() == "set" {
 				let (key, value) = parse_setting(self, ident)?;
-				statements.push(Statement::Set(key, value));
-			} else if let Some(circuit_type) = match statement.as_str() {
+				global_statements.push(GlobalStatement::Set(key, value));
+			} else if let Some(circuit_type) = match statement_type.as_str() {
 				"queen" => Some(CircuitType::Ant(AntType::Queen)),
 				"worker" => Some(CircuitType::Ant(AntType::Worker)),
 				"fn" => Some(CircuitType::Sub),
 				_ => None,
 			} {
 				let circuit = self.parse_circuit(ident, circuit_type)?;
-				statements.push(Statement::Declare(circuit));
+				global_statements.push(GlobalStatement::Declare(circuit));
 			} else {
-				return Err(anyhow!("invalid statement: {statement}"));
+				return Err(anyhow!("invalid global statement: {statement_type}"));
 			}
 		}
 
-		let world = ParsedWorld { statements };
+		let world = ParsedWorld {
+			statements: global_statements,
+		};
 
 		// dbg!(&world);
 
