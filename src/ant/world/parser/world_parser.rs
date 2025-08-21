@@ -1,4 +1,4 @@
-use super::{CircuitType, GlobalStatement, ParsedWorld, Parser, Token};
+use super::{GlobalStatement, ParsedWorld, Parser, Token};
 use crate::ant::AntType;
 use anyhow::{Result, anyhow};
 
@@ -16,22 +16,16 @@ impl Parser {
 
 			let ident = self.next_ident()?;
 
-			match self.next_token() {
-				Token::Assign => {}
-				other => return Err(Parser::unexpected(other, "'='")),
-			};
-
 			if statement_type.as_str() == "set" {
 				let (key, value) = parse_setting(self, ident)?;
 				global_statements.push(GlobalStatement::Set(key, value));
-			} else if let Some(circuit_type) = match statement_type.as_str() {
-				"queen" => Some(CircuitType::Ant(AntType::Queen)),
-				"worker" => Some(CircuitType::Ant(AntType::Worker)),
-				"fn" => Some(CircuitType::Sub),
+			} else if let Some(circuit) = match statement_type.as_str() {
+				"queen" => Some(self.parse_ant(ident, AntType::Queen)),
+				"worker" => Some(self.parse_ant(ident, AntType::Worker)),
+				"fn" => Some(self.parse_func(ident)),
 				_ => None,
 			} {
-				let circuit = self.parse_circuit(ident, circuit_type)?;
-				global_statements.push(GlobalStatement::Declare(circuit));
+				global_statements.push(GlobalStatement::Declare(circuit?));
 			} else {
 				return Err(anyhow!("invalid global statement: {statement_type}"));
 			}

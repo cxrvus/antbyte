@@ -7,7 +7,7 @@ use super::{FlatStatement, NormCircuit};
 use crate::{
 	ant::{
 		compiler::{NormStatement, Normalizer},
-		world::parser::{CircuitType, ParsedCircuit},
+		world::parser::{CircuitType, ParsedCircuit, Signature},
 	},
 	util::find_dupe,
 };
@@ -18,7 +18,9 @@ pub(super) fn flatten_circuits(
 	let mut normalizer = Normalizer::default();
 
 	for circuit in parsed_circuits.into_iter() {
-		validate_circuit_io(&circuit)?;
+		if let CircuitType::Sub(signature) = &circuit.circuit_type {
+			signature.validate()?;
+		}
 
 		let circuit_name = circuit.name.clone();
 		let flat_circuit = normalizer.flatten_circuit(circuit)?;
@@ -94,85 +96,83 @@ impl Normalizer {
 		flat_statement: &FlatStatement,
 		func_index: u32,
 	) -> Result<Vec<NormStatement>> {
-		let func = self
+		let called_func = self
 			.0
 			.get(call)
 			.ok_or(anyhow!("unknown function: '{call}'"))?;
 
-		if let CircuitType::Ant(ant_type) = &func.original.circuit_type {
-			return Err(anyhow!(
+		match &called_func.original.circuit_type {
+			CircuitType::Ant(ant_type) => Err(anyhow!(
 				"circuit '{call}' is a {ant_type:?}, not a function"
-			));
-		}
+			)),
+			CircuitType::Sub(signature) => {
+				let var_prefix = format!("_{call}{func_index:02}");
 
-		validate_call_signature(func, flat_statement)?;
+				let mut expanded_statements = vec![];
 
-		let var_prefix = format!("_{call}{func_index:02}");
+				validate_call(signature, &called_func.original.name, flat_statement)?;
 
-		let mut expanded_statements = vec![];
+				for mut norm_statement in called_func.norm_statements.clone() {
+					if let Some(out_param_index) = signature
+						.out_params
+						.iter()
+						.position(|out_param| *out_param == norm_statement.assignee)
+					{
+						// assignee represents a function out-param
+						norm_statement.assignee = flat_statement.assignees[out_param_index].clone();
+					} else {
+						// assignee represents a variable
+						norm_statement.assignee = var_prefix.clone() + &norm_statement.assignee;
+					}
 
-		for mut norm_statement in func.norm_statements.clone() {
-			if let Some(out_param_index) = func
-				.original
-				.out_params
-				.iter()
-				.position(|out_param| *out_param == norm_statement.assignee)
-			{
-				// assignee represents a function out-param
-				norm_statement.assignee = flat_statement.assignees[out_param_index].clone();
-			} else {
-				// assignee represents a variable
-				norm_statement.assignee = var_prefix.clone() + &norm_statement.assignee;
-			}
+					for param in norm_statement.params.iter_mut() {
+						if let Some(in_param_index) = signature
+							.in_params
+							.iter()
+							.position(|in_param| *in_param == param.target)
+						{
+							// value targets a function in-parameter
+							let in_param_value = &flat_statement.params[in_param_index];
+							param.target = in_param_value.target.clone();
+							param.sign ^= in_param_value.sign;
+						} else {
+							// value targets a variable
+							param.target = var_prefix.clone() + &param.target;
+						}
+					}
 
-			for param in norm_statement.params.iter_mut() {
-				if let Some(in_param_index) = func
-					.original
-					.in_params
-					.iter()
-					.position(|in_param| *in_param == param.target)
-				{
-					// value targets a function in-parameter
-					let in_param_value = &flat_statement.params[in_param_index];
-					param.target = in_param_value.target.clone();
-					param.sign ^= in_param_value.sign;
-				} else {
-					// value targets a variable
-					param.target = var_prefix.clone() + &param.target;
+					expanded_statements.push(norm_statement);
 				}
+
+				Ok(expanded_statements)
 			}
-
-			expanded_statements.push(norm_statement);
 		}
-
-		Ok(expanded_statements)
 	}
 }
 
-fn validate_circuit_io(circuit: &ParsedCircuit) -> Result<()> {
-	if let Some(dupe_ident) = circuit.in_params.iter().find(|in_param| {
-		circuit
-			.out_params
-			.iter()
-			.any(|out_param| out_param == *in_param)
-	}) {
-		Err(anyhow!(
-			"identifier '{dupe_ident}' used both as an in- and an out-parameter"
-		))
-	} else {
-		Ok(())
+impl Signature {
+	fn validate(&self) -> Result<()> {
+		if let Some(dupe_ident) = self.in_params.iter().find(|in_param| {
+			self.out_params
+				.iter()
+				.any(|out_param| out_param == *in_param)
+		}) {
+			Err(anyhow!(
+				"identifier '{dupe_ident}' used both as an in- and an out-parameter"
+			))
+		} else {
+			Ok(())
+		}
 	}
 }
 
-fn validate_call_signature(func: &NormCircuit, statement: &FlatStatement) -> Result<()> {
+fn validate_call(signature: &Signature, func_name: &str, statement: &FlatStatement) -> Result<()> {
 	let (in_count, out_count, param_val_count, assignee_count) = (
-		func.original.in_params.len(),
-		func.original.out_params.len(),
+		signature.in_params.len(),
+		signature.out_params.len(),
 		statement.params.len(),
 		statement.assignees.len(),
 	);
-
-	let func_name = &func.original.name;
 
 	if param_val_count != in_count {
 		Err(anyhow!(
@@ -181,6 +181,15 @@ fn validate_call_signature(func: &NormCircuit, statement: &FlatStatement) -> Res
 	} else if assignee_count != out_count {
 		Err(anyhow!(
 			"function '{func_name}' has been given an invalid number of assignees\nexpected {out_count}, got {assignee_count}"
+		))
+	} else if let Some(dupe_ident) = signature.in_params.iter().find(|in_param| {
+		signature
+			.out_params
+			.iter()
+			.any(|out_param| out_param == *in_param)
+	}) {
+		Err(anyhow!(
+			"identifier '{dupe_ident}' used both as an in- and an out-parameter"
 		))
 	} else {
 		Ok(())

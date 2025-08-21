@@ -24,14 +24,18 @@ struct ParsedWorld {
 struct ParsedCircuit {
 	name: String,
 	circuit_type: CircuitType,
+	statements: Vec<Statement>,
+}
+
+#[derive(Debug, Clone)]
+struct Signature {
 	in_params: Vec<String>,
 	out_params: Vec<String>,
-	statements: Vec<Statement>,
 }
 
 #[rustfmt::skip]
 #[derive(Debug, Clone)]
-enum CircuitType { Ant(AntType), Sub }
+enum CircuitType { Ant(AntType), Sub(Signature) }
 
 #[derive(Debug)]
 struct Statement {

@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow};
 
 use crate::ant::{
 	compiler::{FlatStatement, Normalizer, ParamValue},
-	world::parser::{Expression, ParsedCircuit, Statement},
+	world::parser::{CircuitType, Expression, ParsedCircuit, Signature, Statement},
 };
 
 impl Statement {
@@ -67,30 +67,31 @@ impl Normalizer {
 		flat_statements: &Vec<FlatStatement>,
 		circuit: &ParsedCircuit,
 	) -> Result<()> {
-		let ParsedCircuit {
-			in_params,
-			out_params,
-			..
-		} = circuit;
+		if let CircuitType::Sub(signature) = &circuit.circuit_type {
+			let Signature {
+				in_params,
+				out_params,
+			} = signature;
 
-		for flat_statement in flat_statements {
-			for params in flat_statement.params.iter() {
-				let target = &params.target;
+			for flat_statement in flat_statements {
+				for params in flat_statement.params.iter() {
+					let target = &params.target;
 
-				let is_an_in_param = in_params.contains(target);
-				let is_declared =
-					is_an_in_param || flat_statements.iter().any(|x| x.assignees.contains(target));
+					let is_an_in_param = in_params.contains(target);
+					let is_declared = is_an_in_param
+						|| flat_statements.iter().any(|x| x.assignees.contains(target));
 
-				if !is_declared {
-					let error = if self.0.contains_key(target) {
-						anyhow!("'{target}' is a circuit, not an value")
-					} else if out_params.contains(target) {
-						anyhow!("'{target}' is an out-param, not an value")
-					} else {
-						anyhow!("unknown identifier: '{target}'")
-					};
+					if !is_declared {
+						let error = if self.0.contains_key(target) {
+							anyhow!("'{target}' is a circuit, not an value")
+						} else if out_params.contains(target) {
+							anyhow!("'{target}' is an out-param, not an value")
+						} else {
+							anyhow!("unknown identifier: '{target}'")
+						};
 
-					return Err(error);
+						return Err(error);
+					}
 				}
 			}
 		}

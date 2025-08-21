@@ -1,19 +1,48 @@
+use crate::ant::{AntType, world::parser::Signature};
+
 use super::{CircuitType, ParsedCircuit, Parser, Statement, Token};
 
-use anyhow::Result;
+use anyhow::{Ok, Result};
 
 impl Parser {
-	pub(super) fn parse_circuit(
-		&mut self,
-		name: String,
-		circuit_type: CircuitType,
-	) -> Result<ParsedCircuit> {
+	pub(super) fn parse_ant(&mut self, name: String, ant_type: AntType) -> Result<ParsedCircuit> {
+		let statements = self.parse_statements()?;
+
+		Ok(ParsedCircuit {
+			name,
+			statements,
+			circuit_type: CircuitType::Ant(ant_type),
+		})
+	}
+
+	pub(super) fn parse_func(&mut self, name: String) -> Result<ParsedCircuit> {
+		self.expect_next(Token::Assign)?;
+
+		let signature = self.parse_signature()?;
+		let statements = self.parse_statements()?;
+
+		Ok(ParsedCircuit {
+			name,
+			statements,
+			circuit_type: CircuitType::Sub(signature),
+		})
+	}
+
+	fn parse_signature(&mut self) -> Result<Signature> {
+		// idea: require parentheses like in JS
 		let in_params = self.next_ident_list()?;
 
 		self.expect_next(Token::Arrow)?;
 
 		let out_params: Vec<String> = self.next_ident_list()?;
 
+		Ok(Signature {
+			in_params,
+			out_params,
+		})
+	}
+
+	fn parse_statements(&mut self) -> Result<Vec<Statement>> {
 		self.expect_next(Token::BraceLeft)?;
 
 		let mut statements: Vec<Statement> = vec![];
@@ -37,14 +66,6 @@ impl Parser {
 			}
 		}
 
-		let circuit = ParsedCircuit {
-			name,
-			circuit_type,
-			in_params,
-			out_params,
-			statements,
-		};
-
-		Ok(circuit)
+		Ok(statements)
 	}
 }
