@@ -49,12 +49,17 @@ struct ParamValue {
 impl From<FlatStatement> for NormStatement {
 	fn from(flat_statement: FlatStatement) -> Self {
 		#[rustfmt::skip]
-		let FlatStatement { assignees, sign, params, ..  } = flat_statement;
+		let FlatStatement { assignees, sign, params, call  } = flat_statement;
+
+		assert_eq!(
+			call, "or",
+			"FlatStatement call must be 'or' \nfound '{call}'"
+		);
 
 		assert_eq!(
 			assignees.len(),
 			1,
-			"FlatStatement must have exactly one left-hand-side value\n({assignees:?})",
+			"FlatStatement must have exactly one left-hand-side value\nfound {assignees:?})",
 		);
 
 		Self {
