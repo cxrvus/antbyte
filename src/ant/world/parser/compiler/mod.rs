@@ -14,7 +14,7 @@ use crate::ant::{
 use anyhow::{Ok, Result};
 
 #[derive(Default)]
-struct Normalizer(HashMap<String, NormCircuit>);
+struct Compiler(HashMap<String, NormCircuit>);
 
 #[derive(Debug)]
 struct NormCircuit {

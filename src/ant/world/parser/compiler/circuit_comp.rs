@@ -6,7 +6,7 @@ use super::{FlatStatement, NormCircuit};
 
 use crate::{
 	ant::{
-		compiler::{NormStatement, Normalizer},
+		compiler::{Compiler, NormStatement},
 		world::parser::{CircuitType, ParsedCircuit, Signature},
 	},
 	util::find_dupe,
@@ -15,7 +15,7 @@ use crate::{
 pub(super) fn flatten_circuits(
 	parsed_circuits: Vec<ParsedCircuit>,
 ) -> Result<HashMap<String, NormCircuit>> {
-	let mut normalizer = Normalizer::default();
+	let mut compiler = Compiler::default();
 
 	for circuit in parsed_circuits.into_iter() {
 		if let CircuitType::Sub(signature) = &circuit.circuit_type {
@@ -23,9 +23,9 @@ pub(super) fn flatten_circuits(
 		}
 
 		let circuit_name = circuit.name.clone();
-		let flat_circuit = normalizer.flatten_circuit(circuit)?;
+		let flat_circuit = compiler.flatten_circuit(circuit)?;
 
-		if normalizer
+		if compiler
 			.0
 			.insert(circuit_name.clone(), flat_circuit)
 			.is_some()
@@ -34,10 +34,10 @@ pub(super) fn flatten_circuits(
 		}
 	}
 
-	Ok(normalizer.0)
+	Ok(compiler.0)
 }
 
-impl Normalizer {
+impl Compiler {
 	fn flatten_circuit(&self, circuit: ParsedCircuit) -> Result<NormCircuit> {
 		let mut exp_index = 0;
 		let mut func_index = 0;

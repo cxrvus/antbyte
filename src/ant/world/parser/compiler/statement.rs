@@ -1,7 +1,7 @@
 use anyhow::{Result, anyhow};
 
 use crate::ant::{
-	compiler::{FlatStatement, Normalizer, ParamValue},
+	compiler::{Compiler, FlatStatement, ParamValue},
 	world::parser::{CircuitType, Expression, ParsedCircuit, Signature, Statement},
 };
 
@@ -61,7 +61,7 @@ fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatStatement> {
 	flat_statements
 }
 
-impl Normalizer {
+impl Compiler {
 	pub(super) fn validate_statements(
 		&self,
 		flat_statements: &Vec<FlatStatement>,
