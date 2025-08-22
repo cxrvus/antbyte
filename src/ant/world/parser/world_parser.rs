@@ -1,10 +1,10 @@
-use super::{GlobalStatement, ParsedWorld, Parser, Token};
+use super::{GlobalStatement, Parser, Token};
 use crate::ant::AntType;
 use anyhow::{Result, anyhow};
 
 impl Parser {
-	pub(super) fn parse_world(&mut self) -> Result<ParsedWorld> {
-		let mut global_statements: Vec<GlobalStatement> = vec![];
+	pub(super) fn parse_world(&mut self) -> Result<Vec<GlobalStatement>> {
+		let mut statements: Vec<GlobalStatement> = vec![];
 
 		loop {
 			let statement_type = match self.next_token() {
@@ -18,26 +18,22 @@ impl Parser {
 
 			if statement_type.as_str() == "set" {
 				let (key, value) = parse_setting(self, ident)?;
-				global_statements.push(GlobalStatement::Set(key, value));
+				statements.push(GlobalStatement::Set(key, value));
 			} else if let Some(circuit) = match statement_type.as_str() {
 				"queen" => Some(self.parse_ant(ident, AntType::Queen)),
 				"worker" => Some(self.parse_ant(ident, AntType::Worker)),
 				"fn" => Some(self.parse_func(ident)),
 				_ => None,
 			} {
-				global_statements.push(GlobalStatement::Declare(circuit?));
+				statements.push(GlobalStatement::Declare(circuit?));
 			} else {
 				return Err(anyhow!("invalid global statement: {statement_type}"));
 			}
 		}
 
-		let world = ParsedWorld {
-			statements: global_statements,
-		};
+		// dbg!(&statements);
 
-		// dbg!(&world);
-
-		Ok(world)
+		Ok(statements)
 	}
 }
 

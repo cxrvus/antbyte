@@ -66,12 +66,12 @@ impl From<FlatStatement> for NormStatement {
 }
 
 pub fn compile(code: String) -> Result<WorldConfig> {
-	let parsed_world = Parser::new(code).parse_world()?;
+	let global_statements = Parser::new(code).parse_world()?;
 
 	let mut config = WorldConfig::default();
 	let mut parsed_circuits: Vec<ParsedCircuit> = vec![];
 
-	for global_statement in parsed_world.statements {
+	for global_statement in global_statements {
 		match global_statement {
 			GlobalStatement::Set(key, value) => set_setting(&mut config, key, value)?,
 			GlobalStatement::Declare(circuit) => {

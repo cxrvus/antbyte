@@ -16,11 +16,6 @@ enum GlobalStatement {
 }
 
 #[derive(Debug)]
-struct ParsedWorld {
-	statements: Vec<GlobalStatement>,
-}
-
-#[derive(Debug)]
 struct ParsedCircuit {
 	name: String,
 	circuit_type: CircuitType,
