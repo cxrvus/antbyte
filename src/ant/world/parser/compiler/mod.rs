@@ -6,10 +6,7 @@ use std::collections::HashMap;
 
 use super::{CircuitType, GlobalStatement, ParsedCircuit, Parser};
 
-use crate::ant::{
-	compiler::{circuit_comp::flatten_circuits, settings_comp::set_setting},
-	world::WorldConfig,
-};
+use crate::ant::{compiler::settings_comp::set_setting, world::WorldConfig};
 
 use anyhow::{Ok, Result};
 
@@ -86,7 +83,7 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 	}
 
 	// create Archetypes
-	for (name, flat_circuit) in flatten_circuits(parsed_circuits)? {
+	for (name, flat_circuit) in Compiler::flatten_circuits(parsed_circuits)? {
 		let NormCircuit {
 			original: parsed_circuit,
 			norm_statements,

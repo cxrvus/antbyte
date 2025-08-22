@@ -12,32 +12,32 @@ use crate::{
 	util::find_dupe,
 };
 
-pub(super) fn flatten_circuits(
-	parsed_circuits: Vec<ParsedCircuit>,
-) -> Result<HashMap<String, NormCircuit>> {
-	let mut compiler = Compiler::default();
+impl Compiler {
+	pub(super) fn flatten_circuits(
+		parsed_circuits: Vec<ParsedCircuit>,
+	) -> Result<HashMap<String, NormCircuit>> {
+		let mut compiler = Compiler::default();
 
-	for circuit in parsed_circuits.into_iter() {
-		if let CircuitType::Sub(signature) = &circuit.circuit_type {
-			signature.validate()?;
+		for circuit in parsed_circuits.into_iter() {
+			if let CircuitType::Sub(signature) = &circuit.circuit_type {
+				signature.validate()?;
+			}
+
+			let circuit_name = circuit.name.clone();
+			let flat_circuit = compiler.flatten_circuit(circuit)?;
+
+			if compiler
+				.0
+				.insert(circuit_name.clone(), flat_circuit)
+				.is_some()
+			{
+				return Err(anyhow!("circuit name '{circuit_name}' used more than once"));
+			}
 		}
 
-		let circuit_name = circuit.name.clone();
-		let flat_circuit = compiler.flatten_circuit(circuit)?;
-
-		if compiler
-			.0
-			.insert(circuit_name.clone(), flat_circuit)
-			.is_some()
-		{
-			return Err(anyhow!("circuit name '{circuit_name}' used more than once"));
-		}
+		Ok(compiler.0)
 	}
 
-	Ok(compiler.0)
-}
-
-impl Compiler {
 	fn flatten_circuit(&self, circuit: ParsedCircuit) -> Result<NormCircuit> {
 		let mut exp_index = 0;
 		let mut func_index = 0;
