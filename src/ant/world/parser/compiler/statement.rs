@@ -7,7 +7,7 @@ use crate::ant::{
 
 impl Statement {
 	pub(super) fn flatten(&self, start_index: &mut u32) -> Vec<FlatStatement> {
-		let mut flat_statements = flatten_expression(&self.expression, start_index);
+		let mut flat_statements = expand_expression(&self.expression, start_index);
 		flat_statements.last_mut().unwrap().assignees = self.assignees.clone();
 		flat_statements
 	}
@@ -18,7 +18,7 @@ fn format_index(index: u32) -> String {
 	format!("_exp{index:02}")
 }
 
-fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatStatement> {
+fn expand_expression(exp: &Expression, index: &mut u32) -> Vec<FlatStatement> {
 	let mut flat_statements = vec![];
 
 	let (call, params) = if let Some(parameters) = &exp.parameter_values {
@@ -26,7 +26,7 @@ fn flatten_expression(exp: &Expression, index: &mut u32) -> Vec<FlatStatement> {
 
 		for sub_exp in parameters {
 			if sub_exp.parameter_values.is_some() {
-				flat_statements.extend(flatten_expression(sub_exp, index));
+				flat_statements.extend(expand_expression(sub_exp, index));
 
 				params.push(ParamValue {
 					sign: sub_exp.sign,
