@@ -7,7 +7,7 @@ mod world_parser;
 
 use self::token::Token;
 use crate::ant::AntType;
-use anyhow::{Error, Result, anyhow};
+use anyhow::{Error, Ok, Result, anyhow};
 
 #[derive(Debug)]
 enum GlobalStatement {
@@ -107,20 +107,31 @@ impl Parser {
 	}
 
 	fn next_ident_list(&mut self) -> Result<Vec<String>> {
-		let mut identifiers: Vec<String> = vec![];
-		let mut expect_ident = true;
+		let identifiers = if self.assume_next(Token::ParenthesisLeft) {
+			if self.assume_next(Token::ParenthesisRight) {
+				vec![]
+			} else {
+				let mut identifiers: Vec<String> = vec![];
+				let mut expect_ident = true;
 
-		loop {
-			// let token = self.next_token();
+				loop {
+					if expect_ident {
+						let ident = self.next_ident()?;
+						identifiers.push(ident);
+					} else if !self.assume_next(Token::Comma) {
+						break;
+					}
 
-			if expect_ident {
-				let ident = self.next_ident()?;
-				identifiers.push(ident);
-			} else if !self.assume_next(Token::Comma) {
-				return Ok(identifiers);
+					expect_ident = !expect_ident;
+				}
+
+				self.expect_next(Token::ParenthesisRight)?;
+				identifiers
 			}
+		} else {
+			vec![self.next_ident()?]
+		};
 
-			expect_ident = !expect_ident;
-		}
+		Ok(identifiers)
 	}
 }

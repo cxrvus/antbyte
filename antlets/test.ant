@@ -1,11 +1,11 @@
 set height = 16;
 set width = 16;
 
-fn xor = a, b => c {
+fn xor = (a, b) => c {
 	c = or(and(-a, b), and(a, -b));
 }
 
-fn h_add = a, b => sum, c_out {
+fn h_add = (a, b) => (sum, c_out) {
 	sum = xor(a, b);
 	c_out = and(a, b);
 }
