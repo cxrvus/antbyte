@@ -64,6 +64,16 @@ impl Ant {
 #[derive(Debug, Clone)]
 pub enum AntType { Worker, Queen }
 
+impl AntType {
+	fn from_str(value: &str) -> Option<Self> {
+		match value {
+			"worker" => Some(Self::Worker),
+			"queen" => Some(Self::Queen),
+			_ => None,
+		}
+	}
+}
+
 #[derive(Debug)]
 pub struct Behavior {
 	pub ant_type: AntType,

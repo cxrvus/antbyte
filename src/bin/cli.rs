@@ -5,7 +5,8 @@ use std::{
 
 use antbyte::{
 	ant::{
-		AntType, Behavior, compiler,
+		AntType, Behavior,
+		compiler::Compiler,
 		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
 		world::{World, WorldConfig},
 	},
@@ -57,7 +58,7 @@ fn update(code: String) -> Result<()> {
 	println!("{code}");
 
 	// TODO: temporary
-	compiler::compile(code)?;
+	Compiler::compile(code)?;
 	return Ok(());
 
 	let mut world = create_world(code)?;

@@ -1,30 +1,50 @@
-use crate::ant::{AntType, world::parser::Signature};
+use crate::ant::{
+	AntType,
+	world::parser::{AntFunc, Func, Signature},
+};
 
-use super::{Func, FuncType, Parser, Statement, Token};
+use super::{Parser, Statement, Token};
 
-use anyhow::{Ok, Result};
+use anyhow::{Result, anyhow};
 
 impl Parser {
-	pub(super) fn parse_ant(&mut self, name: String, ant_type: AntType) -> Result<Func> {
+	pub(super) fn parse_ant(&mut self, name: String, ant_type: AntType) -> Result<(Func, AntFunc)> {
+		let target_id = if self.assume_next(Token::At) {
+			let target_id = self.next_token();
+			if let Token::Number(target_id) = target_id {
+				Some(target_id as u8)
+			} else {
+				return Err(anyhow!("expected Ant target ID after '@'"));
+			}
+		} else {
+			None
+		};
+
+		let ant = AntFunc {
+			ant_type,
+			target_func: name,
+			target_id,
+		};
+
 		let statements = self.parse_statements()?;
 
-		Ok(Func {
-			name,
+		let func = Func {
 			statements,
-			func_type: FuncType::Ant(ant_type),
-		})
+			signature: Default::default(),
+		};
+
+		Ok((func, ant))
 	}
 
-	pub(super) fn parse_func(&mut self, name: String) -> Result<Func> {
+	pub(super) fn parse_func(&mut self) -> Result<Func> {
 		self.expect_next(Token::Assign)?;
 
 		let signature = self.parse_signature()?;
 		let statements = self.parse_statements()?;
 
 		Ok(Func {
-			name,
 			statements,
-			func_type: FuncType::Sub(signature),
+			signature,
 		})
 	}
 

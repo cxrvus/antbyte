@@ -9,28 +9,24 @@ use self::token::Token;
 use crate::ant::AntType;
 use anyhow::{Error, Ok, Result, anyhow};
 
-#[derive(Debug)]
-enum GlobalStatement {
-	Set(String, Token),
-	Declare(Func),
+#[derive(Debug, Default)]
+struct ParsedWorld {
+	settings: Vec<(String, Token)>,
+	funcs: Vec<(String, Func)>,
+	ants: Vec<AntFunc>,
 }
 
 #[derive(Debug)]
 struct Func {
-	name: String,
-	func_type: FuncType,
+	signature: Signature,
 	statements: Vec<Statement>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 struct Signature {
 	in_params: Vec<String>,
 	out_params: Vec<String>,
 }
-
-#[rustfmt::skip]
-#[derive(Debug, Clone)]
-enum FuncType { Ant(AntType), Sub(Signature) }
 
 #[derive(Debug)]
 struct Statement {
@@ -44,6 +40,13 @@ struct Expression {
 	sign: bool,
 	/// is a function if Some, else variable
 	parameter_values: Option<Vec<Self>>,
+}
+
+#[derive(Debug)]
+struct AntFunc {
+	ant_type: AntType,
+	target_func: String,
+	target_id: Option<u8>,
 }
 
 #[derive(Default)]

@@ -4,32 +4,35 @@ mod statement;
 
 use std::collections::HashMap;
 
-use super::{Func, FuncType, GlobalStatement, Parser};
+use super::Parser;
 
-use crate::ant::{compiler::settings_comp::set_setting, world::WorldConfig};
+use crate::ant::world::{WorldConfig, parser::Signature};
 
 use anyhow::{Ok, Result};
 
 #[derive(Default)]
-struct Compiler(HashMap<String, NormFunc>);
+pub struct Compiler {
+	world_config: WorldConfig,
+	norm_funcs: HashMap<String, NormFunc>,
+}
 
 #[derive(Debug)]
 struct NormFunc {
-	original: Func,
+	signature: Signature,
 	norm_statements: Vec<NormStatement>,
 }
 
 /// like `Statement`, but flattened, using `ParamValue`s instead of recursive `Expression`s
 #[derive(Debug, Clone)]
 struct FlatStatement {
-	call: String,
+	func: String,
 	assignees: Vec<String>,
 	sign: bool,
 	params: Vec<ParamValue>,
 }
 
 /// like `FlatStatement`, but with exactly one assignee
-/// and without `call`: all calls normalized to `OR`
+/// and without `func`: all funcs normalized to `OR`
 #[derive(Debug, Clone)]
 struct NormStatement {
 	assignee: String,
@@ -46,11 +49,11 @@ struct ParamValue {
 impl From<FlatStatement> for NormStatement {
 	fn from(flat_statement: FlatStatement) -> Self {
 		#[rustfmt::skip]
-		let FlatStatement { assignees, sign, params, call  } = flat_statement;
+		let FlatStatement { assignees, sign, params, func } = flat_statement;
 
 		assert_eq!(
-			call, "or",
-			"FlatStatement call must be 'or' \nfound '{call}'"
+			func, "or",
+			"FlatStatement func must be 'or' \nfound '{func}'"
 		);
 
 		assert_eq!(
@@ -67,34 +70,22 @@ impl From<FlatStatement> for NormStatement {
 	}
 }
 
-pub fn compile(code: String) -> Result<WorldConfig> {
-	let global_statements = Parser::new(code).parse_world()?;
+impl Compiler {
+	pub fn compile(code: String) -> Result<WorldConfig> {
+		let parsed_world = Parser::new(code).parse_world()?;
 
-	let mut config = WorldConfig::default();
-	let mut funcs: Vec<Func> = vec![];
+		let mut compiler = Self::default();
 
-	for global_statement in global_statements {
-		match global_statement {
-			GlobalStatement::Set(key, value) => set_setting(&mut config, key, value)?,
-			GlobalStatement::Declare(func) => {
-				funcs.push(func);
-			}
+		for (key, value) in parsed_world.settings {
+			compiler.set_setting(key, value)?;
 		}
+
+		compiler.normalize_funcs(parsed_world.funcs)?;
+
+		todo!("CONTINUE");
+
+		// dbg!(&config);
+
+		Ok(compiler.world_config)
 	}
-
-	// create Behaviors
-	for (name, norm_func) in Compiler::normalize_funcs(funcs)? {
-		let NormFunc {
-			original: func,
-			norm_statements,
-		} = norm_func;
-
-		if let FuncType::Ant(ant_type) = func.func_type.clone() {
-			todo!("continue");
-		};
-	}
-
-	// dbg!(&config);
-
-	Ok(config)
 }

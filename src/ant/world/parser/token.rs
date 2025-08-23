@@ -17,6 +17,7 @@ pub enum Token {
 	Semicolon,
 	Assign,
 	Arrow,
+	At,
 	BraceLeft,
 	BraceRight,
 
@@ -36,7 +37,7 @@ impl Token {
 	// idea: allow hex numbers
 	const NUMBER_PTN: &'static str = r"\d{1,3}";
 	const IDENT_PTN: &'static str = r"[a-zA-Z_]\w*";
-	const SYMBOL_PTN: &'static str = r"=>|[#={}(),;1]|-";
+	const SYMBOL_PTN: &'static str = r"=>|@|[#={}(),;1]|-";
 
 	const SPACE_PTN: &'static str = r"\s+";
 	const WILD_PTN: &'static str = r".+";
@@ -69,6 +70,7 @@ impl From<&str> for Token {
 	fn from(value: &str) -> Self {
 		match value {
 			"=>" => Token::Arrow,
+			"@" => Token::At,
 			"#" => Token::Comment,
 			"=" => Token::Assign,
 			"{" => Token::BraceLeft,

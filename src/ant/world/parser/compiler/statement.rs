@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow};
 
 use crate::ant::{
 	compiler::{Compiler, FlatStatement, ParamValue},
-	world::parser::{Expression, Func, FuncType, Signature, Statement},
+	world::parser::{Expression, Func, Signature, Statement},
 };
 
 impl Statement {
@@ -21,7 +21,7 @@ fn format_index(index: u32) -> String {
 fn expand_expression(exp: &Expression, index: &mut u32) -> Vec<FlatStatement> {
 	let mut flat_statements = vec![];
 
-	let (call, params) = if let Some(parameters) = &exp.parameter_values {
+	let (func, params) = if let Some(parameters) = &exp.parameter_values {
 		let mut params = vec![];
 
 		for sub_exp in parameters {
@@ -51,7 +51,7 @@ fn expand_expression(exp: &Expression, index: &mut u32) -> Vec<FlatStatement> {
 	};
 
 	flat_statements.push(FlatStatement {
-		call,
+		func,
 		assignees: vec![format_index(*index)],
 		sign: exp.sign,
 		params,
@@ -67,31 +67,29 @@ impl Compiler {
 		flat_statements: &Vec<FlatStatement>,
 		func: &Func,
 	) -> Result<()> {
-		if let FuncType::Sub(signature) = &func.func_type {
-			let Signature {
-				in_params,
-				out_params,
-			} = signature;
+		let Signature {
+			in_params,
+			out_params,
+		} = &func.signature;
 
-			for flat_statement in flat_statements {
-				for params in flat_statement.params.iter() {
-					let target = &params.target;
+		for flat_statement in flat_statements {
+			for params in flat_statement.params.iter() {
+				let target = &params.target;
 
-					let is_an_in_param = in_params.contains(target);
-					let is_declared = is_an_in_param
-						|| flat_statements.iter().any(|x| x.assignees.contains(target));
+				let is_an_in_param = in_params.contains(target);
+				let is_declared =
+					is_an_in_param || flat_statements.iter().any(|x| x.assignees.contains(target));
 
-					if !is_declared {
-						let error = if self.0.contains_key(target) {
-							anyhow!("'{target}' is a func, not a value")
-						} else if out_params.contains(target) {
-							anyhow!("'{target}' is an out-param, not a value")
-						} else {
-							anyhow!("unknown identifier: '{target}'")
-						};
+				if !is_declared {
+					let error = if self.norm_funcs.contains_key(target) {
+						anyhow!("'{target}' is a func, not a value")
+					} else if out_params.contains(target) {
+						anyhow!("'{target}' is an out-param, not a value")
+					} else {
+						anyhow!("unknown identifier: '{target}'")
+					};
 
-						return Err(error);
-					}
+					return Err(error);
 				}
 			}
 		}

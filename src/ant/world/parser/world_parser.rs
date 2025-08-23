@@ -1,10 +1,10 @@
-use super::{GlobalStatement, Parser, Token};
-use crate::ant::AntType;
+use super::{Parser, Token};
+use crate::ant::{AntType, world::parser::ParsedWorld};
 use anyhow::{Result, anyhow};
 
 impl Parser {
-	pub(super) fn parse_world(&mut self) -> Result<Vec<GlobalStatement>> {
-		let mut statements: Vec<GlobalStatement> = vec![];
+	pub(super) fn parse_world(&mut self) -> Result<ParsedWorld> {
+		let mut world = ParsedWorld::default();
 
 		loop {
 			let statement_type = match self.next_token() {
@@ -16,16 +16,16 @@ impl Parser {
 
 			let ident = self.next_ident()?;
 
-			if statement_type.as_str() == "set" {
+			if statement_type == "set" {
 				let (key, value) = parse_setting(self, ident)?;
-				statements.push(GlobalStatement::Set(key, value));
-			} else if let Some(func) = match statement_type.as_str() {
-				"queen" => Some(self.parse_ant(ident, AntType::Queen)),
-				"worker" => Some(self.parse_ant(ident, AntType::Worker)),
-				"fn" => Some(self.parse_func(ident)),
-				_ => None,
-			} {
-				statements.push(GlobalStatement::Declare(func?));
+				world.settings.push((key, value));
+			} else if statement_type == "fn" {
+				let func = self.parse_func()?;
+				world.funcs.push((ident, func));
+			} else if let Some(ant_type) = AntType::from_str(&statement_type) {
+				let (func, ant) = self.parse_ant(ident.clone(), ant_type)?;
+				world.funcs.push((ident, func));
+				world.ants.push(ant);
 			} else {
 				return Err(anyhow!("invalid global statement: {statement_type}"));
 			}
@@ -33,7 +33,7 @@ impl Parser {
 
 		// dbg!(&statements);
 
-		Ok(statements)
+		Ok(world)
 	}
 }
 
