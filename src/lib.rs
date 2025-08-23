@@ -1,3 +1,3 @@
 pub mod ant;
-pub mod circuit;
+pub mod truth_table;
 pub mod util;

@@ -9,7 +9,7 @@ use antbyte::{
 		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
 		world::{World, WorldConfig},
 	},
-	circuit::Circuit,
+	truth_table::TruthTable,
 };
 
 use anyhow::{Result, anyhow};
@@ -91,9 +91,9 @@ fn create_world(code: String) -> Result<World> {
 	let outputs: Vec<Output> = vec![Output::new(Direction, 3)?, Output::new(SpawnAnt, 1)?];
 	let outputs = PeripheralSet::outputs(outputs)?;
 
-	let circuit = Circuit::try_from(code)?;
+	let truth_table = TruthTable::try_from(code)?;
 
-	let behavior = Behavior::new(AntType::Worker, circuit, inputs, outputs)?;
+	let behavior = Behavior::new(AntType::Worker, truth_table, inputs, outputs)?;
 
 	let mut config = WorldConfig::default();
 	config.behaviors.push(behavior);

@@ -1,7 +1,7 @@
 pub mod compiler;
 
-mod circuit_parser;
 mod expression_parser;
+mod func_parser;
 mod token;
 mod world_parser;
 
@@ -12,13 +12,13 @@ use anyhow::{Error, Ok, Result, anyhow};
 #[derive(Debug)]
 enum GlobalStatement {
 	Set(String, Token),
-	Declare(ParsedCircuit),
+	Declare(Func),
 }
 
 #[derive(Debug)]
-struct ParsedCircuit {
+struct Func {
 	name: String,
-	circuit_type: CircuitType,
+	func_type: FuncType,
 	statements: Vec<Statement>,
 }
 
@@ -30,7 +30,7 @@ struct Signature {
 
 #[rustfmt::skip]
 #[derive(Debug, Clone)]
-enum CircuitType { Ant(AntType), Sub(Signature) }
+enum FuncType { Ant(AntType), Sub(Signature) }
 
 #[derive(Debug)]
 struct Statement {

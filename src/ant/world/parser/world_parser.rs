@@ -19,13 +19,13 @@ impl Parser {
 			if statement_type.as_str() == "set" {
 				let (key, value) = parse_setting(self, ident)?;
 				statements.push(GlobalStatement::Set(key, value));
-			} else if let Some(circuit) = match statement_type.as_str() {
+			} else if let Some(func) = match statement_type.as_str() {
 				"queen" => Some(self.parse_ant(ident, AntType::Queen)),
 				"worker" => Some(self.parse_ant(ident, AntType::Worker)),
 				"fn" => Some(self.parse_func(ident)),
 				_ => None,
 			} {
-				statements.push(GlobalStatement::Declare(circuit?));
+				statements.push(GlobalStatement::Declare(func?));
 			} else {
 				return Err(anyhow!("invalid global statement: {statement_type}"));
 			}

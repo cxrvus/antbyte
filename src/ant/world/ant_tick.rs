@@ -9,7 +9,7 @@ impl World {
 		let Behavior {
 			inputs,
 			outputs,
-			circuit,
+			truth_table,
 			..
 		} = world_image
 			.get_behavior(ant.behavior)
@@ -43,7 +43,7 @@ impl World {
 		}
 
 		// calculating the output
-		let mut condensed_output = circuit.tick(condensed_input);
+		let mut condensed_output = truth_table.tick(condensed_input);
 
 		let mut ant = *ant;
 

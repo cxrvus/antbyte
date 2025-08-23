@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow};
 
 use crate::ant::{
 	compiler::{Compiler, FlatStatement, ParamValue},
-	world::parser::{CircuitType, Expression, ParsedCircuit, Signature, Statement},
+	world::parser::{Expression, Func, FuncType, Signature, Statement},
 };
 
 impl Statement {
@@ -65,9 +65,9 @@ impl Compiler {
 	pub(super) fn validate_statements(
 		&self,
 		flat_statements: &Vec<FlatStatement>,
-		circuit: &ParsedCircuit,
+		func: &Func,
 	) -> Result<()> {
-		if let CircuitType::Sub(signature) = &circuit.circuit_type {
+		if let FuncType::Sub(signature) = &func.func_type {
 			let Signature {
 				in_params,
 				out_params,
@@ -83,9 +83,9 @@ impl Compiler {
 
 					if !is_declared {
 						let error = if self.0.contains_key(target) {
-							anyhow!("'{target}' is a circuit, not an value")
+							anyhow!("'{target}' is a func, not a value")
 						} else if out_params.contains(target) {
-							anyhow!("'{target}' is an out-param, not an value")
+							anyhow!("'{target}' is an out-param, not a value")
 						} else {
 							anyhow!("unknown identifier: '{target}'")
 						};

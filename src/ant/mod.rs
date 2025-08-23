@@ -6,7 +6,7 @@ pub use world::parser::compiler;
 use self::peripherals::{InputType, OutputType, PeripheralSet, PeripheralType};
 
 use crate::{
-	circuit::Circuit,
+	truth_table::TruthTable,
 	util::vec2::{Vec2, Vec2u},
 };
 
@@ -67,7 +67,7 @@ pub enum AntType { Worker, Queen }
 #[derive(Debug)]
 pub struct Behavior {
 	pub ant_type: AntType,
-	pub circuit: Circuit,
+	pub truth_table: TruthTable,
 	pub inputs: PeripheralSet<InputType>,
 	pub outputs: PeripheralSet<OutputType>,
 }
@@ -75,13 +75,13 @@ pub struct Behavior {
 impl Behavior {
 	pub fn new(
 		ant_type: AntType,
-		circuit: Circuit,
+		truth_table: TruthTable,
 		inputs: PeripheralSet<InputType>,
 		outputs: PeripheralSet<OutputType>,
 	) -> Result<Self> {
 		let behavior = Self {
 			ant_type,
-			circuit,
+			truth_table,
 			inputs,
 			outputs,
 		};

@@ -1,12 +1,12 @@
 use anyhow::{Error, Result, anyhow};
 
 #[derive(Clone, Debug)]
-pub struct Circuit {
+pub struct TruthTable {
 	layers: Vec<Layer>,
 	input_count: usize,
 }
 
-impl Circuit {
+impl TruthTable {
 	pub fn new(input_count: usize, layers: Vec<Layer>) -> Self {
 		Self {
 			input_count,
@@ -29,7 +29,7 @@ impl Circuit {
 	}
 }
 
-impl TryFrom<&str> for Circuit {
+impl TryFrom<&str> for TruthTable {
 	type Error = Error;
 
 	fn try_from(value: &str) -> std::result::Result<Self, Self::Error> {
@@ -37,10 +37,10 @@ impl TryFrom<&str> for Circuit {
 	}
 }
 
-impl TryFrom<String> for Circuit {
+impl TryFrom<String> for TruthTable {
 	type Error = Error;
 
-	fn try_from(_code: String) -> Result<Circuit> {
+	fn try_from(_code: String) -> Result<TruthTable> {
 		todo!("rewrite using truth table notation");
 	}
 }
@@ -91,11 +91,11 @@ impl Neuron {
 
 #[cfg(test)]
 mod tests {
-	use crate::circuit::Circuit;
+	use crate::truth_table::TruthTable;
 
 	#[test]
 	fn buf() {
-		let buf = Circuit::try_from("+").unwrap();
+		let buf = TruthTable::try_from("+").unwrap();
 
 		assert_eq!(buf.tick(0), 0);
 		assert_eq!(buf.tick(1), 1);
@@ -103,7 +103,7 @@ mod tests {
 
 	#[test]
 	fn not() {
-		let not = Circuit::try_from("-").unwrap();
+		let not = TruthTable::try_from("-").unwrap();
 
 		assert_eq!(not.tick(0), 1);
 		assert_eq!(not.tick(1), 0);
@@ -111,14 +111,14 @@ mod tests {
 
 	#[test]
 	fn or() {
-		let or = Circuit::try_from("++").unwrap();
+		let or = TruthTable::try_from("++").unwrap();
 
 		assert_eq!(or.tick(0b00), 0);
 		assert_eq!(or.tick(0b01), 1);
 		assert_eq!(or.tick(0b10), 1);
 		assert_eq!(or.tick(0b11), 1);
 
-		let or3 = Circuit::try_from("+++").unwrap();
+		let or3 = TruthTable::try_from("+++").unwrap();
 
 		assert_eq!(or3.tick(0b000), 0);
 		assert_eq!(or3.tick(0b010), 1);
@@ -127,14 +127,14 @@ mod tests {
 
 	#[test]
 	fn and() {
-		let and = Circuit::try_from("--;;-").unwrap();
+		let and = TruthTable::try_from("--;;-").unwrap();
 
 		assert_eq!(and.tick(0b00), 0);
 		assert_eq!(and.tick(0b01), 0);
 		assert_eq!(and.tick(0b10), 0);
 		assert_eq!(and.tick(0b11), 1);
 
-		let and3 = Circuit::try_from("---;;-").unwrap();
+		let and3 = TruthTable::try_from("---;;-").unwrap();
 
 		assert_eq!(and3.tick(0b000), 0);
 		assert_eq!(and3.tick(0b010), 0);
@@ -143,7 +143,7 @@ mod tests {
 
 	#[test]
 	fn xor() {
-		let xor = Circuit::try_from("-+;+-;;--").unwrap();
+		let xor = TruthTable::try_from("-+;+-;;--").unwrap();
 
 		assert_eq!(xor.tick(0b00), 0);
 		assert_eq!(xor.tick(0b01), 1);

@@ -1,21 +1,21 @@
-mod circuit_comp;
+mod func_comp;
 mod settings_comp;
 mod statement;
 
 use std::collections::HashMap;
 
-use super::{CircuitType, GlobalStatement, ParsedCircuit, Parser};
+use super::{Func, FuncType, GlobalStatement, Parser};
 
 use crate::ant::{compiler::settings_comp::set_setting, world::WorldConfig};
 
 use anyhow::{Ok, Result};
 
 #[derive(Default)]
-struct Compiler(HashMap<String, NormCircuit>);
+struct Compiler(HashMap<String, NormFunc>);
 
 #[derive(Debug)]
-struct NormCircuit {
-	original: ParsedCircuit,
+struct NormFunc {
+	original: Func,
 	norm_statements: Vec<NormStatement>,
 }
 
@@ -71,25 +71,25 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 	let global_statements = Parser::new(code).parse_world()?;
 
 	let mut config = WorldConfig::default();
-	let mut parsed_circuits: Vec<ParsedCircuit> = vec![];
+	let mut funcs: Vec<Func> = vec![];
 
 	for global_statement in global_statements {
 		match global_statement {
 			GlobalStatement::Set(key, value) => set_setting(&mut config, key, value)?,
-			GlobalStatement::Declare(circuit) => {
-				parsed_circuits.push(circuit);
+			GlobalStatement::Declare(func) => {
+				funcs.push(func);
 			}
 		}
 	}
 
 	// create Behaviors
-	for (name, flat_circuit) in Compiler::flatten_circuits(parsed_circuits)? {
-		let NormCircuit {
-			original: parsed_circuit,
+	for (name, norm_func) in Compiler::normalize_funcs(funcs)? {
+		let NormFunc {
+			original: func,
 			norm_statements,
-		} = flat_circuit;
+		} = norm_func;
 
-		if let CircuitType::Ant(ant_type) = parsed_circuit.circuit_type.clone() {
+		if let FuncType::Ant(ant_type) = func.func_type.clone() {
 			todo!("continue");
 		};
 	}

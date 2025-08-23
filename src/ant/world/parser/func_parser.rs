@@ -1,30 +1,30 @@
 use crate::ant::{AntType, world::parser::Signature};
 
-use super::{CircuitType, ParsedCircuit, Parser, Statement, Token};
+use super::{Func, FuncType, Parser, Statement, Token};
 
 use anyhow::{Ok, Result};
 
 impl Parser {
-	pub(super) fn parse_ant(&mut self, name: String, ant_type: AntType) -> Result<ParsedCircuit> {
+	pub(super) fn parse_ant(&mut self, name: String, ant_type: AntType) -> Result<Func> {
 		let statements = self.parse_statements()?;
 
-		Ok(ParsedCircuit {
+		Ok(Func {
 			name,
 			statements,
-			circuit_type: CircuitType::Ant(ant_type),
+			func_type: FuncType::Ant(ant_type),
 		})
 	}
 
-	pub(super) fn parse_func(&mut self, name: String) -> Result<ParsedCircuit> {
+	pub(super) fn parse_func(&mut self, name: String) -> Result<Func> {
 		self.expect_next(Token::Assign)?;
 
 		let signature = self.parse_signature()?;
 		let statements = self.parse_statements()?;
 
-		Ok(ParsedCircuit {
+		Ok(Func {
 			name,
 			statements,
-			circuit_type: CircuitType::Sub(signature),
+			func_type: FuncType::Sub(signature),
 		})
 	}
 

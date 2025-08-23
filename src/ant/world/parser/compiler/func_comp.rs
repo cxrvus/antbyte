@@ -2,55 +2,49 @@ use std::collections::HashMap;
 
 use anyhow::{Result, anyhow};
 
-use super::{FlatStatement, NormCircuit};
+use super::{FlatStatement, NormFunc};
 
 use crate::{
 	ant::{
 		compiler::{Compiler, NormStatement},
-		world::parser::{CircuitType, ParsedCircuit, Signature},
+		world::parser::{Func, FuncType, Signature},
 	},
 	util::find_dupe,
 };
 
 impl Compiler {
-	pub(super) fn flatten_circuits(
-		parsed_circuits: Vec<ParsedCircuit>,
-	) -> Result<HashMap<String, NormCircuit>> {
+	pub(super) fn normalize_funcs(funcs: Vec<Func>) -> Result<HashMap<String, NormFunc>> {
 		let mut compiler = Compiler::default();
 
-		for circuit in parsed_circuits.into_iter() {
-			if let CircuitType::Sub(signature) = &circuit.circuit_type {
+		for func in funcs.into_iter() {
+			if let FuncType::Sub(signature) = &func.func_type {
 				signature.validate()?;
 			}
 
-			let circuit_name = circuit.name.clone();
-			let flat_circuit = compiler.flatten_circuit(circuit)?;
+			let func_name = func.name.clone();
+			let norm_func = compiler.normalize_func(func)?;
 
-			if compiler
-				.0
-				.insert(circuit_name.clone(), flat_circuit)
-				.is_some()
-			{
-				return Err(anyhow!("circuit name '{circuit_name}' used more than once"));
+			if compiler.0.insert(func_name.clone(), norm_func).is_some() {
+				return Err(anyhow!("func name '{func_name}' used more than once"));
 			}
 		}
 
 		Ok(compiler.0)
 	}
 
-	fn flatten_circuit(&self, circuit: ParsedCircuit) -> Result<NormCircuit> {
+	fn normalize_func(&self, func: Func) -> Result<NormFunc> {
 		let mut exp_index = 0;
 		let mut func_index = 0;
 		let mut norm_statements: Vec<NormStatement> = vec![];
 
-		for statement in circuit.statements.iter() {
+		for statement in func.statements.iter() {
 			exp_index += 1;
 
 			let mut flat_statements = statement.flatten(&mut exp_index);
 
 			resolve_and_gates(&mut flat_statements);
 
-			self.validate_statements(&flat_statements, &circuit)?;
+			self.validate_statements(&flat_statements, &func)?;
 
 			for flat_statement in flat_statements {
 				match flat_statement.call.as_str() {
@@ -84,9 +78,9 @@ impl Compiler {
 
 		dbg!(&norm_statements);
 
-		Ok(NormCircuit {
+		Ok(NormFunc {
 			norm_statements,
-			original: circuit,
+			original: func,
 		})
 	}
 
@@ -101,11 +95,11 @@ impl Compiler {
 			.get(call)
 			.ok_or(anyhow!("unknown function: '{call}'"))?;
 
-		match &called_func.original.circuit_type {
-			CircuitType::Ant(ant_type) => Err(anyhow!(
-				"circuit '{call}' is a {ant_type:?}, not a function"
-			)),
-			CircuitType::Sub(signature) => {
+		match &called_func.original.func_type {
+			FuncType::Ant(ant_type) => {
+				Err(anyhow!("func '{call}' is a {ant_type:?}, not a function"))
+			}
+			FuncType::Sub(signature) => {
 				let var_prefix = format!("_{call}{func_index:02}");
 
 				let mut expanded_statements = vec![];
