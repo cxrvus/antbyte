@@ -10,7 +10,7 @@ use std::{
 };
 
 use super::{
-	Ant, Archetype, BorderMode, StartingPos,
+	Ant, Behavior, BorderMode, StartingPos,
 	peripherals::{InputType, OutputType},
 };
 
@@ -20,7 +20,7 @@ type Cells = Matrix<u8>;
 
 #[derive(Debug)]
 pub struct WorldConfig {
-	pub archetypes: Vec<Archetype>,
+	pub behaviors: Vec<Behavior>,
 	pub width: usize,
 	pub height: usize,
 	pub border_mode: BorderMode,
@@ -31,7 +31,7 @@ pub struct WorldConfig {
 impl Default for WorldConfig {
 	fn default() -> Self {
 		Self {
-			archetypes: vec![],
+			behaviors: vec![],
 			width: 32,
 			height: 32,
 			border_mode: BorderMode::Collide,
@@ -74,7 +74,7 @@ impl World {
 			ants: vec![],
 		};
 
-		if !config.archetypes.is_empty() {
+		if !config.behaviors.is_empty() {
 			let starting_pos = match config.starting_pos {
 				StartingPos::TopLeft => Vec2u::ZERO,
 				StartingPos::Center => Vec2u {
@@ -124,8 +124,8 @@ impl World {
 		&self.cells
 	}
 
-	fn get_archetype(&self, id: u32) -> Option<&Archetype> {
-		self.config.archetypes.get(id as usize)
+	fn get_behavior(&self, id: u32) -> Option<&Behavior> {
+		self.config.behaviors.get(id as usize)
 	}
 
 	fn rng(&mut self) -> u32 {

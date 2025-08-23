@@ -1,19 +1,19 @@
 use crate::util::vec2::Vec2u;
 
-use super::{Ant, Archetype, BorderMode, InputType, OutputType, World};
+use super::{Ant, Behavior, BorderMode, InputType, OutputType, World};
 
 impl World {
 	pub(super) fn ant_tick(&mut self, ant: &Ant) -> Ant {
 		let world_image = self.clone();
 
-		let Archetype {
+		let Behavior {
 			inputs,
 			outputs,
 			circuit,
 			..
 		} = world_image
-			.get_archetype(ant.archetype)
-			.expect("invalid Archetype ID");
+			.get_behavior(ant.behavior)
+			.expect("invalid Behavior ID");
 
 		let mut condensed_input = 0u32;
 
@@ -128,9 +128,9 @@ impl World {
 		self.ants.iter_mut().find(|ant| ant.pos == pos)
 	}
 
-	fn spawn(&mut self, archetype: u32, pos: Vec2u) {
-		if self.get_archetype(archetype).is_some() {
-			let mut ant = Ant::new(archetype);
+	fn spawn(&mut self, behavior: u32, pos: Vec2u) {
+		if self.get_behavior(behavior).is_some() {
+			let mut ant = Ant::new(behavior);
 			ant.pos = pos;
 			self.ants.push(ant);
 		}

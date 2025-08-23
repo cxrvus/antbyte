@@ -5,7 +5,7 @@ use std::{
 
 use antbyte::{
 	ant::{
-		AntType, Archetype, compiler,
+		AntType, Behavior, compiler,
 		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
 		world::{World, WorldConfig},
 	},
@@ -93,10 +93,10 @@ fn create_world(code: String) -> Result<World> {
 
 	let circuit = Circuit::try_from(code)?;
 
-	let archetype = Archetype::new(AntType::Worker, circuit, inputs, outputs)?;
+	let behavior = Behavior::new(AntType::Worker, circuit, inputs, outputs)?;
 
 	let mut config = WorldConfig::default();
-	config.archetypes.push(archetype);
+	config.behaviors.push(behavior);
 	let world = World::new(config);
 
 	Ok(world)

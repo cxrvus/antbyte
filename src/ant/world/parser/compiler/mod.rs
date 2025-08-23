@@ -82,7 +82,7 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 		}
 	}
 
-	// create Archetypes
+	// create Behaviors
 	for (name, flat_circuit) in Compiler::flatten_circuits(parsed_circuits)? {
 		let NormCircuit {
 			original: parsed_circuit,
@@ -91,16 +91,6 @@ pub fn compile(code: String) -> Result<WorldConfig> {
 
 		if let CircuitType::Ant(ant_type) = parsed_circuit.circuit_type.clone() {
 			todo!("continue");
-			// TODO: convert to Circuits
-
-			// let archetype = Archetype {
-			// 	ant_type: ant_type.clone(),
-			// 	circuit,
-			// 	outputs: todo!(),
-			// 	inputs: todo!(),
-			// };
-
-			// config.archetypes.push(archetype);
 		};
 	}
 

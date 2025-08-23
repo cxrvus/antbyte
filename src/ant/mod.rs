@@ -23,7 +23,7 @@ pub enum StartingPos { TopLeft, Center }
 
 #[derive(Clone, Copy, Default)]
 pub struct Ant {
-	pub archetype: u32,
+	pub behavior: u32,
 	pub alive: bool,
 	pub pos: Vec2u,
 	/// cardinal direction - number between 0 and 3
@@ -34,9 +34,9 @@ pub struct Ant {
 
 // todo: move methods to world
 impl Ant {
-	pub fn new(archetype: u32) -> Self {
+	pub fn new(behavior: u32) -> Self {
 		Self {
-			archetype,
+			behavior,
 			alive: true,
 			..Default::default()
 		}
@@ -65,30 +65,30 @@ impl Ant {
 pub enum AntType { Worker, Queen }
 
 #[derive(Debug)]
-pub struct Archetype {
+pub struct Behavior {
 	pub ant_type: AntType,
 	pub circuit: Circuit,
 	pub inputs: PeripheralSet<InputType>,
 	pub outputs: PeripheralSet<OutputType>,
 }
 
-impl Archetype {
+impl Behavior {
 	pub fn new(
 		ant_type: AntType,
 		circuit: Circuit,
 		inputs: PeripheralSet<InputType>,
 		outputs: PeripheralSet<OutputType>,
 	) -> Result<Self> {
-		let archetype = Self {
+		let behavior = Self {
 			ant_type,
 			circuit,
 			inputs,
 			outputs,
 		};
 
-		archetype.validate()?;
+		behavior.validate()?;
 
-		Ok(archetype)
+		Ok(behavior)
 	}
 
 	pub fn validate(&self) -> Result<()> {
