@@ -13,13 +13,13 @@ use anyhow::{Ok, Result};
 #[derive(Default)]
 pub struct Compiler {
 	world_config: WorldConfig,
-	norm_funcs: HashMap<String, NormFunc>,
+	comp_funcs: HashMap<String, CompFunc>,
 }
 
 #[derive(Debug)]
-struct NormFunc {
+struct CompFunc {
 	signature: Signature,
-	norm_statements: Vec<NormStatement>,
+	comp_statements: Vec<CompStatement>,
 }
 
 /// like `Statement`, but flattened, using `ParamValue`s instead of recursive `Expression`s
@@ -32,9 +32,9 @@ struct FlatStatement {
 }
 
 /// like `FlatStatement`, but with exactly one assignee
-/// and without `func`: all funcs normalized to `OR`
+/// and without `func`: all funcs resolved to be `OR`
 #[derive(Debug, Clone)]
-struct NormStatement {
+struct CompStatement {
 	assignee: String,
 	sign: bool,
 	params: Vec<ParamValue>,
@@ -46,7 +46,7 @@ struct ParamValue {
 	target: String,
 }
 
-impl From<FlatStatement> for NormStatement {
+impl From<FlatStatement> for CompStatement {
 	fn from(flat_statement: FlatStatement) -> Self {
 		#[rustfmt::skip]
 		let FlatStatement { assignees, sign, params, func } = flat_statement;
@@ -80,7 +80,7 @@ impl Compiler {
 			compiler.set_setting(key, value)?;
 		}
 
-		compiler.normalize_funcs(parsed_world.funcs)?;
+		compiler.compile_funcs(parsed_world.funcs)?;
 
 		todo!("CONTINUE");
 

@@ -81,7 +81,7 @@ impl Compiler {
 					is_an_in_param || flat_statements.iter().any(|x| x.assignees.contains(target));
 
 				if !is_declared {
-					let error = if self.norm_funcs.contains_key(target) {
+					let error = if self.comp_funcs.contains_key(target) {
 						anyhow!("'{target}' is a func, not a value")
 					} else if out_params.contains(target) {
 						anyhow!("'{target}' is an out-param, not a value")

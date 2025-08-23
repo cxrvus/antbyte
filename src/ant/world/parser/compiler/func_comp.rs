@@ -1,23 +1,23 @@
 use anyhow::{Result, anyhow};
 
-use super::{FlatStatement, NormFunc};
+use super::{CompFunc, FlatStatement};
 
 use crate::{
 	ant::{
-		compiler::{Compiler, NormStatement},
+		compiler::{CompStatement, Compiler},
 		world::parser::{Func, Signature},
 	},
 	util::find_dupe,
 };
 
 impl Compiler {
-	pub(super) fn normalize_funcs(&mut self, funcs: Vec<(String, Func)>) -> Result<()> {
+	pub(super) fn compile_funcs(&mut self, funcs: Vec<(String, Func)>) -> Result<()> {
 		for (name, func) in funcs.into_iter() {
 			func.signature.validate()?;
 
-			let norm_func = self.normalize_func(func)?;
+			let comp_func = self.compile_func(func)?;
 
-			if self.norm_funcs.insert(name.clone(), norm_func).is_some() {
+			if self.comp_funcs.insert(name.clone(), comp_func).is_some() {
 				return Err(anyhow!("func name '{name}' used more than once"));
 			}
 		}
@@ -25,10 +25,10 @@ impl Compiler {
 		Ok(())
 	}
 
-	fn normalize_func(&self, func: Func) -> Result<NormFunc> {
+	fn compile_func(&self, func: Func) -> Result<CompFunc> {
 		let mut exp_index = 0;
 		let mut func_index = 0;
-		let mut norm_statements: Vec<NormStatement> = vec![];
+		let mut comp_statements: Vec<CompStatement> = vec![];
 
 		for statement in func.statements.iter() {
 			exp_index += 1;
@@ -48,12 +48,12 @@ impl Compiler {
 							));
 						}
 
-						norm_statements.push(flat_statement.into());
+						comp_statements.push(flat_statement.into());
 					}
 					func => {
 						func_index += 1;
 						let expanded = self.expand_func_call(func, &flat_statement, func_index)?;
-						norm_statements.extend(expanded);
+						comp_statements.extend(expanded);
 					}
 				}
 			}
@@ -61,7 +61,7 @@ impl Compiler {
 			println!("\n\n\n") //TODO: remove (dbg)
 		}
 
-		let all_assignees: Vec<_> = norm_statements.iter().map(|stm| &stm.assignee).collect();
+		let all_assignees: Vec<_> = comp_statements.iter().map(|stm| &stm.assignee).collect();
 
 		if let Some(dupe_assignee) = find_dupe(&all_assignees) {
 			return Err(anyhow!(
@@ -69,10 +69,10 @@ impl Compiler {
 			));
 		}
 
-		dbg!(&norm_statements);
+		dbg!(&comp_statements);
 
-		Ok(NormFunc {
-			norm_statements,
+		Ok(CompFunc {
+			comp_statements,
 			signature: func.signature,
 		})
 	}
@@ -82,9 +82,9 @@ impl Compiler {
 		func_name: &str,
 		flat_statement: &FlatStatement,
 		func_index: u32,
-	) -> Result<Vec<NormStatement>> {
+	) -> Result<Vec<CompStatement>> {
 		let called_func = self
-			.norm_funcs
+			.comp_funcs
 			.get(func_name)
 			.ok_or(anyhow!("unknown function: '{func_name}'"))?;
 
@@ -94,20 +94,20 @@ impl Compiler {
 
 		validate_call(signature, func_name, flat_statement)?;
 
-		for mut norm_statement in called_func.norm_statements.clone() {
+		for mut comp_statement in called_func.comp_statements.clone() {
 			if let Some(out_param_index) = signature
 				.out_params
 				.iter()
-				.position(|out_param| *out_param == norm_statement.assignee)
+				.position(|out_param| *out_param == comp_statement.assignee)
 			{
 				// assignee represents a function out-param
-				norm_statement.assignee = flat_statement.assignees[out_param_index].clone();
+				comp_statement.assignee = flat_statement.assignees[out_param_index].clone();
 			} else {
 				// assignee represents a variable
-				norm_statement.assignee = var_prefix.clone() + &norm_statement.assignee;
+				comp_statement.assignee = var_prefix.clone() + &comp_statement.assignee;
 			}
 
-			for param in norm_statement.params.iter_mut() {
+			for param in comp_statement.params.iter_mut() {
 				if let Some(in_param_index) = signature
 					.in_params
 					.iter()
@@ -123,7 +123,7 @@ impl Compiler {
 				}
 			}
 
-			expanded_statements.push(norm_statement);
+			expanded_statements.push(comp_statement);
 		}
 
 		Ok(expanded_statements)
