@@ -39,7 +39,7 @@ struct Expression {
 	ident: String,
 	sign: bool,
 	/// is a function if Some, else variable
-	parameter_values: Option<Vec<Self>>,
+	params: Option<Vec<Self>>,
 }
 
 #[derive(Debug)]

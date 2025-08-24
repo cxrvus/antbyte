@@ -21,11 +21,11 @@ fn format_index(index: u32) -> String {
 fn expand_expression(exp: &Expression, index: &mut u32) -> Vec<FlatStatement> {
 	let mut flat_statements = vec![];
 
-	let (func, params) = if let Some(parameters) = &exp.parameter_values {
+	let (func, params) = if let Some(parameters) = &exp.params {
 		let mut params = vec![];
 
 		for sub_exp in parameters {
-			if sub_exp.parameter_values.is_some() {
+			if sub_exp.params.is_some() {
 				flat_statements.extend(expand_expression(sub_exp, index));
 
 				params.push(ParamValue {
