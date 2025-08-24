@@ -15,7 +15,7 @@ impl Compiler {
 		for (name, func) in funcs.into_iter() {
 			func.signature.validate()?;
 
-			let comp_func = self.compile_func(func)?;
+			let comp_func = self.compile_func(&name, func)?;
 
 			if self.comp_funcs.insert(name.clone(), comp_func).is_some() {
 				return Err(anyhow!("func name '{name}' used more than once"));
@@ -25,7 +25,7 @@ impl Compiler {
 		Ok(())
 	}
 
-	fn compile_func(&self, func: Func) -> Result<CompFunc> {
+	fn compile_func(&self, name: &str, func: Func) -> Result<CompFunc> {
 		let mut exp_index = 0;
 		let mut func_index = 0;
 		let mut comp_statements: Vec<CompStatement> = vec![];
@@ -58,7 +58,7 @@ impl Compiler {
 				}
 			}
 
-			println!("\n\n\n") //TODO: remove (dbg)
+			println!() //TODO: remove (dbg)
 		}
 
 		let all_assignees: Vec<_> = comp_statements.iter().map(|stm| &stm.assignee).collect();
@@ -69,7 +69,15 @@ impl Compiler {
 			));
 		}
 
-		dbg!(&comp_statements);
+		//TODO: remove (dbg)
+
+		let comp_statements_dbg = comp_statements
+			.iter()
+			.map(|x| x.to_string())
+			.collect::<Vec<_>>()
+			.join("\n");
+
+		println!("{name}:\n{comp_statements_dbg}\n");
 
 		Ok(CompFunc {
 			comp_statements,

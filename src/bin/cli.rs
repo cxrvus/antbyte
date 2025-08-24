@@ -55,7 +55,7 @@ fn setup() -> Result<()> {
 }
 
 fn update(code: String) -> Result<()> {
-	println!("{code}");
+	println!("{code}\n\n================\n\n");
 
 	// TODO: temporary
 	Compiler::compile(code)?;

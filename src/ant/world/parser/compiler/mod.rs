@@ -2,7 +2,10 @@ mod func_comp;
 mod settings_comp;
 mod statement;
 
-use std::collections::HashMap;
+use std::{
+	collections::HashMap,
+	fmt::{self, Display},
+};
 
 use super::Parser;
 
@@ -40,10 +43,37 @@ struct CompStatement {
 	params: Vec<ParamValue>,
 }
 
+impl Display for CompStatement {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		let Self {
+			assignee,
+			sign,
+			params,
+		} = self;
+
+		let sign = sign_to_str(*sign);
+
+		let params = params
+			.iter()
+			.map(|param| sign_to_str(param.sign).to_string() + &param.target)
+			.collect::<Vec<_>>()
+			.join(", ");
+
+		write!(f, "{sign}{assignee} <- {params};")
+	}
+}
+
 #[derive(Debug, Clone)]
 struct ParamValue {
 	sign: bool,
 	target: String,
+}
+
+fn sign_to_str(sign: bool) -> &'static str {
+	match sign {
+		false => "",
+		true => "!",
+	}
 }
 
 impl From<FlatStatement> for CompStatement {
