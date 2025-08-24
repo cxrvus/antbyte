@@ -83,24 +83,7 @@ fn update(code: String) -> Result<()> {
 }
 
 fn create_world(code: String) -> Result<World> {
-	use InputType::*;
-	use OutputType::*;
-
-	let inputs: Vec<Input> = vec![Input::new(Random, 4)?];
-	let inputs = PeripheralSet::inputs(inputs)?;
-
-	let outputs: Vec<Output> = vec![Output::new(Direction, 3)?, Output::new(SpawnAnt, 1)?];
-	let outputs = PeripheralSet::outputs(outputs)?;
-
-	let truth_table = TruthTable::try_from(code)?;
-
-	let behavior = Behavior::new(AntType::Worker, truth_table, inputs, outputs)?;
-
-	let mut config = WorldConfig::default();
-	config.behaviors.push(behavior);
-	let world = World::new(config);
-
-	Ok(world)
+	todo!();
 }
 
 fn world_to_string(world: &World) -> String {
