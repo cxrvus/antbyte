@@ -3,15 +3,7 @@ use std::{
 	io::{self, Write},
 };
 
-use antbyte::{
-	ant::{
-		AntType, Behavior,
-		compiler::Compiler,
-		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
-		world::{World, WorldInstance},
-	},
-	truth_table::TruthTable,
-};
+use antbyte::ant::{compiler::Compiler, world::WorldInstance};
 
 use anyhow::{Result, anyhow};
 

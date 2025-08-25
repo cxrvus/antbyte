@@ -3,11 +3,13 @@ pub mod world;
 
 pub use world::parser::compiler;
 
-use self::peripherals::{InputType, OutputType, PeripheralSet, PeripheralType};
-
 use crate::{
+	ant::peripherals::PeripheralBit,
 	truth_table::TruthTable,
-	util::vec2::{Vec2, Vec2u},
+	util::{
+		find_dupe,
+		vec2::{Vec2, Vec2u},
+	},
 };
 
 use anyhow::{Result, anyhow};
@@ -24,12 +26,12 @@ pub enum StartingPos { TopLeft, Center }
 #[derive(Clone, Copy, Default)]
 pub struct Ant {
 	pub behavior: u32,
-	pub alive: bool,
+	pub alive: bool, // todo: deprecate,
 	pub pos: Vec2u,
 	/// cardinal direction - number between 0 and 3
 	pub dir: u8,
+	pub memory: u8,
 	pub age: u32,
-	pub memory: u32,
 }
 
 impl Ant {
@@ -60,7 +62,7 @@ impl Ant {
 }
 
 #[rustfmt::skip]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AntType { Worker, Queen }
 
 impl AntType {
@@ -77,41 +79,40 @@ impl AntType {
 pub struct Behavior {
 	pub ant_type: AntType,
 	pub truth_table: TruthTable,
-	pub inputs: PeripheralSet<InputType>,
-	pub outputs: PeripheralSet<OutputType>,
+	pub inputs: Vec<PeripheralBit>,
+	pub outputs: Vec<PeripheralBit>,
 }
 
 impl Behavior {
 	pub fn new(
 		ant_type: AntType,
 		truth_table: TruthTable,
-		inputs: PeripheralSet<InputType>,
-		outputs: PeripheralSet<OutputType>,
+		inputs: Vec<PeripheralBit>,
+		outputs: Vec<PeripheralBit>,
 	) -> Result<Self> {
-		let behavior = Self {
+		Self::validate_periphs(&inputs, &ant_type, false)?;
+		Self::validate_periphs(&outputs, &ant_type, true)?;
+
+		Ok(Self {
 			ant_type,
 			truth_table,
 			inputs,
 			outputs,
-		};
-
-		behavior.validate()?;
-
-		Ok(behavior)
+		})
 	}
 
-	pub fn validate(&self) -> Result<()> {
-		if let Some(x) = self
-			.outputs
-			.iter()
-			.find(|x| !x.peripheral_type().is_legal(&self.ant_type))
-		{
-			Err(anyhow!(
-				"illegal {:?} for {:?}",
-				x.peripheral_type(),
-				self.ant_type
-			))
+	pub fn validate_periphs(
+		periphs: &Vec<PeripheralBit>,
+		ant_type: &AntType,
+		is_output: bool,
+	) -> Result<()> {
+		if let Some(dupe) = find_dupe(periphs) {
+			Err(anyhow!("found duplicate peripheral in Behavior: {dupe:?}"))
 		} else {
+			for periph in periphs {
+				periph.validate(ant_type, is_output)?;
+			}
+
 			Ok(())
 		}
 	}

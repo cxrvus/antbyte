@@ -1,6 +1,9 @@
-use crate::util::vec2::Vec2u;
+use crate::{
+	ant::peripherals::{OutputValue, Peripheral},
+	util::vec2::Vec2u,
+};
 
-use super::{Ant, Behavior, BorderMode, InputType, OutputType, WorldInstance};
+use super::{Ant, Behavior, BorderMode, WorldInstance};
 
 impl WorldInstance {
 	pub(super) fn ant_tick(&mut self, ant: &Ant) -> Ant {
@@ -15,47 +18,63 @@ impl WorldInstance {
 			.get_behavior(ant.behavior)
 			.expect("invalid Behavior ID");
 
-		let mut condensed_input = 0u32;
+		let mut input_bits = 0u8;
 
-		for input in inputs.iter() {
-			use InputType::*;
+		use Peripheral::*;
 
-			// getting the input value
-			let input_value: u32 = match input.peripheral_type() {
-				Time => ant.age % 0x100,
-				Cell => (*self.cells.at(&ant.pos.sign()).unwrap()).into(),
+		for input_spec in inputs.iter() {
+			let input_value: u8 = match input_spec.peripheral {
+				Time => ant.age as u8,
+				Cell => *self.cells.at(&ant.pos.sign()).unwrap(),
 				CellNext => self
 					.next_pos(ant)
 					.map(|pos| *self.cells.at(&pos.sign()).unwrap())
-					.unwrap_or(0u8)
-					.into(),
+					.unwrap_or(0u8),
 				Memory => ant.memory,
 				Random => self.rng(),
 				Obstacle => self.get_target_ant(ant).is_some().into(), // todo: also true if at border
+				Direction => todo!(),
+				Moving => todo!(),
+				_ => panic!("input not handled"),
 			};
 
-			// condensing the input values into a single u32 value
-			let bit_count = input.bit();
-			let mask = 1u32.unbounded_shl(bit_count).wrapping_sub(1);
-			let masked_input_value = input_value & mask;
-			condensed_input <<= bit_count;
-			condensed_input |= masked_input_value;
+			let bit_index = input_spec.bit;
+			let masked_input_value = (input_value >> bit_index) & 1;
+			input_bits <<= 1;
+			input_bits |= masked_input_value;
 		}
 
 		// calculating the output
-		let mut condensed_output = truth_table.get(condensed_input as u8);
+		let mut output_bits = truth_table.get(input_bits);
 
 		let mut ant = *ant;
 
-		for output in outputs.iter() {
-			use OutputType::*;
+		// condense output bits into bytes
+		let mut output_values: Vec<OutputValue> = vec![];
 
-			// inflating the output bits into multiple u32 values
-			let bit_count = output.bit();
-			let mask = 1u32.unbounded_shl(bit_count).wrapping_sub(1);
-			let value = condensed_output & mask;
+		for output_spec in outputs.iter() {
+			let bit_index = output_spec.bit;
+			let output_bit = output_bits & 1;
+			let new_value = output_bit << bit_index;
 
-			match output.peripheral_type() {
+			if let Some(output_value) = output_values
+				.iter_mut()
+				.find(|output_value| output_value.output == output_spec.peripheral)
+			{
+				output_value.value |= new_value;
+			} else {
+				output_values.push(OutputValue {
+					output: output_spec.peripheral.clone(),
+					value: new_value,
+				});
+			}
+
+			output_bits >>= bit_index;
+		}
+
+		// TODO: manually set actual target values in manual order according to output_values
+		for OutputValue { output, value } in output_values.into_iter() {
+			match output {
 				Direction => {
 					let moving = value & 1 == 1;
 					let rotations = (value >> 1) as u8;
@@ -67,7 +86,7 @@ impl WorldInstance {
 				}
 				CellWrite if value != 0 => self.cells.set_at(&ant.pos.sign(), value as u8),
 				CellClear if value == 1 => self.cells.set_at(&ant.pos.sign(), 0),
-				MemoryWrite if value != 0 => ant.memory = value,
+				MemoryWrite if value != 0 => ant.memory = value as u8,
 				MemoryClear if value == 1 => ant.memory = 0,
 				SpawnAnt => {
 					// direction gets flip, so that new ant
@@ -90,8 +109,6 @@ impl WorldInstance {
 				Die => ant.die(),
 				_ => {}
 			};
-
-			condensed_output >>= bit_count;
 		}
 
 		ant

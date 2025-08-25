@@ -9,10 +9,7 @@ use std::{
 	rc::Rc,
 };
 
-use super::{
-	Ant, Behavior, BorderMode, StartingPos,
-	peripherals::{InputType, OutputType},
-};
+use super::{Ant, Behavior, BorderMode, StartingPos};
 
 use crate::util::{matrix::Matrix, vec2::Vec2u};
 
@@ -128,7 +125,7 @@ impl WorldInstance {
 		self.config.behaviors.get(id as usize)
 	}
 
-	fn rng(&mut self) -> u32 {
+	fn rng(&mut self) -> u8 {
 		self.rng.random()
 	}
 }
