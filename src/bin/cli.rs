@@ -8,7 +8,7 @@ use antbyte::{
 		AntType, Behavior,
 		compiler::Compiler,
 		peripherals::{Input, InputType, Output, OutputType, PeripheralSet},
-		world::{World, WorldConfig},
+		world::{World, WorldInstance},
 	},
 	truth_table::TruthTable,
 };
@@ -82,11 +82,11 @@ fn update(code: String) -> Result<()> {
 	}
 }
 
-fn create_world(code: String) -> Result<World> {
+fn create_world(code: String) -> Result<WorldInstance> {
 	todo!();
 }
 
-fn world_to_string(world: &World) -> String {
+fn world_to_string(world: &WorldInstance) -> String {
 	let cells = world.cells();
 	let mut string = String::new();
 

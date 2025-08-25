@@ -12,8 +12,8 @@ impl Compiler {
 			key @ "width" | key @ "height" => {
 				if let Token::Number(number) = value {
 					*match key {
-						"width" => &mut self.world_config.width,
-						"height" => &mut self.world_config.height,
+						"width" => &mut self.world.width,
+						"height" => &mut self.world.height,
 						_ => unreachable!(),
 					} = number as usize;
 					Ok(())

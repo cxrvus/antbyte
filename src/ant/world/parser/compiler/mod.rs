@@ -9,13 +9,13 @@ use std::{
 
 use super::Parser;
 
-use crate::ant::world::{WorldConfig, parser::Signature};
+use crate::ant::world::{World, parser::Signature};
 
 use anyhow::{Ok, Result};
 
 #[derive(Default)]
 pub struct Compiler {
-	world_config: WorldConfig,
+	world: World,
 	comp_funcs: HashMap<String, CompFunc>,
 }
 
@@ -101,7 +101,7 @@ impl From<FlatStatement> for CompStatement {
 }
 
 impl Compiler {
-	pub fn compile(code: String) -> Result<WorldConfig> {
+	pub fn compile(code: String) -> Result<World> {
 		let parsed_world = Parser::new(code).parse_world()?;
 
 		let mut compiler = Self::default();
@@ -114,8 +114,6 @@ impl Compiler {
 
 		todo!("CONTINUE");
 
-		// dbg!(&config);
-
-		Ok(compiler.world_config)
+		Ok(compiler.world)
 	}
 }

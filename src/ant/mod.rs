@@ -32,7 +32,6 @@ pub struct Ant {
 	pub memory: u32,
 }
 
-// todo: move methods to world
 impl Ant {
 	pub fn new(behavior: u32) -> Self {
 		Self {

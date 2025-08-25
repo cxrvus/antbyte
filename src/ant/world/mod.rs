@@ -19,7 +19,7 @@ use crate::util::{matrix::Matrix, vec2::Vec2u};
 type Cells = Matrix<u8>;
 
 #[derive(Debug)]
-pub struct WorldConfig {
+pub struct World {
 	pub behaviors: Vec<Behavior>,
 	pub width: usize,
 	pub height: usize,
@@ -28,7 +28,7 @@ pub struct WorldConfig {
 	pub noise_seed: Option<u32>,
 }
 
-impl Default for WorldConfig {
+impl Default for World {
 	fn default() -> Self {
 		Self {
 			behaviors: vec![],
@@ -52,16 +52,16 @@ pub struct WorldState {
 }
 
 #[derive(Clone)]
-pub struct World {
-	config: Rc<WorldConfig>,
+pub struct WorldInstance {
+	config: Rc<World>,
 	pub state: WorldState,
 }
 
-impl World {
-	pub fn new(config: WorldConfig) -> Self {
-		let WorldConfig { width, height, .. } = config;
+impl WorldInstance {
+	pub fn new(world: World) -> Self {
+		let World { width, height, .. } = world;
 
-		let rng = if let Some(seed) = config.noise_seed {
+		let rng = if let Some(seed) = world.noise_seed {
 			StdRng::seed_from_u64(seed as u64)
 		} else {
 			StdRng::from_seed(rand::random::<[u8; 32]>())
@@ -74,12 +74,12 @@ impl World {
 			ants: vec![],
 		};
 
-		if !config.behaviors.is_empty() {
-			let starting_pos = match config.starting_pos {
+		if !world.behaviors.is_empty() {
+			let starting_pos = match world.starting_pos {
 				StartingPos::TopLeft => Vec2u::ZERO,
 				StartingPos::Center => Vec2u {
-					x: config.width / 2,
-					y: config.height / 2,
+					x: world.width / 2,
+					y: world.height / 2,
 				},
 			};
 
@@ -89,7 +89,7 @@ impl World {
 		}
 
 		Self {
-			config: Rc::new(config),
+			config: Rc::new(world),
 			state,
 		}
 	}
@@ -112,7 +112,7 @@ impl World {
 		self.frame
 	}
 
-	pub fn config(&self) -> &WorldConfig {
+	pub fn config(&self) -> &World {
 		&self.config
 	}
 
@@ -133,7 +133,7 @@ impl World {
 	}
 }
 
-impl Deref for World {
+impl Deref for WorldInstance {
 	type Target = WorldState;
 
 	fn deref(&self) -> &Self::Target {
@@ -141,7 +141,7 @@ impl Deref for World {
 	}
 }
 
-impl DerefMut for World {
+impl DerefMut for WorldInstance {
 	fn deref_mut(&mut self) -> &mut Self::Target {
 		&mut self.state
 	}

@@ -1,8 +1,8 @@
 use crate::util::vec2::Vec2u;
 
-use super::{Ant, Behavior, BorderMode, InputType, OutputType, World};
+use super::{Ant, Behavior, BorderMode, InputType, OutputType, WorldInstance};
 
-impl World {
+impl WorldInstance {
 	pub(super) fn ant_tick(&mut self, ant: &Ant) -> Ant {
 		let world_image = self.clone();
 
