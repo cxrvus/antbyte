@@ -43,7 +43,7 @@ impl World {
 		}
 
 		// calculating the output
-		let mut condensed_output = truth_table.get(condensed_input as u8).unwrap();
+		let mut condensed_output = truth_table.get(condensed_input as u8);
 
 		let mut ant = *ant;
 

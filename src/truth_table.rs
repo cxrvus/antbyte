@@ -9,9 +9,7 @@ pub struct TruthTable {
 
 impl TruthTable {
 	pub fn new(input_bits: usize, output_bits: usize, entries: Vec<u32>) -> Result<Self> {
-		if output_bits == 0 {
-			Err(anyhow!("must have at least one output bit"))
-		} else if output_bits > 32 {
+		if output_bits > 32 {
 			Err(anyhow!("output bit count must not be greater than 32"))
 		} else if entries.len() != 1 << input_bits {
 			Err(anyhow!("entry count must be equal to [1 << input_bits]"))
@@ -40,7 +38,10 @@ impl TruthTable {
 	}
 
 	// idea: optimize - memory efficiency using bit shifting
-	pub fn get(&self, input: u8) -> Option<u32> {
-		self.entries.get(input as usize).copied()
+	pub fn get(&self, input: u8) -> u32 {
+		self.entries
+			.get(input as usize)
+			.copied()
+			.unwrap_or_default()
 	}
 }
