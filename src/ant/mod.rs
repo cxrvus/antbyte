@@ -4,7 +4,7 @@ pub mod world;
 pub use world::parser::compiler;
 
 use crate::{
-	ant::peripherals::PeripheralBit,
+	ant::peripherals::{IoType, PeripheralBit},
 	truth_table::TruthTable,
 	util::{
 		find_dupe,
@@ -90,8 +90,8 @@ impl Behavior {
 		inputs: Vec<PeripheralBit>,
 		outputs: Vec<PeripheralBit>,
 	) -> Result<Self> {
-		Self::validate_periphs(&inputs, &ant_type, false)?;
-		Self::validate_periphs(&outputs, &ant_type, true)?;
+		Self::validate_periphs(&inputs, &ant_type, IoType::Input)?;
+		Self::validate_periphs(&outputs, &ant_type, IoType::Output)?;
 
 		Ok(Self {
 			ant_type,
@@ -104,13 +104,13 @@ impl Behavior {
 	pub fn validate_periphs(
 		periphs: &Vec<PeripheralBit>,
 		ant_type: &AntType,
-		is_output: bool,
+		io_type: IoType,
 	) -> Result<()> {
 		if let Some(dupe) = find_dupe(periphs) {
 			Err(anyhow!("found duplicate peripheral in Behavior: {dupe:?}"))
 		} else {
 			for periph in periphs {
-				periph.validate(ant_type, is_output)?;
+				periph.validate(ant_type, &io_type)?;
 			}
 
 			Ok(())

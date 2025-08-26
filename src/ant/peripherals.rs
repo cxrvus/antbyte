@@ -37,7 +37,7 @@ struct PeripheralProperties {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-enum IoType {
+pub enum IoType {
 	Input,
 	Output,
 }
@@ -158,18 +158,13 @@ pub struct PeripheralBit {
 }
 
 impl PeripheralBit {
-	pub fn validate(&self, ant_type: &AntType, is_output: bool) -> Result<()> {
+	pub fn validate(&self, ant_type: &AntType, io_type: &IoType) -> Result<()> {
 		let properties = self.peripheral.properties();
 
 		let bit_exceeding_size = self.bit >= properties.size;
 
-		let used_io_type = match is_output {
-			true => IoType::Output,
-			false => IoType::Input,
-		};
-
 		let wrong_io_type = match properties.io_type {
-			Some(req_io_type) => req_io_type != used_io_type,
+			Some(req_io_type) => req_io_type != *io_type,
 			None => false,
 		};
 
