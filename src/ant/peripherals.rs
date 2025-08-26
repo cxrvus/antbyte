@@ -34,7 +34,6 @@ pub enum Peripheral {
 struct PeripheralProperties {
 	size: u8,
 	io_type: Option<IoType>,
-	forbidden: Vec<AntType>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -52,73 +51,62 @@ const BYTE: u8 = 8;
 
 impl Peripheral {
 	fn properties(&self) -> PeripheralProperties {
-		type Props = PeripheralProperties;
-		use AntType::*;
 		use IoType::*;
+		type Props = PeripheralProperties;
 
 		// idea: use Vec / HashMap instead of match and incorporate idents
 		let props = match self {
 			Peripheral::Cell => Props {
 				size: CELL,
-				forbidden: vec![Queen],
-				..Default::default()
+				io_type: None,
 			},
 			Peripheral::CellClear => Props {
 				size: BIT,
 				io_type: Some(Output),
-				forbidden: vec![Queen],
 			},
 			Peripheral::CellNext => Props {
 				size: CELL,
 				io_type: Some(Input),
-				..Default::default()
 			},
 			Peripheral::Time => Props {
 				size: BYTE,
 				io_type: Some(Input),
-				..Default::default()
 			},
 			Peripheral::Memory => Props {
 				size: BYTE,
-				..Default::default()
+				io_type: None,
 			},
 			Peripheral::MemoryClear => Props {
 				size: BIT,
 				io_type: Some(Output),
-				..Default::default()
 			},
 			Peripheral::Random => Props {
 				size: BYTE,
 				io_type: Some(Input),
-				..Default::default()
 			},
 			Peripheral::Obstacle => Props {
 				size: BIT,
 				io_type: Some(Input),
-				..Default::default()
 			},
 			Peripheral::Direction => Props {
 				size: DIR,
-				..Default::default()
+				io_type: None,
 			},
 			Peripheral::Moving => Props {
 				size: BIT,
-				..Default::default()
+				io_type: None,
 			},
 			Peripheral::SpawnAnt => Props {
 				size: ANT_ID,
 				io_type: Some(Output),
-				forbidden: vec![Worker],
 			},
 			Peripheral::Kill => Props {
 				size: BIT,
 				io_type: Some(Output),
-				forbidden: vec![Worker],
 			},
 			Peripheral::Die => Props {
 				size: BIT,
 				io_type: Some(Output),
-				..Default::default()
 			},
 		};
 
@@ -184,7 +172,17 @@ impl PeripheralBit {
 			None => false,
 		};
 
-		let invalid_ant_type = properties.forbidden.contains(ant_type);
+		use AntType::*;
+		use IoType::*;
+		use Peripheral::*;
+
+		let invalid_ant_type = matches!(
+			(ant_type, &self.peripheral, io_type),
+			(Queen, Cell, Output)
+				| (Queen, CellClear, _)
+				| (Worker, SpawnAnt, _)
+				| (Worker, Kill, _)
+		);
 
 		if bit_exceeding_size {
 			Err(anyhow!("bit index exceeding size: {self:?}",))
