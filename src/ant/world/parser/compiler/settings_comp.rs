@@ -1,8 +1,8 @@
 use anyhow::{Result, anyhow};
 
-use crate::ant::{compiler::Compiler, world::parser::token::Token};
+use crate::ant::world::{World, parser::token::Token};
 
-impl Compiler {
+impl World {
 	pub(super) fn set_setting(&mut self, key: String, value: Token) -> Result<()> {
 		let key = key.to_ascii_lowercase();
 
@@ -12,8 +12,8 @@ impl Compiler {
 			key @ "width" | key @ "height" => {
 				if let Token::Number(number) = value {
 					*match key {
-						"width" => &mut self.world.width,
-						"height" => &mut self.world.height,
+						"width" => &mut self.width,
+						"height" => &mut self.height,
 						_ => unreachable!(),
 					} = number as usize;
 					Ok(())

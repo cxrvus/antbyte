@@ -4,44 +4,49 @@ use super::{CompFunc, FlatStatement};
 
 use crate::{
 	ant::{
-		compiler::{CompStatement, Compiler},
+		compiler::{CompFuncs, CompStatement},
 		world::parser::{Func, Signature},
 	},
 	util::find_dupe,
 };
 
-impl Compiler {
-	pub(super) fn compile_funcs(&mut self, funcs: Vec<(String, Func)>) -> Result<()> {
-		for (name, func) in funcs.into_iter() {
-			func.signature.validate()?;
+pub(super) fn compile_funcs(funcs: Vec<(String, Func)>) -> Result<CompFuncs> {
+	let mut comp_funcs = CompFuncs::default();
 
-			let comp_func = self.compile_func(&name, func)?;
+	for (name, func) in funcs.into_iter() {
+		func.signature.validate()?;
 
-			if self.comp_funcs.insert(name.clone(), comp_func).is_some() {
-				return Err(anyhow!("func name '{name}' used more than once"));
-			}
+		println!("{name}:\n");
+
+		let comp_func = func.compile(&comp_funcs)?;
+
+		if comp_funcs.insert(name.clone(), comp_func).is_some() {
+			return Err(anyhow!("func name '{name}' used more than once"));
 		}
-
-		Ok(())
 	}
 
-	fn compile_func(&self, name: &str, func: Func) -> Result<CompFunc> {
+	Ok(comp_funcs)
+}
+
+impl Func {
+	fn compile(&self, comp_funcs: &CompFuncs) -> Result<CompFunc> {
 		let mut exp_index = 0;
 		let mut func_index = 0;
 		let mut comp_statements: Vec<CompStatement> = vec![];
 
-		for statement in func.statements.iter() {
+		for statement in self.statements.iter() {
 			exp_index += 1;
 
-			let mut flat_statements = statement.flatten(&mut exp_index);
+			let mut flat_statements = statement.expand_expression(&mut exp_index);
 
-			resolve_and_gates(&mut flat_statements);
-
-			self.validate_statements(&flat_statements, &func)?;
+			flat_statements
+				.iter_mut()
+				.for_each(|stm| stm.resolve_and_gate());
 
 			for flat_statement in flat_statements {
 				match flat_statement.func.as_str() {
 					"or" => {
+						// TODO: implement n:1 expansion
 						if flat_statement.assignees.len() != 1 {
 							return Err(anyhow!(
 								"the result of an OR may only be assigned to a single assignee"
@@ -50,9 +55,10 @@ impl Compiler {
 
 						comp_statements.push(flat_statement.into());
 					}
-					func => {
+					func_name => {
 						func_index += 1;
-						let expanded = self.expand_func_call(func, &flat_statement, func_index)?;
+						let expanded =
+							flat_statement.expand_call(comp_funcs, func_name, func_index)?;
 						comp_statements.extend(expanded);
 					}
 				}
@@ -77,22 +83,23 @@ impl Compiler {
 			.collect::<Vec<_>>()
 			.join("\n");
 
-		println!("{name}:\n{comp_statements_dbg}\n");
+		println!("{comp_statements_dbg}\n");
 
 		Ok(CompFunc {
 			comp_statements,
-			signature: func.signature,
+			signature: self.signature.clone(),
 		})
 	}
+}
 
-	fn expand_func_call(
+impl FlatStatement {
+	fn expand_call(
 		&self,
+		comp_funcs: &CompFuncs,
 		func_name: &str,
-		flat_statement: &FlatStatement,
 		func_index: u32,
 	) -> Result<Vec<CompStatement>> {
-		let called_func = self
-			.comp_funcs
+		let called_func = comp_funcs
 			.get(func_name)
 			.ok_or(anyhow!("unknown function: '{func_name}'"))?;
 
@@ -100,7 +107,7 @@ impl Compiler {
 		let mut expanded_statements = vec![];
 		let signature = &called_func.signature;
 
-		validate_call(signature, func_name, flat_statement)?;
+		validate_call(signature, self, func_name)?;
 
 		for mut comp_statement in called_func.comp_statements.clone() {
 			if let Some(out_param_index) = signature
@@ -109,7 +116,7 @@ impl Compiler {
 				.position(|out_param| *out_param == comp_statement.assignee)
 			{
 				// assignee represents a function out-param
-				comp_statement.assignee = flat_statement.assignees[out_param_index].clone();
+				comp_statement.assignee = self.assignees[out_param_index].clone();
 			} else {
 				// assignee represents a variable
 				comp_statement.assignee = var_prefix.clone() + &comp_statement.assignee;
@@ -122,7 +129,7 @@ impl Compiler {
 					.position(|in_param| *in_param == param.target)
 				{
 					// value targets a function in-parameter
-					let in_param_value = &flat_statement.params[in_param_index];
+					let in_param_value = &self.params[in_param_index];
 					param.target = in_param_value.target.clone();
 					param.sign ^= in_param_value.sign;
 				} else {
@@ -154,7 +161,7 @@ impl Signature {
 	}
 }
 
-fn validate_call(signature: &Signature, func_name: &str, statement: &FlatStatement) -> Result<()> {
+fn validate_call(signature: &Signature, statement: &FlatStatement, func_name: &str) -> Result<()> {
 	let (in_count, out_count, param_val_count, assignee_count) = (
 		signature.in_params.len(),
 		signature.out_params.len(),
@@ -170,31 +177,7 @@ fn validate_call(signature: &Signature, func_name: &str, statement: &FlatStateme
 		Err(anyhow!(
 			"function '{func_name}' has been given an invalid number of assignees\nexpected {out_count}, got {assignee_count}"
 		))
-	} else if let Some(dupe_ident) = signature.in_params.iter().find(|in_param| {
-		signature
-			.out_params
-			.iter()
-			.any(|out_param| out_param == *in_param)
-	}) {
-		Err(anyhow!(
-			"identifier '{dupe_ident}' used both as an in- and an out-parameter"
-		))
 	} else {
 		Ok(())
 	}
-}
-
-/// transform AND into OR ([DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws))
-fn resolve_and_gates(statements: &mut [FlatStatement]) {
-	statements
-		.iter_mut()
-		.filter(|stm| stm.func == "and")
-		.for_each(|stm| {
-			stm.params
-				.iter_mut()
-				.for_each(|param| param.sign = !param.sign);
-
-			stm.sign = !stm.sign;
-			stm.func = "or".into();
-		});
 }

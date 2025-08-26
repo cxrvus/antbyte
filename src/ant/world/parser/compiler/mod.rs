@@ -9,15 +9,15 @@ use std::{
 
 use super::Parser;
 
-use crate::ant::world::{World, parser::Signature};
+use crate::ant::{
+	compiler::func_comp::compile_funcs,
+	world::{World, parser::Signature},
+};
 
 use anyhow::{Ok, Result};
 
-#[derive(Default)]
-pub struct Compiler {
-	world: World,
-	comp_funcs: HashMap<String, CompFunc>,
-}
+// TODO: turn this into a vector and implement overloading
+type CompFuncs = HashMap<String, CompFunc>;
 
 #[derive(Debug)]
 struct CompFunc {
@@ -100,20 +100,18 @@ impl From<FlatStatement> for CompStatement {
 	}
 }
 
-impl Compiler {
-	pub fn compile(code: String) -> Result<World> {
-		let parsed_world = Parser::new(code).parse_world()?;
+pub fn compile(code: String) -> Result<World> {
+	let parsed_world = Parser::new(code).parse_world()?;
 
-		let mut compiler = Self::default();
+	let mut world = World::default();
 
-		for (key, value) in parsed_world.settings {
-			compiler.set_setting(key, value)?;
-		}
-
-		compiler.compile_funcs(parsed_world.funcs)?;
-
-		todo!("CONTINUE");
-
-		Ok(compiler.world)
+	for (key, value) in parsed_world.settings {
+		world.set_setting(key, value)?;
 	}
+
+	compile_funcs(parsed_world.funcs)?;
+
+	todo!("CONTINUE");
+
+	Ok(world)
 }

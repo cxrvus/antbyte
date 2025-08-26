@@ -3,7 +3,7 @@ use std::{
 	io::{self, Write},
 };
 
-use antbyte::ant::{compiler::Compiler, world::WorldInstance};
+use antbyte::ant::{compiler::compile, world::WorldInstance};
 
 use anyhow::{Result, anyhow};
 
@@ -50,7 +50,7 @@ fn update(code: String) -> Result<()> {
 	println!("{code}\n\n================\n\n");
 
 	// TODO: temporary
-	Compiler::compile(code)?;
+	compile(code)?;
 	return Ok(());
 
 	let mut world = create_world(code)?;
