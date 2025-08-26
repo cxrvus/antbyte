@@ -25,17 +25,18 @@ pub enum StartingPos { TopLeft, Center }
 
 #[derive(Clone, Copy, Default)]
 pub struct Ant {
-	pub behavior: u32,
+	pub behavior: u8,
 	pub alive: bool, // todo: deprecate,
 	pub pos: Vec2u,
 	/// cardinal direction - number between 0 and 3
 	pub dir: u8,
+	pub moving: bool,
 	pub memory: u8,
 	pub age: u32,
 }
 
 impl Ant {
-	pub fn new(behavior: u32) -> Self {
+	pub fn new(behavior: u8) -> Self {
 		Self {
 			behavior,
 			alive: true,

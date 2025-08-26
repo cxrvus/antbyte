@@ -121,7 +121,7 @@ impl WorldInstance {
 		&self.cells
 	}
 
-	fn get_behavior(&self, id: u32) -> Option<&Behavior> {
+	fn get_behavior(&self, id: u8) -> Option<&Behavior> {
 		self.config.behaviors.get(id as usize)
 	}
 

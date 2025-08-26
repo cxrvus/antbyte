@@ -6,6 +6,7 @@ use crate::{
 use super::{Ant, Behavior, BorderMode, WorldInstance};
 
 impl WorldInstance {
+	// TODO: split up into sub-methods
 	pub(super) fn ant_tick(&mut self, ant: &Ant) -> Ant {
 		let world_image = self.clone();
 
@@ -33,9 +34,9 @@ impl WorldInstance {
 				Memory => ant.memory,
 				Random => self.rng(),
 				Obstacle => self.get_target_ant(ant).is_some().into(), // todo: also true if at border
-				Direction => todo!(),
-				Moving => todo!(),
-				_ => panic!("input not handled"),
+				Direction => ant.dir,
+				Moving => ant.moving as u8,
+				_ => panic!("unhandled input"),
 			};
 
 			let bit_index = input_spec.bit;
@@ -54,7 +55,7 @@ impl WorldInstance {
 
 		for output_spec in outputs.iter() {
 			let bit_index = output_spec.bit;
-			let output_bit = output_bits & 1;
+			let output_bit = (output_bits & 1) as u8;
 			let new_value = output_bit << bit_index;
 
 			if let Some(output_value) = output_values
@@ -72,21 +73,22 @@ impl WorldInstance {
 			output_bits >>= bit_index;
 		}
 
-		// TODO: manually set actual target values in manual order according to output_values
+		output_values.sort();
+
 		for OutputValue { output, value } in output_values.into_iter() {
 			match output {
-				Direction => {
-					let moving = value & 1 == 1;
-					let rotations = (value >> 1) as u8;
-					ant.set_dir(ant.dir + rotations);
+				Direction => ant.set_dir(ant.dir + value),
+				Moving => {
+					let moving = value != 0;
+					ant.moving = moving;
 
 					if moving {
 						self.move_tick(&mut ant);
 					}
 				}
-				CellWrite if value != 0 => self.cells.set_at(&ant.pos.sign(), value as u8),
+				Cell if value != 0 => self.cells.set_at(&ant.pos.sign(), value),
 				CellClear if value == 1 => self.cells.set_at(&ant.pos.sign(), 0),
-				MemoryWrite if value != 0 => ant.memory = value as u8,
+				Memory if value != 0 => ant.memory = value,
 				MemoryClear if value == 1 => ant.memory = 0,
 				SpawnAnt => {
 					// direction gets flip, so that new ant
@@ -107,7 +109,7 @@ impl WorldInstance {
 					}
 				}
 				Die => ant.die(),
-				_ => {}
+				_ => panic!("unhandled output"),
 			};
 		}
 
@@ -145,7 +147,7 @@ impl WorldInstance {
 		self.ants.iter_mut().find(|ant| ant.pos == pos)
 	}
 
-	fn spawn(&mut self, behavior: u32, pos: Vec2u) {
+	fn spawn(&mut self, behavior: u8, pos: Vec2u) {
 		if self.get_behavior(behavior).is_some() {
 			let mut ant = Ant::new(behavior);
 			ant.pos = pos;

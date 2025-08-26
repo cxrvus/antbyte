@@ -1,30 +1,31 @@
+use std::cmp::Ordering;
+
 use super::AntType;
 
 use anyhow::{Ok, Result, anyhow};
 use regex::Regex;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Peripheral {
-	/// Worker Only
-	Cell,
-	/// Worker Only
-	CellClear,
+	Cell,      // Worker Only
+	CellClear, // Worker Only
 	CellNext,
 
+	// universal inputs:
 	Time,
 	Memory,
 	MemoryClear,
 	Random,
+
 	Obstacle,
+
+	Kill, // Queen Only
 
 	/// 3 bits indicating number of 45 degrees rotations
 	Direction,
 	Moving,
 
-	/// Queen Only
-	SpawnAnt,
-	/// Queen Only
-	Kill,
+	SpawnAnt, // Queen Only
 
 	Die,
 }
@@ -55,6 +56,7 @@ impl Peripheral {
 		use AntType::*;
 		use IoType::*;
 
+		// idea: use Vec / HashMap instead of match and incorporate idents
 		let props = match self {
 			Peripheral::Cell => Props {
 				size: CELL,
@@ -148,7 +150,21 @@ impl Peripheral {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OutputValue {
 	pub output: Peripheral,
-	pub value: u32,
+	pub value: u8,
+}
+
+impl PartialOrd for OutputValue {
+	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+		Some(self.cmp(other))
+	}
+}
+
+impl Ord for OutputValue {
+	fn cmp(&self, other: &Self) -> Ordering {
+		self.output
+			.cmp(&other.output)
+			.then(self.value.cmp(&other.value))
+	}
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
