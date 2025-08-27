@@ -1,14 +1,11 @@
-use crate::ant::{
-	AntType,
-	world::parser::{AntFunc, Func, Signature},
-};
+use crate::ant::world::parser::{AntFunc, Func, Signature};
 
 use super::{Parser, Statement, Token};
 
 use anyhow::{Result, anyhow};
 
 impl Parser {
-	pub(super) fn parse_ant(&mut self, name: String, ant_type: AntType) -> Result<(Func, AntFunc)> {
+	pub(super) fn parse_ant(&mut self, name: &str) -> Result<(Func, AntFunc)> {
 		let target_id = if self.assume_next(Token::At) {
 			let target_id = self.next_token();
 			if let Token::Number(target_id) = target_id {
@@ -21,8 +18,7 @@ impl Parser {
 		};
 
 		let ant = AntFunc {
-			ant_type,
-			target_func: name,
+			target_func: name.into(),
 			target_id,
 		};
 

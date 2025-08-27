@@ -1,5 +1,5 @@
 use super::{Parser, Token};
-use crate::ant::{AntType, world::parser::ParsedWorld};
+use crate::ant::world::parser::ParsedWorld;
 use anyhow::{Result, anyhow};
 
 impl Parser {
@@ -16,14 +16,15 @@ impl Parser {
 
 			let ident = self.next_ident()?;
 
+			// TODO: turn into match
 			if statement_type == "set" {
 				let (key, value) = parse_setting(self, ident)?;
 				world.settings.push((key, value));
 			} else if statement_type == "fn" {
 				let func = self.parse_func()?;
 				world.funcs.push((ident, func));
-			} else if let Some(ant_type) = AntType::from_str(&statement_type) {
-				let (func, ant) = self.parse_ant(ident.clone(), ant_type)?;
+			} else if statement_type == "ant" {
+				let (func, ant) = self.parse_ant(&ident)?;
 				world.funcs.push((ident, func));
 				world.ants.push(ant);
 			} else {

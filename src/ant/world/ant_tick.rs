@@ -92,7 +92,7 @@ impl WorldInstance {
 				MemoryClear if value == 1 => ant.memory = 0,
 				SpawnAnt => {
 					// direction gets flip, so that new ant
-					// spawns behind the queen and not in front of her
+					// spawns behind the old one and not in front of her
 					ant.flip_dir();
 
 					if let Some(pos) = self.next_pos(&ant)

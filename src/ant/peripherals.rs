@@ -1,14 +1,12 @@
 use std::cmp::Ordering;
 
-use super::AntType;
-
 use anyhow::{Ok, Result, anyhow};
 use regex::Regex;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Peripheral {
-	Cell,      // Worker Only
-	CellClear, // Worker Only
+	Cell,
+	CellClear,
 	CellNext,
 
 	// universal inputs:
@@ -19,13 +17,13 @@ pub enum Peripheral {
 
 	Obstacle,
 
-	Kill, // Queen Only
+	Kill,
 
 	/// 3 bits indicating number of 45 degrees rotations
 	Direction,
 	Moving,
 
-	SpawnAnt, // Queen Only
+	SpawnAnt,
 
 	Die,
 }
@@ -162,7 +160,7 @@ pub struct PeripheralBit {
 }
 
 impl PeripheralBit {
-	pub fn validate(&self, ant_type: &AntType, io_type: &IoType) -> Result<()> {
+	pub fn validate(&self, io_type: &IoType) -> Result<()> {
 		let properties = self.peripheral.properties();
 
 		let bit_exceeding_size = self.bit >= properties.size;
@@ -172,28 +170,11 @@ impl PeripheralBit {
 			None => false,
 		};
 
-		use AntType::*;
-		use IoType::*;
-		use Peripheral::*;
-
-		let invalid_ant_type = matches!(
-			(ant_type, &self.peripheral, io_type),
-			(Queen, Cell, Output)
-				| (Queen, CellClear, _)
-				| (Worker, SpawnAnt, _)
-				| (Worker, Kill, _)
-		);
-
 		if bit_exceeding_size {
 			Err(anyhow!("bit index exceeding size: {self:?}",))
 		} else if wrong_io_type {
 			Err(anyhow!(
 				"wrong Input / Output type for Peripheral: {self:?}",
-			))
-		} else if invalid_ant_type {
-			Err(anyhow!(
-				"peripheral {:?} forbidden for {ant_type:?}",
-				self.peripheral
 			))
 		} else {
 			Ok(())

@@ -6,7 +6,6 @@ mod token;
 mod world_parser;
 
 use self::token::Token;
-use crate::ant::AntType;
 use anyhow::{Error, Ok, Result, anyhow};
 
 #[derive(Debug, Default)]
@@ -44,7 +43,6 @@ struct Expression {
 
 #[derive(Debug)]
 struct AntFunc {
-	ant_type: AntType,
 	target_func: String,
 	target_id: Option<u8>,
 }

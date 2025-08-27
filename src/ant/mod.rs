@@ -62,23 +62,8 @@ impl Ant {
 	}
 }
 
-#[rustfmt::skip]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum AntType { Worker, Queen }
-
-impl AntType {
-	fn from_str(value: &str) -> Option<Self> {
-		match value {
-			"worker" => Some(Self::Worker),
-			"queen" => Some(Self::Queen),
-			_ => None,
-		}
-	}
-}
-
 #[derive(Debug)]
 pub struct Behavior {
-	pub ant_type: AntType,
 	pub truth_table: TruthTable,
 	pub inputs: Vec<PeripheralBit>,
 	pub outputs: Vec<PeripheralBit>,
@@ -86,32 +71,26 @@ pub struct Behavior {
 
 impl Behavior {
 	pub fn new(
-		ant_type: AntType,
 		truth_table: TruthTable,
 		inputs: Vec<PeripheralBit>,
 		outputs: Vec<PeripheralBit>,
 	) -> Result<Self> {
-		Self::validate_periphs(&inputs, &ant_type, IoType::Input)?;
-		Self::validate_periphs(&outputs, &ant_type, IoType::Output)?;
+		Self::validate_periphs(&inputs, IoType::Input)?;
+		Self::validate_periphs(&outputs, IoType::Output)?;
 
 		Ok(Self {
-			ant_type,
 			truth_table,
 			inputs,
 			outputs,
 		})
 	}
 
-	pub fn validate_periphs(
-		periphs: &Vec<PeripheralBit>,
-		ant_type: &AntType,
-		io_type: IoType,
-	) -> Result<()> {
+	pub fn validate_periphs(periphs: &Vec<PeripheralBit>, io_type: IoType) -> Result<()> {
 		if let Some(dupe) = find_dupe(periphs) {
 			Err(anyhow!("found duplicate peripheral in Behavior: {dupe:?}"))
 		} else {
 			for periph in periphs {
-				periph.validate(ant_type, &io_type)?;
+				periph.validate(&io_type)?;
 			}
 
 			Ok(())
