@@ -2,10 +2,7 @@ mod func_comp;
 mod settings_comp;
 mod statement;
 
-use std::{
-	collections::HashMap,
-	fmt::{self, Display},
-};
+use std::collections::HashMap;
 
 use super::Parser;
 
@@ -43,61 +40,10 @@ struct CompStatement {
 	params: Vec<ParamValue>,
 }
 
-impl Display for CompStatement {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		let Self {
-			assignee,
-			sign,
-			params,
-		} = self;
-
-		let sign = sign_to_str(*sign);
-
-		let params = params
-			.iter()
-			.map(|param| sign_to_str(param.sign).to_string() + &param.target)
-			.collect::<Vec<_>>()
-			.join(", ");
-
-		write!(f, "{sign}{assignee} <- {params};")
-	}
-}
-
 #[derive(Debug, Clone)]
 struct ParamValue {
 	sign: bool,
 	target: String,
-}
-
-fn sign_to_str(sign: bool) -> &'static str {
-	match sign {
-		false => "",
-		true => "!",
-	}
-}
-
-impl From<FlatStatement> for CompStatement {
-	fn from(flat_statement: FlatStatement) -> Self {
-		#[rustfmt::skip]
-		let FlatStatement { assignees, sign, params, func } = flat_statement;
-
-		assert_eq!(
-			func, "or",
-			"FlatStatement func must be 'or' \nfound '{func}'"
-		);
-
-		assert_eq!(
-			assignees.len(),
-			1,
-			"FlatStatement must have exactly one left-hand-side value\nfound {assignees:?})",
-		);
-
-		Self {
-			sign,
-			assignee: assignees[0].clone(),
-			params: params.clone(),
-		}
-	}
 }
 
 pub fn compile(code: String) -> Result<World> {
@@ -109,7 +55,7 @@ pub fn compile(code: String) -> Result<World> {
 		world.set_setting(key, value)?;
 	}
 
-	compile_funcs(parsed_world.funcs)?;
+	let comp_funcs = compile_funcs(parsed_world.funcs)?;
 
 	todo!("CONTINUE");
 
