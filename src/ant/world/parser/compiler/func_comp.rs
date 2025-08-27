@@ -2,12 +2,9 @@ use anyhow::{Result, anyhow};
 
 use super::CompFunc;
 
-use crate::{
-	ant::{
-		compiler::{CompFuncs, CompStatement},
-		world::parser::{Func, Signature},
-	},
-	util::find_dupe,
+use crate::ant::{
+	compiler::{CompFuncs, CompStatement},
+	world::parser::{Func, Signature},
 };
 
 pub(super) fn compile_funcs(funcs: Vec<(String, Func)>) -> Result<CompFuncs> {
@@ -62,7 +59,6 @@ impl Func {
 			for flat_statement in flat_statements {
 				match flat_statement.func.as_str() {
 					"or" => {
-						// TODO: implement n:1 expansion
 						if flat_statement.assignees.len() != 1 {
 							return Err(anyhow!(
 								"the result of an OR may only be assigned to a single assignee"
@@ -80,18 +76,8 @@ impl Func {
 				}
 			}
 
-			println!() //TODO: remove (dbg)
+			println!()
 		}
-
-		let all_assignees: Vec<_> = comp_statements.iter().map(|stm| &stm.assignee).collect();
-
-		if let Some(dupe_assignee) = find_dupe(&all_assignees) {
-			return Err(anyhow!(
-				"identifier '{dupe_assignee}' can not be assigned to more than once"
-			));
-		}
-
-		//TODO: remove (dbg)
 
 		let comp_statements_dbg = comp_statements
 			.iter()
