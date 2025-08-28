@@ -4,8 +4,6 @@ use crate::ant::world::{World, parser::token::Token};
 
 impl World {
 	pub(super) fn set_setting(&mut self, key: String, value: Token) -> Result<()> {
-		let key = key.to_ascii_lowercase();
-
 		// todo: implement all WorldConfig properties
 		// idea: more elegant match block
 		match key.as_str() {

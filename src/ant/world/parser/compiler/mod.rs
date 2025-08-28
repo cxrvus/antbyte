@@ -1,6 +1,7 @@
 mod call;
 mod func_comp;
 mod settings_comp;
+mod simulate;
 mod statement;
 
 use super::Parser;
@@ -9,11 +10,11 @@ use crate::ant::{
 	compiler::func_comp::compile_funcs,
 	world::{
 		World,
-		parser::{ParamValue, Signature},
+		parser::{AntFunc, ParamValue, Signature},
 	},
 };
 
-use anyhow::{Ok, Result};
+use anyhow::Result;
 
 #[derive(Debug)]
 struct CompFunc {
@@ -48,7 +49,20 @@ pub fn compile(code: String) -> Result<World> {
 
 	let comp_funcs = compile_funcs(parsed_world.funcs)?;
 
-	todo!("CONTINUE");
+	for AntFunc {
+		target_name,
+		target_id,
+	} in parsed_world.ants
+	{
+		// a call with no params or assignees to emulate the conditions for a valid ant Func
+		let func_call = FuncCall {
+			func: target_name,
+			assignees: vec![],
+			params: vec![],
+		};
+
+		let target_func = func_call.get_overload(&comp_funcs).unwrap();
+	}
 
 	Ok(world)
 }

@@ -69,7 +69,7 @@ impl FuncCall {
 		Ok(expanded_statements)
 	}
 
-	fn get_overload<'a>(&self, comp_funcs: &'a [CompFunc]) -> Result<&'a CompFunc> {
+	pub(super) fn get_overload<'a>(&self, comp_funcs: &'a [CompFunc]) -> Result<&'a CompFunc> {
 		if !comp_funcs.iter().any(|f| f.signature.name == self.func) {
 			return Err(anyhow!("unknown function: {}", self.func));
 		}
