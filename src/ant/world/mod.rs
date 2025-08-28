@@ -17,7 +17,7 @@ type Cells = Matrix<u8>;
 
 #[derive(Debug)]
 pub struct World {
-	pub behaviors: Vec<Behavior>,
+	pub behaviors: [Option<Behavior>; 0x100],
 	pub width: usize,
 	pub height: usize,
 	pub border_mode: BorderMode,
@@ -28,7 +28,7 @@ pub struct World {
 impl Default for World {
 	fn default() -> Self {
 		Self {
-			behaviors: vec![],
+			behaviors: [const { None }; 0x100],
 			width: 32,
 			height: 32,
 			border_mode: BorderMode::Collide,
@@ -121,8 +121,8 @@ impl WorldInstance {
 		&self.cells
 	}
 
-	fn get_behavior(&self, id: u8) -> Option<&Behavior> {
-		self.config.behaviors.get(id as usize)
+	fn get_behavior(&self, id: u8) -> &Option<Behavior> {
+		&self.config.behaviors[id as usize]
 	}
 
 	fn rng(&mut self) -> u8 {

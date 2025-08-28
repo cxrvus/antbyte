@@ -17,6 +17,7 @@ impl WorldInstance {
 			..
 		} = world_image
 			.get_behavior(ant.behavior)
+			.as_ref()
 			.expect("invalid Behavior ID");
 
 		let mut input_bits = 0u8;
