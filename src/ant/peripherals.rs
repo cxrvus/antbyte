@@ -115,19 +115,19 @@ impl Peripheral {
 
 	fn from_ident(ident: &str) -> Option<Self> {
 		match ident {
-			"c" | "cell_" => Some(Self::Cell),
-			"cc" | "clear" => Some(Self::CellClear),
-			"cn" | "next_cell_" => Some(Self::CellNext),
-			"t" | "clock_" => Some(Self::Time),
-			"m" | "mem_" => Some(Self::Memory),
-			"mc" | "clear_mem" => Some(Self::MemoryClear),
-			"r" | "rand_" => Some(Self::Random),
-			"obs" | "obstacle" => Some(Self::Obstacle),
-			"d" | "dir_" => Some(Self::Direction),
-			"mov" | "moving" => Some(Self::Moving),
-			"a" | "spawn_" => Some(Self::SpawnAnt),
-			"kill" => Some(Self::Kill),
-			"die" => Some(Self::Die),
+			"C" | "CELL_" => Some(Self::Cell),
+			"CC" | "CLEAR" => Some(Self::CellClear),
+			"CN" | "NEXT_CELL_" => Some(Self::CellNext),
+			"T" | "CLOCK_" => Some(Self::Time),
+			"M" | "MEM_" => Some(Self::Memory),
+			"MC" | "CLEAR_MEM" => Some(Self::MemoryClear),
+			"R" | "RAND_" => Some(Self::Random),
+			"OBS" | "OBSTACLE" => Some(Self::Obstacle),
+			"D" | "DIR_" => Some(Self::Direction),
+			"MOV" | "MOVING" => Some(Self::Moving),
+			"A" | "SPAWN_" => Some(Self::SpawnAnt),
+			"KILL" => Some(Self::Kill),
+			"DIE" => Some(Self::Die),
 			_ => None,
 		}
 	}
