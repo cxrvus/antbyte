@@ -131,6 +131,10 @@ impl Peripheral {
 			_ => None,
 		}
 	}
+
+	pub(super) fn is_peripheral_ident(ident: &str) -> bool {
+		Self::from_ident(ident).is_some()
+	}
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
