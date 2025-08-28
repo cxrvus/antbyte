@@ -5,7 +5,8 @@ use super::CompFunc;
 use crate::{
 	ant::{
 		compiler::CompStatement,
-		world::parser::{Func, Signature},
+		peripherals::Peripheral,
+		world::parser::{Func, Parser, Signature},
 	},
 	util::find_dupe,
 };
@@ -28,6 +29,8 @@ pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
 
 impl Signature {
 	fn validate(&self) -> Result<()> {
+		self.validate_keywords()?;
+
 		if let Some(collision) = self
 			.params
 			.iter()
@@ -48,6 +51,36 @@ impl Signature {
 		} else {
 			Ok(())
 		}
+	}
+
+	fn validate_keywords(&self) -> Result<()> {
+		let Signature {
+			name,
+			assignees,
+			params,
+		} = self;
+
+		let mut idents = vec![name];
+		idents.extend(params);
+		idents.extend(assignees);
+
+		for ident in idents {
+			let collision = if Parser::is_declaration_keyword(ident) {
+				Some("declaration keyword")
+			} else if Peripheral::is_peripheral_ident(ident) {
+				Some("peripheral specifier")
+			} else {
+				None
+			};
+
+			if let Some(collision) = collision {
+				return Err(anyhow!(
+					"identifier '{ident}' in signature of '{name}' is a {collision}"
+				));
+			}
+		}
+
+		Ok(())
 	}
 }
 

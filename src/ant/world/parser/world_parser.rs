@@ -1,50 +1,77 @@
 use super::{Parser, Token};
 use crate::ant::world::parser::ParsedWorld;
-use anyhow::{Result, anyhow};
+use anyhow::{Error, Result, anyhow};
+
+enum Declaration {
+	Set,
+	Fn,
+	Ant,
+}
+
+impl TryFrom<String> for Declaration {
+	type Error = Error;
+
+	fn try_from(keyword: String) -> Result<Self> {
+		match keyword.as_str() {
+			"set" => Ok(Self::Set),
+			"fn" => Ok(Self::Fn),
+			"ant" => Ok(Self::Ant),
+			_ => Err(anyhow!("invalid declaration keyword: {keyword}")),
+		}
+	}
+}
 
 impl Parser {
 	pub(super) fn parse_world(&mut self) -> Result<ParsedWorld> {
 		let mut world = ParsedWorld::default();
 
 		loop {
-			let statement_type = match self.next_token() {
+			let declaration_keyword = match self.next_token() {
 				Token::Ident(ident) => ident,
 				Token::EndOfFile => break,
 				// fixme: better error handling - parsing goes on even if statement is invalid
 				other => return Err(Parser::unexpected(other, "global statement")),
 			};
 
+			let declaration = Declaration::try_from(declaration_keyword)?;
 			let ident = self.next_ident()?;
 
-			// TODO: turn into match
-			if statement_type == "set" {
-				let (key, value) = parse_setting(self, ident)?;
-				world.settings.push((key, value));
-			} else if statement_type == "fn" {
-				let func = self.parse_func(ident)?;
-				world.funcs.push(func);
-			} else if statement_type == "ant" {
-				let (func, ant) = self.parse_ant(ident)?;
-				world.funcs.push(func);
-				world.ants.push(ant);
-			} else {
-				return Err(anyhow!("invalid global statement: {statement_type}"));
-			}
+			use Declaration::*;
+
+			match declaration {
+				Set => {
+					let (key, value) = self.parse_setting(ident)?;
+					world.settings.push((key, value));
+				}
+				Fn => {
+					let func = self.parse_func(ident)?;
+					world.funcs.push(func);
+				}
+				Ant => {
+					let (func, ant) = self.parse_ant(ident)?;
+					world.funcs.push(func);
+					world.ants.push(ant);
+				}
+			};
 		}
 
 		// dbg!(&statements);
 
 		Ok(world)
 	}
-}
 
-fn parse_setting(parser: &mut Parser, key: String) -> Result<(String, Token)> {
-	parser.assume_next(Token::Assign);
-	let value = parser.next_token();
-	parser.expect_next(Token::Semicolon)?;
+	pub(super) fn parse_setting(&mut self, key: String) -> Result<(String, Token)> {
+		self.assume_next(Token::Assign);
+		let value = self.next_token();
+		self.expect_next(Token::Semicolon)?;
 
-	match value {
-		Token::Ident(_) | Token::Number(_) => Ok((key, value)),
-		other => Err(Parser::unexpected(other, "value (identifier or number)")),
+		match value {
+			Token::Ident(_) | Token::Number(_) => Ok((key, value)),
+			other => Err(Parser::unexpected(other, "value (identifier or number)")),
+		}
+	}
+
+	pub(super) fn is_declaration_keyword(ident: &String) -> bool {
+		Declaration::try_from(ident.clone()).is_ok()
 	}
 }
