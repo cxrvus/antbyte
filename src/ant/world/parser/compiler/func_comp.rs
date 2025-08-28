@@ -3,23 +3,21 @@ use anyhow::{Result, anyhow};
 use super::CompFunc;
 
 use crate::ant::{
-	compiler::{CompFuncs, CompStatement},
+	compiler::CompStatement,
 	world::parser::{Func, Signature},
 };
 
-pub(super) fn compile_funcs(funcs: Vec<(String, Func)>) -> Result<CompFuncs> {
-	let mut comp_funcs = CompFuncs::default();
+pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
+	let mut comp_funcs = vec![];
 
-	for (name, func) in funcs.into_iter() {
+	for func in funcs.into_iter() {
 		func.signature.validate()?;
 
-		println!("{name}:\n");
+		println!("{}:", func.signature.name);
 
 		let comp_func = func.compile(&comp_funcs)?;
 
-		if comp_funcs.insert(name.clone(), comp_func).is_some() {
-			return Err(anyhow!("func name '{name}' used more than once"));
-		}
+		comp_funcs.push(comp_func);
 	}
 
 	Ok(comp_funcs)
@@ -42,7 +40,14 @@ impl Signature {
 }
 
 impl Func {
-	fn compile(&self, comp_funcs: &CompFuncs) -> Result<CompFunc> {
+	fn compile(&self, comp_funcs: &Vec<CompFunc>) -> Result<CompFunc> {
+		if comp_funcs.iter().any(|f| f.signature == self.signature) {
+			return Err(anyhow!(
+				"overload with signature {:?} already exists",
+				self.signature
+			));
+		}
+
 		let mut exp_index = 0;
 		let mut func_index = 0;
 		let mut comp_statements: Vec<CompStatement> = vec![];
@@ -67,10 +72,9 @@ impl Func {
 
 						comp_statements.push(flat_statement.into());
 					}
-					func_name => {
+					_ => {
 						func_index += 1;
-						let expanded =
-							flat_statement.expand_call(comp_funcs, func_name, func_index)?;
+						let expanded = flat_statement.expand_call(comp_funcs, func_index)?;
 						comp_statements.extend(expanded);
 					}
 				}

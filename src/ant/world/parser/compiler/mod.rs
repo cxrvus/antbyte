@@ -2,8 +2,6 @@ mod func_comp;
 mod settings_comp;
 mod statement;
 
-use std::collections::HashMap;
-
 use super::Parser;
 
 use crate::ant::{
@@ -12,9 +10,6 @@ use crate::ant::{
 };
 
 use anyhow::{Ok, Result};
-
-// TODO: turn this into a vector and implement overloading
-type CompFuncs = HashMap<String, CompFunc>;
 
 #[derive(Debug)]
 struct CompFunc {

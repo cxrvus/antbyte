@@ -11,7 +11,7 @@ use anyhow::{Error, Ok, Result, anyhow};
 #[derive(Debug, Default)]
 struct ParsedWorld {
 	settings: Vec<(String, Token)>,
-	funcs: Vec<(String, Func)>,
+	funcs: Vec<Func>,
 	ants: Vec<AntFunc>,
 }
 
@@ -21,8 +21,9 @@ struct Func {
 	statements: Vec<Statement>,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct Signature {
+	name: String,
 	in_params: Vec<String>,
 	out_params: Vec<String>,
 }

@@ -3,7 +3,7 @@ use std::fmt::{self, Display};
 use anyhow::{Result, anyhow};
 
 use crate::ant::{
-	compiler::{CompFuncs, CompStatement, FlatStatement, ParamValue},
+	compiler::{CompFunc, CompStatement, FlatStatement, ParamValue},
 	world::parser::{Expression, Signature, Statement},
 };
 
@@ -80,19 +80,14 @@ impl FlatStatement {
 
 	pub(super) fn expand_call(
 		&self,
-		comp_funcs: &CompFuncs,
-		func_name: &str,
+		comp_funcs: &Vec<CompFunc>,
 		func_index: u32,
 	) -> Result<Vec<CompStatement>> {
-		let called_func = comp_funcs
-			.get(func_name)
-			.ok_or(anyhow!("unknown function: '{func_name}'"))?;
+		let called_func = self.get_overload(comp_funcs)?;
 
-		let var_prefix = format!("_{func_name}{func_index:02}");
-		let mut expanded_statements = vec![];
 		let signature = &called_func.signature;
-
-		validate_call(signature, self, func_name)?;
+		let var_prefix = format!("_{}{func_index:02}", self.func);
+		let mut expanded_statements = vec![];
 
 		for mut comp_statement in called_func.comp_statements.clone() {
 			if let Some(out_param_index) = signature
@@ -128,26 +123,26 @@ impl FlatStatement {
 
 		Ok(expanded_statements)
 	}
-}
 
-fn validate_call(signature: &Signature, statement: &FlatStatement, func_name: &str) -> Result<()> {
-	let (in_count, out_count, param_val_count, assignee_count) = (
-		signature.in_params.len(),
-		signature.out_params.len(),
-		statement.params.len(),
-		statement.assignees.len(),
-	);
+	fn get_overload<'a>(&self, comp_funcs: &'a [CompFunc]) -> Result<&'a CompFunc> {
+		if !comp_funcs.iter().any(|f| f.signature.name == self.func) {
+			return Err(anyhow!("unknown function: {}", self.func));
+		}
 
-	if param_val_count != in_count {
-		Err(anyhow!(
-			"function '{func_name}' has been given an invalid number of parameter values\nexpected {in_count}, got {param_val_count}"
-		))
-	} else if assignee_count != out_count {
-		Err(anyhow!(
-			"function '{func_name}' has been given an invalid number of assignees\nexpected {out_count}, got {assignee_count}"
-		))
-	} else {
-		Ok(())
+		comp_funcs
+			.iter()
+			.find(|f| {
+				let Signature {
+					name,
+					in_params,
+					out_params,
+				} = &f.signature;
+
+				name == &self.func
+					&& in_params.len() == self.params.len()
+					&& out_params.len() == self.assignees.len()
+			})
+			.ok_or(anyhow!("no overload found for function call {self:?}"))
 	}
 }
 

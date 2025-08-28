@@ -21,11 +21,11 @@ impl Parser {
 				let (key, value) = parse_setting(self, ident)?;
 				world.settings.push((key, value));
 			} else if statement_type == "fn" {
-				let func = self.parse_func()?;
-				world.funcs.push((ident, func));
+				let func = self.parse_func(ident)?;
+				world.funcs.push(func);
 			} else if statement_type == "ant" {
 				let (func, ant) = self.parse_ant(&ident)?;
-				world.funcs.push((ident, func));
+				world.funcs.push(func);
 				world.ants.push(ant);
 			} else {
 				return Err(anyhow!("invalid global statement: {statement_type}"));

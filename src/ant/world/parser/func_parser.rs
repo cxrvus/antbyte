@@ -32,10 +32,10 @@ impl Parser {
 		Ok((func, ant))
 	}
 
-	pub(super) fn parse_func(&mut self) -> Result<Func> {
+	pub(super) fn parse_func(&mut self, name: String) -> Result<Func> {
 		self.expect_next(Token::Assign)?;
 
-		let signature = self.parse_signature()?;
+		let signature = self.parse_signature(name)?;
 		let statements = self.parse_statements()?;
 
 		Ok(Func {
@@ -44,7 +44,7 @@ impl Parser {
 		})
 	}
 
-	fn parse_signature(&mut self) -> Result<Signature> {
+	fn parse_signature(&mut self, name: String) -> Result<Signature> {
 		// idea: require parentheses like in JS
 		let in_params = self.next_ident_list()?;
 
@@ -53,6 +53,7 @@ impl Parser {
 		let out_params: Vec<String> = self.next_ident_list()?;
 
 		Ok(Signature {
+			name,
 			in_params,
 			out_params,
 		})
