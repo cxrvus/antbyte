@@ -18,7 +18,7 @@ impl Parser {
 		};
 
 		let ant = AntFunc {
-			target_func: name.clone(),
+			target_name: name.clone(),
 			target_id,
 		};
 

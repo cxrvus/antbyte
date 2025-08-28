@@ -57,7 +57,7 @@ struct Expression {
 
 #[derive(Debug)]
 struct AntFunc {
-	target_func: String,
+	target_name: String,
 	target_id: Option<u8>,
 }
 
