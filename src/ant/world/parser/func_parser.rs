@@ -11,7 +11,7 @@ impl Parser {
 			if let Token::Number(target_id) = target_id {
 				Some(target_id as u8)
 			} else {
-				return Err(anyhow!("expected Ant target ID after '=>'"));
+				return Err(anyhow!("expected Ant target ID after '='"));
 			}
 		} else {
 			None
