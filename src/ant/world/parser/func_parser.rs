@@ -6,12 +6,12 @@ use anyhow::{Result, anyhow};
 
 impl Parser {
 	pub(super) fn parse_ant(&mut self, name: &str) -> Result<(Func, AntFunc)> {
-		let target_id = if self.assume_next(Token::At) {
+		let target_id = if self.assume_next(Token::Assign) {
 			let target_id = self.next_token();
 			if let Token::Number(target_id) = target_id {
 				Some(target_id as u8)
 			} else {
-				return Err(anyhow!("expected Ant target ID after '@'"));
+				return Err(anyhow!("expected Ant target ID after '=>'"));
 			}
 		} else {
 			None
