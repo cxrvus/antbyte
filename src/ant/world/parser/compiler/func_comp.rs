@@ -2,9 +2,12 @@ use anyhow::{Result, anyhow};
 
 use super::CompFunc;
 
-use crate::ant::{
-	compiler::CompStatement,
-	world::parser::{Func, Signature},
+use crate::{
+	ant::{
+		compiler::CompStatement,
+		world::parser::{Func, Signature},
+	},
+	util::find_dupe,
 };
 
 pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
@@ -25,14 +28,23 @@ pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
 
 impl Signature {
 	fn validate(&self) -> Result<()> {
-		if let Some(dupe_ident) = self
+		if let Some(collision) = self
 			.params
 			.iter()
 			.find(|param| self.assignees.iter().any(|assignee| assignee == *param))
 		{
 			Err(anyhow!(
-				"identifier '{dupe_ident}' used both as a parameter and an assignee"
+				"identifier '{collision}' used both as a parameter and an assignee"
 			))
+		} else if self.params.contains(&self.name) || self.assignees.contains(&self.name) {
+			Err(anyhow!(
+				"cannot use func name {} as parameter or assignee",
+				self.name
+			))
+		} else if let Some(dupe) = find_dupe(&self.params) {
+			Err(anyhow!("identifier {dupe} used for multiple parameters"))
+		} else if let Some(dupe) = find_dupe(&self.assignees) {
+			Err(anyhow!("identifier {dupe} used for multiple assignees"))
 		} else {
 			Ok(())
 		}
