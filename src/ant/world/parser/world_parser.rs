@@ -71,7 +71,7 @@ impl Parser {
 		}
 	}
 
-	pub(super) fn is_declaration_keyword(ident: &String) -> bool {
-		Declaration::try_from(ident.clone()).is_ok()
+	pub(super) fn is_declaration_keyword(ident: &str) -> bool {
+		Declaration::try_from(ident.to_owned()).is_ok()
 	}
 }

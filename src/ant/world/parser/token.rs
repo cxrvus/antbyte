@@ -17,7 +17,6 @@ pub enum Token {
 	Semicolon,
 	Assign,
 	Arrow,
-	At,
 	BraceLeft,
 	BraceRight,
 
