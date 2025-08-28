@@ -24,14 +24,27 @@ struct Func {
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct Signature {
 	name: String,
-	in_params: Vec<String>,
-	out_params: Vec<String>,
+	assignees: Vec<String>,
+	params: Vec<String>,
 }
 
 #[derive(Debug)]
 struct Statement {
-	assignees: Vec<String>,
+	assignees: Vec<ParamValue>,
 	expression: Expression,
+}
+
+#[derive(Debug, Clone)]
+struct ParamValue {
+	sign: bool,
+	target: String,
+}
+
+impl ParamValue {
+	#[inline]
+	fn invert(&mut self) {
+		self.sign = !self.sign;
+	}
 }
 
 #[derive(Debug)]
@@ -104,31 +117,44 @@ impl Parser {
 	}
 
 	fn next_ident_list(&mut self) -> Result<Vec<String>> {
-		let identifiers = if self.assume_next(Token::ParenthesisLeft) {
+		self.next_tuple(Self::next_ident)
+	}
+
+	fn next_assignee(&mut self) -> Result<ParamValue> {
+		let sign = self.assume_next(Token::Invert);
+		let target = self.next_ident()?;
+		Ok(ParamValue { sign, target })
+	}
+
+	fn next_assignee_list(&mut self) -> Result<Vec<ParamValue>> {
+		self.next_tuple(Self::next_assignee)
+	}
+
+	fn next_tuple<T>(&mut self, get_item: fn(&mut Self) -> Result<T>) -> Result<Vec<T>> {
+		let items = if self.assume_next(Token::ParenthesisLeft) {
 			if self.assume_next(Token::ParenthesisRight) {
 				vec![]
 			} else {
-				let mut identifiers: Vec<String> = vec![];
-				let mut expect_ident = true;
+				let mut items: Vec<T> = vec![];
+				let mut expect_item = true;
 
 				loop {
-					if expect_ident {
-						let ident = self.next_ident()?;
-						identifiers.push(ident);
+					if expect_item {
+						items.push(get_item(self)?);
 					} else if !self.assume_next(Token::Comma) {
 						break;
 					}
 
-					expect_ident = !expect_ident;
+					expect_item = !expect_item;
 				}
 
 				self.expect_next(Token::ParenthesisRight)?;
-				identifiers
+				items
 			}
 		} else {
-			vec![self.next_ident()?]
+			vec![get_item(self)?]
 		};
 
-		Ok(identifiers)
+		Ok(items)
 	}
 }

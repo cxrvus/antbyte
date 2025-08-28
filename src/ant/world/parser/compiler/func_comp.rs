@@ -25,13 +25,13 @@ pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
 
 impl Signature {
 	fn validate(&self) -> Result<()> {
-		if let Some(dupe_ident) = self.in_params.iter().find(|in_param| {
-			self.out_params
-				.iter()
-				.any(|out_param| out_param == *in_param)
-		}) {
+		if let Some(dupe_ident) = self
+			.params
+			.iter()
+			.find(|param| self.assignees.iter().any(|assignee| assignee == *param))
+		{
 			Err(anyhow!(
-				"identifier '{dupe_ident}' used both as an in- and an out-parameter"
+				"identifier '{dupe_ident}' used both as a parameter and an assignee"
 			))
 		} else {
 			Ok(())
@@ -40,7 +40,7 @@ impl Signature {
 }
 
 impl Func {
-	fn compile(&self, comp_funcs: &Vec<CompFunc>) -> Result<CompFunc> {
+	fn compile(&self, comp_funcs: &[CompFunc]) -> Result<CompFunc> {
 		if comp_funcs.iter().any(|f| f.signature == self.signature) {
 			return Err(anyhow!(
 				"overload with signature {:?} already exists",
@@ -55,26 +55,24 @@ impl Func {
 		for statement in self.statements.iter() {
 			exp_index += 1;
 
-			let mut flat_statements = statement.expand_expression(&mut exp_index);
+			let mut func_calls = statement.expand_expression(&mut exp_index);
 
-			flat_statements
-				.iter_mut()
-				.for_each(|stm| stm.resolve_and_gate());
+			func_calls.iter_mut().for_each(|stm| stm.resolve_and_gate());
 
-			for flat_statement in flat_statements {
-				match flat_statement.func.as_str() {
+			for func_call in func_calls {
+				match func_call.func.as_str() {
 					"or" => {
-						if flat_statement.assignees.len() != 1 {
+						if func_call.assignees.len() != 1 {
 							return Err(anyhow!(
 								"the result of an OR may only be assigned to a single assignee"
 							));
 						}
 
-						comp_statements.push(flat_statement.into());
+						comp_statements.push(func_call.into());
 					}
 					_ => {
 						func_index += 1;
-						let expanded = flat_statement.expand_call(comp_funcs, func_index)?;
+						let expanded = func_call.expand_call(comp_funcs, func_index)?;
 						comp_statements.extend(expanded);
 					}
 				}

@@ -24,7 +24,7 @@ impl Parser {
 				let func = self.parse_func(ident)?;
 				world.funcs.push(func);
 			} else if statement_type == "ant" {
-				let (func, ant) = self.parse_ant(&ident)?;
+				let (func, ant) = self.parse_ant(ident)?;
 				world.funcs.push(func);
 				world.ants.push(ant);
 			} else {

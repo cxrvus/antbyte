@@ -5,7 +5,7 @@ use super::{Parser, Statement, Token};
 use anyhow::{Result, anyhow};
 
 impl Parser {
-	pub(super) fn parse_ant(&mut self, name: &str) -> Result<(Func, AntFunc)> {
+	pub(super) fn parse_ant(&mut self, name: String) -> Result<(Func, AntFunc)> {
 		let target_id = if self.assume_next(Token::Assign) {
 			let target_id = self.next_token();
 			if let Token::Number(target_id) = target_id {
@@ -18,7 +18,7 @@ impl Parser {
 		};
 
 		let ant = AntFunc {
-			target_func: name.into(),
+			target_func: name.clone(),
 			target_id,
 		};
 
@@ -26,7 +26,10 @@ impl Parser {
 
 		let func = Func {
 			statements,
-			signature: Default::default(),
+			signature: Signature {
+				name,
+				..Default::default()
+			},
 		};
 
 		Ok((func, ant))
@@ -45,17 +48,14 @@ impl Parser {
 	}
 
 	fn parse_signature(&mut self, name: String) -> Result<Signature> {
-		// idea: require parentheses like in JS
-		let in_params = self.next_ident_list()?;
-
+		let params = self.next_ident_list()?;
 		self.expect_next(Token::Arrow)?;
-
-		let out_params: Vec<String> = self.next_ident_list()?;
+		let assignees: Vec<String> = self.next_ident_list()?;
 
 		Ok(Signature {
 			name,
-			in_params,
-			out_params,
+			params,
+			assignees,
 		})
 	}
 
@@ -65,7 +65,7 @@ impl Parser {
 		let mut statements: Vec<Statement> = vec![];
 
 		loop {
-			let assignees = self.next_ident_list()?;
+			let assignees = self.next_assignee_list()?;
 
 			self.expect_next(Token::Assign)?;
 

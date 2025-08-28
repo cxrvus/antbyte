@@ -6,7 +6,10 @@ use super::Parser;
 
 use crate::ant::{
 	compiler::func_comp::compile_funcs,
-	world::{World, parser::Signature},
+	world::{
+		World,
+		parser::{ParamValue, Signature},
+	},
 };
 
 use anyhow::{Ok, Result};
@@ -19,26 +22,18 @@ struct CompFunc {
 
 /// like `Statement`, but flattened, using `ParamValue`s instead of recursive `Expression`s
 #[derive(Debug, Clone)]
-struct FlatStatement {
+struct FuncCall {
 	func: String,
-	assignees: Vec<String>,
-	sign: bool,
+	assignees: Vec<ParamValue>,
 	params: Vec<ParamValue>,
 }
 
-/// like `FlatStatement`, but with exactly one assignee
+/// like `FuncCall`, but without func and with exactly one assignee
 /// and without `func`: all funcs resolved to be `OR`
 #[derive(Debug, Clone)]
 struct CompStatement {
-	assignee: String,
-	sign: bool,
+	assignee: ParamValue,
 	params: Vec<ParamValue>,
-}
-
-#[derive(Debug, Clone)]
-struct ParamValue {
-	sign: bool,
-	target: String,
 }
 
 pub fn compile(code: String) -> Result<World> {

@@ -3,15 +3,24 @@ use std::fmt::{self, Display};
 use anyhow::{Result, anyhow};
 
 use crate::ant::{
-	compiler::{CompFunc, CompStatement, FlatStatement, ParamValue},
+	compiler::{CompFunc, CompStatement, FuncCall, ParamValue},
 	world::parser::{Expression, Signature, Statement},
 };
 
 impl Statement {
-	pub(super) fn expand_expression(&self, start_index: &mut u32) -> Vec<FlatStatement> {
-		let mut flat_statements = self.expression.expand(start_index);
-		flat_statements.last_mut().unwrap().assignees = self.assignees.clone();
-		flat_statements
+	pub(super) fn expand_expression(&self, start_index: &mut u32) -> Vec<FuncCall> {
+		let mut func_calls = self.expression.expand(start_index);
+		let mut last_func_call = func_calls.pop().unwrap();
+		let mut stm_assignees = self.assignees.clone();
+
+		if last_func_call.assignees[0].sign {
+			stm_assignees.iter_mut().for_each(|f| f.invert());
+		}
+
+		last_func_call.assignees = stm_assignees;
+		func_calls.push(last_func_call);
+
+		func_calls
 	}
 }
 
@@ -21,15 +30,15 @@ impl Expression {
 		format!("_exp{index:02}")
 	}
 
-	fn expand(&self, index: &mut u32) -> Vec<FlatStatement> {
-		let mut flat_statements = vec![];
+	fn expand(&self, index: &mut u32) -> Vec<FuncCall> {
+		let mut func_calls = vec![];
 
 		let (func, params) = if let Some(parameters) = &self.params {
 			let mut params = vec![];
 
 			for sub_exp in parameters {
 				if sub_exp.params.is_some() {
-					flat_statements.extend(sub_exp.expand(index));
+					func_calls.extend(sub_exp.expand(index));
 
 					params.push(ParamValue {
 						sign: sub_exp.sign,
@@ -53,34 +62,35 @@ impl Expression {
 			("or".to_string(), params)
 		};
 
-		flat_statements.push(FlatStatement {
-			func,
-			assignees: vec![Self::format_index(*index)],
+		let assignee = ParamValue {
+			target: Self::format_index(*index),
 			sign: self.sign,
+		};
+
+		func_calls.push(FuncCall {
+			func,
+			assignees: vec![assignee],
 			params,
 		});
 
 		*index += 1;
-		flat_statements
+		func_calls
 	}
 }
 
-impl FlatStatement {
+impl FuncCall {
 	/// transform AND into OR ([DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws))
 	pub(super) fn resolve_and_gate(&mut self) {
 		if self.func == "and" {
-			self.params
-				.iter_mut()
-				.for_each(|param| param.sign = !param.sign);
-
-			self.sign = !self.sign;
+			self.params.iter_mut().for_each(|param| param.invert());
+			self.assignees.iter_mut().for_each(|asg| asg.invert());
 			self.func = "or".into();
 		}
 	}
 
 	pub(super) fn expand_call(
 		&self,
-		comp_funcs: &Vec<CompFunc>,
+		comp_funcs: &[CompFunc],
 		func_index: u32,
 	) -> Result<Vec<CompStatement>> {
 		let called_func = self.get_overload(comp_funcs)?;
@@ -89,36 +99,44 @@ impl FlatStatement {
 		let var_prefix = format!("_{}{func_index:02}", self.func);
 		let mut expanded_statements = vec![];
 
-		for mut comp_statement in called_func.comp_statements.clone() {
-			if let Some(out_param_index) = signature
-				.out_params
+		for mut func_stm in called_func.comp_statements.clone() {
+			if let Some(assignee_index) = signature
+				.assignees
 				.iter()
-				.position(|out_param| *out_param == comp_statement.assignee)
+				.position(|asg_target| *asg_target == func_stm.assignee.target)
 			{
-				// assignee represents a function out-param
-				comp_statement.assignee = self.assignees[out_param_index].clone();
+				// assignee represents a function assignee
+				let call_assignee = &self.assignees[assignee_index];
+
+				func_stm.assignee = ParamValue {
+					sign: func_stm.assignee.sign ^ call_assignee.sign,
+					target: call_assignee.target.clone(),
+				}
 			} else {
 				// assignee represents a variable
-				comp_statement.assignee = var_prefix.clone() + &comp_statement.assignee;
+				func_stm.assignee.target = var_prefix.clone() + &func_stm.assignee.target;
 			}
 
-			for param in comp_statement.params.iter_mut() {
-				if let Some(in_param_index) = signature
-					.in_params
+			for func_param in func_stm.params.iter_mut() {
+				if let Some(param_index) = signature
+					.params
 					.iter()
-					.position(|in_param| *in_param == param.target)
+					.position(|param_target| *param_target == func_param.target)
 				{
-					// value targets a function in-parameter
-					let in_param_value = &self.params[in_param_index];
-					param.target = in_param_value.target.clone();
-					param.sign ^= in_param_value.sign;
+					// value targets a function parameter
+					let call_param = &self.params[param_index];
+
+					*func_param = ParamValue {
+						sign: func_param.sign ^ call_param.sign,
+						target: call_param.target.clone(),
+					};
 				} else {
 					// value targets a variable
-					param.target = var_prefix.clone() + &param.target;
+					func_param.target = var_prefix.clone() + &func_param.target;
 				}
 			}
 
-			expanded_statements.push(comp_statement);
+			expanded_statements.push(func_stm);
 		}
 
 		Ok(expanded_statements)
@@ -134,36 +152,37 @@ impl FlatStatement {
 			.find(|f| {
 				let Signature {
 					name,
-					in_params,
-					out_params,
+					params,
+					assignees,
 				} = &f.signature;
 
 				name == &self.func
-					&& in_params.len() == self.params.len()
-					&& out_params.len() == self.assignees.len()
+					&& params.len() == self.params.len()
+					&& assignees.len() == self.assignees.len()
 			})
-			.ok_or(anyhow!("no overload found for function call {self:?}"))
+			.ok_or(anyhow!(
+				"no overload found for function '{}'\nwith {} parameters and {} assignees",
+				self.func,
+				self.params.len(),
+				self.assignees.len()
+			))
 	}
 }
 
-impl From<FlatStatement> for CompStatement {
-	fn from(flat_statement: FlatStatement) -> Self {
+impl From<FuncCall> for CompStatement {
+	fn from(func_call: FuncCall) -> Self {
 		#[rustfmt::skip]
-		let FlatStatement { assignees, sign, params, func } = flat_statement;
+		let FuncCall { assignees, params, func } = func_call;
 
-		assert_eq!(
-			func, "or",
-			"FlatStatement func must be 'or' \nfound '{func}'"
-		);
+		assert_eq!(func, "or", "func must be 'or' \nfound '{func}'");
 
 		assert_eq!(
 			assignees.len(),
 			1,
-			"FlatStatement must have exactly one left-hand-side value\nfound {assignees:?})",
+			"FuncCall must have exactly one left-hand-side value\nfound {assignees:?})",
 		);
 
 		Self {
-			sign,
 			assignee: assignees[0].clone(),
 			params: params.clone(),
 		}
@@ -172,19 +191,16 @@ impl From<FlatStatement> for CompStatement {
 
 impl Display for CompStatement {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		let Self {
-			assignee,
-			sign,
-			params,
-		} = self;
+		let sign = sign_to_str(self.assignee.sign);
 
-		let sign = sign_to_str(*sign);
-
-		let params = params
+		let params = self
+			.params
 			.iter()
 			.map(|param| sign_to_str(param.sign).to_string() + &param.target)
 			.collect::<Vec<_>>()
 			.join(", ");
+
+		let assignee = &self.assignee.target;
 
 		write!(f, "{sign}{assignee} <- {params};")
 	}
