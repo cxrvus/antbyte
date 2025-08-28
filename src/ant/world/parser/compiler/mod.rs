@@ -1,3 +1,4 @@
+mod call;
 mod func_comp;
 mod settings_comp;
 mod statement;
