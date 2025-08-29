@@ -5,8 +5,7 @@ use super::CompFunc;
 use crate::{
 	ant::{
 		compiler::CompStatement,
-		peripherals::Peripheral,
-		world::parser::{Func, Parser, Signature},
+		world::parser::{Func, Signature, token::Token},
 	},
 	util::find_dupe,
 };
@@ -65,17 +64,9 @@ impl Signature {
 		idents.extend(assignees);
 
 		for ident in idents {
-			let collision = if Parser::is_declaration_keyword(ident) {
-				Some("declaration keyword")
-			} else if Peripheral::is_peripheral_ident(ident) {
-				Some("peripheral specifier")
-			} else {
-				None
-			};
-
-			if let Some(collision) = collision {
+			if Token::is_uppercase_ident(ident) {
 				return Err(anyhow!(
-					"identifier '{ident}' in signature of '{name}' is a {collision}"
+					"may only use lower-case identifiers in function signatures\nfound '{ident}' in function '{name}'"
 				));
 			}
 		}

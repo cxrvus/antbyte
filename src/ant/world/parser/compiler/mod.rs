@@ -39,7 +39,7 @@ struct CompStatement {
 }
 
 pub fn compile(code: String) -> Result<World> {
-	let parsed_world = Parser::new(code).parse_world()?;
+	let parsed_world = Parser::new(code)?.parse_world()?;
 
 	let mut world = World::default();
 

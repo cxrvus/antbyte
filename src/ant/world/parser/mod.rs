@@ -67,10 +67,10 @@ struct Parser {
 }
 
 impl Parser {
-	fn new(code: String) -> Self {
-		let mut tokens = Token::tokenize(code);
+	fn new(code: String) -> Result<Self> {
+		let mut tokens = Token::tokenize(code)?;
 		tokens.reverse();
-		Self { tokens }
+		Ok(Self { tokens })
 	}
 
 	#[inline]
