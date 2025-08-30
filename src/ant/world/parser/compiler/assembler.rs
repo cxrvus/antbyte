@@ -69,6 +69,12 @@ impl CompFunc {
 		if Token::is_uppercase_ident(target) {
 			let periph = PeripheralBit::from_ident(target)?;
 
+			if let Some(req_io) = periph.peripheral.properties().io_type
+				&& req_io != io_type
+			{
+				return Err(anyhow!("cannot use peripheral '{target}' as {io_type:?}"));
+			}
+
 			*target = format_periph(target, io_type);
 
 			if !periphs.contains(&periph) {

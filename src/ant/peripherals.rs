@@ -29,9 +29,9 @@ pub enum Peripheral {
 }
 
 #[derive(Debug, Default)]
-struct PeripheralProperties {
-	size: u8,
-	io_type: Option<IoType>,
+pub struct PeripheralProperties {
+	pub size: u8,
+	pub io_type: Option<IoType>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -49,7 +49,7 @@ const BYTE: u8 = 8;
 
 impl Peripheral {
 	// idea: use Vec / HashMap instead of match and incorporate idents
-	fn properties(&self) -> PeripheralProperties {
+	pub fn properties(&self) -> PeripheralProperties {
 		use IoType::*;
 		use Peripheral::*;
 		type Props = PeripheralProperties;
@@ -76,7 +76,7 @@ impl Peripheral {
 		props
 	}
 
-	fn from_ident(ident: &str) -> Option<Self> {
+	pub fn from_ident(ident: &str) -> Option<Self> {
 		match ident {
 			"C" | "CELL_" => Some(Self::Cell),
 			"CC" | "CLEAR" => Some(Self::CellClear),
