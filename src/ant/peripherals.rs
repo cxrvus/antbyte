@@ -131,10 +131,6 @@ impl Peripheral {
 			_ => None,
 		}
 	}
-
-	pub(super) fn is_peripheral_ident(ident: &str) -> bool {
-		Self::from_ident(ident).is_some()
-	}
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -192,7 +188,7 @@ impl PeripheralBit {
 
 		// let (periph_string, bit_index) =
 		let captures = re
-			.captures(&ident)
+			.captures(ident)
 			.ok_or(anyhow!("'{ident}' is not a valid peripheral"))?;
 
 		let periph_ident = captures.get(1).unwrap().as_str();

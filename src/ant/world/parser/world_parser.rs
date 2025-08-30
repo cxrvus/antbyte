@@ -1,6 +1,6 @@
 use super::{Parser, Token};
 use crate::ant::world::parser::{ParsedWorld, token::Keyword};
-use anyhow::{Error, Result, anyhow};
+use anyhow::Result;
 
 impl Parser {
 	pub(super) fn parse_world(&mut self) -> Result<ParsedWorld> {

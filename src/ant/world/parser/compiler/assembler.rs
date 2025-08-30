@@ -1,7 +1,7 @@
 use crate::{
 	ant::{
 		Behavior,
-		compiler::{CompFunc, CompStatement},
+		compiler::CompFunc,
 		peripherals::{IoType, PeripheralBit},
 		world::parser::{ParamValue, Signature, token::Token},
 	},

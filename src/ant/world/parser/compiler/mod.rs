@@ -65,7 +65,6 @@ pub fn compile(code: String) -> Result<World> {
 	let comp_funcs = compile_funcs(parsed_world.funcs)?;
 
 	let mut behaviors: [Option<Behavior>; 0x100] = [const { None }; 0x100];
-	let mut default_id: usize = 0;
 
 	for AntFunc {
 		target_name,
@@ -87,10 +86,12 @@ pub fn compile(code: String) -> Result<World> {
 
 			let target_func = func_call.get_overload(&comp_funcs).unwrap();
 
-			let behavior = target_func.assemble()?;
-			behaviors[target_id as usize] = Some(behavior);
+			let behavior = target_func.assemble().map(Some)?;
+			behaviors[target_id as usize] = behavior;
 		}
 	}
+
+	world.behaviors = behaviors;
 
 	Ok(world)
 }
