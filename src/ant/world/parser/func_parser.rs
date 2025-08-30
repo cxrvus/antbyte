@@ -1,4 +1,7 @@
-use crate::ant::world::parser::{AntFunc, Func, Signature};
+use crate::{
+	ant::world::parser::{AntFunc, Func, Signature},
+	util::find_dupe,
+};
 
 use super::{Parser, Statement, Token};
 
@@ -52,11 +55,15 @@ impl Parser {
 		self.expect_next(Token::Arrow)?;
 		let assignees: Vec<String> = self.next_ident_list()?;
 
-		Ok(Signature {
+		let signature = Signature {
 			name,
 			params,
 			assignees,
-		})
+		};
+
+		signature.validate()?;
+
+		Ok(signature)
 	}
 
 	fn parse_statements(&mut self) -> Result<Vec<Statement>> {
@@ -84,5 +91,54 @@ impl Parser {
 		}
 
 		Ok(statements)
+	}
+}
+
+impl Signature {
+	fn validate(&self) -> Result<()> {
+		self.validate_keywords()?;
+
+		if let Some(collision) = self
+			.params
+			.iter()
+			.find(|param| self.assignees.iter().any(|assignee| assignee == *param))
+		{
+			Err(anyhow!(
+				"identifier '{collision}' used both as a parameter and an assignee"
+			))
+		} else if self.params.contains(&self.name) || self.assignees.contains(&self.name) {
+			Err(anyhow!(
+				"cannot use func name {} as parameter or assignee",
+				self.name
+			))
+		} else if let Some(dupe) = find_dupe(&self.params) {
+			Err(anyhow!("identifier {dupe} used for multiple parameters"))
+		} else if let Some(dupe) = find_dupe(&self.assignees) {
+			Err(anyhow!("identifier {dupe} used for multiple assignees"))
+		} else {
+			Ok(())
+		}
+	}
+
+	fn validate_keywords(&self) -> Result<()> {
+		let Signature {
+			name,
+			assignees,
+			params,
+		} = self;
+
+		let mut idents = vec![name];
+		idents.extend(params);
+		idents.extend(assignees);
+
+		for ident in idents {
+			if Token::is_uppercase_ident(ident) {
+				return Err(anyhow!(
+					"may only use lower-case identifiers in function signatures\nfound '{ident}' in function '{name}'"
+				));
+			}
+		}
+
+		Ok(())
 	}
 }

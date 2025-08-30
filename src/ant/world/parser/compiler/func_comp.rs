@@ -2,20 +2,12 @@ use anyhow::{Result, anyhow};
 
 use super::CompFunc;
 
-use crate::{
-	ant::{
-		compiler::CompStatement,
-		world::parser::{Func, Signature, token::Token},
-	},
-	util::find_dupe,
-};
+use crate::ant::{compiler::CompStatement, world::parser::Func};
 
 pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
 	let mut comp_funcs = vec![];
 
 	for func in funcs.into_iter() {
-		func.signature.validate()?;
-
 		println!("{}:", func.signature.name);
 
 		let comp_func = func.compile(&comp_funcs)?;
@@ -24,55 +16,6 @@ pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
 	}
 
 	Ok(comp_funcs)
-}
-
-impl Signature {
-	fn validate(&self) -> Result<()> {
-		self.validate_keywords()?;
-
-		if let Some(collision) = self
-			.params
-			.iter()
-			.find(|param| self.assignees.iter().any(|assignee| assignee == *param))
-		{
-			Err(anyhow!(
-				"identifier '{collision}' used both as a parameter and an assignee"
-			))
-		} else if self.params.contains(&self.name) || self.assignees.contains(&self.name) {
-			Err(anyhow!(
-				"cannot use func name {} as parameter or assignee",
-				self.name
-			))
-		} else if let Some(dupe) = find_dupe(&self.params) {
-			Err(anyhow!("identifier {dupe} used for multiple parameters"))
-		} else if let Some(dupe) = find_dupe(&self.assignees) {
-			Err(anyhow!("identifier {dupe} used for multiple assignees"))
-		} else {
-			Ok(())
-		}
-	}
-
-	fn validate_keywords(&self) -> Result<()> {
-		let Signature {
-			name,
-			assignees,
-			params,
-		} = self;
-
-		let mut idents = vec![name];
-		idents.extend(params);
-		idents.extend(assignees);
-
-		for ident in idents {
-			if Token::is_uppercase_ident(ident) {
-				return Err(anyhow!(
-					"may only use lower-case identifiers in function signatures\nfound '{ident}' in function '{name}'"
-				));
-			}
-		}
-
-		Ok(())
-	}
 }
 
 impl Func {
