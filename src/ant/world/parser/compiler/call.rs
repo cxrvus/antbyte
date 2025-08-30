@@ -23,7 +23,7 @@ impl FuncCall {
 		let called_func = self.get_overload(comp_funcs)?;
 
 		let signature = &called_func.signature;
-		let var_prefix = format!("_{}{func_index:02}", self.func);
+		let var_prefix = format!("_{}_{func_index}", self.func);
 		let mut expanded_statements = vec![];
 
 		for mut func_stm in called_func.comp_statements.clone() {

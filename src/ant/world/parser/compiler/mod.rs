@@ -3,6 +3,8 @@ mod func_comp;
 mod settings_comp;
 mod statement;
 
+use std::fmt::Display;
+
 use super::Parser;
 
 use crate::ant::{
@@ -19,6 +21,18 @@ use anyhow::Result;
 struct CompFunc {
 	signature: Signature,
 	comp_statements: Vec<CompStatement>,
+}
+
+impl Display for CompFunc {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		writeln!(f, "{} !{{", self.signature)?;
+
+		for comp_statement in &self.comp_statements {
+			writeln!(f, "\t{comp_statement}")?
+		}
+
+		writeln!(f, "}}")
+	}
 }
 
 /// like `Statement`, but flattened, using `ParamValue`s instead of recursive `Expression`s

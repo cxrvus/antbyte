@@ -8,9 +8,9 @@ pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
 	let mut comp_funcs = vec![];
 
 	for func in funcs.into_iter() {
-		println!("{}:", func.signature.name);
-
 		let comp_func = func.compile(&comp_funcs)?;
+
+		println!("{comp_func}");
 
 		comp_funcs.push(comp_func);
 	}
@@ -32,8 +32,6 @@ impl Func {
 		let mut comp_statements: Vec<CompStatement> = vec![];
 
 		for statement in self.statements.iter() {
-			exp_index += 1;
-
 			let mut func_calls = statement.expand_expression(&mut exp_index);
 
 			func_calls.iter_mut().for_each(|stm| stm.resolve_and_gate());
@@ -57,16 +55,8 @@ impl Func {
 				}
 			}
 
-			println!()
+			exp_index += 1;
 		}
-
-		let comp_statements_dbg = comp_statements
-			.iter()
-			.map(|x| x.to_string())
-			.collect::<Vec<_>>()
-			.join("\n");
-
-		println!("{comp_statements_dbg}\n");
 
 		Ok(CompFunc {
 			comp_statements,

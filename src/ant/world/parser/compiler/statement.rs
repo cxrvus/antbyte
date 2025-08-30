@@ -25,7 +25,7 @@ impl Statement {
 impl Expression {
 	#[inline]
 	fn format_index(index: u32) -> String {
-		format!("_exp{index:02}")
+		format!("_{index}")
 	}
 
 	fn expand(&self, index: &mut u32) -> Vec<FuncCall> {
@@ -78,24 +78,14 @@ impl Expression {
 
 impl Display for CompStatement {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		let sign = sign_to_str(self.assignee.sign);
+		let Self { assignee, params } = self;
 
-		let params = self
-			.params
+		let params = params
 			.iter()
-			.map(|param| sign_to_str(param.sign).to_string() + &param.target)
+			.map(|param| param.to_string())
 			.collect::<Vec<_>>()
 			.join(", ");
 
-		let assignee = &self.assignee.target;
-
-		write!(f, "{sign}{assignee} <- {params};")
-	}
-}
-
-fn sign_to_str(sign: bool) -> &'static str {
-	match sign {
-		false => "",
-		true => "!",
+		write!(f, "{assignee} <- {params};")
 	}
 }

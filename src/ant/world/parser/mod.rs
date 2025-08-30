@@ -5,6 +5,8 @@ mod func_parser;
 mod token;
 mod world_parser;
 
+use std::fmt::Display;
+
 use self::token::Token;
 use anyhow::{Error, Ok, Result, anyhow};
 
@@ -28,6 +30,16 @@ struct Signature {
 	params: Vec<String>,
 }
 
+impl Display for Signature {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let name = &self.name;
+		let params = self.params.join(", ");
+		let assignees = self.assignees.join(", ");
+
+		write!(f, "{name} = ({params}) => ({assignees})")
+	}
+}
+
 #[derive(Debug)]
 struct Statement {
 	assignees: Vec<ParamValue>,
@@ -44,6 +56,19 @@ impl ParamValue {
 	#[inline]
 	fn invert(&mut self) {
 		self.sign = !self.sign;
+	}
+}
+
+impl Display for ParamValue {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let Self { sign, target } = self;
+
+		let sign = match sign {
+			false => "",
+			true => "!",
+		};
+
+		write!(f, "{sign}{target}")
 	}
 }
 
