@@ -89,8 +89,7 @@ impl WorldInstance {
 				}
 				Cell if value != 0 => self.cells.set_at(&ant.pos.sign(), value),
 				CellClear if value == 1 => self.cells.set_at(&ant.pos.sign(), 0),
-				Memory if value != 0 => ant.memory = value,
-				MemoryClear if value == 1 => ant.memory = 0,
+				Memory => ant.memory = value,
 				SpawnAnt => {
 					// direction gets flip, so that new ant
 					// spawns behind the old one and not in front of her

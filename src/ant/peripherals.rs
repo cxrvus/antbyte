@@ -12,7 +12,6 @@ pub enum Peripheral {
 	// universal inputs:
 	Time,
 	Memory,
-	MemoryClear,
 	Random,
 
 	Obstacle,
@@ -61,7 +60,6 @@ impl Peripheral {
 			CellNext 	=> Props { size: CELL, io_type: Some(Input), },
 			Time 		=> Props { size: BYTE, io_type: Some(Input), },
 			Memory 		=> Props { size: BYTE, io_type: None, },
-			MemoryClear => Props { size: BIT, io_type: Some(Output), },
 			Random 		=> Props { size: BYTE, io_type: Some(Input), },
 			Obstacle 	=> Props { size: BIT, io_type: Some(Input), },
 			Direction 	=> Props { size: DIR, io_type: None, },
@@ -83,7 +81,6 @@ impl Peripheral {
 			"CN" | "NEXT_CELL_" => Some(Self::CellNext),
 			"T" | "CLOCK_" => Some(Self::Time),
 			"M" | "MEM_" => Some(Self::Memory),
-			"MC" | "CLEAR_MEM" => Some(Self::MemoryClear),
 			"R" | "RAND_" => Some(Self::Random),
 			"OBS" | "OBSTACLE" => Some(Self::Obstacle),
 			"D" | "DIR_" => Some(Self::Direction),
