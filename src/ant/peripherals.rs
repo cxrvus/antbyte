@@ -48,64 +48,27 @@ const ANT_ID: u8 = NIBBLE;
 const BYTE: u8 = 8;
 
 impl Peripheral {
+	// idea: use Vec / HashMap instead of match and incorporate idents
 	fn properties(&self) -> PeripheralProperties {
 		use IoType::*;
+		use Peripheral::*;
 		type Props = PeripheralProperties;
 
-		// idea: use Vec / HashMap instead of match and incorporate idents
+		#[rustfmt::skip]
 		let props = match self {
-			Peripheral::Cell => Props {
-				size: CELL,
-				io_type: None,
-			},
-			Peripheral::CellClear => Props {
-				size: BIT,
-				io_type: Some(Output),
-			},
-			Peripheral::CellNext => Props {
-				size: CELL,
-				io_type: Some(Input),
-			},
-			Peripheral::Time => Props {
-				size: BYTE,
-				io_type: Some(Input),
-			},
-			Peripheral::Memory => Props {
-				size: BYTE,
-				io_type: None,
-			},
-			Peripheral::MemoryClear => Props {
-				size: BIT,
-				io_type: Some(Output),
-			},
-			Peripheral::Random => Props {
-				size: BYTE,
-				io_type: Some(Input),
-			},
-			Peripheral::Obstacle => Props {
-				size: BIT,
-				io_type: Some(Input),
-			},
-			Peripheral::Direction => Props {
-				size: DIR,
-				io_type: None,
-			},
-			Peripheral::Moving => Props {
-				size: BIT,
-				io_type: None,
-			},
-			Peripheral::SpawnAnt => Props {
-				size: ANT_ID,
-				io_type: Some(Output),
-			},
-			Peripheral::Kill => Props {
-				size: BIT,
-				io_type: Some(Output),
-			},
-			Peripheral::Die => Props {
-				size: BIT,
-				io_type: Some(Output),
-			},
+			Cell 		=> Props { size: CELL, io_type: None, },
+			CellClear 	=> Props { size: BIT, io_type: Some(Output), },
+			CellNext 	=> Props { size: CELL, io_type: Some(Input), },
+			Time 		=> Props { size: BYTE, io_type: Some(Input), },
+			Memory 		=> Props { size: BYTE, io_type: None, },
+			MemoryClear => Props { size: BIT, io_type: Some(Output), },
+			Random 		=> Props { size: BYTE, io_type: Some(Input), },
+			Obstacle 	=> Props { size: BIT, io_type: Some(Input), },
+			Direction 	=> Props { size: DIR, io_type: None, },
+			Moving 		=> Props { size: BIT, io_type: None, },
+			SpawnAnt 	=> Props { size: ANT_ID, io_type: Some(Output), },
+			Kill 		=> Props { size: BIT, io_type: Some(Output), },
+			Die 		=> Props { size: BIT, io_type: Some(Output), },
 		};
 
 		assert_ne!(props.size, 0);
