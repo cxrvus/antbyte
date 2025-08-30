@@ -34,7 +34,7 @@ struct PeripheralProperties {
 	io_type: Option<IoType>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IoType {
 	Input,
 	Output,
@@ -187,7 +187,7 @@ impl PeripheralBit {
 
 	const PERIPH_PTN: &str = r"^([A-Z_])+([0-9a-f])?$";
 
-	pub fn from_ident(ident: String) -> Result<Self> {
+	pub fn from_ident(ident: &str) -> Result<Self> {
 		let re = Regex::new(Self::PERIPH_PTN).unwrap();
 
 		// let (periph_string, bit_index) =

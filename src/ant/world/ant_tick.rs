@@ -13,7 +13,7 @@ impl WorldInstance {
 		let Behavior {
 			inputs,
 			outputs,
-			truth_table,
+			logic: truth_table,
 			..
 		} = world_image
 			.get_behavior(ant.behavior)

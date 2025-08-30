@@ -7,17 +7,21 @@ use super::{Parser, Statement, Token};
 
 use anyhow::{Result, anyhow};
 
+const MAIN: &str = "main";
+
 impl Parser {
 	pub(super) fn parse_ant(&mut self, name: String) -> Result<(Func, AntFunc)> {
 		let target_id = if self.assume_next(Token::Assign) {
 			let target_id = self.next_token();
 			if let Token::Number(target_id) = target_id {
-				Some(target_id as u8)
+				target_id as u8
 			} else {
 				return Err(anyhow!("expected Ant target ID after '='"));
 			}
+		} else if name == MAIN {
+			1
 		} else {
-			None
+			return Err(anyhow!("specify Ant target ID using '='"));
 		};
 
 		let ant = AntFunc {

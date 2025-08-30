@@ -1,3 +1,4 @@
+mod assembler;
 mod call;
 mod func_comp;
 mod settings_comp;
@@ -8,6 +9,7 @@ use std::fmt::Display;
 use super::Parser;
 
 use crate::ant::{
+	Behavior,
 	compiler::func_comp::compile_funcs,
 	world::{
 		World,
@@ -15,9 +17,9 @@ use crate::ant::{
 	},
 };
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct CompFunc {
 	signature: Signature,
 	comp_statements: Vec<CompStatement>,
@@ -62,19 +64,32 @@ pub fn compile(code: String) -> Result<World> {
 
 	let comp_funcs = compile_funcs(parsed_world.funcs)?;
 
+	let mut behaviors: [Option<Behavior>; 0x100] = [const { None }; 0x100];
+	let mut default_id: usize = 0;
+
 	for AntFunc {
 		target_name,
 		target_id,
 	} in parsed_world.ants
 	{
-		// a call with no params or assignees to emulate the conditions for a valid ant Func
-		let func_call = FuncCall {
-			func: target_name,
-			assignees: vec![],
-			params: vec![],
-		};
+		if let Some(behavior) = &behaviors[target_id as usize] {
+			return Err(anyhow!(
+				"tried to assign ID #{target_id} to '{target_name}', but it's already assigned to '{}'",
+				behavior.name
+			));
+		} else {
+			// a call with no params or assignees to emulate the conditions for a valid ant Func
+			let func_call = FuncCall {
+				func: target_name,
+				assignees: vec![],
+				params: vec![],
+			};
 
-		let target_func = func_call.get_overload(&comp_funcs).unwrap();
+			let target_func = func_call.get_overload(&comp_funcs).unwrap();
+
+			let behavior = target_func.assemble()?;
+			behaviors[target_id as usize] = Some(behavior);
+		}
 	}
 
 	Ok(world)

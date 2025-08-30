@@ -64,13 +64,15 @@ impl Ant {
 
 #[derive(Debug)]
 pub struct Behavior {
-	pub truth_table: TruthTable,
+	pub name: String,
+	pub logic: TruthTable,
 	pub inputs: Vec<PeripheralBit>,
 	pub outputs: Vec<PeripheralBit>,
 }
 
 impl Behavior {
 	pub fn new(
+		name: String,
 		truth_table: TruthTable,
 		inputs: Vec<PeripheralBit>,
 		outputs: Vec<PeripheralBit>,
@@ -79,7 +81,8 @@ impl Behavior {
 		Self::validate_periphs(&outputs, IoType::Output)?;
 
 		Ok(Self {
-			truth_table,
+			logic: truth_table,
+			name,
 			inputs,
 			outputs,
 		})
