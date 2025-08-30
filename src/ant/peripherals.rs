@@ -5,25 +5,25 @@ use regex::Regex;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Peripheral {
+	// ## cell interaction
 	Cell,
 	CellClear,
 	CellNext,
 
-	// universal inputs:
+	// ## universal inputs:
 	Time,
 	Memory,
 	Random,
 
+	// ## ant interaction inputs
 	Obstacle,
-
 	Kill,
 
+	// ## ant interaction outputs
 	/// 3 bits indicating number of 45 degrees rotations
 	Direction,
 	Moving,
-
 	SpawnAnt,
-
 	Die,
 }
 
