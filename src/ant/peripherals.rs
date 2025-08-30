@@ -144,7 +144,7 @@ impl PeripheralBit {
 		}
 	}
 
-	const PERIPH_PTN: &str = r"^([A-Z_])+([0-9a-f])?$";
+	const PERIPH_PTN: &str = r"^([A-Z_]+)([0-8])?$";
 
 	pub fn from_ident(ident: &str) -> Result<Self> {
 		let re = Regex::new(Self::PERIPH_PTN).unwrap();
