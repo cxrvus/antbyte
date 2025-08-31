@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use anyhow::{Result, anyhow};
 
 #[derive(Debug)]
@@ -47,5 +49,15 @@ impl TruthTable {
 			.get(input as usize)
 			.copied()
 			.unwrap_or_default()
+	}
+}
+
+impl Display for TruthTable {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		for (input, output) in self.entries.iter().enumerate() {
+			writeln!(f, "{input:08b} => {output:08b}")?;
+		}
+
+		writeln!(f)
 	}
 }
