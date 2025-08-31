@@ -9,9 +9,6 @@ pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
 
 	for func in funcs.into_iter() {
 		let comp_func = func.compile(&comp_funcs)?;
-
-		println!("{comp_func}");
-
 		comp_funcs.push(comp_func);
 	}
 

@@ -15,8 +15,7 @@ fn main() {
 }
 
 /// use this for debugging
-// TODO
-const TEST_PATH: Option<&'static str> = Some("antlets/test.ant");
+const TEST_PATH: Option<&'static str> = Some("antlets/random_move.ant");
 // const TEST_PATH: Option<&'static str> = None;
 
 /// use this for debugging
@@ -49,11 +48,8 @@ fn setup() -> Result<()> {
 fn update(code: String) -> Result<()> {
 	println!("{code}\n\n================\n\n");
 
-	// TODO: temporary
-	compile_world(code)?;
-	return Ok(());
+	let mut world = WorldInstance::from(compile_world(code)?);
 
-	let mut world = create_world(code)?;
 	let mut auto_loop = AUTO_LOOP;
 
 	loop {
@@ -72,10 +68,6 @@ fn update(code: String) -> Result<()> {
 
 		world.tick();
 	}
-}
-
-fn create_world(code: String) -> Result<WorldInstance> {
-	todo!();
 }
 
 fn world_to_string(world: &WorldInstance) -> String {

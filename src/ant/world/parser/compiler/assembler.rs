@@ -17,8 +17,6 @@ impl CompFunc {
 		let mut func = self.clone();
 
 		let (inputs, outputs) = func.extract_peripherals()?;
-		dbg!((&inputs, &outputs));
-		println!("{func}");
 		let logic = func.simulate();
 
 		let behavior = Behavior {
@@ -204,9 +202,7 @@ mod test {
 	fn bit_conversion() {
 		for i in 0..=0xff {
 			let bits = CompFunc::bits_from_int(i);
-			dbg!(&bits);
 			let value = CompFunc::int_from_bits(&bits) as u8;
-			dbg!(value);
 			assert_eq!(i, value);
 		}
 	}

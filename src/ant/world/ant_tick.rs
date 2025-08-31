@@ -6,7 +6,7 @@ use crate::{
 use super::{Ant, Behavior, BorderMode, WorldInstance};
 
 impl WorldInstance {
-	// TODO: split up into sub-methods
+	// todo: split up into sub-methods
 	pub(super) fn ant_tick(&mut self, ant: &Ant) -> Ant {
 		let world_image = self.clone();
 

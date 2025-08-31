@@ -54,8 +54,8 @@ pub struct WorldInstance {
 	pub state: WorldState,
 }
 
-impl WorldInstance {
-	pub fn new(world: World) -> Self {
+impl From<World> for WorldInstance {
+	fn from(world: World) -> Self {
 		let World { width, height, .. } = world;
 
 		let rng = if let Some(seed) = world.noise_seed {
@@ -80,7 +80,7 @@ impl WorldInstance {
 				},
 			};
 
-			let mut ant = Ant::new(0);
+			let mut ant = Ant::new(1);
 			ant.pos = starting_pos;
 			state.ants.push(ant);
 		}
@@ -90,7 +90,9 @@ impl WorldInstance {
 			state,
 		}
 	}
+}
 
+impl WorldInstance {
 	pub fn tick(&mut self) {
 		// todo: optimize - remove cloning (here and in ant_tick)
 		self.frame += 1;

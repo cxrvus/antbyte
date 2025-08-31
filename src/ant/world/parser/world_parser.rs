@@ -35,8 +35,6 @@ impl Parser {
 			};
 		}
 
-		// dbg!(&statements);
-
 		Ok(world)
 	}
 
