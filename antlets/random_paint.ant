@@ -1,5 +1,10 @@
 ant main {
 	D0 = R0;
 	D1 = R1;
+
+	C0 = -or();
 	MOV = -or();
+
+	DIE = OBS;
 }
+

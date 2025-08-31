@@ -15,7 +15,7 @@ fn main() {
 }
 
 /// use this for debugging
-const TEST_PATH: Option<&'static str> = Some("antlets/random_move.ant");
+const TEST_PATH: Option<&'static str> = Some("antlets/random_paint.ant");
 // const TEST_PATH: Option<&'static str> = None;
 
 /// use this for debugging
@@ -66,7 +66,11 @@ fn update(code: String) -> Result<()> {
 			}
 		}
 
-		world.tick();
+		let world_active = world.tick();
+
+		if !world_active {
+			return Ok(());
+		}
 	}
 }
 
