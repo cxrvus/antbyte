@@ -69,7 +69,7 @@ impl Peripheral {
 			Die 		=> Props { size: BIT, io_type: Some(Output), },
 		};
 
-		assert_ne!(props.size, 0);
+		debug_assert_ne!(props.size, 0);
 
 		props
 	}

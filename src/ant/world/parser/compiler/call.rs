@@ -101,9 +101,9 @@ impl From<FuncCall> for CompStatement {
 		#[rustfmt::skip]
 		let FuncCall { assignees, params, func } = func_call;
 
-		assert_eq!(func, "or", "func must be 'or' \nfound '{func}'");
+		debug_assert_eq!(func, "or", "func must be 'or' \nfound '{func}'");
 
-		assert_eq!(
+		debug_assert_eq!(
 			assignees.len(),
 			1,
 			"FuncCall must have exactly one left-hand-side value\nfound {assignees:?})",

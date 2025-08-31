@@ -49,7 +49,7 @@ impl Ant {
 	}
 
 	pub fn get_dir_vec(&self) -> Vec2 {
-		assert!(self.dir < 4);
+		debug_assert!(self.dir < 4);
 		Vec2::cardinal()[self.dir as usize]
 	}
 
