@@ -97,6 +97,28 @@ impl CompFunc {
 		Ok(())
 	}
 
+	fn bits_from_int(value: u8) -> Vec<bool> {
+		let mut bits = vec![];
+
+		for i in 0..8 {
+			bits.push((value >> i & 1) == 1);
+		}
+
+		bits
+	}
+
+	fn int_from_bits(bits: &[bool]) -> u32 {
+		let mut value = 0;
+
+		for (i, &bit) in bits.iter().enumerate() {
+			if bit {
+				value |= 1 << i;
+			}
+		}
+
+		value
+	}
+
 	fn simulate(&self) -> TruthTable {
 		todo!()
 	}
@@ -111,4 +133,20 @@ fn format_periph(ident: &str, io_type: IoType) -> String {
 	};
 
 	format!("_{prefix}_{ident}")
+}
+
+#[cfg(test)]
+mod test {
+	use crate::ant::compiler::CompFunc;
+
+	#[test]
+	fn bit_conversion() {
+		for i in 0..=0xff {
+			let bits = CompFunc::bits_from_int(i);
+			dbg!(&bits);
+			let value = CompFunc::int_from_bits(&bits) as u8;
+			dbg!(value);
+			assert_eq!(i, value);
+		}
+	}
 }
