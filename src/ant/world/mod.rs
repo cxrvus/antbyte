@@ -93,18 +93,26 @@ impl From<World> for WorldInstance {
 }
 
 impl WorldInstance {
-	pub fn tick(&mut self) {
+	pub fn tick(&mut self) -> bool {
 		// todo: optimize - remove cloning (here and in ant_tick)
 		self.frame += 1;
 
 		let mut world_frame = self.clone();
 
-		for (i, ant) in self.ants.iter().enumerate() {
+		let live_ants: Vec<&Ant> = self.ants.iter().filter(|ant| ant.alive).collect();
+
+		if live_ants.is_empty() {
+			return false;
+		}
+
+		for (i, ant) in live_ants.iter().enumerate() {
 			let ant = world_frame.ant_tick(ant);
 			world_frame.ants[i] = ant;
 		}
 
 		*self = world_frame;
+
+		true
 	}
 
 	pub fn frame(&self) -> usize {

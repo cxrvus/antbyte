@@ -6,7 +6,7 @@ use crate::{
 use super::{Ant, Behavior, BorderMode, WorldInstance};
 
 impl WorldInstance {
-	// todo: split up into sub-methods
+	// todo: split up into sub-methods and rename
 	pub(super) fn ant_tick(&mut self, ant: &Ant) -> Ant {
 		let world_image = self.clone();
 
@@ -34,7 +34,9 @@ impl WorldInstance {
 					.unwrap_or(0u8),
 				Memory => ant.memory,
 				Random => self.rng(),
-				Obstacle => self.get_target_ant(ant).is_some().into(), // todo: also true if at border
+				Obstacle => {
+					(self.next_pos(ant).is_none() || self.get_target_ant(ant).is_some()).into()
+				}
 				Direction => ant.dir,
 				Moving => ant.moving as u8,
 				_ => panic!("unhandled input"),
@@ -55,8 +57,8 @@ impl WorldInstance {
 		let mut output_values: Vec<OutputValue> = vec![];
 
 		for output_spec in outputs.iter() {
-			let bit_index = output_spec.bit;
 			let output_bit = (output_bits & 1) as u8;
+			let bit_index = output_spec.bit;
 			let new_value = output_bit << bit_index;
 
 			if let Some(output_value) = output_values
@@ -71,15 +73,16 @@ impl WorldInstance {
 				});
 			}
 
-			output_bits >>= bit_index;
+			output_bits >>= 1;
 		}
 
 		output_values.sort();
+		dbg!(&output_values);
 
 		for OutputValue { output, value } in output_values.into_iter() {
-			match output {
-				Direction => ant.set_dir(ant.dir + value),
-				Moving => {
+			match (output, value) {
+				(Direction, _) => ant.set_dir(ant.dir + value),
+				(Moving, _) => {
 					let moving = value != 0;
 					ant.moving = moving;
 
@@ -87,10 +90,10 @@ impl WorldInstance {
 						self.move_tick(&mut ant);
 					}
 				}
-				Cell if value != 0 => self.cells.set_at(&ant.pos.sign(), value),
-				CellClear if value == 1 => self.cells.set_at(&ant.pos.sign(), 0),
-				Memory => ant.memory = value,
-				SpawnAnt => {
+				(Cell, _) if value != 0 => self.cells.set_at(&ant.pos.sign(), value),
+				(CellClear, 1) => self.cells.set_at(&ant.pos.sign(), 0),
+				(Memory, value) => ant.memory = value,
+				(SpawnAnt, _) if value != 0 => {
 					// direction gets flip, so that new ant
 					// spawns behind the old one and not in front of her
 					ant.flip_dir();
@@ -103,15 +106,17 @@ impl WorldInstance {
 
 					ant.flip_dir();
 				}
-				Kill => {
+				(Kill, 1) => {
 					if let Some(ant) = self.get_target_ant(&ant) {
 						ant.die();
 					}
 				}
-				Die => ant.die(),
-				_ => panic!("unhandled output"),
+				(Die, 1) => ant.die(),
+				_ => {}
 			};
 		}
+
+		ant.age += 1;
 
 		ant
 	}

@@ -54,6 +54,8 @@ impl CompFunc {
 			}
 		}
 
+		inputs.reverse();
+
 		if inputs.len() > 8 {
 			Err(anyhow!(
 				"may not have more than 8 inputs, got {}",
