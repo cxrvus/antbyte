@@ -75,7 +75,7 @@ impl Parser {
 
 		let mut statements: Vec<Statement> = vec![];
 
-		loop {
+		while !self.assume_next(Token::BraceRight) {
 			let assignees = self.next_assignee_list()?;
 
 			self.expect_next(Token::Assign)?;
@@ -88,10 +88,6 @@ impl Parser {
 			});
 
 			self.expect_next(Token::Semicolon)?;
-
-			if self.assume_next(Token::BraceRight) {
-				break;
-			}
 		}
 
 		Ok(statements)

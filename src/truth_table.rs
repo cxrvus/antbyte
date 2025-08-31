@@ -37,6 +37,10 @@ impl TruthTable {
 		self.output_count
 	}
 
+	pub fn entries(&self) -> &Vec<u32> {
+		&self.entries
+	}
+
 	// idea: optimize - memory efficiency using bit shifting
 	pub fn get(&self, input: u8) -> u32 {
 		self.entries

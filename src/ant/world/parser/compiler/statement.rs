@@ -53,7 +53,7 @@ impl Expression {
 			(self.ident.clone(), params)
 		} else {
 			let params = vec![ParamValue {
-				sign: self.sign,
+				sign: false,
 				target: self.ident.clone(),
 			}];
 

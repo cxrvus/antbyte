@@ -8,13 +8,16 @@ use std::fmt::Display;
 
 use super::Parser;
 
-use crate::ant::{
-	Behavior,
-	compiler::func_comp::compile_funcs,
-	world::{
-		World,
-		parser::{AntFunc, ParamValue, Signature},
+use crate::{
+	ant::{
+		Behavior,
+		compiler::func_comp::compile_funcs,
+		world::{
+			World,
+			parser::{AntFunc, ParamValue, Signature},
+		},
 	},
+	truth_table::TruthTable,
 };
 
 use anyhow::{Result, anyhow};
@@ -53,7 +56,7 @@ struct CompStatement {
 	params: Vec<ParamValue>,
 }
 
-pub fn compile(code: String) -> Result<World> {
+pub fn compile_world(code: String) -> Result<World> {
 	let parsed_world = Parser::new(code)?.parse_world()?;
 
 	let mut world = World::default();
@@ -94,4 +97,20 @@ pub fn compile(code: String) -> Result<World> {
 	world.behaviors = behaviors;
 
 	Ok(world)
+}
+
+pub fn compile_main(code: String) -> TruthTable {
+	let parsed_world = Parser::new(code).unwrap().parse_world().unwrap();
+
+	assert_eq!(parsed_world.settings.len(), 0);
+	assert_eq!(parsed_world.ants.len(), 0);
+
+	compile_funcs(parsed_world.funcs)
+		.unwrap()
+		.iter()
+		.find(|x| x.signature.name == "main")
+		.expect("'main' function required for compile_main")
+		.assemble()
+		.unwrap()
+		.logic
 }

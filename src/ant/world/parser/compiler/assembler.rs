@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::{
 	ant::{
 		Behavior,
@@ -54,10 +56,19 @@ impl CompFunc {
 			}
 		}
 
-		debug_assert_eq!(self.signature.params.len(), inputs.len());
-		debug_assert_eq!(self.signature.assignees.len(), outputs.len());
-
-		Ok((inputs, outputs))
+		if inputs.len() > 8 {
+			Err(anyhow!(
+				"may not have more than 8 inputs, got {}",
+				inputs.len()
+			))
+		} else if outputs.len() > 32 {
+			Err(anyhow!(
+				"may not have more than 32 inputs, got {}",
+				outputs.len()
+			))
+		} else {
+			Ok((inputs, outputs))
+		}
 	}
 
 	fn extract_peripheral(
@@ -92,12 +103,63 @@ impl CompFunc {
 			}
 		} else if !variables.contains(target) {
 			match io_type {
-				IoType::Output => variables.push(target.clone()),
-				IoType::Input => return Err(anyhow!("unknown variable: {target}")),
+				IoType::Output if !signature.assignees.contains(target) => {
+					variables.push(target.clone())
+				}
+				IoType::Input if !signature.params.contains(target) => {
+					return Err(anyhow!("unknown variable: {target}"));
+				}
+				_ => {}
 			}
 		}
 
 		Ok(())
+	}
+
+	fn simulate(&self) -> TruthTable {
+		let input_bits = self.signature.params.len();
+		let output_bits = self.signature.assignees.len();
+		let max_input = (1u8 << input_bits) - 1;
+
+		let mut entries = vec![];
+
+		for input in 0..=max_input {
+			entries.push(self.tick(input));
+		}
+
+		TruthTable::new(input_bits, output_bits, entries).unwrap()
+	}
+
+	fn tick(&self, input: u8) -> u32 {
+		let mut variables = HashMap::<String, bool>::new();
+		let input_bits = Self::bits_from_int(input);
+
+		for (n, input) in self.signature.params.iter().enumerate() {
+			variables.insert(input.clone(), input_bits[n]);
+		}
+
+		for statement in &self.comp_statements {
+			let mut assignee_value = statement.assignee.sign;
+
+			for param in &statement.params {
+				let param_value = param.sign ^ variables[&param.target];
+
+				if param_value {
+					assignee_value = !statement.assignee.sign;
+					break;
+				}
+			}
+
+			variables.insert(statement.assignee.target.clone(), assignee_value);
+		}
+
+		let mut output_bits = vec![];
+
+		for output in &self.signature.assignees {
+			output_bits.push(variables[output]);
+		}
+
+		Self::int_from_bits(&output_bits)
 	}
 
 	fn bits_from_int(value: u8) -> Vec<bool> {
@@ -120,10 +182,6 @@ impl CompFunc {
 		}
 
 		value
-	}
-
-	fn simulate(&self) -> TruthTable {
-		todo!()
 	}
 }
 
