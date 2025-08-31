@@ -54,6 +54,9 @@ impl CompFunc {
 			}
 		}
 
+		debug_assert_eq!(self.signature.params.len(), inputs.len());
+		debug_assert_eq!(self.signature.assignees.len(), outputs.len());
+
 		Ok((inputs, outputs))
 	}
 
