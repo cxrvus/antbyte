@@ -31,8 +31,17 @@ impl Vec2 {
 		}
 	}
 
-	pub fn cardinal() -> [Vec2; 4] {
-		[-Vec2::Y, Vec2::X, Vec2::Y, -Vec2::X]
+	pub fn cardinal() -> [Vec2; 8] {
+		[
+			Vec2::X,
+			Vec2 { x: 1, y: 1 },
+			Vec2::Y,
+			Vec2 { x: -1, y: 1 },
+			-Vec2::X,
+			Vec2 { x: -1, y: -1 },
+			-Vec2::Y,
+			Vec2 { x: 1, y: -1 },
+		]
 	}
 
 	pub fn as_char(&self) -> char {

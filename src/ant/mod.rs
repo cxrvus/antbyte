@@ -49,12 +49,12 @@ impl Ant {
 	}
 
 	pub fn get_dir_vec(&self) -> Vec2 {
-		debug_assert!(self.dir < 4);
+		debug_assert!(self.dir < 8);
 		Vec2::cardinal()[self.dir as usize]
 	}
 
 	pub fn set_dir(&mut self, dir: u8) {
-		self.dir = dir % 4;
+		self.dir = dir % 8;
 	}
 
 	pub fn flip_dir(&mut self) {

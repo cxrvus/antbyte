@@ -77,7 +77,6 @@ impl WorldInstance {
 		}
 
 		output_values.sort();
-		dbg!(&output_values);
 
 		for OutputValue { output, value } in output_values.into_iter() {
 			match (output, value) {

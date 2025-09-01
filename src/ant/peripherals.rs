@@ -40,7 +40,7 @@ pub enum IoType {
 }
 
 const BIT: u8 = 1;
-const DIR: u8 = 2;
+const DIR: u8 = 3;
 const NIBBLE: u8 = 4;
 const CELL: u8 = NIBBLE;
 const ANT_ID: u8 = NIBBLE;
