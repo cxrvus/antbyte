@@ -3,7 +3,7 @@ use std::{
 	io::{self, Write},
 };
 
-use antbyte::ant::{compiler::compile_world, world::WorldInstance};
+use antbyte::ant::{compiler::compile_world, world::World};
 
 use anyhow::{Result, anyhow};
 
@@ -48,7 +48,7 @@ fn setup() -> Result<()> {
 fn update(code: String) -> Result<()> {
 	println!("{code}\n\n================\n\n");
 
-	let mut world = WorldInstance::from(compile_world(code)?);
+	let mut world = World::from(compile_world(code)?);
 
 	let mut auto_loop = AUTO_LOOP;
 
@@ -74,7 +74,7 @@ fn update(code: String) -> Result<()> {
 	}
 }
 
-fn world_to_string(world: &WorldInstance) -> String {
+fn world_to_string(world: &World) -> String {
 	let cells = world.cells();
 	let mut string = String::new();
 

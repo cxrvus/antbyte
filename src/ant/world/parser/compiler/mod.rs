@@ -13,7 +13,7 @@ use crate::{
 		Behavior,
 		compiler::func_comp::compile_funcs,
 		world::{
-			World,
+			WorldProperties,
 			parser::{AntFunc, ParamValue, Signature},
 		},
 	},
@@ -56,13 +56,13 @@ struct CompStatement {
 	params: Vec<ParamValue>,
 }
 
-pub fn compile_world(code: String) -> Result<World> {
+pub fn compile_world(code: String) -> Result<WorldProperties> {
 	let parsed_world = Parser::new(code)?.parse_world()?;
 
-	let mut world = World::default();
+	let mut properties = WorldProperties::default();
 
 	for (key, value) in parsed_world.settings {
-		world.set_setting(key, value)?;
+		properties.config.set_setting(key, value)?;
 	}
 
 	let comp_funcs = compile_funcs(parsed_world.funcs)?;
@@ -94,9 +94,9 @@ pub fn compile_world(code: String) -> Result<World> {
 		}
 	}
 
-	world.behaviors = behaviors;
+	properties.behaviors = behaviors;
 
-	Ok(world)
+	Ok(properties)
 }
 
 pub fn compile_main(code: String) -> TruthTable {

@@ -16,11 +16,11 @@ use anyhow::{Error, Result, anyhow};
 
 // idea: add Cycle & Wrap
 #[rustfmt::skip]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum BorderMode { Collide, Despawn }
 
 #[rustfmt::skip]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum StartingPos { TopLeft, Center }
 
 impl TryFrom<String> for StartingPos {

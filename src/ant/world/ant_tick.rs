@@ -3,9 +3,9 @@ use crate::{
 	util::vec2::Vec2u,
 };
 
-use super::{Ant, Behavior, BorderMode, WorldInstance};
+use super::{Ant, Behavior, BorderMode, World};
 
-impl WorldInstance {
+impl World {
 	// todo: split up into sub-methods and rename
 	pub(super) fn ant_tick(&mut self, ant: &Ant) -> Ant {
 		let world_image = self.clone();
@@ -129,7 +129,7 @@ impl WorldInstance {
 		} else {
 			use BorderMode::*;
 
-			match self.config.border_mode {
+			match self.config().border_mode {
 				Collide | Despawn => None,
 			}
 		}
@@ -141,7 +141,7 @@ impl WorldInstance {
 			if !self.ants.iter().any(|ant| ant.pos == new_pos) {
 				ant.pos = new_pos;
 			}
-		} else if let BorderMode::Despawn = self.config.border_mode {
+		} else if let BorderMode::Despawn = self.config().border_mode {
 			ant.die();
 		}
 	}

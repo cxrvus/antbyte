@@ -15,25 +15,37 @@ use crate::util::{matrix::Matrix, vec2::Vec2u};
 
 type Cells = Matrix<u8>;
 
-#[derive(Debug)]
-pub struct World {
-	pub behaviors: [Option<Behavior>; 0x100],
+#[derive(Debug, Clone)]
+pub struct WorldConfig {
 	pub width: usize,
 	pub height: usize,
 	pub border_mode: BorderMode,
 	pub starting_pos: StartingPos,
 	pub noise_seed: Option<u32>,
 }
-
-impl Default for World {
+impl Default for WorldConfig {
 	fn default() -> Self {
 		Self {
-			behaviors: [const { None }; 0x100],
 			width: 32,
 			height: 32,
 			border_mode: BorderMode::Collide,
 			starting_pos: StartingPos::Center,
 			noise_seed: None,
+		}
+	}
+}
+
+#[derive(Debug)]
+pub struct WorldProperties {
+	pub behaviors: [Option<Behavior>; 0x100],
+	pub config: WorldConfig,
+}
+
+impl Default for WorldProperties {
+	fn default() -> Self {
+		Self {
+			behaviors: [const { None }; 0x100],
+			config: Default::default(),
 		}
 	}
 }
@@ -49,16 +61,22 @@ pub struct WorldState {
 }
 
 #[derive(Clone)]
-pub struct WorldInstance {
-	config: Rc<World>,
+pub struct World {
+	properties: Rc<WorldProperties>,
 	pub state: WorldState,
 }
 
-impl From<World> for WorldInstance {
-	fn from(world: World) -> Self {
-		let World { width, height, .. } = world;
+impl From<WorldProperties> for World {
+	fn from(properties: WorldProperties) -> Self {
+		let WorldConfig {
+			width,
+			height,
+			starting_pos,
+			noise_seed,
+			..
+		} = properties.config.clone();
 
-		let rng = if let Some(seed) = world.noise_seed {
+		let rng = if let Some(seed) = noise_seed {
 			StdRng::seed_from_u64(seed as u64)
 		} else {
 			StdRng::from_seed(rand::random::<[u8; 32]>())
@@ -71,12 +89,12 @@ impl From<World> for WorldInstance {
 			ants: vec![],
 		};
 
-		if !world.behaviors.is_empty() {
-			let starting_pos = match world.starting_pos {
+		if !properties.behaviors.is_empty() {
+			let starting_pos = match starting_pos {
 				StartingPos::TopLeft => Vec2u::ZERO,
 				StartingPos::Center => Vec2u {
-					x: world.width / 2,
-					y: world.height / 2,
+					x: width / 2,
+					y: height / 2,
 				},
 			};
 
@@ -86,13 +104,13 @@ impl From<World> for WorldInstance {
 		}
 
 		Self {
-			config: Rc::new(world),
+			properties: Rc::new(properties),
 			state,
 		}
 	}
 }
 
-impl WorldInstance {
+impl World {
 	pub fn tick(&mut self) -> bool {
 		// todo: optimize - remove cloning (here and in ant_tick)
 		self.frame += 1;
@@ -119,8 +137,8 @@ impl WorldInstance {
 		self.frame
 	}
 
-	pub fn config(&self) -> &World {
-		&self.config
+	pub fn config(&self) -> &WorldConfig {
+		&self.properties.config
 	}
 
 	pub fn ants(&self) -> &Vec<Ant> {
@@ -132,7 +150,7 @@ impl WorldInstance {
 	}
 
 	fn get_behavior(&self, id: u8) -> &Option<Behavior> {
-		&self.config.behaviors[id as usize]
+		&self.properties.behaviors[id as usize]
 	}
 
 	fn rng(&mut self) -> u8 {
@@ -140,7 +158,7 @@ impl WorldInstance {
 	}
 }
 
-impl Deref for WorldInstance {
+impl Deref for World {
 	type Target = WorldState;
 
 	fn deref(&self) -> &Self::Target {
@@ -148,7 +166,7 @@ impl Deref for WorldInstance {
 	}
 }
 
-impl DerefMut for WorldInstance {
+impl DerefMut for World {
 	fn deref_mut(&mut self) -> &mut Self::Target {
 		&mut self.state
 	}

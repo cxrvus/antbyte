@@ -2,10 +2,10 @@ use anyhow::{Result, anyhow};
 
 use crate::ant::{
 	StartingPos,
-	world::{World, parser::token::Token},
+	world::{WorldConfig, parser::token::Token},
 };
 
-impl World {
+impl WorldConfig {
 	pub(super) fn set_setting(&mut self, key: String, value: Token) -> Result<()> {
 		// todo: implement all WorldConfig properties
 		// idea: more elegant match block
