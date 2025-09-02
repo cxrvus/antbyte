@@ -4,7 +4,7 @@ use anyhow::{Result, anyhow};
 impl Parser {
 	pub(super) fn parse_next_exp(&mut self) -> Result<Expression> {
 		let mut sign = false;
-		let mut current_token = Token::ParenthesisLeft;
+		let mut current_token = Token::Assign;
 		let mut expression_sets: Vec<Vec<Expression>> = vec![];
 
 		loop {
@@ -85,10 +85,11 @@ fn validate_exp_token(current: &Token, next: &Token) -> bool {
 
 	matches!(
 		(current, next),
-		(
-			Ident(_),
-			ParenthesisLeft | ParenthesisRight | Comma | Semicolon
-		) | (Invert, Ident(_))
+		(Assign, Ident(_) | Invert)
+			| (
+				Ident(_),
+				ParenthesisLeft | ParenthesisRight | Comma | Semicolon
+			) | (Invert, Ident(_))
 			| (ParenthesisLeft, Ident(_) | Invert | ParenthesisRight)
 			| (ParenthesisRight, ParenthesisRight | Comma | Semicolon)
 			| (Comma, Ident(_) | Invert)
