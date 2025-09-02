@@ -1,0 +1,18 @@
+set height = 4;
+set width = 4;
+
+set start = top_left;
+
+ant main {
+	MOV = 1;
+
+	C0 = -and(-T2, -T1, -T0);
+
+	turn_right = and(-T2, -T1, +T0);
+	turn_left =  and(+T2, -T1, -T0);
+
+	D1 = or(turn_right, turn_left);
+	D2 = turn_left;
+
+	DIE = and(+T2, -T1, +T0);
+}
