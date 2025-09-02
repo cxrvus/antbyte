@@ -1,0 +1,16 @@
+set height = 64;
+set width = 64;
+set border = die;
+
+ant main {
+	left = C0;
+	right = -C0;
+
+	CC = C0;
+	C0 = -C0;
+
+	D1 = or(left, right);
+	D2 = left;
+
+	MOV = 1;
+}
