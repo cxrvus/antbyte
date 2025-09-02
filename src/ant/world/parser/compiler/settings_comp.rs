@@ -38,6 +38,14 @@ impl WorldConfig {
 					invalid_type(&value, "border mode (identifier)", &key)
 				}
 			}
+			"desc" | "description" => {
+				if let Token::String(desc) = value {
+					self.description = desc;
+					Ok(())
+				} else {
+					invalid_type(&value, "description (string)", &key)
+				}
+			}
 			other => Err(anyhow!("unknown setting: {}", other)),
 		}
 	}
