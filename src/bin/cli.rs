@@ -15,7 +15,7 @@ fn main() {
 }
 
 /// use this for debugging
-const TEST_PATH: Option<&'static str> = Some("antlets/random_paint.ant");
+const TEST_PATH: Option<&'static str> = None;
 // const TEST_PATH: Option<&'static str> = None;
 
 /// use this for debugging
