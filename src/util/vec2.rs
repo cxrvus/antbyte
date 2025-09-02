@@ -31,7 +31,11 @@ impl Vec2 {
 		}
 	}
 
-	pub fn cardinal() -> [Vec2; 8] {
+	pub fn cardinal() -> [Vec2; 4] {
+		[Vec2::X, Vec2::Y, -Vec2::X, -Vec2::Y]
+	}
+
+	pub fn principal() -> [Vec2; 8] {
 		[
 			Vec2::X,
 			Vec2 { x: 1, y: 1 },
@@ -44,15 +48,36 @@ impl Vec2 {
 		]
 	}
 
-	pub fn as_char(&self) -> char {
+	pub fn cardinal_char(&self) -> char {
 		let Self { x, y } = self;
 		match (x, y) {
 			(0, 0) => 'o',
-			(0, -1) => '^',
+
 			(1, 0) => '>',
 			(0, 1) => 'v',
 			(-1, 0) => '<',
+			(0, -1) => '^',
+
 			_ => '*',
+		}
+	}
+
+	pub fn principal_chars(&self) -> (char, char) {
+		let Self { x, y } = self;
+		match (x, y) {
+			(0, 0) => ('<', '>'),
+
+			(0, _) | (_, 0) => {
+				let c = self.cardinal_char();
+				(c, c)
+			}
+
+			(1, 1) => ('>', 'v'),
+			(-1, 1) => ('<', 'v'),
+			(-1, -1) => ('<', '^'),
+			(1, -1) => ('>', '^'),
+
+			_ => ('*', '*'),
 		}
 	}
 

@@ -97,7 +97,7 @@ fn world_to_string(world: &World) -> String {
 
 		let ant_char = match ant {
 			None => cell_char,
-			Some(ant) => ant.get_dir_vec().as_char(),
+			Some(ant) => ant.get_dir_vec().cardinal_char(),
 		};
 
 		string.push(ant_char);

@@ -74,7 +74,7 @@ impl Ant {
 
 	pub fn get_dir_vec(&self) -> Vec2 {
 		debug_assert!(self.dir < 8);
-		Vec2::cardinal()[self.dir as usize]
+		Vec2::principal()[self.dir as usize]
 	}
 
 	pub fn set_dir(&mut self, dir: u8) {
