@@ -1,3 +1,4 @@
+set desc = "randomly wanders in straight lines, generating interesting patterns!";
 set border = die;
 
 ant main {

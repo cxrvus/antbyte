@@ -43,9 +43,6 @@ impl Parser {
 		let value = self.next_token();
 		self.expect_next(Token::Semicolon)?;
 
-		match value {
-			Token::Ident(_) | Token::Number(_) => Ok((key, value)),
-			other => Err(Parser::unexpected(other, "value (identifier or number)")),
-		}
+		Ok((key, value))
 	}
 }

@@ -6,6 +6,11 @@ fn regex(ptn: &str) -> Regex {
 	Regex::new(ptn).unwrap()
 }
 
+#[inline]
+fn regex_full(ptn: &str) -> Regex {
+	regex(&format!("^{ptn}$"))
+}
+
 // idea: add Token.line and show in error handling
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Token {
@@ -27,7 +32,7 @@ pub enum Token {
 	Arrow,
 
 	// ## Values
-	String(String), // todo: implement
+	String(String),
 	Number(u32),
 
 	// ## Other
@@ -41,9 +46,10 @@ pub enum Token {
 impl Token {
 	// idea: allow hex numbers
 	const NUMBER_PTN: &'static str = r"\d{1,3}";
+	const STRING_PTN: &'static str = r#""(.*?)""#;
 	const IDENT_PTN: &'static str = r"[a-zA-Z_]\w*";
-	const LOWER_IDENT: &'static str = r"^[a-z][a-z0-9_]*$";
-	const UPPER_IDENT: &'static str = r"^[A-Z][A-Z0-9_]*$";
+	const LOWER_IDENT: &'static str = r"[a-z][a-z0-9_]*";
+	const UPPER_IDENT: &'static str = r"[A-Z][A-Z0-9_]*";
 	const SYMBOL_PTN: &'static str = r"=>|[#={}(),;01]|\+|-";
 
 	const SPACE_PTN: &'static str = r"\s+";
@@ -52,6 +58,7 @@ impl Token {
 	// todo: write tests
 	pub fn tokenize(code: String) -> Result<Vec<Self>> {
 		let pattern = [
+			Self::STRING_PTN,
 			Self::IDENT_PTN,
 			Self::NUMBER_PTN,
 			Self::SYMBOL_PTN,
@@ -60,14 +67,17 @@ impl Token {
 		]
 		.join("|");
 
-		let whitespace_re = regex(Self::SPACE_PTN);
+		let token_strings = regex(&pattern).find_iter(&code).collect::<Vec<_>>();
 
-		regex(&pattern)
-			.find_iter(&code)
+		let whitespace_re = regex_full(Self::SPACE_PTN);
+
+		// dbg!(&token_strings.iter().map(|x| x.as_str()).collect::<Vec<_>>());
+
+		token_strings
+			.iter()
 			.map(|x| x.as_str())
-			.filter(|x| !whitespace_re.is_match(x))
+			.filter(|x| !whitespace_re.is_match_at(x, 0))
 			.map(Token::from_token_str)
-			// .chain([Token::EndOfFile])
 			.collect::<Result<Vec<_>>>()
 	}
 
@@ -99,8 +109,9 @@ impl Token {
 	fn complex_match(token: &str) -> Result<Self> {
 		if let Some(keyword) = Keyword::from_ident(token) {
 			Ok(Token::Keyword(keyword))
-		} else if regex(Self::IDENT_PTN).is_match(token) {
-			if regex(Self::UPPER_IDENT).is_match(token) || regex(Self::LOWER_IDENT).is_match(token)
+		} else if regex_full(Self::IDENT_PTN).is_match(token) {
+			if regex_full(Self::UPPER_IDENT).is_match(token)
+				|| regex_full(Self::LOWER_IDENT).is_match(token)
 			{
 				Ok(Token::Ident(token.to_string()))
 			} else {
@@ -108,18 +119,21 @@ impl Token {
 					"identifiers must be either all upper or all lower-case, found '{token}'"
 				))
 			}
-		} else if regex(Self::NUMBER_PTN).is_match(token) {
+		} else if regex_full(Self::NUMBER_PTN).is_match(token) {
 			token
 				.parse::<u32>()
 				.map(Token::Number)
 				.map_err(|e| anyhow!(e))
+		} else if let Some(captures) = regex_full(Self::STRING_PTN).captures(token) {
+			let string = captures.get(1).unwrap().as_str().to_owned();
+			Ok(Token::String(string))
 		} else {
 			Ok(Token::Invalid(token.to_owned()))
 		}
 	}
 
 	pub(super) fn is_uppercase_ident(ident: &str) -> bool {
-		regex(Self::UPPER_IDENT).is_match(ident)
+		regex_full(Self::UPPER_IDENT).is_match(ident)
 	}
 }
 
