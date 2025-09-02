@@ -119,7 +119,7 @@ impl CompFunc {
 	fn simulate(&self) -> TruthTable {
 		let input_bits = self.signature.params.len();
 		let output_bits = self.signature.assignees.len();
-		let max_input = (1u8 << input_bits) - 1;
+		let max_input = 1u8.unbounded_shl(input_bits as u32).wrapping_sub(1);
 
 		let mut entries = vec![];
 
