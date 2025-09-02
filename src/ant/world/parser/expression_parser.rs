@@ -47,8 +47,8 @@ impl Parser {
 					}
 				}
 
-				Token::Invert => {
-					sign = true;
+				Token::Invert(new_sign) => {
+					sign = *new_sign;
 				}
 
 				Token::ParenthesisLeft => {
@@ -99,16 +99,16 @@ fn validate_exp_token(current: &Token, next: &Token) -> bool {
 
 	matches!(
 		(current, next),
-		(Assign, Ident(_) | Invert | Bit(_))
+		(Assign, Ident(_) | Invert(_) | Bit(_))
 			| (
 				Ident(_) | Bit(_),
 				ParenthesisLeft | ParenthesisRight | Comma | Semicolon
-			) | (Invert, Ident(_))
+			) | (Invert(_), Ident(_))
 			| (
 				ParenthesisLeft,
-				Ident(_) | Bit(_) | Invert | ParenthesisRight
+				Ident(_) | Bit(_) | Invert(_) | ParenthesisRight
 			) | (ParenthesisRight, ParenthesisRight | Comma | Semicolon)
-			| (Comma, Ident(_) | Bit(_) | Invert)
+			| (Comma, Ident(_) | Bit(_) | Invert(_))
 	)
 }
 
@@ -119,7 +119,8 @@ fn expected_exp_tokens(current: &Token) -> Vec<Token> {
 		Ident("_".into()),
 		Bit(false),
 		Bit(true),
-		Invert,
+		Invert(false),
+		Invert(true),
 		ParenthesisLeft,
 		ParenthesisRight,
 		Comma,

@@ -147,8 +147,11 @@ impl Parser {
 	}
 
 	fn next_assignee(&mut self) -> Result<ParamValue> {
-		let sign = self.assume_next(Token::Invert);
+		self.assume_next(Token::Invert(false));
+		let sign = self.assume_next(Token::Invert(true));
+
 		let target = self.next_ident()?;
+
 		Ok(ParamValue { sign, target })
 	}
 
