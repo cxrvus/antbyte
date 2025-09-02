@@ -12,7 +12,7 @@ use crate::{
 	},
 };
 
-use anyhow::{Result, anyhow};
+use anyhow::{Error, Result, anyhow};
 
 // idea: add Cycle & Wrap
 #[rustfmt::skip]
@@ -22,6 +22,18 @@ pub enum BorderMode { Collide, Despawn }
 #[rustfmt::skip]
 #[derive(Debug)]
 pub enum StartingPos { TopLeft, Center }
+
+impl TryFrom<String> for StartingPos {
+	type Error = Error;
+
+	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
+		match value.as_str() {
+			"top_left" => Ok(Self::TopLeft),
+			"center" => Ok(Self::Center),
+			invalid => Err(anyhow!("invalid StartingPos: '{invalid}'")),
+		}
+	}
+}
 
 #[derive(Clone, Copy, Default)]
 pub struct Ant {

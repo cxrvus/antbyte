@@ -1,6 +1,9 @@
 use anyhow::{Result, anyhow};
 
-use crate::ant::world::{World, parser::token::Token};
+use crate::ant::{
+	StartingPos,
+	world::{World, parser::token::Token},
+};
 
 impl World {
 	pub(super) fn set_setting(&mut self, key: String, value: Token) -> Result<()> {
@@ -17,6 +20,14 @@ impl World {
 					Ok(())
 				} else {
 					invalid_type(&value, "number (pixel count)", key)
+				}
+			}
+			"start" => {
+				if let Token::Ident(starting_pos) = value {
+					self.starting_pos = StartingPos::try_from(starting_pos)?;
+					Ok(())
+				} else {
+					invalid_type(&value, "StartingPos (identifier)", &key)
 				}
 			}
 			other => Err(anyhow!("unknown setting: {}", other)),
