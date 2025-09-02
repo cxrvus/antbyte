@@ -98,9 +98,9 @@ impl World {
 					ant.flip_dir();
 
 					if let Some(pos) = self.next_pos(&ant)
-						&& value > 0
+						&& value != 0
 					{
-						Self::spawn(self, value - 1, pos);
+						Self::spawn(self, value, pos);
 					}
 
 					ant.flip_dir();
@@ -151,9 +151,9 @@ impl World {
 		self.ants.iter_mut().find(|ant| ant.pos == pos)
 	}
 
-	fn spawn(&mut self, behavior: u8, pos: Vec2u) {
-		if self.get_behavior(behavior).is_some() {
-			let mut ant = Ant::new(behavior);
+	fn spawn(&mut self, behavior_id: u8, pos: Vec2u) {
+		if self.get_behavior(behavior_id).is_some() {
+			let mut ant = Ant::new(behavior_id);
 			ant.pos = pos;
 			self.ants.push(ant);
 		}
