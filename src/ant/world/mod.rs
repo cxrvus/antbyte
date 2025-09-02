@@ -22,6 +22,7 @@ pub struct WorldConfig {
 	pub border_mode: BorderMode,
 	pub starting_pos: StartingPos,
 	pub noise_seed: Option<u32>,
+	pub description: String,
 }
 impl Default for WorldConfig {
 	fn default() -> Self {
@@ -31,6 +32,7 @@ impl Default for WorldConfig {
 			border_mode: BorderMode::Collide,
 			starting_pos: StartingPos::Center,
 			noise_seed: None,
+			description: "".into(),
 		}
 	}
 }
