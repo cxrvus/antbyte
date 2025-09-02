@@ -17,7 +17,9 @@ impl CompFunc {
 		let mut func = self.clone();
 
 		let (inputs, outputs) = func.extract_peripherals()?;
+		// dbg!((&inputs, &outputs));
 		let logic = func.simulate();
+		// println!("{logic}");
 
 		let behavior = Behavior {
 			name: self.signature.name.clone(),
