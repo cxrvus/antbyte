@@ -19,6 +19,18 @@ use anyhow::{Error, Result, anyhow};
 #[derive(Debug, Clone)]
 pub enum BorderMode { Collide, Despawn }
 
+impl TryFrom<String> for BorderMode {
+	type Error = Error;
+
+	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
+		match value.as_str() {
+			"collide" => Ok(Self::Collide),
+			"die" | "despawn" => Ok(Self::Despawn),
+			invalid => Err(anyhow!("invalid border mode: '{invalid}'")),
+		}
+	}
+}
+
 #[rustfmt::skip]
 #[derive(Debug, Clone)]
 pub enum StartingPos { TopLeft, Center }
@@ -30,7 +42,7 @@ impl TryFrom<String> for StartingPos {
 		match value.as_str() {
 			"top_left" => Ok(Self::TopLeft),
 			"center" => Ok(Self::Center),
-			invalid => Err(anyhow!("invalid StartingPos: '{invalid}'")),
+			invalid => Err(anyhow!("invalid starting pos: '{invalid}'")),
 		}
 	}
 }

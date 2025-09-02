@@ -1,7 +1,7 @@
 use anyhow::{Result, anyhow};
 
 use crate::ant::{
-	StartingPos,
+	BorderMode, StartingPos,
 	world::{WorldConfig, parser::token::Token},
 };
 
@@ -27,7 +27,15 @@ impl WorldConfig {
 					self.starting_pos = StartingPos::try_from(starting_pos)?;
 					Ok(())
 				} else {
-					invalid_type(&value, "StartingPos (identifier)", &key)
+					invalid_type(&value, "starting pos (identifier)", &key)
+				}
+			}
+			"border" => {
+				if let Token::Ident(starting_pos) = value {
+					self.border_mode = BorderMode::try_from(starting_pos)?;
+					Ok(())
+				} else {
+					invalid_type(&value, "border mode (identifier)", &key)
 				}
 			}
 			other => Err(anyhow!("unknown setting: {}", other)),
