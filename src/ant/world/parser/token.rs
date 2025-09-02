@@ -19,7 +19,7 @@ pub enum Token {
 	Comma,
 	BraceLeft,
 	BraceRight,
-	// todo: implement constant ONE and ZERO
+	Bit(bool),
 
 	// ## Top-Level / Funcs
 	Keyword(Keyword),
@@ -45,7 +45,7 @@ impl Token {
 	const IDENT_PTN: &'static str = r"[a-zA-Z_]\w*";
 	const LOWER_IDENT: &'static str = r"^[a-z][a-z0-9_]*$";
 	const UPPER_IDENT: &'static str = r"^[A-Z][A-Z0-9_]*$";
-	const SYMBOL_PTN: &'static str = r"=>|[#={}(),;1]|-";
+	const SYMBOL_PTN: &'static str = r"=>|[#={}(),;01]|-";
 
 	const SPACE_PTN: &'static str = r"\s+";
 	const WILD_PTN: &'static str = r".+";
@@ -90,6 +90,8 @@ impl Token {
 			"," => Some(Token::Comma),
 			";" => Some(Token::Semicolon),
 			"-" => Some(Token::Invert),
+			"0" => Some(Token::Bit(false)),
+			"1" => Some(Token::Bit(true)),
 			_ => None,
 		}
 	}

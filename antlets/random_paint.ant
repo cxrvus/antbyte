@@ -2,8 +2,8 @@ ant main {
 	D1 = R0;
 	D2 = R1;
 
-	C0 = -or();
-	MOV = -or();
+	C0 = 1;
+	MOV = 1;
 
 	DIE = OBS;
 }

@@ -33,6 +33,20 @@ impl Parser {
 					sign = false; // reset
 				}
 
+				Token::Bit(sign) => {
+					let new_exp = Expression {
+						ident: "or".into(),
+						sign: *sign,
+						params: Some(vec![]),
+					};
+
+					if let Some(current_set) = expression_sets.last_mut() {
+						current_set.push(new_exp);
+					} else {
+						expression_sets.push(vec![new_exp]);
+					}
+				}
+
 				Token::Invert => {
 					sign = true;
 				}
@@ -85,14 +99,16 @@ fn validate_exp_token(current: &Token, next: &Token) -> bool {
 
 	matches!(
 		(current, next),
-		(Assign, Ident(_) | Invert)
+		(Assign, Ident(_) | Invert | Bit(_))
 			| (
-				Ident(_),
+				Ident(_) | Bit(_),
 				ParenthesisLeft | ParenthesisRight | Comma | Semicolon
 			) | (Invert, Ident(_))
-			| (ParenthesisLeft, Ident(_) | Invert | ParenthesisRight)
-			| (ParenthesisRight, ParenthesisRight | Comma | Semicolon)
-			| (Comma, Ident(_) | Invert)
+			| (
+				ParenthesisLeft,
+				Ident(_) | Bit(_) | Invert | ParenthesisRight
+			) | (ParenthesisRight, ParenthesisRight | Comma | Semicolon)
+			| (Comma, Ident(_) | Bit(_) | Invert)
 	)
 }
 
@@ -101,6 +117,8 @@ fn expected_exp_tokens(current: &Token) -> Vec<Token> {
 
 	[
 		Ident("_".into()),
+		Bit(false),
+		Bit(true),
 		Invert,
 		ParenthesisLeft,
 		ParenthesisRight,
