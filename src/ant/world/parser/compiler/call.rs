@@ -22,30 +22,32 @@ impl FuncCall {
 	) -> Result<Vec<CompStatement>> {
 		let called_func = self.get_overload(comp_funcs)?;
 
-		let signature = &called_func.signature;
 		let var_prefix = format!("_{}_{func_index}", self.func);
 		let mut expanded_statements = vec![];
 
-		for mut func_stm in called_func.comp_statements.clone() {
-			if let Some(assignee_index) = signature
+		for mut called_func_stm in called_func.comp_statements.clone() {
+			if let Some(assignee_index) = called_func
+				.signature
 				.assignees
 				.iter()
-				.position(|asg_target| *asg_target == func_stm.assignee.target)
+				.position(|asg_target| *asg_target == called_func_stm.assignee.target)
 			{
 				// assignee represents a function assignee
 				let call_assignee = &self.assignees[assignee_index];
 
-				func_stm.assignee = ParamValue {
-					sign: func_stm.assignee.sign ^ call_assignee.sign,
+				called_func_stm.assignee = ParamValue {
+					sign: called_func_stm.assignee.sign ^ call_assignee.sign,
 					target: call_assignee.target.clone(),
 				}
 			} else {
 				// assignee represents a variable
-				func_stm.assignee.target = var_prefix.clone() + &func_stm.assignee.target;
+				called_func_stm.assignee.target =
+					var_prefix.clone() + &called_func_stm.assignee.target;
 			}
 
-			for func_param in func_stm.params.iter_mut() {
-				if let Some(param_index) = signature
+			for func_param in called_func_stm.params.iter_mut() {
+				if let Some(param_index) = called_func
+					.signature
 					.params
 					.iter()
 					.position(|param_target| *param_target == func_param.target)
@@ -63,7 +65,7 @@ impl FuncCall {
 				}
 			}
 
-			expanded_statements.push(func_stm);
+			expanded_statements.push(called_func_stm);
 		}
 
 		Ok(expanded_statements)
