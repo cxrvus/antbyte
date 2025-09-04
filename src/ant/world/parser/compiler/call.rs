@@ -6,7 +6,7 @@ use crate::ant::{
 use anyhow::{Result, anyhow};
 
 impl FuncCall {
-	/// transform AND into OR ([DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws))
+	/// transforms AND into OR ([DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws))
 	pub(super) fn resolve_and_gate(&mut self) {
 		if self.func == "and" {
 			self.params.iter_mut().for_each(|param| param.invert());
@@ -26,49 +26,52 @@ impl FuncCall {
 		let mut expanded_statements = vec![];
 
 		for mut called_func_stm in called_func.comp_statements.clone() {
-			if let Some(assignee_index) = called_func
-				.signature
-				.assignees
-				.iter()
-				.position(|asg_target| *asg_target == called_func_stm.assignee.target)
-			{
-				// assignee represents a function assignee
-				let call_assignee = &self.assignees[assignee_index];
+			// resolve assignee
+			Self::resolve_param(
+				&mut called_func_stm.assignee,
+				&self.assignees,
+				&called_func.signature.assignees,
+				&var_prefix,
+			);
 
-				called_func_stm.assignee = ParamValue {
-					sign: called_func_stm.assignee.sign ^ call_assignee.sign,
-					target: call_assignee.target.clone(),
-				}
-			} else {
-				// assignee represents a variable
-				called_func_stm.assignee.target =
-					var_prefix.clone() + &called_func_stm.assignee.target;
-			}
-
+			// resolve parameters
 			for func_param in called_func_stm.params.iter_mut() {
-				if let Some(param_index) = called_func
-					.signature
-					.params
-					.iter()
-					.position(|param_target| *param_target == func_param.target)
-				{
-					// value targets a function parameter
-					let call_param = &self.params[param_index];
-
-					*func_param = ParamValue {
-						sign: func_param.sign ^ call_param.sign,
-						target: call_param.target.clone(),
-					};
-				} else {
-					// value targets a variable
-					func_param.target = var_prefix.clone() + &func_param.target;
-				}
+				Self::resolve_param(
+					func_param,
+					&self.params,
+					&called_func.signature.params,
+					&var_prefix,
+				);
 			}
 
 			expanded_statements.push(called_func_stm);
 		}
 
 		Ok(expanded_statements)
+	}
+
+	/// resolves a statement parameter / assignee in by either mapping it to a func parameter / assignee
+	/// or prefixing it with the variable prefix if it's a variable
+	fn resolve_param(
+		func_param: &mut ParamValue,
+		call_params: &[ParamValue],
+		signature_targets: &[String],
+		var_prefix: &str,
+	) {
+		if let Some(call_value) = signature_targets
+			.iter()
+			.position(|target| *target == func_param.target)
+			.map(|i| &call_params[i])
+		{
+			// value targets a function parameter / assignee
+			*func_param = ParamValue {
+				sign: func_param.sign ^ call_value.sign,
+				target: call_value.target.clone(),
+			};
+		} else {
+			// value targets a variable
+			func_param.target = var_prefix.to_string() + &func_param.target;
+		}
 	}
 
 	pub(super) fn get_overload<'a>(&self, comp_funcs: &'a [CompFunc]) -> Result<&'a CompFunc> {
