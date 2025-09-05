@@ -1,3 +1,5 @@
+set desc = "Langton's Ant";
+
 set height = 64;
 set width = 64;
 set border = die;
