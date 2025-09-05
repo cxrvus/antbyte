@@ -45,6 +45,7 @@ pub enum Token {
 
 impl Token {
 	// idea: allow hex numbers
+	const COMMENT_PTN: &'static str = r"#.*(?:\r?\n|$)";
 	const NUMBER_PTN: &'static str = r"\d{1,3}";
 	const STRING_PTN: &'static str = r#""(.*?)""#;
 	const IDENT_PTN: &'static str = r"[a-zA-Z_]\w*";
@@ -58,6 +59,7 @@ impl Token {
 	// todo: write tests
 	pub fn tokenize(code: String) -> Result<Vec<Self>> {
 		let pattern = [
+			Self::COMMENT_PTN,
 			Self::STRING_PTN,
 			Self::IDENT_PTN,
 			Self::NUMBER_PTN,
@@ -70,13 +72,14 @@ impl Token {
 		let token_strings = regex(&pattern).find_iter(&code).collect::<Vec<_>>();
 
 		let whitespace_re = regex_full(Self::SPACE_PTN);
+		let comment_re = regex_full(Self::COMMENT_PTN);
 
 		// dbg!(&token_strings.iter().map(|x| x.as_str()).collect::<Vec<_>>());
 
 		token_strings
 			.iter()
 			.map(|x| x.as_str())
-			.filter(|x| !whitespace_re.is_match_at(x, 0))
+			.filter(|x| !(whitespace_re.is_match(x) || comment_re.is_match(x)))
 			.map(Token::from_token_str)
 			.collect::<Result<Vec<_>>>()
 	}
