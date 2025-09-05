@@ -1,6 +1,6 @@
 use crate::ant::{
 	compiler::{CompFunc, CompStatement, FuncCall},
-	world::parser::{ParamValue, Signature},
+	world::parser::{ParamValue, Signature, token::Token},
 };
 
 use anyhow::{Result, anyhow};
@@ -58,7 +58,9 @@ impl FuncCall {
 		signature_targets: &[String],
 		var_prefix: &str,
 	) {
-		if let Some(call_value) = signature_targets
+		if Token::is_uppercase_ident(&func_param.target) {
+			// value targets a peripheral => do nothing
+		} else if let Some(call_value) = signature_targets
 			.iter()
 			.position(|target| *target == func_param.target)
 			.map(|i| &call_params[i])
