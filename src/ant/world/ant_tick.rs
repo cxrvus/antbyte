@@ -93,6 +93,8 @@ impl World {
 				(CellClear, 1) => self.cells.set_at(&ant.pos.sign(), 0),
 				(Memory, value) => ant.memory = value,
 				(SpawnAnt, _) if value != 0 => {
+					let original_dir = ant.dir;
+
 					// direction gets flip, so that new ant
 					// spawns behind the old one and not in front of her
 					ant.flip_dir();
@@ -100,7 +102,7 @@ impl World {
 					if let Some(pos) = self.next_pos(&ant)
 						&& value != 0
 					{
-						Self::spawn(self, value, pos);
+						Self::spawn(self, value, pos, original_dir);
 					}
 
 					ant.flip_dir();
@@ -151,9 +153,9 @@ impl World {
 		self.ants.iter_mut().find(|ant| ant.pos == pos)
 	}
 
-	fn spawn(&mut self, behavior_id: u8, pos: Vec2u) {
+	fn spawn(&mut self, behavior_id: u8, pos: Vec2u, dir: u8) {
 		if self.get_behavior(behavior_id).is_some() {
-			let mut ant = Ant::new(behavior_id);
+			let mut ant = Ant::new(behavior_id, dir);
 			ant.pos = pos;
 			self.ants.push(ant);
 		}

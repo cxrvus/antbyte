@@ -60,9 +60,10 @@ pub struct Ant {
 }
 
 impl Ant {
-	pub fn new(behavior: u8) -> Self {
+	pub fn new(behavior: u8, dir: u8) -> Self {
 		Self {
 			behavior,
+			dir,
 			alive: true,
 			..Default::default()
 		}
@@ -82,7 +83,7 @@ impl Ant {
 	}
 
 	pub fn flip_dir(&mut self) {
-		self.set_dir(self.dir + 2);
+		self.set_dir(self.dir + 4);
 	}
 }
 

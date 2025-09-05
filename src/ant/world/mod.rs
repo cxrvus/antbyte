@@ -100,7 +100,7 @@ impl From<WorldProperties> for World {
 				},
 			};
 
-			let mut ant = Ant::new(1);
+			let mut ant = Ant::new(1, 0);
 			ant.pos = starting_pos;
 			state.ants.push(ant);
 		}
