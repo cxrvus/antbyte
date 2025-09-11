@@ -55,6 +55,8 @@ impl Func {
 			exp_index += 1;
 		}
 
+		comp_statements.retain(|stm| stm.assignee.target != "_");
+
 		Ok(CompFunc {
 			comp_statements,
 			signature: self.signature.clone(),

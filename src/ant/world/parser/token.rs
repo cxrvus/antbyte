@@ -113,7 +113,8 @@ impl Token {
 		if let Some(keyword) = Keyword::from_ident(token) {
 			Ok(Token::Keyword(keyword))
 		} else if regex_full(Self::IDENT_PTN).is_match(token) {
-			if regex_full(Self::UPPER_IDENT).is_match(token)
+			if token == "_"
+				|| regex_full(Self::UPPER_IDENT).is_match(token)
 				|| regex_full(Self::LOWER_IDENT).is_match(token)
 			{
 				Ok(Token::Ident(token.to_string()))
