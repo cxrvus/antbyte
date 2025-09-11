@@ -14,18 +14,19 @@ use crate::{
 
 use anyhow::{Error, Result, anyhow};
 
-// todo: add Cycle & Wrap
 #[rustfmt::skip]
 #[derive(Debug, Clone)]
-pub enum BorderMode { Collide, Despawn }
+pub enum BorderMode { Collide, Despawn, Cycle, Wrap }
 
 impl TryFrom<String> for BorderMode {
 	type Error = Error;
 
 	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
 		match value.as_str() {
-			"collide" => Ok(Self::Collide),
+			"obs" | "collide" => Ok(Self::Collide),
 			"die" | "despawn" => Ok(Self::Despawn),
+			"cycle" => Ok(Self::Cycle),
+			"wrap" => Ok(Self::Wrap),
 			invalid => Err(anyhow!("invalid border mode: '{invalid}'")),
 		}
 	}

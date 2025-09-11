@@ -133,6 +133,30 @@ impl World {
 
 			match self.config().border_mode {
 				Collide | Despawn => None,
+				Cycle | Wrap => {
+					let dimensions = self.cells.dimensions().sign();
+					let mut wrapped_pos = new_pos % dimensions;
+
+					if let Wrap = self.config().border_mode {
+						if new_pos.x < 0 {
+							wrapped_pos.x = dimensions.x - 1;
+							wrapped_pos.y = (wrapped_pos.y - 1).rem_euclid(dimensions.y);
+						} else if new_pos.x >= dimensions.x {
+							wrapped_pos.x = 0;
+							wrapped_pos.y = (wrapped_pos.y + 1).rem_euclid(dimensions.y);
+						}
+
+						if new_pos.y < 0 {
+							wrapped_pos.y = dimensions.y - 1;
+							wrapped_pos.x = (wrapped_pos.x - 1).rem_euclid(dimensions.x);
+						} else if new_pos.y >= dimensions.y {
+							wrapped_pos.y = 0;
+							wrapped_pos.x = (wrapped_pos.x + 1).rem_euclid(dimensions.x);
+						}
+					}
+
+					Some(wrapped_pos.unsign().unwrap())
+				}
 			}
 		}
 	}
