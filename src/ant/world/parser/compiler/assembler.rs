@@ -18,6 +18,7 @@ impl CompFunc {
 
 		let (inputs, outputs) = func.extract_peripherals()?;
 		// dbg!((&inputs, &outputs));
+		// println!("\n{func}");
 		let logic = func.simulate();
 		// println!("{logic}");
 
@@ -37,14 +38,6 @@ impl CompFunc {
 		let mut variables: Vec<String> = vec![];
 
 		for statement in &mut self.comp_statements {
-			Self::extract_peripheral(
-				&mut self.signature,
-				&mut variables,
-				&mut outputs,
-				&mut statement.assignee,
-				IoType::Output,
-			)?;
-
 			for param in &mut statement.params {
 				Self::extract_peripheral(
 					&mut self.signature,
@@ -54,6 +47,14 @@ impl CompFunc {
 					IoType::Input,
 				)?;
 			}
+
+			Self::extract_peripheral(
+				&mut self.signature,
+				&mut variables,
+				&mut outputs,
+				&mut statement.assignee,
+				IoType::Output,
+			)?;
 		}
 
 		inputs.reverse();
@@ -83,15 +84,26 @@ impl CompFunc {
 		let target = &mut param.target;
 
 		if Token::is_uppercase_ident(target) {
-			let periph = PeripheralBit::from_ident(target)?;
+			let original_target = target.clone();
 
-			if let Some(req_io) = periph.peripheral.properties().io_type
-				&& req_io != io_type
-			{
-				return Err(anyhow!("cannot use peripheral '{target}' as {io_type:?}"));
+			if io_type == IoType::Input {
+				let reassigned_output_name = format_periph(&original_target, IoType::Output);
+				if signature.assignees.contains(&reassigned_output_name) {
+					*target = reassigned_output_name;
+					return Ok(());
+				}
 			}
 
-			*target = format_periph(target, io_type);
+			let periph = PeripheralBit::from_ident(&original_target)?;
+
+			if let Some(req_io) = periph.peripheral.properties().io_type
+				&& req_io == IoType::Input
+				&& io_type == IoType::Output
+			{
+				return Err(anyhow!("cannot assign to input-only peripheral '{target}'"));
+			}
+
+			*target = format_periph(&original_target, io_type);
 
 			if !periphs.contains(&periph) {
 				periphs.push(periph);
