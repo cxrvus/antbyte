@@ -88,6 +88,7 @@ impl CompFunc {
 
 			if io_type == IoType::Input {
 				let reassigned_output_name = format_periph(&original_target, IoType::Output);
+
 				if signature.assignees.contains(&reassigned_output_name) {
 					*target = reassigned_output_name;
 					return Ok(());
@@ -97,10 +98,14 @@ impl CompFunc {
 			let periph = PeripheralBit::from_ident(&original_target)?;
 
 			if let Some(req_io) = periph.peripheral.properties().io_type
-				&& req_io == IoType::Input
-				&& io_type == IoType::Output
+				&& req_io != io_type
 			{
-				return Err(anyhow!("cannot assign to input-only peripheral '{target}'"));
+				return Err(match req_io {
+					IoType::Input => anyhow!("cannot assign to input-only peripheral '{target}'"),
+					IoType::Output => anyhow!(
+						"cannot use output-only peripheral '{target}' like an input\n(except if it has been assigned a value before)"
+					),
+				});
 			}
 
 			*target = format_periph(&original_target, io_type);
