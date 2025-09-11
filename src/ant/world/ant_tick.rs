@@ -39,7 +39,7 @@ impl World {
 				}
 				Direction => ant.dir,
 				Moving => ant.moving as u8,
-				_ => panic!("unhandled input"),
+				_ => panic!("unhandled input: {input_spec:?}"),
 			};
 
 			let bit_index = input_spec.bit;

@@ -156,6 +156,12 @@ impl CompFunc {
 			let mut assignee_value = statement.assignee.sign;
 
 			for param in &statement.params {
+				debug_assert!(
+					variables.contains_key(&param.target),
+					"unknown variable: {}",
+					&param.target
+				);
+
 				let param_value = param.sign ^ variables[&param.target];
 
 				if param_value {
