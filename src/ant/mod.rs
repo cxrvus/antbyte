@@ -14,7 +14,7 @@ use crate::{
 
 use anyhow::{Error, Result, anyhow};
 
-// idea: add Cycle & Wrap
+// todo: add Cycle & Wrap
 #[rustfmt::skip]
 #[derive(Debug, Clone)]
 pub enum BorderMode { Collide, Despawn }
@@ -50,9 +50,9 @@ impl TryFrom<String> for StartingPos {
 #[derive(Clone, Copy, Default)]
 pub struct Ant {
 	pub behavior: u8,
-	pub alive: bool, // todo: deprecate,
+	pub alive: bool, // todo: deprecate
 	pub pos: Vec2u,
-	/// cardinal direction - number between 0 and 3
+	/// principle direction - number between 0 and 7
 	pub dir: u8,
 	pub moving: bool,
 	pub memory: u8,

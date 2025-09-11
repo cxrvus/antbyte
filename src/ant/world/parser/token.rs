@@ -11,7 +11,7 @@ fn regex_full(ptn: &str) -> Regex {
 	regex(&format!("^{ptn}$"))
 }
 
-// idea: add Token.line and show in error handling
+// todo: add Token line metadata
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Token {
 	Ident(String),
@@ -37,16 +37,15 @@ pub enum Token {
 
 	// ## Other
 	Invalid(String),
-	Comment, // todo: implement
+	Comment,
 
 	#[default]
 	EndOfFile,
 }
 
 impl Token {
-	// idea: allow hex numbers
 	const COMMENT_PTN: &'static str = r"#.*(?:\r?\n|$)";
-	const NUMBER_PTN: &'static str = r"\d{1,3}";
+	const NUMBER_PTN: &'static str = r"\d{1,3}"; // todo: parse bin and hex numbers
 	const STRING_PTN: &'static str = r#""(.*?)""#;
 	const IDENT_PTN: &'static str = r"[a-zA-Z_]\w*";
 	const LOWER_IDENT: &'static str = r"[a-z][a-z0-9_]*";
@@ -56,7 +55,6 @@ impl Token {
 	const SPACE_PTN: &'static str = r"\s+";
 	const WILD_PTN: &'static str = r".+";
 
-	// todo: write tests
 	pub fn tokenize(code: String) -> Result<Vec<Self>> {
 		let pattern = [
 			Self::COMMENT_PTN,

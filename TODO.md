@@ -1,5 +1,2 @@
-## Parser
-- todo: turn Statements into Truth Tables
-
 ## Other
-- todo: use thiserror instead of anyhow
+- idea: use thiserror instead of anyhow

@@ -56,9 +56,9 @@ impl Default for WorldProperties {
 pub struct WorldState {
 	rng: StdRng,
 	frame: usize,
-	// todo: ant cache matrix
+	// TODO: store ants in cells
 	cells: Cells,
-	// todo: limit ant count
+	// TODO: limit ant count
 	ants: Vec<Ant>,
 }
 
@@ -114,7 +114,7 @@ impl From<WorldProperties> for World {
 
 impl World {
 	pub fn tick(&mut self) -> bool {
-		// todo: optimize - remove cloning (here and in ant_tick)
+		// idea: optimize - remove cloning (here and in ant_tick)
 		self.frame += 1;
 
 		let mut world_frame = self.clone();

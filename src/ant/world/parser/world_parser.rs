@@ -10,7 +10,6 @@ impl Parser {
 			let keyword = match self.next_token() {
 				Token::Keyword(keyword) => keyword,
 				Token::EndOfFile => break,
-				// fixme: better error handling - parsing goes on even if statement is invalid
 				other => return Err(Parser::unexpected(other, "global statement")),
 			};
 
