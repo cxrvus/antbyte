@@ -22,7 +22,7 @@ impl FuncCall {
 	) -> Result<Vec<CompStatement>> {
 		let called_func = self.get_overload(comp_funcs)?;
 
-		let var_prefix = format!("_{}_{func_index}", self.func);
+		let var_prefix = format!("_{}_{func_index}_", self.func);
 		let mut expanded_statements = vec![];
 
 		for mut called_func_stm in called_func.comp_statements.clone() {
