@@ -38,7 +38,7 @@ impl World {
 					(self.next_pos(ant).is_none() || self.get_target_ant(ant).is_some()).into()
 				}
 				Direction => ant.dir,
-				Moving => ant.moving as u8,
+				Halted => ant.halted as u8,
 				_ => panic!("unhandled input: {input_spec:?}"),
 			};
 
@@ -81,14 +81,7 @@ impl World {
 		for OutputValue { output, value } in output_values.into_iter() {
 			match (output, value) {
 				(Direction, _) => ant.set_dir(ant.dir + value),
-				(Moving, _) => {
-					let moving = value != 0;
-					ant.moving = moving;
-
-					if moving {
-						self.move_tick(&mut ant);
-					}
-				}
+				(Halted, _) => ant.halted = value != 0,
 				(Cell, _) if value != 0 => self.cells.set_at(&ant.pos.sign(), value),
 				(CellClear, 1) => self.cells.set_at(&ant.pos.sign(), 0),
 				(Memory, value) => ant.memory = value,
@@ -115,6 +108,10 @@ impl World {
 				(Die, 1) => ant.die(),
 				_ => {}
 			};
+		}
+
+		if !ant.halted {
+			self.move_tick(&mut ant);
 		}
 
 		ant.age += 1;

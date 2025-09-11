@@ -4,8 +4,6 @@ set width = 4;
 set start = top_left;
 
 ant main {
-	MOV = 1;
-
 	C0 = -and(-T2, -T1, -T0);
 
 	turn_right = and(-T2, -T1, +T0);

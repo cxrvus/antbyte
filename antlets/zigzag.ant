@@ -11,8 +11,6 @@ fn dir_change = (mem, clock) => (mem_out, dir) {
 }
 
 ant main {
-	MOV = 1;
-
 	CC = C0;
 	C0 = -C0;
 

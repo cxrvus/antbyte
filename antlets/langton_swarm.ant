@@ -13,8 +13,6 @@ fn langton = () => () {
 
 	D1 = or(left, right);
 	D2 = left;
-
-	MOV = 1;
 }
 
 ant main {

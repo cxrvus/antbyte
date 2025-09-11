@@ -22,7 +22,7 @@ pub enum Peripheral {
 	// ## ant interaction outputs
 	/// 3 bits indicating number of 45 degrees rotations
 	Direction,
-	Moving,
+	Halted,
 	SpawnAnt,
 	Die,
 }
@@ -63,7 +63,7 @@ impl Peripheral {
 			Random 		=> Props { size: BYTE, io_type: Some(Input), },
 			Obstacle 	=> Props { size: BIT, io_type: Some(Input), },
 			Direction 	=> Props { size: DIR, io_type: None, },
-			Moving 		=> Props { size: BIT, io_type: None, },
+			Halted 		=> Props { size: BIT, io_type: None, },
 			SpawnAnt 	=> Props { size: ANT_ID, io_type: Some(Output), },
 			Kill 		=> Props { size: BIT, io_type: Some(Output), },
 			Die 		=> Props { size: BIT, io_type: Some(Output), },
@@ -84,7 +84,7 @@ impl Peripheral {
 			"R" | "RAND_" => Some(Self::Random),
 			"OBS" | "OBSTACLE" => Some(Self::Obstacle),
 			"D" | "DIR_" => Some(Self::Direction),
-			"MOV" | "MOVING" => Some(Self::Moving),
+			"HALT" => Some(Self::Halted),
 			"A" | "SPAWN_" => Some(Self::SpawnAnt),
 			"KILL" => Some(Self::Kill),
 			"DIE" => Some(Self::Die),

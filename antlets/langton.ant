@@ -13,6 +13,4 @@ ant main {
 
 	D1 = or(left, right);
 	D2 = left;
-
-	MOV = 1;
 }
