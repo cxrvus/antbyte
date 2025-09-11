@@ -1,5 +1,4 @@
 ant main {
-	M0 = 1;
 	D0 = -M0;
 	
 	D1 = R0;
@@ -9,4 +8,6 @@ ant main {
 	MOV = 1;
 
 	DIE = OBS;
+	
+	M0 = 1;
 }
