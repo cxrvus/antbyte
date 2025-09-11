@@ -1,0 +1,21 @@
+set height = 64;
+set width = 64;
+set start = top_left;
+set border = wrap;
+
+fn xor = (a, b) => c { c = or(and(-a, b), and(a, -b)); }
+
+ant main {
+	MOV = 1;
+
+	CC = C0;
+	C0 = -C0;
+
+	D1 = xor(M2, T2);
+	D2 = xor(M3, T3);
+	D0 = xor(M7, T7);
+
+	M2 = T2;
+	M3 = T3;
+	M7 = T7;
+}
