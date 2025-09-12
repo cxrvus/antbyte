@@ -1,5 +1,4 @@
-set height = 64;
-set width = 64;
+set size = 64;
 set start = top_left;
 set border = wrap;
 

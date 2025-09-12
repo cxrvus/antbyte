@@ -1,6 +1,4 @@
-set height = 4;
-set width = 4;
-
+set size = 4;
 set start = top_left;
 
 ant main {

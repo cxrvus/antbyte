@@ -10,13 +10,18 @@ impl WorldConfig {
 		// todo: implement all WorldConfig properties
 		// idea: more elegant match block
 		match key.as_str() {
-			key @ "width" | key @ "height" => {
+			key @ ("height" | "width" | "size") => {
 				if let Token::Number(number) = value {
-					*match key {
-						"width" => &mut self.width,
-						"height" => &mut self.height,
+					match key {
+						"width" => self.width = number as usize,
+						"height" => self.height = number as usize,
+						"size" => {
+							self.width = number as usize;
+							self.height = number as usize;
+						}
 						_ => unreachable!(),
-					} = number as usize;
+					}
+
 					Ok(())
 				} else {
 					invalid_type(&value, "number (pixel count)", key)
