@@ -1,0 +1,17 @@
+set height = 8;
+set width = 16;
+set start = top_left;
+set border = wrap;
+set colors = rgb;
+
+ant main {
+	D1 = -M0;
+	M0 = 1;
+
+	C0 = T0;
+	C1 = T1;
+	C2 = T2;
+	C3 = 1;
+
+	DIE = T7;
+}
