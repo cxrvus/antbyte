@@ -89,6 +89,20 @@ fn update(world: World, auto_step: bool) -> Result<()> {
 	}
 }
 
+fn color_codes(value: u8) -> (u8, u8) {
+	let color = value & 0b0111;
+	let intensity = (value & 0b1000) != 0;
+	let bg_color = if intensity { 100 + color } else { 40 + color };
+	let fg_color = if !intensity { 90 + color } else { 30 + color };
+
+	(bg_color, fg_color)
+}
+
+fn color_cell(value: u8, content: &str) -> String {
+	let (bg, fg) = color_codes(value);
+	format!("\x1b[{fg};{bg}m{content}\x1b[0m")
+}
+
 fn world_to_string(world: &World) -> String {
 	let cells = world.cells();
 	let mut string = String::new();
@@ -105,18 +119,16 @@ fn world_to_string(world: &World) -> String {
 			.filter(|ant| ant.alive)
 			.find(|ant| ant.pos == pos);
 
-		let cell_char = match cell {
-			0 => '.',
-			_ => '#',
-		};
-
-		let ant_char = match ant {
-			None => cell_char,
-			Some(ant) => ant.get_dir_vec().cardinal_char(),
-		};
-
-		string.push(ant_char);
-		string.push(cell_char);
+		match ant {
+			None => {
+				string.push_str(&color_cell(*cell, "  "));
+			}
+			Some(ant) => {
+				let (char1, char2) = ant.get_dir_vec().principal_chars();
+				let ant_chars = format!("{char1}{char2}");
+				string.push_str(&color_cell(*cell, &ant_chars));
+			}
+		}
 	}
 
 	string
