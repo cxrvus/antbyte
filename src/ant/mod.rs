@@ -48,6 +48,24 @@ impl TryFrom<String> for StartingPos {
 	}
 }
 
+#[derive(Debug, Clone)]
+pub enum ColorMode {
+	Binary,
+	RGBI,
+}
+
+impl TryFrom<String> for ColorMode {
+	type Error = Error;
+
+	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
+		match value.as_str() {
+			"rgb" | "rbgi" => Ok(Self::RGBI),
+			"bin" => Ok(Self::Binary),
+			invalid => Err(anyhow!("invalid starting pos: '{invalid}'")),
+		}
+	}
+}
+
 #[derive(Clone, Copy, Default)]
 pub struct Ant {
 	pub behavior: u8,

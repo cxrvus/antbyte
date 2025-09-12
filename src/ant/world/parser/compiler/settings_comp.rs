@@ -1,7 +1,7 @@
 use anyhow::{Result, anyhow};
 
 use crate::ant::{
-	BorderMode, StartingPos,
+	BorderMode, ColorMode, StartingPos,
 	world::{WorldConfig, parser::token::Token},
 };
 
@@ -38,6 +38,14 @@ impl WorldConfig {
 			"border" => {
 				if let Token::Ident(starting_pos) = value {
 					self.border_mode = BorderMode::try_from(starting_pos)?;
+					Ok(())
+				} else {
+					invalid_type(&value, "border mode (identifier)", &key)
+				}
+			}
+			"colors" => {
+				if let Token::Ident(color_mode) = value {
+					self.color_mode = ColorMode::try_from(color_mode)?;
 					Ok(())
 				} else {
 					invalid_type(&value, "border mode (identifier)", &key)

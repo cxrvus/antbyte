@@ -1,5 +1,8 @@
 use crate::{
-	ant::peripherals::{OutputValue, Peripheral},
+	ant::{
+		ColorMode,
+		peripherals::{OutputValue, Peripheral},
+	},
 	util::vec2::Vec2u,
 };
 
@@ -82,10 +85,14 @@ impl World {
 			match (output, value) {
 				(Direction, _) => ant.set_dir(ant.dir + value),
 				(Halted, _) => ant.halted = value != 0,
-				(Cell, _) if value != 0 => self.cells.set_at(&ant.pos.sign(), value),
+				(Cell, _) if value != 0 => {
+					let adjusted = self.adjusted_color(value);
+					self.cells.set_at(&ant.pos.sign(), adjusted);
+				}
 				(CellClear, 1) => self.cells.set_at(&ant.pos.sign(), 0),
 				(Memory, value) => ant.memory = value,
 				(SpawnAnt, _) if value != 0 => {
+					// TODO: encapsulate into function
 					let original_dir = ant.dir;
 
 					// direction gets flip, so that new ant
@@ -179,6 +186,16 @@ impl World {
 			let mut ant = Ant::new(behavior_id, dir);
 			ant.pos = pos;
 			self.ants.push(ant);
+		}
+	}
+
+	fn adjusted_color(&self, color: u8) -> u8 {
+		match self.config().color_mode {
+			ColorMode::Binary => match color {
+				0 => 0x0,
+				_ => 0xf,
+			},
+			ColorMode::RGBI => color,
 		}
 	}
 }

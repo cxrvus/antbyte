@@ -11,7 +11,10 @@ use std::{
 
 use super::{Ant, Behavior, BorderMode, StartingPos};
 
-use crate::util::{matrix::Matrix, vec2::Vec2u};
+use crate::{
+	ant::ColorMode,
+	util::{matrix::Matrix, vec2::Vec2u},
+};
 
 type Cells = Matrix<u8>;
 
@@ -21,9 +24,11 @@ pub struct WorldConfig {
 	pub height: usize,
 	pub border_mode: BorderMode,
 	pub starting_pos: StartingPos,
+	pub color_mode: ColorMode,
 	pub noise_seed: Option<u32>,
 	pub description: String,
 }
+
 impl Default for WorldConfig {
 	fn default() -> Self {
 		Self {
@@ -31,6 +36,7 @@ impl Default for WorldConfig {
 			height: 32,
 			border_mode: BorderMode::Collide,
 			starting_pos: StartingPos::Center,
+			color_mode: ColorMode::Binary,
 			noise_seed: None,
 			description: "".into(),
 		}
