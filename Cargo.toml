@@ -9,5 +9,6 @@ path = "src/bin/cli.rs"
 
 [dependencies]
 anyhow = "*"
+clap = { version = "4.5.47", features = ["derive"] }
 rand = "*"
 regex = "*"
