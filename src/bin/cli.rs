@@ -93,7 +93,13 @@ fn color_codes(value: u8) -> (u8, u8) {
 	let color = value & 0b0111;
 	let intensity = (value & 0b1000) != 0;
 	let bg_color = if intensity { 100 + color } else { 40 + color };
-	let fg_color = if !intensity { 90 + color } else { 30 + color };
+	let flipped_color = color ^ 0b0111;
+
+	let fg_color = if intensity {
+		90 + flipped_color
+	} else {
+		30 + flipped_color
+	};
 
 	(bg_color, fg_color)
 }
