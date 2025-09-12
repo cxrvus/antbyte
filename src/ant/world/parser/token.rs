@@ -55,7 +55,7 @@ impl Token {
 	const SPACE_PTN: &'static str = r"\s+";
 	const WILD_PTN: &'static str = r".+";
 
-	pub fn tokenize(code: String) -> Result<Vec<Self>> {
+	pub fn tokenize(code: &str) -> Result<Vec<Self>> {
 		let pattern = [
 			Self::COMMENT_PTN,
 			Self::STRING_PTN,
@@ -67,7 +67,7 @@ impl Token {
 		]
 		.join("|");
 
-		let token_strings = regex(&pattern).find_iter(&code).collect::<Vec<_>>();
+		let token_strings = regex(&pattern).find_iter(code).collect::<Vec<_>>();
 
 		let whitespace_re = regex_full(Self::SPACE_PTN);
 		let comment_re = regex_full(Self::COMMENT_PTN);

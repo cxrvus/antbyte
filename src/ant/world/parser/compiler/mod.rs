@@ -56,7 +56,11 @@ struct CompStatement {
 	params: Vec<ParamValue>,
 }
 
-pub fn compile_world(code: String) -> Result<WorldProperties> {
+pub struct LogConfig {
+	pub all: bool,
+}
+
+pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties> {
 	let parsed_world = Parser::new(code)?.parse_world()?;
 
 	let mut properties = WorldProperties::default();
@@ -89,7 +93,7 @@ pub fn compile_world(code: String) -> Result<WorldProperties> {
 
 			let target_func = func_call.get_overload(&comp_funcs).unwrap();
 
-			let behavior = target_func.assemble().map(Some)?;
+			let behavior = target_func.assemble(log_cfg).map(Some)?;
 			behaviors[target_id as usize] = behavior;
 		}
 	}
@@ -100,17 +104,19 @@ pub fn compile_world(code: String) -> Result<WorldProperties> {
 }
 
 pub fn compile_main(code: String) -> TruthTable {
-	let parsed_world = Parser::new(code).unwrap().parse_world().unwrap();
+	let parsed_world = Parser::new(&code).unwrap().parse_world().unwrap();
 
 	assert_eq!(parsed_world.settings.len(), 0);
 	assert_eq!(parsed_world.ants.len(), 0);
+
+	let log_cfg = LogConfig { all: true };
 
 	compile_funcs(parsed_world.funcs)
 		.unwrap()
 		.iter()
 		.find(|x| x.signature.name == "main")
 		.expect("'main' function required for compile_main")
-		.assemble()
+		.assemble(&log_cfg)
 		.unwrap()
 		.logic
 }

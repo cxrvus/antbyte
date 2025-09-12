@@ -93,7 +93,7 @@ struct Parser {
 }
 
 impl Parser {
-	fn new(code: String) -> Result<Self> {
+	fn new(code: &str) -> Result<Self> {
 		let mut tokens = Token::tokenize(code)?;
 		tokens.reverse();
 		Ok(Self { tokens })

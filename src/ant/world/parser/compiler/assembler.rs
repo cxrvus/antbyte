@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{
 	ant::{
 		Behavior,
-		compiler::CompFunc,
+		compiler::{CompFunc, LogConfig},
 		peripherals::{IoType, PeripheralBit},
 		world::parser::{ParamValue, Signature, token::Token},
 	},
@@ -13,14 +13,22 @@ use crate::{
 use anyhow::{Result, anyhow};
 
 impl CompFunc {
-	pub fn assemble(&self) -> Result<Behavior> {
+	pub fn assemble(&self, log_cfg: &LogConfig) -> Result<Behavior> {
 		let mut func = self.clone();
 
 		let (inputs, outputs) = func.extract_peripherals()?;
+
 		// dbg!((&inputs, &outputs));
-		// println!("\n{func}");
+
+		if log_cfg.all {
+			println!("\n{func}");
+		}
+
 		let logic = func.simulate();
-		// println!("{logic}");
+
+		if log_cfg.all {
+			println!("{logic}");
+		}
 
 		let behavior = Behavior {
 			name: self.signature.name.clone(),

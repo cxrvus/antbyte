@@ -1,11 +1,16 @@
 use std::{
-	env, fs,
+	fs,
 	io::{self, Write},
+	path::PathBuf,
 };
 
-use antbyte::ant::{compiler::compile_world, world::World};
+use antbyte::ant::{
+	compiler::{LogConfig, compile_world},
+	world::World,
+};
 
-use anyhow::{Result, anyhow};
+use anyhow::{Ok, Result, anyhow};
+use clap::Parser;
 
 fn main() {
 	setup().unwrap_or_else(|e| {
@@ -14,54 +19,65 @@ fn main() {
 	});
 }
 
-/// use this for debugging
-const TEST_PATH: Option<&'static str> = None;
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+	/// Path to the .ant file to execute
+	path: PathBuf,
 
-/// use this for debugging
-const AUTO_LOOP: bool = false;
+	/// Auto-step through simulation without waiting for input
+	#[arg(short, long)]
+	auto_step: bool,
+
+	/// Log debug info instead of running the simulation
+	#[arg(long)]
+	log: bool,
+}
 
 fn setup() -> Result<()> {
-	let args: Vec<String> = env::args().collect();
+	let args = Args::parse();
 
-	if TEST_PATH.is_none() && args.len() != 2 {
-		return Err(anyhow!("Usage: {} <ant_file>", args[0]));
-	}
+	let path_str = args.path.to_string_lossy();
 
-	let path = match TEST_PATH {
-		Some(path) => path,
-		None => &args[1],
-	};
-
-	if !path.ends_with(".ant") {
+	if !path_str.ends_with(".ant") {
 		return Err(anyhow!("ant files need to have the .ant extension"));
 	}
 
-	let code =
-		fs::read_to_string(path).map_err(|e| anyhow!("Error reading file {}: {}", args[1], e))?;
+	let code = fs::read_to_string(&args.path)
+		.map_err(|e| anyhow!("Error reading file {}: {}", path_str, e))?;
 
-	println!("<<ANTBYTE>>\n");
+	let log_config = LogConfig { all: args.log };
+	let world = World::from(compile_world(&code, &log_config)?);
 
-	update(code)
+	if args.log {
+		log(&code)
+	} else {
+		update(world, args.auto_step)
+	}
 }
 
-fn update(code: String) -> Result<()> {
-	println!("{code}\n\n================\n\n");
+fn log(code: &str) -> Result<()> {
+	println!("\n\n================\n\n");
+	println!("{code}");
+	Ok(())
+}
 
-	let mut world = World::from(compile_world(code)?);
-
-	let mut auto_loop = AUTO_LOOP;
+fn update(world: World, auto_step: bool) -> Result<()> {
+	let mut world = world;
+	let mut auto_step = auto_step;
 
 	loop {
+		println!("\n<<ANTBYTE>>\n===========\n\n");
 		println!("{:0>10}", world.frame());
 		println!("{}\n\n", world_to_string(&world));
 
-		if !auto_loop {
+		if !auto_step {
 			io::stderr().flush().unwrap();
 			let mut input = String::new();
 
 			io::stdin().read_line(&mut input).unwrap();
 			if input.trim() == "a" {
-				auto_loop = true;
+				auto_step = true;
 			}
 		}
 
