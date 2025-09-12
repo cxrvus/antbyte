@@ -6,8 +6,8 @@ use regex::Regex;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Peripheral {
 	// ## cell interaction
-	Cell,
 	CellClear,
+	Cell,
 	CellNext,
 
 	// ## universal inputs:
