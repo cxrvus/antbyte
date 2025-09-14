@@ -1,5 +1,5 @@
 set desc = "Langton's Ant, but self-replicating";
-set size = 64;
+set size = 128;
 set border = die;
 
 fn langton = () => () {

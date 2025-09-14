@@ -1,0 +1,28 @@
+set desc = "Langton's Ant, but self-replicating (+other variation)";
+set size = 128;
+set start = top_left;
+set border = wrap;
+
+fn langton = () => () {
+	left = C0;
+	right = -C0;
+
+	CC = C0;
+	C0 = -C0;
+
+	D0 = or(left, right);
+	D2 = left;
+}
+
+ant main {
+	() = langton();
+
+	A1 = -or(T2, T1, T0);
+	DIE = and(M0, OBS);
+	M0 = OBS;
+}
+
+ant clone = 2 {
+	() = langton();
+	DIE = OBS;
+}
