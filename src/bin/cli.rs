@@ -75,7 +75,7 @@ fn update(world: World, auto_step: bool) -> Result<()> {
 
 	loop {
 		println!("\n<<ANTBYTE>>\n===========\n\n");
-		println!("{:0>10}", world.frame());
+		println!("{:0>10}", world.age());
 		println!("{}\n\n", world_to_string(&world));
 
 		if !auto_step {
