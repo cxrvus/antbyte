@@ -10,17 +10,17 @@ use super::{Ant, Behavior, BorderMode, World};
 
 impl World {
 	// todo: split up into sub-methods and rename
-	pub(super) fn ant_tick(&mut self, ant: &Ant) -> Ant {
-		let world_image = self.clone();
+	pub(super) fn ant_tick(&mut self, ant_index: usize) {
+		let ant = self.ants[ant_index];
 
 		let Behavior {
 			inputs,
 			outputs,
 			logic: truth_table,
 			..
-		} = world_image
+		} = self
 			.get_behavior(ant.behavior)
-			.as_ref()
+			.clone()
 			.expect("invalid Behavior ID");
 
 		let mut input_bits = 0u8;
@@ -32,13 +32,13 @@ impl World {
 				Time => ant.age as u8,
 				Cell => *self.cells.at(&ant.pos.sign()).unwrap(),
 				CellNext => self
-					.next_pos(ant)
+					.next_pos(&ant)
 					.map(|pos| *self.cells.at(&pos.sign()).unwrap())
 					.unwrap_or(0u8),
 				Memory => ant.memory,
 				Random => self.rng(),
 				Obstacle => {
-					(self.next_pos(ant).is_none() || self.get_target_ant(ant).is_some()).into()
+					(self.next_pos(&ant).is_none() || self.get_target_ant(&ant).is_some()).into()
 				}
 				Direction => ant.dir,
 				Halted => ant.halted as u8,
@@ -53,8 +53,6 @@ impl World {
 
 		// calculating the output
 		let mut output_bits = truth_table.get(input_bits);
-
-		let mut ant = *ant;
 
 		// condense output bits into bytes
 		let mut output_values: Vec<OutputValue> = vec![];
@@ -80,6 +78,8 @@ impl World {
 		}
 
 		output_values.sort();
+
+		let mut ant = ant.clone();
 
 		for OutputValue { output, value } in output_values.into_iter() {
 			match (output, value) {
@@ -123,7 +123,7 @@ impl World {
 
 		ant.age += 1;
 
-		ant
+		self.ants[ant_index] = ant;
 	}
 
 	fn next_pos(&self, ant: &Ant) -> Option<Vec2u> {
@@ -168,7 +168,12 @@ impl World {
 	fn move_tick(&self, ant: &mut Ant) {
 		if let Some(new_pos) = self.next_pos(ant) {
 			// ant collision check
-			if !self.ants.iter().any(|ant| ant.pos == new_pos) {
+			if !self
+				.ants
+				.iter()
+				.filter(|ant| ant.alive)
+				.any(|ant| ant.pos == new_pos)
+			{
 				ant.pos = new_pos;
 			}
 		} else if let BorderMode::Despawn = self.config().border_mode {

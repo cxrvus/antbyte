@@ -106,7 +106,7 @@ impl Ant {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Behavior {
 	pub name: String,
 	pub logic: TruthTable,

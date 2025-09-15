@@ -58,7 +58,6 @@ impl Default for WorldProperties {
 	}
 }
 
-#[derive(Clone)]
 pub struct WorldState {
 	rng: StdRng,
 	frame: usize,
@@ -68,7 +67,6 @@ pub struct WorldState {
 	ants: Vec<Ant>,
 }
 
-#[derive(Clone)]
 pub struct World {
 	properties: Rc<WorldProperties>,
 	pub state: WorldState,
@@ -120,25 +118,18 @@ impl From<WorldProperties> for World {
 
 impl World {
 	pub fn tick(&mut self) -> bool {
-		// idea: optimize - remove cloning (here and in ant_tick)
 		self.frame += 1;
 
-		let mut world_frame = self.clone();
+		let mut active = false;
 
-		let live_ants: Vec<&Ant> = self.ants.iter().filter(|ant| ant.alive).collect();
-
-		if live_ants.is_empty() {
-			return false;
+		for i in 0..self.ants.len() {
+			if self.ants[i].alive {
+				active = true;
+				self.ant_tick(i);
+			}
 		}
 
-		for (i, ant) in live_ants.iter().enumerate() {
-			let ant = world_frame.ant_tick(ant);
-			world_frame.ants[i] = ant;
-		}
-
-		*self = world_frame;
-
-		true
+		active
 	}
 
 	pub fn frame(&self) -> usize {
