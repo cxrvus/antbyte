@@ -9,7 +9,7 @@ use crate::{
 use super::{Ant, Behavior, BorderMode, World};
 
 impl World {
-	// todo: split up into sub-methods and rename
+	// idea: split up into sub-methods and rename
 	pub(super) fn ant_tick(&mut self, ant_index: usize) {
 		let ant = self.ants[ant_index];
 

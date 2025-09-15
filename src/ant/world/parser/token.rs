@@ -11,7 +11,7 @@ fn regex_full(ptn: &str) -> Regex {
 	regex(&format!("^{ptn}$"))
 }
 
-// todo: add Token line metadata
+// idea: add Token line metadata
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Token {
 	Ident(String),
