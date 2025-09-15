@@ -1,6 +1,7 @@
 set desc = "Langton's Ant, but self-replicating (+other variation)";
 set size = 128;
 set border = die;
+set colors = bin;
 
 fn langton = () => () {
 	left = C0;

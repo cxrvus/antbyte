@@ -31,7 +31,7 @@ impl Default for WorldConfig {
 			height: 32,
 			border_mode: BorderMode::Collide,
 			starting_pos: StartingPos::Center,
-			color_mode: ColorMode::Binary,
+			color_mode: ColorMode::RGBI,
 			noise_seed: None,
 			description: "".into(),
 		}

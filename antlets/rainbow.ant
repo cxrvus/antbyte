@@ -2,7 +2,6 @@ set height = 8;
 set width = 16;
 set start = top_left;
 set border = wrap;
-set colors = rgb;
 
 ant main {
 	D1 = -M0;

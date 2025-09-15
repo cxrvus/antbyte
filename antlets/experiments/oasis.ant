@@ -1,6 +1,5 @@
 set size = 128;
 set border = cycle;
-set colors = rgb;
 
 fn langton = () => () {
 	left = C1;

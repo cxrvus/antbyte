@@ -1,7 +1,6 @@
 set desc = "Langton's Ant, but with D0 instead of D1";
 set size = 128;
 set border = wrap;
-set colors = rgb;
 
 fn langton = () => () {
 	left = C0;

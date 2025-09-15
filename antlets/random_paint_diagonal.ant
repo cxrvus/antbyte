@@ -1,3 +1,5 @@
+set colors = bin;
+
 ant main {
 	D0 = -M0;
 	

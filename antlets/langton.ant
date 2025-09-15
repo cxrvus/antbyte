@@ -1,6 +1,7 @@
 set desc = "Langton's Ant";
 set size = 64;
 set border = die;
+set colors = bin;
 
 ant main {
 	left = C0;

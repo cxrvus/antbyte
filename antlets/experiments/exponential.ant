@@ -1,5 +1,4 @@
 set size = 64;
-set colors = rgb;
 
 ant main {
 	A0 = 1;
