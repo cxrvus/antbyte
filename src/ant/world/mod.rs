@@ -119,20 +119,15 @@ impl World {
 	pub fn tick(&mut self) -> bool {
 		self.frame += 1;
 
-		// tick all Alive ants;
 		for i in 0..self.ants.len() {
 			if self.ants[i].is_alive() {
 				self.ant_tick(i);
 			}
 		}
 
-		// promote Newborn ants to Alive ants
 		self.ants.iter_mut().for_each(|ant| ant.grow_up());
-
-		// remove Dead ants
 		self.ants.retain(|ant| ant.is_alive());
 
-		// check if world active
 		let no_ants = self.ants.is_empty();
 
 		!no_ants
