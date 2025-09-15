@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use anyhow::{Ok, Result, anyhow};
+use anyhow::{Ok, Result, anyhow, bail};
 use regex::Regex;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -164,13 +164,11 @@ impl PeripheralBit {
 
 		if let Some(bit_index) = bit_index {
 			if size == 1 {
-				return Err(anyhow!(
-					"may not have a bit index in one-bit peripherals\n(in '{ident}')"
-				));
+				bail!("may not have a bit index in one-bit peripherals\n(in '{ident}')");
 			} else if bit_index >= size {
-				return Err(anyhow!(
+				bail!(
 					"bit index may not exceed peripheral bit capacity:\n{bit_index} >= {size}\n(in '{ident}')"
-				));
+				);
 			}
 		};
 

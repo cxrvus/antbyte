@@ -9,7 +9,7 @@ use antbyte::ant::{
 	world::World,
 };
 
-use anyhow::{Ok, Result, anyhow};
+use anyhow::{Ok, Result, anyhow, bail};
 use clap::Parser;
 
 fn main() {
@@ -40,7 +40,7 @@ fn setup() -> Result<()> {
 	let path_str = args.path.to_string_lossy();
 
 	if !path_str.ends_with(".ant") {
-		return Err(anyhow!("ant files need to have the .ant extension"));
+		bail!("ant files need to have the .ant extension");
 	}
 
 	let code = fs::read_to_string(&args.path)

@@ -1,4 +1,4 @@
-use anyhow::{Result, anyhow};
+use anyhow::{Result, bail};
 
 use super::CompFunc;
 
@@ -18,10 +18,10 @@ pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
 impl Func {
 	fn compile(&self, comp_funcs: &[CompFunc]) -> Result<CompFunc> {
 		if comp_funcs.iter().any(|f| f.signature == self.signature) {
-			return Err(anyhow!(
+			bail!(
 				"overload with signature {:?} already exists",
 				self.signature
-			));
+			);
 		}
 
 		let mut exp_index = 0;
@@ -37,9 +37,7 @@ impl Func {
 				match func_call.func.as_str() {
 					"or" => {
 						if func_call.assignees.len() != 1 {
-							return Err(anyhow!(
-								"the result of an OR may only be assigned to a single assignee"
-							));
+							bail!("the result of an OR may only be assigned to a single assignee");
 						}
 
 						comp_statements.push(func_call.into());

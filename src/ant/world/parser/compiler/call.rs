@@ -3,7 +3,7 @@ use crate::ant::{
 	world::parser::{ParamValue, Signature, token::Token},
 };
 
-use anyhow::{Result, anyhow};
+use anyhow::{Result, anyhow, bail};
 
 impl FuncCall {
 	/// transforms AND into OR ([DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws))
@@ -78,7 +78,7 @@ impl FuncCall {
 
 	pub(super) fn get_overload<'a>(&self, comp_funcs: &'a [CompFunc]) -> Result<&'a CompFunc> {
 		if !comp_funcs.iter().any(|f| f.signature.name == self.func) {
-			return Err(anyhow!("unknown function: {}", self.func));
+			bail!("unknown function: {}", self.func);
 		}
 
 		comp_funcs

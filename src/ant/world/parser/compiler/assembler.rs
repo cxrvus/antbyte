@@ -10,7 +10,7 @@ use crate::{
 	truth_table::TruthTable,
 };
 
-use anyhow::{Result, anyhow};
+use anyhow::{Result, anyhow, bail};
 
 impl CompFunc {
 	pub fn assemble(&self, log_cfg: &LogConfig) -> Result<Behavior> {
@@ -136,7 +136,7 @@ impl CompFunc {
 					variables.push(target.clone())
 				}
 				IoType::Input if !signature.params.contains(target) => {
-					return Err(anyhow!("unknown variable: {target}"));
+					bail!("unknown variable: {target}");
 				}
 				_ => {}
 			}

@@ -1,5 +1,5 @@
 use super::{Expression, Parser, Token};
-use anyhow::{Result, anyhow};
+use anyhow::{Result, anyhow, bail};
 
 impl Parser {
 	pub(super) fn parse_next_exp(&mut self) -> Result<Expression> {
@@ -64,7 +64,7 @@ impl Parser {
 						let func = prev_set.last_mut().unwrap();
 						func.params = Some(parameters);
 					} else {
-						return Err(anyhow!("unmatched right parentheses"));
+						bail!("unmatched right parentheses");
 					}
 				}
 

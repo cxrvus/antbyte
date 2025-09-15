@@ -5,7 +5,7 @@ use crate::{
 
 use super::{Parser, Statement, Token};
 
-use anyhow::{Result, anyhow};
+use anyhow::{Result, anyhow, bail};
 
 const MAIN: &str = "main";
 
@@ -16,12 +16,12 @@ impl Parser {
 			if let Token::Number(target_id) = target_id {
 				target_id as u8
 			} else {
-				return Err(anyhow!("expected Ant target ID after '='"));
+				bail!("expected Ant target ID after '='");
 			}
 		} else if name == MAIN {
 			1
 		} else {
-			return Err(anyhow!("specify Ant target ID using '='"));
+			bail!("specify Ant target ID using '='");
 		};
 
 		let ant = AntFunc {
@@ -133,9 +133,9 @@ impl Signature {
 
 		for ident in idents {
 			if Token::is_uppercase_ident(ident) {
-				return Err(anyhow!(
+				bail!(
 					"may only use lower-case identifiers in function signatures\nfound '{ident}' in function '{name}'"
-				));
+				);
 			}
 		}
 

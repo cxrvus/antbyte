@@ -20,7 +20,7 @@ use crate::{
 	truth_table::TruthTable,
 };
 
-use anyhow::{Result, anyhow};
+use anyhow::{Result, bail};
 
 #[derive(Debug, Clone)]
 struct CompFunc {
@@ -79,10 +79,10 @@ pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties>
 	} in parsed_world.ants
 	{
 		if let Some(behavior) = &behaviors[target_id as usize] {
-			return Err(anyhow!(
+			bail!(
 				"tried to assign ID #{target_id} to '{target_name}', but it's already assigned to '{}'",
 				behavior.name
-			));
+			);
 		} else {
 			// a call with no params or assignees to emulate the conditions for a valid ant Func
 			let func_call = FuncCall {
