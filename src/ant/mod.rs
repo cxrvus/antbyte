@@ -96,6 +96,7 @@ impl Ant {
 		}
 	}
 
+	#[inline]
 	pub fn is_alive(&self) -> bool {
 		!matches!(self.status, AntStatus::Dead)
 	}
@@ -112,7 +113,7 @@ impl Ant {
 
 	pub fn dir_vec(&self) -> Vec2 {
 		debug_assert!(self.dir < 8);
-		Vec2::principal()[self.dir as usize]
+		Vec2::PRINCIPAL[self.dir as usize]
 	}
 
 	#[inline]

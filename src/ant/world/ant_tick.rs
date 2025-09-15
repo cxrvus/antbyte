@@ -150,6 +150,8 @@ impl World {
 			}
 		}
 	}
+
+	#[inline]
 	pub fn is_occupied(&self, pos: &Vec2u) -> bool {
 		*self
 			.ant_cache

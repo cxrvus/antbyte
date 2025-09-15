@@ -31,22 +31,18 @@ impl Vec2 {
 		}
 	}
 
-	pub fn cardinal() -> [Vec2; 4] {
-		[Vec2::X, Vec2::Y, -Vec2::X, -Vec2::Y]
-	}
+	pub const CARDINAL: [Vec2; 4] = [Vec2::X, Vec2::Y, Vec2::X_NEG, Vec2::Y_NEG];
 
-	pub fn principal() -> [Vec2; 8] {
-		[
-			Vec2::X,
-			Vec2 { x: 1, y: 1 },
-			Vec2::Y,
-			Vec2 { x: -1, y: 1 },
-			-Vec2::X,
-			Vec2 { x: -1, y: -1 },
-			-Vec2::Y,
-			Vec2 { x: 1, y: -1 },
-		]
-	}
+	pub const PRINCIPAL: [Vec2; 8] = [
+		Vec2::X,
+		Vec2 { x: 1, y: 1 },
+		Vec2::Y,
+		Vec2 { x: -1, y: 1 },
+		Vec2::X_NEG,
+		Vec2 { x: -1, y: -1 },
+		Vec2::Y_NEG,
+		Vec2 { x: 1, y: -1 },
+	];
 
 	pub fn cardinal_char(&self) -> char {
 		let Self { x, y } = self;
@@ -80,6 +76,8 @@ impl Vec2 {
 
 	pub const X: Self = Self { x: 1, y: 0 };
 	pub const Y: Self = Self { x: 0, y: 1 };
+	pub const X_NEG: Self = Self { x: -1, y: 0 };
+	pub const Y_NEG: Self = Self { x: 0, y: -1 };
 	pub const ZERO: Self = Self { x: 0, y: 0 };
 }
 

@@ -23,6 +23,7 @@ impl<T> Matrix<T> {
 		x >= 0 && y >= 0 && y < self.height as i32 && x < self.width as i32
 	}
 
+	#[inline]
 	pub fn at(&self, pos: &Vec2) -> Option<&T> {
 		let Vec2u { x, y } = pos.unsign()?;
 		if self.in_bounds(pos) {
@@ -32,6 +33,7 @@ impl<T> Matrix<T> {
 		}
 	}
 
+	#[inline]
 	pub fn set_at(&mut self, pos: &Vec2, value: T) {
 		if self.in_bounds(pos) {
 			let Vec2u { x, y } = pos.unsign().unwrap();
