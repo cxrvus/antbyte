@@ -19,7 +19,7 @@ fn main() {
 	});
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Default)]
 #[command(version, about, long_about = None)]
 struct Args {
 	/// Path to the .ant file to execute
@@ -36,6 +36,13 @@ struct Args {
 
 fn setup() -> Result<()> {
 	let args = Args::parse();
+
+	// use this for debugging:
+	// let args = Args {
+	// 	path: PathBuf::from("antlets/test.ant"),
+	// 	auto_step: true,
+	// 	..Default::default()
+	// };
 
 	let path_str = args.path.to_string_lossy();
 
