@@ -1,0 +1,14 @@
+set size = 64;
+set colors = rgb;
+
+ant main {
+	A0 = 1;
+
+	C1 = R1;
+	C2 = R2;
+
+	D1 = R1;
+	D2 = R2;
+
+	DIE = T3;
+}
