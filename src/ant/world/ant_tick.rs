@@ -37,9 +37,10 @@ impl World {
 					.unwrap_or(0u8),
 				Memory => ant.memory,
 				Random => self.rng(),
-				Obstacle => {
-					(self.next_pos(&ant).is_none() || self.get_target_ant(&ant).is_some()).into()
-				}
+				Obstacle => match self.next_pos(&ant) {
+					Some(pos) => self.is_occupied(&pos).into(),
+					None => 1,
+				},
 				Direction => ant.dir,
 				Halted => ant.halted as u8,
 				_ => panic!("unhandled input: {input_spec:?}"),
@@ -91,18 +92,18 @@ impl World {
 				}
 				(CellClear, 1) => self.cells.set_at(&ant.pos.sign(), 0),
 				(Memory, value) => ant.memory = value,
-				(SpawnAnt, _) if value != 0 => self.spawn(&ant, value),
+				(SpawnAnt, _) if value != 0 => self.reproduce(&ant, value),
 				(Kill, 1) => {
-					if let Some(ant) = self.get_target_ant(&ant) {
-						ant.die();
+					if let Some(pos) = self.next_pos(&ant) {
+						self.kill_at(&pos);
 					}
 				}
-				(Die, 1) => ant.die(),
+				(Die, 1) => self.kill(&mut ant),
 				_ => {}
 			};
 		}
 
-		if !ant.halted {
+		if ant.is_alive() && !ant.halted {
 			self.move_tick(&mut ant);
 		}
 
@@ -112,7 +113,7 @@ impl World {
 	}
 
 	fn next_pos(&self, ant: &Ant) -> Option<Vec2u> {
-		let (pos, dir) = (ant.pos.sign(), ant.get_dir_vec());
+		let (pos, dir) = (ant.pos.sign(), ant.dir_vec());
 		let new_pos = pos + dir;
 
 		if self.cells.in_bounds(&new_pos) {
@@ -149,42 +150,74 @@ impl World {
 			}
 		}
 	}
+	pub fn is_occupied(&self, pos: &Vec2u) -> bool {
+		*self
+			.ant_cache
+			.at(&pos.sign())
+			.expect("position out of bounds: {pos:?}")
+	}
 
-	fn move_tick(&self, ant: &mut Ant) {
+	fn occupy(&mut self, pos: &Vec2u, value: bool) {
+		self.ant_cache.set_at(&pos.sign(), value)
+	}
+
+	fn move_tick(&mut self, ant: &mut Ant) {
 		if let Some(new_pos) = self.next_pos(ant) {
-			// ant collision check
-			if !self
-				.ants
-				.iter()
-				.filter(|ant| matches!(ant.status, AntStatus::Alive))
-				.any(|ant| ant.pos == new_pos)
-			{
+			if !self.is_occupied(&new_pos) {
+				self.occupy(&new_pos, true);
+				self.occupy(&ant.pos, false);
 				ant.pos = new_pos;
 			}
 		} else if let BorderMode::Despawn = self.config().border_mode {
-			ant.die();
+			self.kill(ant);
 		}
 	}
 
-	fn get_target_ant<'a>(&'a mut self, ant: &Ant) -> Option<&'a mut Ant> {
-		let pos = self.next_pos(ant)?;
-		self.ants.iter_mut().find(|ant| ant.pos == pos)
-	}
-
-	fn spawn(&mut self, ant: &Ant, behavior_id: u8) {
-		// direction gets flip, so that new ant
+	fn reproduce(&mut self, origin: &Ant, behavior_id: u8) {
+		// direction gets flipped, so that the new ant
 		// spawns behind the old one and not in front of her
-		let original_dir = ant.dir;
-		let mut ant = *ant;
+		let original_dir = origin.dir;
+		let mut ant = *origin;
 		ant.flip_dir();
 
-		if let Some(pos) = self.next_pos(&ant) {
-			if self.get_behavior(behavior_id).is_some() {
-				let mut new_ant = Ant::new(behavior_id, original_dir);
-				new_ant.pos = pos;
-				self.ants.push(new_ant);
-			}
+		if let Some(pos) = self.next_pos(&ant)
+			&& self.get_behavior(behavior_id).is_some()
+		{
+			let new_ant = Ant::new(pos, original_dir, behavior_id);
+			self.spawn(new_ant);
 		}
+	}
+
+	pub fn spawn(&mut self, ant: Ant) {
+		if !self.is_occupied(&ant.pos) {
+			self.ants.push(ant);
+			self.occupy(&ant.pos, true);
+		}
+	}
+
+	fn get_ant_index(&self, pos: &Vec2u) -> Option<usize> {
+		if self.is_occupied(pos) {
+			Some(
+				self.ants
+					.iter()
+					.position(|ant| ant.pos == *pos)
+					.expect("couldn't find cached ant at {pos:?}"),
+			)
+		} else {
+			None
+		}
+	}
+
+	fn kill_at(&mut self, pos: &Vec2u) {
+		if let Some(index) = self.get_ant_index(pos) {
+			let mut ant = self.ants[index];
+			self.kill(&mut ant);
+		}
+	}
+
+	fn kill(&mut self, target: &mut Ant) {
+		target.status = AntStatus::Dead;
+		self.occupy(&target.pos, false);
 	}
 
 	fn adjusted_color(&self, color: u8) -> u8 {

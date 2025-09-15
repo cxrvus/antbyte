@@ -12,7 +12,7 @@ use std::{
 use super::{Ant, Behavior, BorderMode, StartingPos};
 
 use crate::{
-	ant::{AntStatus, ColorMode},
+	ant::ColorMode,
 	util::{matrix::Matrix, vec2::Vec2u},
 };
 
@@ -86,7 +86,7 @@ impl From<WorldProperties> for World {
 			StdRng::from_seed(rand::random::<[u8; 32]>())
 		};
 
-		let mut state = WorldState {
+		let state = WorldState {
 			rng,
 			frame: 0,
 			cells: Matrix::new(width, height),
@@ -94,25 +94,24 @@ impl From<WorldProperties> for World {
 			ants: vec![],
 		};
 
-		if !properties.behaviors.is_empty() {
-			let starting_pos = match starting_pos {
-				StartingPos::TopLeft => Vec2u::ZERO,
-				StartingPos::Center => Vec2u {
-					x: width / 2,
-					y: height / 2,
-				},
-			};
-
-			let mut ant = Ant::new(1, 0);
-			ant.status = AntStatus::Alive;
-			ant.pos = starting_pos;
-			state.ants.push(ant);
-		}
-
-		Self {
+		let mut world = Self {
 			properties: Rc::new(properties),
 			state,
-		}
+		};
+
+		let starting_pos = match starting_pos {
+			StartingPos::TopLeft => Vec2u::ZERO,
+			StartingPos::Center => Vec2u {
+				x: width / 2,
+				y: height / 2,
+			},
+		};
+
+		let mut ant = Ant::new(starting_pos, 0, 1);
+		ant.grow_up();
+		world.spawn(ant);
+
+		world
 	}
 }
 
@@ -120,22 +119,23 @@ impl World {
 	pub fn tick(&mut self) -> bool {
 		self.frame += 1;
 
-		let mut active = false;
-
+		// tick all Alive ants;
 		for i in 0..self.ants.len() {
-			if let AntStatus::Alive = self.ants[i].status {
-				active = true;
+			if self.ants[i].is_alive() {
 				self.ant_tick(i);
 			}
 		}
 
-		self.ants.iter_mut().for_each(|ant| {
-			if let AntStatus::Newborn = ant.status {
-				ant.status = AntStatus::Alive
-			}
-		});
+		// promote Newborn ants to Alive ants
+		self.ants.iter_mut().for_each(|ant| ant.grow_up());
 
-		active
+		// remove Dead ants
+		self.ants.retain(|ant| ant.is_alive());
+
+		// check if world active
+		let no_ants = self.ants.is_empty();
+
+		!no_ants
 	}
 
 	pub fn frame(&self) -> usize {
@@ -148,10 +148,6 @@ impl World {
 
 	pub fn ants(&self) -> &Vec<Ant> {
 		&self.ants
-	}
-
-	pub fn is_occupied(&self, pos: &Vec2u) -> bool {
-		*self.ant_cache.at(&pos.sign()).unwrap()
 	}
 
 	fn get_behavior(&self, id: u8) -> &Option<Behavior> {

@@ -5,7 +5,6 @@ use std::{
 };
 
 use antbyte::ant::{
-	AntStatus,
 	compiler::{LogConfig, compile_world},
 	world::World,
 };
@@ -127,18 +126,14 @@ fn world_to_string(world: &World) -> String {
 		}
 
 		let pos = cells.get_pos(i).unwrap();
-		let ant = world
-			.ants()
-			.iter()
-			.filter(|ant| matches!(ant.status, AntStatus::Alive))
-			.find(|ant| ant.pos == pos);
+		let ant = world.ants().iter().find(|ant| ant.pos == pos);
 
 		match ant {
 			None => {
 				string.push_str(&color_cell(*cell, "  "));
 			}
 			Some(ant) => {
-				let (char1, char2) = ant.get_dir_vec().principal_chars();
+				let (char1, char2) = ant.dir_vec().principal_chars();
 				let ant_chars = format!("{char1}{char2}");
 				string.push_str(&color_cell(*cell, &ant_chars));
 			}
