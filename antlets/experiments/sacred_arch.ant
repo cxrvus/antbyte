@@ -17,8 +17,8 @@ fn langton = () => () {
 ant main {
 	() = langton();
 
-	A1 = -or(-M0, T3, T2, T1, T0);
-	C1 = 1;
+	A1 = -or(T1, T0);
+	C1 = OBS;
 	DIE = and(T1, T2, M0, OBS);
 	M0 = OBS;
 }
