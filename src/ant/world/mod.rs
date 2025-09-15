@@ -4,10 +4,7 @@ mod ant_tick;
 
 use rand::{Rng, SeedableRng, rngs::StdRng};
 
-use std::{
-	ops::{Deref, DerefMut},
-	rc::Rc,
-};
+use std::ops::{Deref, DerefMut};
 
 use super::{Ant, Behavior, BorderMode, StartingPos};
 
@@ -66,7 +63,7 @@ pub struct WorldState {
 }
 
 pub struct World {
-	properties: Rc<WorldProperties>,
+	properties: WorldProperties,
 	pub state: WorldState,
 }
 
@@ -94,10 +91,7 @@ impl From<WorldProperties> for World {
 			ants: vec![],
 		};
 
-		let mut world = Self {
-			properties: Rc::new(properties),
-			state,
-		};
+		let mut world = Self { properties, state };
 
 		let starting_pos = match starting_pos {
 			StartingPos::TopLeft => Vec2u::ZERO,
