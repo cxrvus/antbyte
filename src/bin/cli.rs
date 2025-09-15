@@ -37,13 +37,6 @@ struct Args {
 fn setup() -> Result<()> {
 	let args = Args::parse();
 
-	// use this for debugging:
-	// let args = Args {
-	// 	path: PathBuf::from("antlets/test.ant"),
-	// 	auto_step: true,
-	// 	..Default::default()
-	// };
-
 	let path_str = args.path.to_string_lossy();
 
 	if !path_str.ends_with(".ant") {

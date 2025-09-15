@@ -1,0 +1,71 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "lldb-dap",
+			"request": "attach",
+			"name": "Attach",
+			"program": "antbyte",
+			"waitFor": true
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug unit tests in library 'antbyte'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--lib",
+					"--package=antbyte"
+				],
+				"filter": {
+					"name": "antbyte",
+					"kind": "lib"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug executable 'cli'",
+			"cargo": {
+				"args": [
+					"build",
+					"--bin=cli",
+					"--package=antbyte"
+				],
+				"filter": {
+					"name": "cli",
+					"kind": "bin"
+				}
+			},
+			"args": ["antlets/test.ant", "--auto-step"],
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug unit tests in executable 'cli'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--bin=cli",
+					"--package=antbyte"
+				],
+				"filter": {
+					"name": "cli",
+					"kind": "bin"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		}
+	]
+}
