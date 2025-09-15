@@ -1,6 +1,7 @@
 set desc = "randomly wanders in straight lines, generating interesting patterns!";
 set border = die;
 set colors = bin;
+set seed = 69;
 
 ant main {
 	D1 = R0;
