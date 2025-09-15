@@ -1,6 +1,6 @@
 use crate::{
 	ant::{
-		ColorMode,
+		AntStatus, ColorMode,
 		peripherals::{OutputValue, Peripheral},
 	},
 	util::vec2::Vec2u,
@@ -79,7 +79,7 @@ impl World {
 
 		output_values.sort();
 
-		let mut ant = ant.clone();
+		let mut ant = ant;
 
 		for OutputValue { output, value } in output_values.into_iter() {
 			match (output, value) {
@@ -91,22 +91,7 @@ impl World {
 				}
 				(CellClear, 1) => self.cells.set_at(&ant.pos.sign(), 0),
 				(Memory, value) => ant.memory = value,
-				(SpawnAnt, _) if value != 0 => {
-					// TODO: encapsulate into function
-					let original_dir = ant.dir;
-
-					// direction gets flip, so that new ant
-					// spawns behind the old one and not in front of her
-					ant.flip_dir();
-
-					if let Some(pos) = self.next_pos(&ant)
-						&& value != 0
-					{
-						Self::spawn(self, value, pos, original_dir);
-					}
-
-					ant.flip_dir();
-				}
+				(SpawnAnt, _) if value != 0 => self.spawn(&ant, value),
 				(Kill, 1) => {
 					if let Some(ant) = self.get_target_ant(&ant) {
 						ant.die();
@@ -171,7 +156,7 @@ impl World {
 			if !self
 				.ants
 				.iter()
-				.filter(|ant| ant.alive)
+				.filter(|ant| matches!(ant.status, AntStatus::Alive))
 				.any(|ant| ant.pos == new_pos)
 			{
 				ant.pos = new_pos;
@@ -186,11 +171,19 @@ impl World {
 		self.ants.iter_mut().find(|ant| ant.pos == pos)
 	}
 
-	fn spawn(&mut self, behavior_id: u8, pos: Vec2u, dir: u8) {
-		if self.get_behavior(behavior_id).is_some() {
-			let mut ant = Ant::new(behavior_id, dir);
-			ant.pos = pos;
-			self.ants.push(ant);
+	fn spawn(&mut self, ant: &Ant, behavior_id: u8) {
+		// direction gets flip, so that new ant
+		// spawns behind the old one and not in front of her
+		let original_dir = ant.dir;
+		let mut ant = *ant;
+		ant.flip_dir();
+
+		if let Some(pos) = self.next_pos(&ant) {
+			if self.get_behavior(behavior_id).is_some() {
+				let mut new_ant = Ant::new(behavior_id, original_dir);
+				new_ant.pos = pos;
+				self.ants.push(new_ant);
+			}
 		}
 	}
 

@@ -67,9 +67,17 @@ impl TryFrom<String> for ColorMode {
 }
 
 #[derive(Clone, Copy, Default)]
+pub enum AntStatus {
+	#[default]
+	Newborn,
+	Alive,
+	Dead,
+}
+
+#[derive(Clone, Copy, Default)]
 pub struct Ant {
 	pub behavior: u8,
-	pub alive: bool, // todo: deprecate
+	pub status: AntStatus,
 	pub pos: Vec2u,
 	/// principle direction - number between 0 and 7
 	pub dir: u8,
@@ -83,13 +91,12 @@ impl Ant {
 		Self {
 			behavior,
 			dir,
-			alive: true,
 			..Default::default()
 		}
 	}
 
 	pub fn die(&mut self) {
-		self.alive = false;
+		self.status = AntStatus::Dead;
 	}
 
 	pub fn get_dir_vec(&self) -> Vec2 {
@@ -97,12 +104,19 @@ impl Ant {
 		Vec2::principal()[self.dir as usize]
 	}
 
+	#[inline]
 	pub fn set_dir(&mut self, dir: u8) {
-		self.dir = dir % 8;
+		self.dir = Self::wrap_dir(dir);
 	}
 
+	#[inline]
 	pub fn flip_dir(&mut self) {
 		self.set_dir(self.dir + 4);
+	}
+
+	#[inline]
+	fn wrap_dir(dir: u8) -> u8 {
+		dir % 8
 	}
 }
 

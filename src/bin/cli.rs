@@ -5,6 +5,7 @@ use std::{
 };
 
 use antbyte::ant::{
+	AntStatus,
 	compiler::{LogConfig, compile_world},
 	world::World,
 };
@@ -117,7 +118,7 @@ fn color_cell(value: u8, content: &str) -> String {
 }
 
 fn world_to_string(world: &World) -> String {
-	let cells = world.cells();
+	let cells = &world.cells;
 	let mut string = String::new();
 
 	for (i, cell) in cells.values.iter().enumerate() {
@@ -129,7 +130,7 @@ fn world_to_string(world: &World) -> String {
 		let ant = world
 			.ants()
 			.iter()
-			.filter(|ant| ant.alive)
+			.filter(|ant| matches!(ant.status, AntStatus::Alive))
 			.find(|ant| ant.pos == pos);
 
 		match ant {

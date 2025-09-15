@@ -12,11 +12,9 @@ use std::{
 use super::{Ant, Behavior, BorderMode, StartingPos};
 
 use crate::{
-	ant::ColorMode,
+	ant::{AntStatus, ColorMode},
 	util::{matrix::Matrix, vec2::Vec2u},
 };
-
-type Cells = Matrix<u8>;
 
 #[derive(Debug, Clone)]
 pub struct WorldConfig {
@@ -61,10 +59,10 @@ impl Default for WorldProperties {
 pub struct WorldState {
 	rng: StdRng,
 	frame: usize,
-	// TODO: store ants in cells
-	cells: Cells,
+	pub cells: Matrix<u8>,
 	// TODO: limit ant count
 	ants: Vec<Ant>,
+	ant_cache: Matrix<bool>,
 }
 
 pub struct World {
@@ -92,6 +90,7 @@ impl From<WorldProperties> for World {
 			rng,
 			frame: 0,
 			cells: Matrix::new(width, height),
+			ant_cache: Matrix::new(width, height),
 			ants: vec![],
 		};
 
@@ -105,6 +104,7 @@ impl From<WorldProperties> for World {
 			};
 
 			let mut ant = Ant::new(1, 0);
+			ant.status = AntStatus::Alive;
 			ant.pos = starting_pos;
 			state.ants.push(ant);
 		}
@@ -123,11 +123,17 @@ impl World {
 		let mut active = false;
 
 		for i in 0..self.ants.len() {
-			if self.ants[i].alive {
+			if let AntStatus::Alive = self.ants[i].status {
 				active = true;
 				self.ant_tick(i);
 			}
 		}
+
+		self.ants.iter_mut().for_each(|ant| {
+			if let AntStatus::Newborn = ant.status {
+				ant.status = AntStatus::Alive
+			}
+		});
 
 		active
 	}
@@ -144,8 +150,8 @@ impl World {
 		&self.ants
 	}
 
-	pub fn cells(&self) -> &Matrix<u8> {
-		&self.cells
+	pub fn is_occupied(&self, pos: &Vec2u) -> bool {
+		*self.ant_cache.at(&pos.sign()).unwrap()
 	}
 
 	fn get_behavior(&self, id: u8) -> &Option<Behavior> {
