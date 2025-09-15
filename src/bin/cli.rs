@@ -9,12 +9,12 @@ use antbyte::ant::{
 	world::World,
 };
 
-use anyhow::{Ok, Result, anyhow, bail};
+use anyhow::{Context, Ok, Result, bail};
 use clap::Parser;
 
 fn main() {
 	setup().unwrap_or_else(|e| {
-		eprintln!("<!> {e:?}");
+		eprintln!("{}", format!("<!> {e:#}").replace(":", ":\n"));
 		std::process::exit(1);
 	});
 }
@@ -44,7 +44,7 @@ fn setup() -> Result<()> {
 	}
 
 	let code = fs::read_to_string(&args.path)
-		.map_err(|e| anyhow!("Error reading file {}: {}", path_str, e))?;
+		.with_context(|| format!("Error reading file '{path_str}'"))?;
 
 	let log_config = LogConfig { all: args.log };
 	let world = World::from(compile_world(&code, &log_config)?);
