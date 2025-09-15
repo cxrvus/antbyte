@@ -57,7 +57,6 @@ pub struct WorldState {
 	rng: StdRng,
 	age: usize,
 	pub cells: Matrix<u8>,
-	// TODO: limit ant count
 	ants: Vec<Ant>,
 	ant_cache: Matrix<bool>,
 }
