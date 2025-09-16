@@ -4,7 +4,7 @@ mod func_comp;
 mod settings_comp;
 mod statement;
 
-use std::fmt::Display;
+use std::{fmt::Display, fs, path::PathBuf};
 
 use super::Parser;
 
@@ -20,7 +20,7 @@ use crate::{
 	truth_table::TruthTable,
 };
 
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
 
 #[derive(Debug, Clone)]
 struct CompFunc {
@@ -60,7 +60,33 @@ pub struct LogConfig {
 	pub all: bool,
 }
 
+pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldProperties> {
+	let code = read_file(path)?;
+	compile_world(&code, log_cfg)
+		.with_context(|| format!("compiler error in file '{}'", path.to_string_lossy()))
+}
+
+fn read_file(path: &PathBuf) -> Result<String> {
+	let extension = path
+		.extension()
+		.unwrap_or_default()
+		.to_str()
+		.unwrap_or_default();
+
+	if extension != "ant" {
+		bail!("ant files need to have a '.ant' extension");
+	}
+
+	fs::read_to_string(path)
+		.with_context(|| format!("error reading file '{}'", path.to_string_lossy()))
+}
+
 pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties> {
+	if log_cfg.all {
+		println!("\n\n================\n\n");
+		println!("{code}");
+	}
+
 	let parsed_world = Parser::new(code)?.parse_world()?;
 
 	let mut properties = WorldProperties::default();

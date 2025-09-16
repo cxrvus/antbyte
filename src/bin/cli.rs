@@ -1,15 +1,14 @@
 use std::{
-	fs,
 	io::{self, Write},
 	path::PathBuf,
 };
 
 use antbyte::ant::{
-	compiler::{LogConfig, compile_world},
+	compiler::{LogConfig, compile_world_file},
 	world::World,
 };
 
-use anyhow::{Context, Ok, Result, bail};
+use anyhow::{Ok, Result};
 use clap::Parser;
 
 fn main() {
@@ -37,29 +36,14 @@ struct Args {
 fn setup() -> Result<()> {
 	let args = Args::parse();
 
-	let path_str = args.path.to_string_lossy();
-
-	if !path_str.ends_with(".ant") {
-		bail!("ant files need to have the .ant extension");
-	}
-
-	let code = fs::read_to_string(&args.path)
-		.with_context(|| format!("Error reading file '{path_str}'"))?;
-
 	let log_config = LogConfig { all: args.log };
-	let world = World::from(compile_world(&code, &log_config)?);
+	let world = World::from(compile_world_file(&args.path, &log_config)?);
 
-	if args.log {
-		log(&code)
-	} else {
+	if !args.log {
 		update(world, args.auto_step)
+	} else {
+		Ok(())
 	}
-}
-
-fn log(code: &str) -> Result<()> {
-	println!("\n\n================\n\n");
-	println!("{code}");
-	Ok(())
 }
 
 fn update(world: World, auto_step: bool) -> Result<()> {
