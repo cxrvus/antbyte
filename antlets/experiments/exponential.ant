@@ -1,4 +1,5 @@
 set size = 64;
+set border = obs;
 
 ant main {
 	A0 = 1;

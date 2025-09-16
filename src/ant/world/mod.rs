@@ -30,7 +30,7 @@ impl Default for WorldConfig {
 		Self {
 			width: 32,
 			height: 32,
-			border_mode: BorderMode::Collide,
+			border_mode: BorderMode::Wrap,
 			starting_pos: StartingPos::Center,
 			color_mode: ColorMode::RGBI,
 			noise_seed: None,
