@@ -1,5 +1,4 @@
-use super::{Parser, Token};
-use crate::ant::world::parser::{ParsedWorld, token::Keyword};
+use super::{Keyword, ParsedWorld, Parser, Token};
 use anyhow::Result;
 
 impl Parser {
@@ -18,6 +17,16 @@ impl Parser {
 			use Keyword::*;
 
 			match keyword {
+				Use(import_type) => {
+					// idea: allow ident values for built-in imports
+					let token = self.next_token();
+
+					if let Token::String(import) = token {
+						world.imports.push((import_type, import));
+					} else {
+						return Err(Self::unexpected(token, "path to import (string)"));
+					}
+				}
 				Set => {
 					let (key, value) = self.parse_setting(ident)?;
 					world.settings.push((key, value));

@@ -1,6 +1,8 @@
 use anyhow::{Result, anyhow};
 use regex::Regex;
 
+use super::Keyword;
+
 #[inline]
 fn regex(ptn: &str) -> Regex {
 	Regex::new(ptn).unwrap()
@@ -136,20 +138,5 @@ impl Token {
 
 	pub(super) fn is_uppercase_ident(ident: &str) -> bool {
 		regex_full(Self::UPPER_IDENT).is_match(ident)
-	}
-}
-
-#[rustfmt::skip]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(super) enum Keyword { Set, Fn, Ant }
-
-impl Keyword {
-	pub(super) fn from_ident(ident: &str) -> Option<Self> {
-		match ident {
-			"set" => Some(Self::Set),
-			"fn" => Some(Self::Fn),
-			"ant" => Some(Self::Ant),
-			_ => None,
-		}
 	}
 }

@@ -11,11 +11,37 @@ use std::fmt::Display;
 use self::token::Token;
 use anyhow::{Error, Ok, Result, anyhow};
 
+#[rustfmt::skip]
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum Keyword { Set, Fn, Ant, Use(ImportType) }
+
+#[rustfmt::skip]
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum ImportType { Funcs, Config, Ants, All }
+
+impl Keyword {
+	pub(super) fn from_ident(ident: &str) -> Option<Self> {
+		use ImportType::*;
+
+		match ident {
+			"set" => Some(Self::Set),
+			"fn" => Some(Self::Fn),
+			"ant" => Some(Self::Ant),
+			"use" => Some(Self::Use(Funcs)),
+			"use_cfg" => Some(Self::Use(Config)),
+			"use_ants" => Some(Self::Use(Ants)),
+			"use_all" => Some(Self::Use(All)),
+			_ => None,
+		}
+	}
+}
+
 #[derive(Debug, Default)]
 struct ParsedWorld {
 	settings: Vec<(String, Token)>,
 	funcs: Vec<Func>,
 	ants: Vec<AntFunc>,
+	imports: Vec<(ImportType, String)>,
 }
 
 #[derive(Debug)]

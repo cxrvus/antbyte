@@ -3,7 +3,7 @@ set size = 64;
 set border = die;
 set colors = bin;
 
-ant main {
+fn langton = () => () {
 	left = C0;
 	right = -C0;
 
@@ -12,4 +12,8 @@ ant main {
 
 	D1 = or(left, right);
 	D2 = left;
+}
+
+ant main {
+	() = langton();
 }

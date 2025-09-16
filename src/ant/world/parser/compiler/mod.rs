@@ -98,9 +98,10 @@ pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties>
 		println!("{code}");
 	}
 
-	let parsed_world = Parser::new(code)?.parse_world()?;
-
 	let mut properties = WorldProperties::default();
+
+	// TODO: CONTINUE (stack all parsed_worlds into one, then compile, no recursion needed)
+	let parsed_world = Parser::new(code)?.parse_world()?;
 
 	for (key, value) in parsed_world.settings {
 		properties.config.set_setting(key, value)?;
