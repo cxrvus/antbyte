@@ -13,7 +13,7 @@ use clap::Parser;
 
 fn main() {
 	setup().unwrap_or_else(|e| {
-		eprintln!("{}", format!("<!> {e:#}").replace(":", ":\n"));
+		eprintln!("{}", format!("<!> {e:#}").replace(": ", ":\n    "));
 		std::process::exit(1);
 	});
 }
