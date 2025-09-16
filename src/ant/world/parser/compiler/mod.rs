@@ -136,10 +136,6 @@ pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties>
 		}
 	}
 
-	if behaviors[1].is_none() {
-		behaviors[1] = Some(Default::default());
-	}
-
 	properties.behaviors = behaviors;
 
 	Ok(properties)

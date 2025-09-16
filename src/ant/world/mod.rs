@@ -2,6 +2,7 @@ pub mod parser;
 
 mod ant_tick;
 
+use anyhow::{Result, bail};
 use rand::{Rng, SeedableRng, rngs::StdRng};
 
 use std::ops::{Deref, DerefMut};
@@ -65,9 +66,8 @@ pub struct World {
 	properties: WorldProperties,
 	pub state: WorldState,
 }
-
-impl From<WorldProperties> for World {
-	fn from(properties: WorldProperties) -> Self {
+impl World {
+	pub fn new(properties: WorldProperties) -> Result<Self> {
 		let WorldConfig {
 			width,
 			height,
@@ -100,15 +100,17 @@ impl From<WorldProperties> for World {
 			},
 		};
 
-		let mut ant = Ant::new(starting_pos, 0, 1);
-		ant.grow_up();
-		world.spawn(ant);
+		if world.properties.behaviors[1].is_some() {
+			let mut ant = Ant::new(starting_pos, 0, 1);
+			ant.grow_up();
+			world.spawn(ant);
+		} else {
+			bail!("no entry point: could not find `ant main` or other ant with ID = 1")
+		}
 
-		world
+		Ok(world)
 	}
-}
 
-impl World {
 	pub fn tick(&mut self) -> bool {
 		self.age += 1;
 

@@ -8,7 +8,7 @@ use antbyte::ant::{
 	world::World,
 };
 
-use anyhow::{Ok, Result};
+use anyhow::{Context, Ok, Result};
 use clap::Parser;
 
 fn main() {
@@ -37,7 +37,7 @@ fn setup() -> Result<()> {
 	let args = Args::parse();
 
 	let log_config = LogConfig { all: args.log };
-	let world = World::from(compile_world_file(&args.path, &log_config)?);
+	let world = World::new(compile_world_file(&args.path, &log_config)?).context("world error")?;
 
 	if !args.log {
 		update(world, args.auto_step)
