@@ -87,7 +87,7 @@ fn read_file(path: &PathBuf) -> Result<String> {
 fn validate_file_name(file_name: &str) -> bool {
 	if let Ok(tokens) = Token::tokenize(file_name)
 		&& let Some(Token::Ident(ident)) = tokens.first()
-		&& dbg!(ident) == dbg!(file_name)
+		&& ident == file_name
 	{ true }
 	else { false }
 }
