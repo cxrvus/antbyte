@@ -5,11 +5,16 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"type": "lldb-dap",
-			"request": "attach",
-			"name": "Attach",
-			"program": "antbyte",
-			"waitFor": true
+			"type": "lldb",
+			"request": "launch",
+			"name": "Cargo launch",
+			"cargo": {
+				"args": [
+					"build",
+					"--lib"
+				]
+			},
+			"args": []
 		},
 		{
 			"type": "lldb",
@@ -33,15 +38,15 @@
 		{
 			"type": "lldb",
 			"request": "launch",
-			"name": "Debug executable 'cli'",
+			"name": "Debug executable 'antbyte'",
 			"cargo": {
 				"args": [
 					"build",
-					"--bin=cli",
+					"--bin=antbyte",
 					"--package=antbyte"
 				],
 				"filter": {
-					"name": "cli",
+					"name": "antbyte",
 					"kind": "bin"
 				}
 			},
@@ -51,16 +56,16 @@
 		{
 			"type": "lldb",
 			"request": "launch",
-			"name": "Debug unit tests in executable 'cli'",
+			"name": "Debug unit tests in executable 'antbyte'",
 			"cargo": {
 				"args": [
 					"test",
 					"--no-run",
-					"--bin=cli",
+					"--bin=antbyte",
 					"--package=antbyte"
 				],
 				"filter": {
-					"name": "cli",
+					"name": "antbyte",
 					"kind": "bin"
 				}
 			},
