@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use anyhow::{Result, anyhow};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct TruthTable {
 	input_count: u8,
 	output_count: u8,
