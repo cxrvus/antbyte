@@ -26,7 +26,7 @@ pub const STDLIB: &str = r#"
 
 	fn h_add = (a, b) => (sum, cout) {
 		sum = xor(a, b);
-		c_out = and(a, b);
+		cout = and(a, b);
 	}
 
 	fn add = (a, b, cin) => (sum, cout) {
