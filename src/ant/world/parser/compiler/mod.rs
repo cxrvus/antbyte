@@ -141,7 +141,7 @@ pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties>
 	Ok(properties)
 }
 
-pub fn compile_main(code: String) -> TruthTable {
+pub fn compile_func(code: String, func_name: &str) -> TruthTable {
 	let parsed_world = Parser::new(&code).unwrap().parse_world().unwrap();
 
 	assert_eq!(parsed_world.settings.len(), 0);
@@ -152,8 +152,8 @@ pub fn compile_main(code: String) -> TruthTable {
 	compile_funcs(parsed_world.funcs)
 		.unwrap()
 		.iter()
-		.find(|x| x.signature.name == "main")
-		.expect("'main' function required for compile_main")
+		.find(|func| func.signature.name == func_name)
+		.unwrap_or_else(|| panic!("function '{func_name}' required for compile_func"))
 		.assemble(&log_cfg)
 		.unwrap()
 		.logic

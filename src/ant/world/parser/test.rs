@@ -1,9 +1,9 @@
 #![cfg(test)]
 
-use crate::ant::compiler::compile_main;
+use crate::ant::compiler::compile_func;
 
 fn test_func(code: &str, entries: Vec<u32>) {
-	let truth_table = compile_main(code.to_owned());
+	let truth_table = compile_func(code.to_owned(), "main");
 	assert_eq!(truth_table.entries(), &entries)
 }
 
