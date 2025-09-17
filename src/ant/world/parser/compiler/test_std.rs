@@ -1,6 +1,6 @@
 #![cfg(test)]
 
-use crate::ant::compiler::compile_func;
+use super::compile_func;
 
 fn test_func(code: &str, entries: Vec<u32>) {
 	let truth_table = compile_func(code.to_owned(), "main");

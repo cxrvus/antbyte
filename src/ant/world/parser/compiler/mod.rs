@@ -3,6 +3,7 @@ mod call;
 mod func_comp;
 mod settings_comp;
 mod statement;
+mod test_std;
 
 use std::{fmt::Display, fs, path::PathBuf};
 
