@@ -197,11 +197,11 @@ impl CompFunc {
 		Self::int_from_bits(&output_bits)
 	}
 
-	fn bits_from_int(value: u8) -> Vec<bool> {
-		let mut bits = vec![];
+	fn bits_from_int(value: u8) -> [bool; 8] {
+		let mut bits = [false; 8];
 
-		for i in 0..8 {
-			bits.push((value >> i & 1) == 1);
+		for (i, bit) in bits.iter_mut().enumerate() {
+			*bit = (value >> i & 1) == 1;
 		}
 
 		bits
