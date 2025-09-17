@@ -1,97 +1,87 @@
 #![cfg(test)]
 
-use super::compile_func;
+use super::{FuncCall, compile_func, compile_world_simple, stdlib::STDLIB};
 
-fn test_func(code: &str, entries: Vec<u32>) {
-	let truth_table = compile_func(code.to_owned(), "main");
+fn test_func(call: FuncCall, entries: Vec<u32>) {
+	let truth_table = compile_func(STDLIB, call);
 	assert_eq!(truth_table.entries(), &entries)
 }
 
-const XOR: &str = "(a, b) => c { c = or(and(-a, b), and(a, -b)); }";
-
-fn with_std(code: &str) -> String {
-	format!(
-		r"
-		fn xor = {XOR}
-		
-		{code}"
-	)
+#[test]
+fn comp_std() {
+	_ = compile_world_simple(STDLIB).unwrap()
 }
 
-mod gates {
-	use super::*;
-
-	#[test]
-	fn empty() {
-		let code = r"fn main = () => () { }";
-		let entries = vec![0];
-		test_func(code, entries);
-	}
-
-	#[test]
-	fn buffer_gate() {
-		let code = r"fn main = p => q { q = p; }";
-		let entries = vec![0, 1];
-		test_func(code, entries);
-	}
-
-	#[test]
-	fn not_gate() {
-		let code = r"fn main = p => q { q = -p; }";
-		let entries = vec![1, 0];
-		test_func(code, entries);
-	}
-
-	#[test]
-	fn or_gate() {
-		let code = r"fn main = (a, b) => c { c = or(a, b); }";
-		let entries = vec![0, 1, 1, 1];
-		test_func(code, entries);
-	}
-
-	#[test]
-	fn or_gate3() {
-		let code = r"fn main = (a, b, c) => r { r = or(a, b, c); }";
-		let entries = vec![0, 1, 1, 1, 1, 1, 1, 1];
-		test_func(code, entries);
-	}
-
-	#[test]
-	fn and_gate() {
-		let code = r"fn main = (a, b) => c { c = and(a, b); }";
-		let entries = vec![0, 0, 0, 1];
-		test_func(code, entries);
-	}
-
-	#[test]
-	fn and_gate3() {
-		let code = r"fn main = (a, b, c) => r { r = and(a, b, c); }";
-		let entries = vec![0, 0, 0, 0, 0, 0, 0, 1];
-		test_func(code, entries);
-	}
-
-	#[test]
-	fn xor_gate() {
-		let code = &with_std("fn main = (a, b) => c { c = xor(a, b); }");
-		let entries = vec![0, 1, 1, 0];
-		test_func(code, entries);
-	}
+#[test]
+fn and2() {
+	let call = FuncCall::from_spec("and", 2, 1);
+	let entries = vec![0, 0, 0, 1];
+	test_func(call, entries);
 }
 
-mod math {
-	use super::*;
+#[test]
+fn and3() {
+	let call = FuncCall::from_spec("and", 3, 1);
+	let entries = vec![0, 0, 0, 0, 0, 0, 0, 1];
+	test_func(call, entries);
+}
 
-	#[test]
-	fn h_add() {
-		let code = &with_std(
-			r"
-		fn main = (a, b) => (sum, c_out) {
-			sum = xor(a, b);
-			c_out = and(a, b);
-		}",
-		);
+#[test]
+fn xor() {
+	let call = FuncCall::from_spec("xor", 2, 1);
+	let entries = vec![0, 1, 1, 0];
+	test_func(call, entries);
+}
 
-		let entries = vec![0, 1, 1, 2];
-		test_func(code, entries);
-	}
+#[test]
+fn eq() {
+	let call = FuncCall::from_spec("eq", 2, 1);
+	let entries = vec![1, 0, 0, 1];
+	test_func(call, entries);
+}
+
+#[test]
+fn mux3() {
+	let call = FuncCall::from_spec("mux", 3, 1);
+	let entries = vec![0, 0, 1, 0, 0, 1, 1, 1];
+	test_func(call, entries);
+}
+
+#[test]
+fn mux6() {
+	let call = FuncCall::from_spec("mux", 6, 1);
+	let entries = vec![
+		0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1,
+		1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+		1, 1, 1, 1,
+	];
+	test_func(call, entries);
+}
+
+#[test]
+fn h_add() {
+	let call = FuncCall::from_spec("h_add", 2, 2);
+	let entries = vec![0, 1, 1, 2];
+	test_func(call, entries);
+}
+
+#[test]
+fn cpy2() {
+	let call = FuncCall::from_spec("cpy", 1, 2);
+	let entries = vec![0, 3];
+	test_func(call, entries);
+}
+
+#[test]
+fn buf2() {
+	let call = FuncCall::from_spec("buf", 2, 2);
+	let entries = vec![0, 1, 2, 3];
+	test_func(call, entries);
+}
+
+#[test]
+fn inv2() {
+	let call = FuncCall::from_spec("inv", 2, 2);
+	let entries = vec![3, 2, 1, 0];
+	test_func(call, entries);
 }

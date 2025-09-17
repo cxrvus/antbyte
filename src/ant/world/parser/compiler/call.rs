@@ -6,6 +6,20 @@ use crate::ant::{
 use anyhow::{Result, anyhow, bail};
 
 impl FuncCall {
+	pub fn from_spec(name: &str, params: u32, assignees: u32) -> Self {
+		let empty_param = ParamValue {
+			sign: false,
+			target: "".into(),
+		};
+
+		Self {
+			func: name.into(),
+			params: vec![empty_param.clone(); params as usize],
+			assignees: vec![empty_param; assignees as usize],
+		}
+	}
+
+	// TODO: deprecate (stdlib)
 	/// transforms AND into OR ([DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws))
 	pub(super) fn resolve_and_gate(&mut self) {
 		if self.func == "and" {

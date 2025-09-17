@@ -44,7 +44,7 @@ impl Display for CompFunc {
 
 /// like `Statement`, but flattened, using `ParamValue`s instead of recursive `Expression`s
 #[derive(Debug, Clone)]
-struct FuncCall {
+pub struct FuncCall {
 	func: String,
 	assignees: Vec<ParamValue>,
 	params: Vec<ParamValue>,
@@ -58,6 +58,7 @@ struct CompStatement {
 	params: Vec<ParamValue>,
 }
 
+#[derive(Default)]
 pub struct LogConfig {
 	pub all: bool,
 }
@@ -125,12 +126,7 @@ pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties>
 			);
 		} else {
 			// a call with no params or assignees to emulate the conditions for a valid ant Func
-			let func_call = FuncCall {
-				func: target_name,
-				assignees: vec![],
-				params: vec![],
-			};
-
+			let func_call = FuncCall::from_spec(&target_name, 0, 0);
 			let target_func = func_call.get_overload(&comp_funcs).unwrap();
 
 			let behavior = target_func.assemble(log_cfg).map(Some)?;
@@ -143,20 +139,15 @@ pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties>
 	Ok(properties)
 }
 
-pub fn compile_func(code: String, func_name: &str) -> TruthTable {
-	let parsed_world = Parser::new(&code).unwrap().parse_world().unwrap();
+pub fn compile_world_simple(code: &str) -> Result<WorldProperties> {
+	compile_world(code, &Default::default())
+}
 
-	assert_eq!(parsed_world.settings.len(), 0);
-	assert_eq!(parsed_world.ants.len(), 0);
-
+pub fn compile_func(code: &str, call: FuncCall) -> TruthTable {
+	let parsed_world = Parser::new(code).unwrap().parse_world().unwrap();
+	let comp_funcs = compile_funcs(parsed_world.funcs).unwrap();
+	let func = call.get_overload(&comp_funcs).unwrap();
 	let log_cfg = LogConfig { all: true };
 
-	compile_funcs(parsed_world.funcs)
-		.unwrap()
-		.iter()
-		.find(|func| func.signature.name == func_name)
-		.unwrap_or_else(|| panic!("function '{func_name}' required for compile_func"))
-		.assemble(&log_cfg)
-		.unwrap()
-		.logic
+	func.assemble(&log_cfg).unwrap().logic
 }

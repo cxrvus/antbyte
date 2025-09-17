@@ -37,9 +37,10 @@ fn setup() -> Result<()> {
 	let args = Args::parse();
 
 	let log_config = LogConfig { all: args.log };
-	let world = World::new(compile_world_file(&args.path, &log_config)?).context("world error")?;
+	let properties = compile_world_file(&args.path, &log_config)?;
 
 	if !args.log {
+		let world = World::new(properties).context("world error")?;
 		update(world, args.auto_step)
 	} else {
 		Ok(())
