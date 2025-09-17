@@ -34,26 +34,7 @@ fn add = (a, b, cin) => (sum, cout) {
 	cout = or(cout0, cout1);
 }
 
-#todo: add, sub, h_sub, add_sub, h_sub_add
-
-
-## And (5-8 parameters)
-
-fn and = (i0, i1, i2, i3, i4) => out {
-	out = -or(-i0, -i1, -i2, -i3, -i4);
-}
-
-fn and = (i0, i1, i2, i3, i4, i5) => out {
-	out = -or(-i0, -i1, -i2, -i3, -i4, -i5);
-}
-
-fn and = (i0, i1, i2, i3, i4, i5, i6) => out {
-	out = -or(-i0, -i1, -i2, -i3, -i4, -i5, -i6);
-}
-
-fn and = (i0, i1, i2, i3, i4, i5, i6, i7) => out {
-	out = -or(-i0, -i1, -i2, -i3, -i4, -i5, -i6, -i7);
-}
+#todo: sub, h_sub, add_sub, h_sub_add
 
 
 ## Copy: copies a single parameter to multiple assignees
@@ -81,5 +62,24 @@ fn inv = (i0, i1) => (o0, o1) { o0 = -i0; o1 = -i1; }
 fn inv = (i0, i1, i2) => (o0, o1, o2) { o0 = -i0; o1 = -i1; o2 = -i2; }
 fn inv = (i0, i1, i2, i3) => (o0, o1, o2, o3) {
 	o0 = -i0; o1 = -i1; o2 = -i2; o3 = -i3;
+}
+
+
+## And (5-8 parameters)
+
+fn and = (i0, i1, i2, i3, i4) => out {
+	out = -or(-i0, -i1, -i2, -i3, -i4);
+}
+
+fn and = (i0, i1, i2, i3, i4, i5) => out {
+	out = -or(-i0, -i1, -i2, -i3, -i4, -i5);
+}
+
+fn and = (i0, i1, i2, i3, i4, i5, i6) => out {
+	out = -or(-i0, -i1, -i2, -i3, -i4, -i5, -i6);
+}
+
+fn and = (i0, i1, i2, i3, i4, i5, i6, i7) => out {
+	out = -or(-i0, -i1, -i2, -i3, -i4, -i5, -i6, -i7);
 }
 
