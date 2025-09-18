@@ -39,7 +39,7 @@ impl Expression {
 					func_calls.extend(sub_exp.expand(index));
 
 					params.push(ParamValue {
-						sign: sub_exp.sign,
+						sign: false,
 						target: Self::format_index(*index - 1),
 					});
 				} else {
