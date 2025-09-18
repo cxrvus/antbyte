@@ -37,7 +37,9 @@ impl Func {
 				match func_call.func.as_str() {
 					"or" => {
 						if func_call.assignees.len() != 1 {
-							bail!("the result of an OR may only be assigned to a single assignee");
+							bail!(
+								"the result of an OR-expression or a literal may only be assigned to a single assignee\ntry using cpy()"
+							);
 						}
 
 						comp_statements.push(func_call.into());
