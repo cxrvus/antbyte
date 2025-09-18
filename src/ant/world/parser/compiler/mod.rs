@@ -6,7 +6,13 @@ mod statement;
 mod stdlib;
 mod test_std;
 
-use std::{collections::HashSet, fmt::Display, fs, mem::take, path::PathBuf};
+use std::{
+	collections::HashSet,
+	fmt::Display,
+	fs,
+	mem::take,
+	path::{Path, PathBuf},
+};
 
 use super::Parser;
 
@@ -65,7 +71,7 @@ pub struct LogConfig {
 
 pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldProperties> {
 	let code = read_file(path)?;
-	compile_world(&code, log_cfg)
+	compile_world(&code, log_cfg, Some(path))
 		.with_context(|| format!("compiler error in file '{}'", path.to_string_lossy()))
 }
 
@@ -95,7 +101,11 @@ fn validate_file_name(file_name: &str) -> bool {
 	else { false }
 }
 
-pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties> {
+pub fn compile_world(
+	code: &str,
+	log_cfg: &LogConfig,
+	source_path: Option<&PathBuf>,
+) -> Result<WorldProperties> {
 	if log_cfg.all {
 		println!("\n\n========LOG========\n\n");
 		println!("{code}");
@@ -107,8 +117,14 @@ pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties>
 	let mut visited = HashSet::new();
 
 	for import in &parsed_world.imports {
-		let path = PathBuf::from(format!("{import}.ant"));
-		collect_import_funcs(&path, &mut parsed_funcs, &mut visited)?;
+		let path = if let Some(source_path) = source_path {
+			let base_dir = source_path.parent().unwrap_or_else(|| Path::new("."));
+			base_dir.join(format!("{import}.ant"))
+		} else {
+			bail!("cannot import other files in path-less compilations");
+		};
+
+		import_funcs(&path, &mut parsed_funcs, &mut visited)?;
 	}
 
 	// add source file's functions after imports so imported functions are available
@@ -149,7 +165,7 @@ pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties>
 	Ok(properties)
 }
 
-fn collect_import_funcs(
+fn import_funcs(
 	path: &PathBuf,
 	parsed_funcs: &mut Vec<Func>,
 	visited: &mut HashSet<PathBuf>,
@@ -163,9 +179,11 @@ fn collect_import_funcs(
 	let code = read_file(path)?;
 	let parsed_world = Parser::new(&code)?.parse_world()?;
 
+	let base_dir = path.parent().unwrap_or_else(|| Path::new("."));
+
 	for import in &parsed_world.imports {
-		let import_path = PathBuf::from(format!("{import}.ant"));
-		collect_import_funcs(&import_path, parsed_funcs, visited)?;
+		let import_path = base_dir.join(format!("{import}.ant"));
+		import_funcs(&import_path, parsed_funcs, visited)?;
 	}
 
 	parsed_funcs.extend(parsed_world.funcs);
@@ -175,7 +193,7 @@ fn collect_import_funcs(
 }
 
 pub fn compile_world_simple(code: &str) -> Result<WorldProperties> {
-	compile_world(code, &Default::default())
+	compile_world(code, &Default::default(), None)
 }
 
 pub fn compile_func(code: &str, call: FuncCall) -> TruthTable {
