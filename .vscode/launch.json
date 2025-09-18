@@ -50,7 +50,7 @@
 					"kind": "bin"
 				}
 			},
-			"args": ["antlets/test.ant", "--auto-step"],
+			"args": ["test.ant", "--auto-step"],
 			"cwd": "${workspaceFolder}"
 		},
 		{
