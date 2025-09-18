@@ -6,7 +6,7 @@ mod statement;
 mod stdlib;
 mod test_std;
 
-use std::{fmt::Display, fs, path::PathBuf};
+use std::{collections::HashSet, fmt::Display, fs, mem::take, path::PathBuf};
 
 use super::Parser;
 
@@ -16,7 +16,7 @@ use crate::{
 		compiler::func_comp::compile_funcs,
 		world::{
 			WorldProperties,
-			parser::{AntFunc, ParamValue, Signature, token::Token},
+			parser::{AntFunc, Func, ParamValue, Signature, token::Token},
 		},
 	},
 	truth_table::TruthTable,
@@ -101,16 +101,26 @@ pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties>
 		println!("{code}");
 	}
 
-	let mut properties = WorldProperties::default();
+	let mut parsed_world = Parser::new(code)?.parse_world()?;
 
-	// TODO: CONTINUE (stack all parsed_worlds into one, then compile, no recursion needed)
-	let parsed_world = Parser::new(code)?.parse_world()?;
+	let mut parsed_funcs = vec![];
+	let mut visited = HashSet::new();
+
+	for import in &parsed_world.imports {
+		let path = PathBuf::from(format!("{import}.ant"));
+		collect_import_funcs(&path, &mut parsed_funcs, &mut visited)?;
+	}
+
+	// add source file's functions after imports so imported functions are available
+	parsed_funcs.extend(take(&mut parsed_world.funcs));
+
+	let mut properties = WorldProperties::default();
 
 	for (key, value) in parsed_world.settings {
 		properties.config.set_setting(key, value)?;
 	}
 
-	let comp_funcs = compile_funcs(parsed_world.funcs)?;
+	let comp_funcs = compile_funcs(parsed_funcs)?;
 
 	let mut behaviors: [Option<Behavior>; 0x100] = [const { None }; 0x100];
 
@@ -137,6 +147,31 @@ pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties>
 	properties.behaviors = behaviors;
 
 	Ok(properties)
+}
+
+fn collect_import_funcs(
+	path: &PathBuf,
+	parsed_funcs: &mut Vec<Func>,
+	visited: &mut HashSet<PathBuf>,
+) -> Result<()> {
+	if visited.contains(path) {
+		bail!("circular import detected: {}", path.to_string_lossy());
+	}
+
+	visited.insert(path.clone());
+
+	let code = read_file(path)?;
+	let parsed_world = Parser::new(&code)?.parse_world()?;
+
+	for import in &parsed_world.imports {
+		let import_path = PathBuf::from(format!("{import}.ant"));
+		collect_import_funcs(&import_path, parsed_funcs, visited)?;
+	}
+
+	parsed_funcs.extend(parsed_world.funcs);
+
+	visited.remove(path);
+	Ok(())
 }
 
 pub fn compile_world_simple(code: &str) -> Result<WorldProperties> {
