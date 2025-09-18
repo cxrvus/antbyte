@@ -66,6 +66,13 @@ fn h_add() {
 }
 
 #[test]
+fn add() {
+	let call = FuncCall::from_spec("add", 3, 2);
+	let entries = vec![0, 1, 1, 2, 1, 2, 2, 3];
+	test_func(call, entries);
+}
+
+#[test]
 fn cpy2() {
 	let call = FuncCall::from_spec("cpy", 1, 2);
 	let entries = vec![0, 3];
