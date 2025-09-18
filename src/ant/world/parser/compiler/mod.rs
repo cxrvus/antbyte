@@ -97,7 +97,7 @@ fn validate_file_name(file_name: &str) -> bool {
 
 pub fn compile_world(code: &str, log_cfg: &LogConfig) -> Result<WorldProperties> {
 	if log_cfg.all {
-		println!("\n\n================\n\n");
+		println!("\n\n========LOG========\n\n");
 		println!("{code}");
 	}
 
