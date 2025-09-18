@@ -9,10 +9,8 @@ impl Parser {
 			let keyword = match self.next_token() {
 				Token::Keyword(keyword) => keyword,
 				Token::EndOfFile => break,
-				other => return Err(Parser::unexpected(other, "global statement")),
+				other => return Err(Parser::unexpected(other, "instruction")),
 			};
-
-			let ident = self.next_ident()?;
 
 			use Keyword::*;
 
@@ -25,17 +23,19 @@ impl Parser {
 					} else {
 						return Err(Self::unexpected(token, "path to import (string)"));
 					}
+
+					self.expect_next(Token::Semicolon)?;
 				}
 				Set => {
-					let (key, value) = self.parse_setting(ident)?;
+					let (key, value) = self.parse_setting()?;
 					world.settings.push((key, value));
 				}
 				Fn => {
-					let func = self.parse_func(ident)?;
+					let func = self.parse_func()?;
 					world.funcs.push(func);
 				}
 				Ant => {
-					let (func, ant) = self.parse_ant(ident)?;
+					let (func, ant) = self.parse_ant()?;
 					world.funcs.push(func);
 					world.ants.push(ant);
 				}
@@ -45,7 +45,8 @@ impl Parser {
 		Ok(world)
 	}
 
-	pub(super) fn parse_setting(&mut self, key: String) -> Result<(String, Token)> {
+	pub(super) fn parse_setting(&mut self) -> Result<(String, Token)> {
+		let key = self.next_ident()?;
 		self.assume_next(Token::Assign);
 		let value = self.next_token();
 		self.expect_next(Token::Semicolon)?;

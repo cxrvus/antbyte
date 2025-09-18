@@ -10,7 +10,9 @@ use anyhow::{Result, anyhow, bail};
 const MAIN: &str = "main";
 
 impl Parser {
-	pub(super) fn parse_ant(&mut self, name: String) -> Result<(Func, AntFunc)> {
+	pub(super) fn parse_ant(&mut self) -> Result<(Func, AntFunc)> {
+		let name = self.next_ident()?;
+
 		let target_id = if self.assume_next(Token::Assign) {
 			let target_id = self.next_token();
 			if let Token::Number(target_id) = target_id {
@@ -42,7 +44,9 @@ impl Parser {
 		Ok((func, ant))
 	}
 
-	pub(super) fn parse_func(&mut self, name: String) -> Result<Func> {
+	pub(super) fn parse_func(&mut self) -> Result<Func> {
+		let name = self.next_ident()?;
+
 		self.expect_next(Token::Assign)?;
 
 		let signature = self.parse_signature(name)?;
