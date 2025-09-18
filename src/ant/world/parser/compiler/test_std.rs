@@ -60,7 +60,7 @@ fn mux6() {
 
 #[test]
 fn h_add() {
-	let call = FuncCall::from_spec("h_add", 2, 2);
+	let call = FuncCall::from_spec("add", 2, 2);
 	let entries = vec![0, 1, 1, 2];
 	test_func(call, entries);
 }

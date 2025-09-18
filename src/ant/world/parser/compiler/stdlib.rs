@@ -24,18 +24,16 @@ pub const STDLIB: &str = r#"
 
 	## Addition & Subtraction
 
-	fn h_add = (a, b) => (sum, cout) {
+	fn add = (a, b) => (sum, cout) {
 		sum = xor(a, b);
 		cout = and(a, b);
 	}
 
 	fn add = (a, b, cin) => (sum, cout) {
-		(sum0, cout0) = h_add(a, b);
-		(sum,  cout1) = h_add(sum0, cin);
+		(sum0, cout0) = add(a, b);
+		(sum,  cout1) = add(sum0, cin);
 		cout = or(cout0, cout1);
 	}
-
-	#todo: sub, h_sub, add_sub, h_sub_add
 
 
 	## Copy: copies a single parameter to multiple assignees
