@@ -17,12 +17,11 @@ impl Parser {
 			use Keyword::*;
 
 			match keyword {
-				Use(import_type) => {
-					// idea: allow ident values for built-in imports
+				Use => {
 					let token = self.next_token();
 
 					if let Token::String(import) = token {
-						world.imports.push((import_type, import));
+						world.imports.push(import);
 					} else {
 						return Err(Self::unexpected(token, "path to import (string)"));
 					}
