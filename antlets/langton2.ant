@@ -1,0 +1,16 @@
+use "langton";
+
+set desc = "Langton's Ant, but with D0 instead of D1";
+
+set size = 128;
+set border = wrap;
+
+fn main = in_color => out_color {
+	out_color = langton(in_color);
+	D0 = D1;
+	D1 = 0;
+}
+
+ant main {
+	C0 = main(C0);
+}
