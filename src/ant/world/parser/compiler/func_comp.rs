@@ -17,11 +17,9 @@ pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
 
 impl Func {
 	fn compile(&self, comp_funcs: &[CompFunc]) -> Result<CompFunc> {
-		if comp_funcs.iter().any(|f| f.signature == self.signature) {
-			bail!(
-				"overload with signature {:?} already exists",
-				self.signature
-			);
+		let signature_spec = self.signature.spec();
+		if signature_spec.get_overload(comp_funcs).is_ok() {
+			bail!("overload with signature [{signature_spec}] already exists");
 		}
 
 		let mut exp_index = 0;

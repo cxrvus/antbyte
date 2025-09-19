@@ -40,7 +40,7 @@ struct Func {
 	statements: Vec<Statement>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default)]
 struct Signature {
 	name: String,
 	assignees: Vec<String>,
@@ -54,6 +54,37 @@ impl Display for Signature {
 		let assignees = self.assignees.join(", ");
 
 		write!(f, "{name} = ({params}) => ({assignees})")
+	}
+}
+
+#[derive(PartialEq, Eq)]
+pub struct SignatureSpec<'a> {
+	name: &'a str,
+	assignee_count: usize,
+	param_count: usize,
+}
+
+#[rustfmt::skip]
+impl<'a> Display for SignatureSpec<'a> {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let Self { name, assignee_count, param_count, } = self;
+		write!(f, "{name} = [{param_count}] => [{assignee_count}]")
+	}
+}
+
+impl<'a> From<&'a Signature> for SignatureSpec<'a> {
+	fn from(signature: &'a Signature) -> Self {
+		SignatureSpec {
+			name: &signature.name,
+			assignee_count: signature.assignees.len(),
+			param_count: signature.params.len(),
+		}
+	}
+}
+
+impl<'a> Signature {
+	fn spec(&'a self) -> SignatureSpec<'a> {
+		SignatureSpec::from(self)
 	}
 }
 

@@ -1,24 +1,11 @@
 use crate::ant::{
 	compiler::{CompFunc, CompStatement, FuncCall},
-	world::parser::{ParamValue, Signature, token::Token},
+	world::parser::{ParamValue, SignatureSpec, token::Token},
 };
 
 use anyhow::{Result, anyhow, bail};
 
 impl FuncCall {
-	pub fn from_spec(name: &str, params: u32, assignees: u32) -> Self {
-		let empty_param = ParamValue {
-			sign: false,
-			target: "".into(),
-		};
-
-		Self {
-			func: name.into(),
-			params: vec![empty_param.clone(); params as usize],
-			assignees: vec![empty_param; assignees as usize],
-		}
-	}
-
 	// TODO: deprecate (stdlib)
 	/// transforms AND into OR ([DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws))
 	pub(super) fn resolve_and_gate(&mut self) {
@@ -34,7 +21,7 @@ impl FuncCall {
 		comp_funcs: &[CompFunc],
 		func_index: u32,
 	) -> Result<Vec<CompStatement>> {
-		let called_func = self.get_overload(comp_funcs)?;
+		let called_func = SignatureSpec::from(self).get_overload(comp_funcs)?;
 
 		let var_prefix = format!("_{}_{func_index}_", self.func);
 		let mut expanded_statements = vec![];
@@ -89,31 +76,18 @@ impl FuncCall {
 			func_param.target = var_prefix.to_string() + &func_param.target;
 		}
 	}
+}
 
-	pub(super) fn get_overload<'a>(&self, comp_funcs: &'a [CompFunc]) -> Result<&'a CompFunc> {
-		if !comp_funcs.iter().any(|f| f.signature.name == self.func) {
-			bail!("unknown function: {}", self.func);
+impl<'a> SignatureSpec<'a> {
+	pub(super) fn get_overload<'b>(&self, comp_funcs: &'b [CompFunc]) -> Result<&'b CompFunc> {
+		if !comp_funcs.iter().any(|f| f.signature.name == self.name) {
+			bail!("unknown function: {}", self.name);
 		}
 
 		comp_funcs
 			.iter()
-			.find(|f| {
-				let Signature {
-					name,
-					params,
-					assignees,
-				} = &f.signature;
-
-				name == &self.func
-					&& params.len() == self.params.len()
-					&& assignees.len() == self.assignees.len()
-			})
-			.ok_or(anyhow!(
-				"no overload found for function '{}'\nwith {} parameters and {} assignees",
-				self.func,
-				self.params.len(),
-				self.assignees.len()
-			))
+			.find(|f| SignatureSpec::from(&f.signature) == *self)
+			.ok_or(anyhow!("no overload found for {self}"))
 	}
 }
 
@@ -133,6 +107,16 @@ impl From<FuncCall> for CompStatement {
 		Self {
 			assignee: assignees[0].clone(),
 			params: params.clone(),
+		}
+	}
+}
+
+impl<'a> From<&'a FuncCall> for SignatureSpec<'a> {
+	fn from(func_call: &'a FuncCall) -> Self {
+		Self {
+			name: &func_call.func,
+			param_count: func_call.params.len(),
+			assignee_count: func_call.assignees.len(),
 		}
 	}
 }

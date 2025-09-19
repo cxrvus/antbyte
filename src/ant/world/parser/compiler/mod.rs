@@ -22,7 +22,7 @@ use crate::{
 		compiler::func_comp::compile_funcs,
 		world::{
 			WorldProperties,
-			parser::{AntFunc, Func, ParamValue, Signature, token::Token},
+			parser::{AntFunc, Func, ParamValue, Signature, SignatureSpec, token::Token},
 		},
 	},
 	truth_table::TruthTable,
@@ -151,10 +151,14 @@ pub fn compile_world(
 				behavior.name
 			);
 		} else {
-			// a call with no params or assignees to emulate the conditions for a valid ant Func
-			let func_call = FuncCall::from_spec(&target_name, 0, 0);
-			let target_func = func_call.get_overload(&comp_funcs).unwrap();
+			// a signature spec with no params or assignees to emulate the conditions for a valid ant Func
+			let signature = SignatureSpec {
+				name: &target_name,
+				assignee_count: 0,
+				param_count: 0,
+			};
 
+			let target_func = signature.get_overload(&comp_funcs).unwrap();
 			let behavior = target_func.assemble(log_cfg).map(Some)?;
 			behaviors[target_id as usize] = behavior;
 		}
@@ -205,10 +209,10 @@ pub fn compile_world_simple(code: &str) -> Result<WorldProperties> {
 	compile_world(code, &Default::default(), None)
 }
 
-pub fn compile_func(code: &str, call: FuncCall) -> TruthTable {
+pub fn compile_func(code: &str, signature: SignatureSpec) -> TruthTable {
 	let parsed_world = Parser::new(code).unwrap().parse_world().unwrap();
 	let comp_funcs = compile_funcs(parsed_world.funcs).unwrap();
-	let func = call.get_overload(&comp_funcs).unwrap();
+	let func = signature.get_overload(&comp_funcs).unwrap();
 	let log_cfg = LogConfig { all: true };
 
 	func.assemble(&log_cfg).unwrap().logic
