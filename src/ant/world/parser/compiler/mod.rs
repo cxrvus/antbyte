@@ -170,8 +170,17 @@ fn import_funcs(
 	parsed_funcs: &mut Vec<Func>,
 	visited: &mut HashSet<PathBuf>,
 ) -> Result<()> {
+	import_funcs_recursive(path, parsed_funcs, visited)
+		.with_context(|| format!("in file '{}'", path.to_string_lossy()))
+}
+
+fn import_funcs_recursive(
+	path: &PathBuf,
+	parsed_funcs: &mut Vec<Func>,
+	visited: &mut HashSet<PathBuf>,
+) -> Result<()> {
 	if visited.contains(path) {
-		bail!("circular import detected: {}", path.to_string_lossy());
+		bail!("circular import detected: '{}'", path.to_string_lossy());
 	}
 
 	visited.insert(path.clone());
@@ -183,7 +192,7 @@ fn import_funcs(
 
 	for import in &parsed_world.imports {
 		let import_path = base_dir.join(format!("{import}.ant"));
-		import_funcs(&import_path, parsed_funcs, visited)?;
+		import_funcs(&import_path, parsed_funcs, visited)?
 	}
 
 	parsed_funcs.extend(parsed_world.funcs);
