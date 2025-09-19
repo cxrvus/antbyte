@@ -7,7 +7,7 @@ use super::{Parser, Statement, Token};
 
 use anyhow::{Result, anyhow, bail};
 
-const MAIN: &str = "main";
+pub const MAIN: &str = "main";
 
 impl Parser {
 	pub(super) fn parse_ant(&mut self) -> Result<(Func, AntFunc)> {

@@ -22,7 +22,10 @@ use crate::{
 		compiler::func_comp::compile_funcs,
 		world::{
 			WorldProperties,
-			parser::{AntFunc, Func, ParamValue, Signature, SignatureSpec, token::Token},
+			parser::{
+				AntFunc, Expression, Func, ParamValue, Signature, SignatureSpec, func_parser::MAIN,
+				token::Token,
+			},
 		},
 	},
 	truth_table::TruthTable,
@@ -199,10 +202,38 @@ fn import_funcs_recursive(
 		import_funcs(&import_path, parsed_funcs, visited)?
 	}
 
-	parsed_funcs.extend(parsed_world.funcs);
+	let mut new_parsed_funcs = parsed_world.funcs;
+	sanitize_main(&mut new_parsed_funcs, path);
+	parsed_funcs.extend(new_parsed_funcs);
 
 	visited.remove(path);
 	Ok(())
+}
+
+fn sanitize_main(parsed_funcs: &mut [Func], path: &Path) {
+	for parsed_func in parsed_funcs.iter_mut() {
+		let file_name = path.file_stem().unwrap().to_string_lossy().to_string();
+
+		for stm in parsed_func.statements.iter_mut() {
+			sanitize_exp(&mut stm.expression, &file_name);
+		}
+
+		if parsed_func.signature.name == MAIN {
+			parsed_func.signature.name = file_name;
+		}
+	}
+
+	fn sanitize_exp(exp: &mut Expression, file_name: &str) {
+		if let Some(params) = &mut exp.params {
+			if exp.ident == MAIN {
+				exp.ident = file_name.to_owned();
+			}
+
+			for sub_exp in params.iter_mut() {
+				sanitize_exp(sub_exp, file_name);
+			}
+		}
+	}
 }
 
 pub fn compile_world_simple(code: &str) -> Result<WorldProperties> {
