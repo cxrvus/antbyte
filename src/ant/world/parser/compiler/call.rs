@@ -6,16 +6,6 @@ use crate::ant::{
 use anyhow::{Result, anyhow, bail};
 
 impl FuncCall {
-	// TODO: deprecate (stdlib)
-	/// transforms AND into OR ([DeMorgan's Laws](https://en.wikipedia.org/wiki/De_Morgan%27s_laws))
-	pub(super) fn resolve_and_gate(&mut self) {
-		if self.func == "and" {
-			self.params.iter_mut().for_each(|param| param.invert());
-			self.assignees.iter_mut().for_each(|asg| asg.invert());
-			self.func = "or".into();
-		}
-	}
-
 	pub(super) fn expand_call(
 		&self,
 		comp_funcs: &[CompFunc],

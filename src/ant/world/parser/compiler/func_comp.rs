@@ -27,9 +27,7 @@ impl Func {
 		let mut comp_statements: Vec<CompStatement> = vec![];
 
 		for statement in self.statements.iter() {
-			let mut func_calls = statement.expand_expression(&mut exp_index);
-
-			func_calls.iter_mut().for_each(|stm| stm.resolve_and_gate());
+			let func_calls = statement.expand_expression(&mut exp_index);
 
 			for func_call in func_calls {
 				match func_call.func.as_str() {
