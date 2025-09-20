@@ -12,7 +12,7 @@ use anyhow::{Error, Ok, Result, anyhow};
 
 #[rustfmt::skip]
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum Keyword { Set, Fn, Ant, Use }
+enum Keyword { Set, Fn, Ant, Use, NoStd }
 
 impl Keyword {
 	pub(super) fn from_ident(ident: &str) -> Option<Self> {
@@ -21,6 +21,7 @@ impl Keyword {
 			"fn" => Some(Self::Fn),
 			"ant" => Some(Self::Ant),
 			"use" => Some(Self::Use),
+			"no_std" => Some(Self::NoStd),
 			_ => None,
 		}
 	}
@@ -32,6 +33,7 @@ struct ParsedWorld {
 	funcs: Vec<Func>,
 	ants: Vec<AntFunc>,
 	imports: Vec<String>,
+	no_std: bool,
 }
 
 #[derive(Debug)]

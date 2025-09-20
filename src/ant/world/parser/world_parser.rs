@@ -39,6 +39,10 @@ impl Parser {
 					world.funcs.push(func);
 					world.ants.push(ant);
 				}
+				NoStd => {
+					world.no_std = true;
+					self.expect_next(Token::Semicolon)?;
+				}
 			};
 		}
 

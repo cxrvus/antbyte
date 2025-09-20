@@ -19,7 +19,7 @@ use super::Parser;
 use crate::{
 	ant::{
 		Behavior,
-		compiler::func_comp::compile_funcs,
+		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
 		world::{
 			WorldProperties,
 			parser::{
@@ -117,6 +117,12 @@ pub fn compile_world(
 	let mut parsed_world = Parser::new(code)?.parse_world()?;
 
 	let mut parsed_funcs = vec![];
+
+	if !parsed_world.no_std {
+		let std_funcs = Parser::new(STDLIB)?.parse_world()?.funcs;
+		parsed_funcs.extend(std_funcs);
+	}
+
 	let mut visited = HashSet::new();
 
 	for import in &parsed_world.imports {
