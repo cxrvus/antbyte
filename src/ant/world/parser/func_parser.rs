@@ -100,6 +100,10 @@ impl Parser {
 
 impl Signature {
 	fn validate(&self) -> Result<()> {
+		if self.name == "or" {
+			bail!("may not use 'or' as a function name")
+		}
+
 		self.validate_keywords()?;
 
 		if let Some(collision) = self
