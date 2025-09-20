@@ -136,7 +136,7 @@ impl CompFunc {
 					variables.push(target.clone())
 				}
 				IoType::Input if !signature.params.contains(target) => {
-					bail!("unknown variable: {target}");
+					bail!("unknown variable: '{target}'");
 				}
 				_ => {}
 			}

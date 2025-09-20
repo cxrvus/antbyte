@@ -112,13 +112,13 @@ impl Signature {
 			))
 		} else if self.params.contains(&self.name) || self.assignees.contains(&self.name) {
 			Err(anyhow!(
-				"cannot use func name {} as parameter or assignee",
+				"cannot use func name '{}' as parameter or assignee",
 				self.name
 			))
 		} else if let Some(dupe) = find_dupe(&self.params) {
-			Err(anyhow!("identifier {dupe} used for multiple parameters"))
+			Err(anyhow!("identifier '{dupe}' used for multiple parameters"))
 		} else if let Some(dupe) = find_dupe(&self.assignees) {
-			Err(anyhow!("identifier {dupe} used for multiple assignees"))
+			Err(anyhow!("identifier '{dupe}' used for multiple assignees"))
 		} else {
 			Ok(())
 		}

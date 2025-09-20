@@ -71,13 +71,13 @@ impl FuncCall {
 impl<'a> SignatureSpec<'a> {
 	pub(super) fn get_overload<'b>(&self, comp_funcs: &'b [CompFunc]) -> Result<&'b CompFunc> {
 		if !comp_funcs.iter().any(|f| f.signature.name == self.name) {
-			bail!("unknown function: {}", self.name);
+			bail!("unknown function: '{}'", self.name);
 		}
 
 		comp_funcs
 			.iter()
 			.find(|f| SignatureSpec::from(&f.signature) == *self)
-			.ok_or(anyhow!("no overload found for {self}"))
+			.ok_or(anyhow!("no overload found for [{self}]"))
 	}
 }
 

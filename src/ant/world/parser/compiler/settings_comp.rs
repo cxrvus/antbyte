@@ -66,13 +66,13 @@ impl WorldConfig {
 					invalid_type(&value, "description (string)", &key)
 				}
 			}
-			other => Err(anyhow!("unknown setting: {}", other)),
+			other => Err(anyhow!("unknown setting: '{}'", other)),
 		}
 	}
 }
 
 pub fn invalid_type(actual: &Token, expected: &str, key: &str) -> Result<()> {
 	Err(anyhow!(
-		"expected {expected}, got {actual:?}\nfor key {key}"
+		"expected {expected}, got {actual:?}\nfor key '{key}'"
 	))
 }
