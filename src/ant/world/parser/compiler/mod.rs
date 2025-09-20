@@ -75,7 +75,7 @@ pub struct LogConfig {
 pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldProperties> {
 	let code = read_file(path)?;
 	compile_world(&code, log_cfg, Some(path))
-		.with_context(|| format!("compiler error in file '{}'", path.to_string_lossy()))
+		.with_context(|| format!("compiler error in file '{}'!", path.to_string_lossy()))
 }
 
 fn read_file(path: &PathBuf) -> Result<String> {
@@ -92,7 +92,7 @@ fn read_file(path: &PathBuf) -> Result<String> {
 	}
 
 	fs::read_to_string(path)
-		.with_context(|| format!("error reading file '{}'", path.to_string_lossy()))
+		.with_context(|| format!("error reading file '{}'!", path.to_string_lossy()))
 }
 
 #[rustfmt::skip]
@@ -184,7 +184,7 @@ fn import_funcs(
 	visited: &mut HashSet<PathBuf>,
 ) -> Result<()> {
 	import_funcs_recursive(path, parsed_funcs, visited)
-		.with_context(|| format!("in file '{}'", path.to_string_lossy()))
+		.with_context(|| format!("in file '{}'!", path.to_string_lossy()))
 }
 
 fn import_funcs_recursive(

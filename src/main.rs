@@ -13,7 +13,8 @@ use clap::Parser;
 
 fn main() {
 	setup().unwrap_or_else(|e| {
-		eprintln!("{}", format!("<!> {e:#}").replace(": ", ":\n    "));
+		// need to conventionally provide all anyhow context messages ending in a '!'
+		eprintln!("{}", format!("<!> {e:#}").replace("!: ", ":\n    "));
 		std::process::exit(1);
 	});
 }
@@ -40,7 +41,7 @@ fn setup() -> Result<()> {
 	let properties = compile_world_file(&args.path, &log_config)?;
 
 	if !args.log {
-		let world = World::new(properties).context("world error")?;
+		let world = World::new(properties).context("world error!")?;
 		update(world, args.auto_step)
 	} else {
 		Ok(())
