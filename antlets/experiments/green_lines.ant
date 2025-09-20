@@ -10,6 +10,4 @@ ant main {
 
 	D1 = and(R1, R2);
 	D2 = and(D1, R3);
-
-	#DIE = T3;
 }

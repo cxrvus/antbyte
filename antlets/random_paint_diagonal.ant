@@ -3,11 +3,7 @@ set border = die;
 
 ant main {
 	D0 = -M0;
-	
-	D1 = R0;
-	D2 = R1;
-
+	(D2, D1) = buf(R2, R1);
 	C0 = 1;
-
 	M0 = 1;
 }

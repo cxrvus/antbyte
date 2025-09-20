@@ -11,13 +11,8 @@ fn langton_keep_c02 = () => () {
 
 ant main {
 	() = langton_keep_c02();
-
 	C2 = 1;
-
-	special = and(R2, R1, R0);
-	CC = special;
-	C0 = special;
-
+	(CC, C0) = cpy(and(R2, R1, R0));
 	A1 = -or(T1, T0);
 }
 

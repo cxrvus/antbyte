@@ -3,10 +3,7 @@ set start = top_left;
 set border = wrap;
 
 ant main {
-	spawn = T1;
-	A0 = spawn;
-	A1 = spawn;
-	DIE = spawn;
+	(A1, A0, DIE) = cpy(T1);
 }
 
 ant queen = 3 {
