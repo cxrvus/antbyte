@@ -5,7 +5,7 @@ use std::{
 
 use antbyte::ant::{
 	compiler::{LogConfig, compile_world_file},
-	world::World,
+	world::{World, WorldConfig},
 };
 
 use anyhow::{Context, Ok, Result};
@@ -30,8 +30,12 @@ struct Args {
 	auto_step: bool,
 
 	/// Log debug info instead of running the simulation
-	#[arg(long)]
+	#[arg(short, long)]
 	log: bool,
+
+	/// Show a preview of the dimensions of the antlet
+	#[arg(short, long)]
+	preview: bool,
 }
 
 fn setup() -> Result<()> {
@@ -40,7 +44,12 @@ fn setup() -> Result<()> {
 	let log_config = LogConfig { all: args.log };
 	let properties = compile_world_file(&args.path, &log_config)?;
 
-	if !args.log {
+	if args.preview {
+		let WorldConfig { width, height, .. } = properties.config;
+		let preview_str = "\\/\n".repeat(height) + "|_" + &">>".repeat(width) + "\n\n";
+		print!("{preview_str}");
+		Ok(())
+	} else if !args.log {
 		let world = World::new(properties).context("world error!")?;
 		update(world, args.auto_step)
 	} else {
