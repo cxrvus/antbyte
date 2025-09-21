@@ -25,10 +25,12 @@ struct Args {
 	/// Path to the .ant file to execute
 	path: PathBuf,
 
+	// TODO: migrate to FPS setting
 	/// Auto-step through simulation without waiting for input
 	#[arg(short, long)]
 	auto_step: bool,
 
+	// todo: make this a world property
 	/// Log debug info instead of running the simulation
 	#[arg(short, long)]
 	log: bool,
