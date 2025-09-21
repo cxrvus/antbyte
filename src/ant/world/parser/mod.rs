@@ -104,6 +104,14 @@ struct ParamValue {
 
 impl ParamValue {
 	#[inline]
+	fn target(target: String) -> Self {
+		Self {
+			sign: false,
+			target,
+		}
+	}
+
+	#[inline]
 	fn invert(&mut self) {
 		self.sign = !self.sign;
 	}

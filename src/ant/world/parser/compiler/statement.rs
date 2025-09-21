@@ -37,11 +37,7 @@ impl Expression {
 			for sub_exp in parameters {
 				if sub_exp.params.is_some() {
 					func_calls.extend(sub_exp.expand(index));
-
-					params.push(ParamValue {
-						sign: false,
-						target: Self::format_index(*index - 1),
-					});
+					params.push(ParamValue::target(Self::format_index(*index - 1)));
 				} else {
 					params.push(ParamValue {
 						sign: sub_exp.sign,
@@ -52,10 +48,7 @@ impl Expression {
 
 			(self.ident.clone(), params)
 		} else {
-			let params = vec![ParamValue {
-				sign: false,
-				target: self.ident.clone(),
-			}];
+			let params = vec![ParamValue::target(self.ident.clone())];
 
 			("or".to_string(), params)
 		};
