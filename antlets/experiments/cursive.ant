@@ -1,6 +1,5 @@
 # todo: fix re-exporting issue creating a 'langton' name-collision
 
-use "../langton";
 use "../langton2";
 
 set desc = "Langton's Ant, but self-replicating (+other variation)";

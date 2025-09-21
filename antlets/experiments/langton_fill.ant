@@ -1,4 +1,4 @@
-use "langton";
+use "../langton";
 set size = 64;
 set border = cycle;
 
