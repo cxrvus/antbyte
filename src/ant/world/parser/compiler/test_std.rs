@@ -71,7 +71,7 @@ fn eq() {
 #[test]
 fn mux3() {
 	let signature = SignatureSpec::new("mux", 3, 1);
-	let entries = vec![0, 0, 1, 0, 0, 1, 1, 1];
+	let entries = vec![0, 0, 1, 1, 0, 1, 0, 1];
 	test_func(signature, entries);
 }
 
@@ -79,9 +79,9 @@ fn mux3() {
 fn mux6() {
 	let signature = SignatureSpec::new("mux", 6, 1);
 	let entries = vec![
-		0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1,
-		1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-		1, 1, 1, 1,
+		0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0,
+		1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+		0, 1, 0, 1,
 	];
 	test_func(signature, entries);
 }
@@ -101,6 +101,23 @@ fn add() {
 }
 
 #[test]
+fn h_add2() {
+	let signature = SignatureSpec::new("add", 4, 3);
+	let entries = vec![0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5, 3, 4, 5, 6];
+	test_func(signature, entries);
+}
+
+#[test]
+fn add2() {
+	let signature = SignatureSpec::new("add", 5, 3);
+	let entries = vec![
+		0, 1, 1, 2, 2, 3, 3, 4, 1, 2, 2, 3, 3, 4, 4, 5, 2, 3, 3, 4, 4, 5, 5, 6, 3, 4, 4, 5, 5, 6,
+		6, 7,
+	];
+	test_func(signature, entries);
+}
+
+#[test]
 fn cpy2() {
 	let signature = SignatureSpec::new("cpy", 1, 2);
 	let entries = vec![0, 3];
@@ -115,8 +132,22 @@ fn buf2() {
 }
 
 #[test]
+fn buf3() {
+	let signature = SignatureSpec::new("buf", 3, 3);
+	let entries = vec![0, 1, 2, 3, 4, 5, 6, 7];
+	test_func(signature, entries);
+}
+
+#[test]
 fn inv2() {
 	let signature = SignatureSpec::new("inv", 2, 2);
 	let entries = vec![3, 2, 1, 0];
+	test_func(signature, entries);
+}
+
+#[test]
+fn inv3() {
+	let signature = SignatureSpec::new("inv", 3, 3);
+	let entries = vec![7, 6, 5, 4, 3, 2, 1, 0];
 	test_func(signature, entries);
 }
