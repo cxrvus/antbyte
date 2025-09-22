@@ -123,7 +123,7 @@ impl Display for ParamValue {
 
 		let sign = match sign {
 			false => "",
-			true => "!",
+			true => "~",
 		};
 
 		write!(f, "{sign}{target}")

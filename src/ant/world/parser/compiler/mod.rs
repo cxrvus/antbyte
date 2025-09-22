@@ -41,7 +41,7 @@ struct CompFunc {
 
 impl Display for CompFunc {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		writeln!(f, "{} !{{", self.signature)?;
+		writeln!(f, "{} ~{{", self.signature)?;
 
 		for comp_statement in &self.comp_statements {
 			writeln!(f, "\t{comp_statement}")?;
