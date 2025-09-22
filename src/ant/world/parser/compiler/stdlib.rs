@@ -24,17 +24,28 @@ fn mux = (s0, s1, a, b, c, d) => out {
 	out = mux(s1, mux(s0, a, b), mux(s0, c, d));
 }
 
+
 ## Addition & Subtraction
 
-fn add = (a, b) => (sum, cout) {
+fn add = (a, b) => (cout, sum) {
 	sum = xor(a, b);
 	cout = and(a, b);
 }
 
-fn add = (a, b, cin) => (sum, cout) {
-	(sum0, cout0) = add(a, b);
-	(sum,  cout1) = add(sum0, cin);
+fn add = (a, b, cin) => (cout, sum) {
+	(cout0, sum0) = add(a, b);
+	(cout1, sum) = add(sum0, cin);
 	cout = or(cout0, cout1);
+}
+
+fn add = (a1, a0, b1, b0) => (cout, sum1, sum0) {
+	(cout0, sum0) = add(a0, b0);
+	(cout, sum1) = add(a1, b1, cout0);
+}
+
+fn add = (a1, a0, b1, b0, cin) => (cout, sum1, sum0) {
+	(cout0, sum0) = add(a0, b0, cin);
+	(cout, sum1) = add(a1, b1, cout0);
 }
 
 
