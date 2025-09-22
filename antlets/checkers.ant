@@ -3,8 +3,6 @@ set start = top_left;
 set colors = bin;
 set border = obs;
 
-fn xor = (a, b) => c { c = or(and(-a, b), and(a, -b)); }
-
 ant main {
 	C0 = T0;
 
