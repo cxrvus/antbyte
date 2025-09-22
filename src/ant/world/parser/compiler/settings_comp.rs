@@ -11,12 +11,13 @@ impl WorldConfig {
 		match key.as_str() {
 			key @ ("height" | "width" | "size") => {
 				if let Token::Number(number) = value {
+					let number = number.clamp(1, 0x100) as usize;
 					match key {
-						"width" => self.width = number as usize,
-						"height" => self.height = number as usize,
+						"width" => self.width = number,
+						"height" => self.height = number,
 						"size" => {
-							self.width = number as usize;
-							self.height = number as usize;
+							self.width = number;
+							self.height = number;
 						}
 						_ => unreachable!(),
 					}
@@ -24,6 +25,14 @@ impl WorldConfig {
 					Ok(())
 				} else {
 					invalid_type(&value, "number (pixel count)", key)
+				}
+			}
+			"fps" => {
+				if let Token::Number(number) = value {
+					self.fps = number.clamp(1, 30) as u8;
+					Ok(())
+				} else {
+					invalid_type(&value, "number (pixel count)", &key)
 				}
 			}
 			"border" => {

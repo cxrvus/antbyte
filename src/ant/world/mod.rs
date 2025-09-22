@@ -19,6 +19,7 @@ use crate::{
 pub struct WorldConfig {
 	pub width: usize,
 	pub height: usize,
+	pub fps: u8,
 	pub border_mode: BorderMode,
 	pub starting_pos: StartingPos,
 	pub color_mode: ColorMode,
@@ -31,6 +32,7 @@ impl Default for WorldConfig {
 		Self {
 			width: 32,
 			height: 32,
+			fps: 24,
 			border_mode: BorderMode::Wrap,
 			starting_pos: StartingPos::Center,
 			color_mode: ColorMode::RGBI,
