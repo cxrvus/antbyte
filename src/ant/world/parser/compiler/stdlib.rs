@@ -14,9 +14,9 @@ fn and = (i0, i1, i2, i3) => out { out = -or(-i0, -i1, -i2, -i3); }
 
 ## Other Logic Gates
 
-fn xor = (a, b) => c { c = or(and(-a, b), and(a, -b)); }
+fn xor = (a, b) => c { c = or(-or(-a, b), -or(a, -b)); }
 
-fn eq = (a, b) => c { c = or(and(a, b), and(-a, -b)); }
+fn eq = (a, b) => c { c = -or(-or(-a, b), -or(a, -b)); }
 
 fn mux = (s, a, b) => out { out = or(and(-s, a), and(s, b)); }
 
