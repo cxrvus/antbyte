@@ -159,7 +159,7 @@ impl CompFunc {
 
 	fn tick(&self, input: u8) -> u32 {
 		let mut variables = HashMap::<String, bool>::new();
-		let mut input_bits = Self::bits_from_int(input).to_vec();
+		let mut input_bits = bits_from_int(input).to_vec();
 
 		for input in self.signature.params.iter().rev() {
 			variables.insert(input.clone(), input_bits.pop().unwrap());
@@ -192,29 +192,29 @@ impl CompFunc {
 			output_bits.push(variables[output]);
 		}
 
-		Self::int_from_bits(&output_bits)
+		int_from_bits(&output_bits)
 	}
+}
 
-	fn bits_from_int(value: u8) -> [bool; 8] {
-		let mut bits = [false; 8];
-		for (i, bit) in bits.iter_mut().enumerate() {
-			*bit = (value >> i & 1) == 1;
+fn bits_from_int(value: u8) -> [bool; 8] {
+	let mut bits = [false; 8];
+	for (i, bit) in bits.iter_mut().enumerate() {
+		*bit = (value >> i & 1) == 1;
+	}
+	bits.reverse();
+	bits
+}
+
+fn int_from_bits(bits: &[bool]) -> u32 {
+	let mut value = 0;
+
+	for (i, &bit) in bits.iter().rev().enumerate() {
+		if bit {
+			value |= 1 << i;
 		}
-		bits.reverse();
-		bits
 	}
 
-	fn int_from_bits(bits: &[bool]) -> u32 {
-		let mut value = 0;
-
-		for (i, &bit) in bits.iter().rev().enumerate() {
-			if bit {
-				value |= 1 << i;
-			}
-		}
-
-		value
-	}
+	value
 }
 
 fn format_periph(ident: &str, io_type: IoType) -> String {
@@ -230,13 +230,13 @@ fn format_periph(ident: &str, io_type: IoType) -> String {
 
 #[cfg(test)]
 mod test {
-	use crate::ant::compiler::CompFunc;
+	use super::*;
 
 	#[test]
 	fn bit_conversion() {
 		for i in 0..=0xff {
-			let bits = CompFunc::bits_from_int(i);
-			let value = CompFunc::int_from_bits(&bits) as u8;
+			let bits = bits_from_int(i);
+			let value = int_from_bits(&bits) as u8;
 			assert_eq!(i, value);
 		}
 	}
