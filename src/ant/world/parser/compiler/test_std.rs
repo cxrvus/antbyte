@@ -1,10 +1,6 @@
 #![cfg(test)]
 
-use std::path::PathBuf;
-
-use crate::ant::{compiler::read_file, world::parser::SignatureSpec};
-
-use super::{compile_func, compile_world_simple, stdlib::STDLIB};
+use super::{SignatureSpec, compile_func, compile_world_simple, stdlib::STDLIB};
 
 impl<'a> SignatureSpec<'a> {
 	fn new(name: &'a str, param_count: usize, assignee_count: usize) -> Self {
@@ -24,20 +20,6 @@ fn test_func(signature: SignatureSpec, entries: Vec<u32>) {
 #[test]
 fn comp_std() {
 	_ = compile_world_simple(STDLIB).unwrap()
-}
-
-#[test]
-fn mirror_std() {
-	let std_file_content = read_file(&PathBuf::from("std.ant"))
-		.unwrap()
-		.trim()
-		.to_owned();
-
-	assert_eq!(
-		std_file_content,
-		STDLIB.trim(),
-		"STDLIB has to be mirrored in the std.ant file"
-	);
 }
 
 #[test]

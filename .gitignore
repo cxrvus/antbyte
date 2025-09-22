@@ -21,3 +21,6 @@ target/
 #.idea/
 
 /tmp
+
+# the original stdlib is contained in stdlib.rs
+std.ant
