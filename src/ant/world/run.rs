@@ -8,7 +8,7 @@ impl World {
 
 		loop {
 			println!("\n<<ANTBYTE>>\n===========\n\n");
-			println!("{:0>10}", self.age());
+			println!("{:0>10}", self.frame());
 			println!("{}\n\n", self.full_render());
 
 			if fps == 0 {

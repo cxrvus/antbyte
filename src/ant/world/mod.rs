@@ -59,7 +59,7 @@ impl Default for WorldProperties {
 
 pub struct WorldState {
 	rng: StdRng,
-	age: usize,
+	frame: usize,
 	pub cells: Matrix<u8>,
 	ants: Vec<Ant>,
 	ant_cache: Matrix<bool>,
@@ -87,7 +87,7 @@ impl World {
 
 		let state = WorldState {
 			rng,
-			age: 0,
+			frame: 0,
 			cells: Matrix::new(width, height),
 			ant_cache: Matrix::new(width, height),
 			ants: vec![],
@@ -115,7 +115,7 @@ impl World {
 	}
 
 	pub fn tick(&mut self) -> bool {
-		self.age += 1;
+		self.frame += 1;
 
 		for i in 0..self.ants.len() {
 			if self.ants[i].is_alive() {
@@ -131,8 +131,8 @@ impl World {
 		!no_ants
 	}
 
-	pub fn age(&self) -> usize {
-		self.age
+	pub fn frame(&self) -> usize {
+		self.frame
 	}
 
 	pub fn config(&self) -> &WorldConfig {
