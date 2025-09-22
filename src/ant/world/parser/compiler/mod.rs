@@ -44,7 +44,11 @@ impl Display for CompFunc {
 		writeln!(f, "{} !{{", self.signature)?;
 
 		for comp_statement in &self.comp_statements {
-			writeln!(f, "\t{comp_statement}")?
+			writeln!(f, "\t{comp_statement}")?;
+
+			if comp_statement.params.len() > 1 {
+				writeln!(f)?;
+			}
 		}
 
 		writeln!(f, "}}")
