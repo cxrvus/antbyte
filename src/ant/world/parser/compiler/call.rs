@@ -12,59 +12,44 @@ impl FuncCall {
 		func_index: u32,
 	) -> Result<Vec<CompStatement>> {
 		let called_func = SignatureSpec::from(self).get_overload(comp_funcs)?;
+		let called_assigns = &called_func.signature.assignees;
+		let called_params = &called_func.signature.params;
 
 		let var_prefix = format!("_{}_{func_index}_", self.func);
-		let mut expanded_statements = vec![];
+		let mut comp_statements = vec![];
+
+		comp_statements.extend(self.params.clone().into_iter().zip(called_params).map(
+			|(param_value, param)| CompStatement {
+				assignee: ParamValue::target(format!("{var_prefix}{param}")),
+				params: vec![param_value],
+			},
+		));
 
 		for mut called_func_stm in called_func.comp_statements.clone() {
-			// resolve assignee
-			Self::resolve_param(
-				&mut called_func_stm.assignee,
-				&self.assignees,
-				&called_func.signature.assignees,
-				&var_prefix,
-			);
+			prefix_var(&mut called_func_stm.assignee, &var_prefix);
 
-			// resolve parameters
-			for func_param in called_func_stm.params.iter_mut() {
-				Self::resolve_param(
-					func_param,
-					&self.params,
-					&called_func.signature.params,
-					&var_prefix,
-				);
+			for stm_param in called_func_stm.params.iter_mut() {
+				prefix_var(stm_param, &var_prefix);
 			}
 
-			expanded_statements.push(called_func_stm);
+			comp_statements.push(called_func_stm);
 		}
 
-		Ok(expanded_statements)
+		comp_statements.extend(self.assignees.clone().into_iter().zip(called_assigns).map(
+			|(assignee_value, assignee)| CompStatement {
+				assignee: assignee_value,
+				params: vec![ParamValue::target(format!("{var_prefix}{assignee}"))],
+			},
+		));
+
+		Ok(comp_statements)
 	}
+}
 
-	/// resolves a statement parameter / assignee in by either mapping it to a func parameter / assignee
-	/// or prefixing it with the variable prefix if it's a variable
-	fn resolve_param(
-		func_param: &mut ParamValue,
-		call_params: &[ParamValue],
-		signature_targets: &[String],
-		var_prefix: &str,
-	) {
-		if Token::is_uppercase_ident(&func_param.target) {
-			// value targets a peripheral => do nothing
-		} else if let Some(call_value) = signature_targets
-			.iter()
-			.position(|target| *target == func_param.target)
-			.map(|i| &call_params[i])
-		{
-			// value targets a function parameter / assignee
-			*func_param = ParamValue {
-				sign: func_param.sign ^ call_value.sign,
-				target: call_value.target.clone(),
-			};
-		} else {
-			// value targets a variable
-			func_param.target = var_prefix.to_string() + &func_param.target;
-		}
+#[inline]
+fn prefix_var(value: &mut ParamValue, var_prefix: &str) {
+	if !Token::is_uppercase_ident(&value.target) {
+		value.target = format!("{var_prefix}{}", &value.target);
 	}
 }
 
