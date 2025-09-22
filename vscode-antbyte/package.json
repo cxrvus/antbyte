@@ -1,0 +1,23 @@
+{
+  "name": "ant-language",
+  "displayName": "Antbyte",
+  "description": "Syntax highlighting for .ant files",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": ["Programming Languages"],
+  "contributes": {
+    "languages": [{
+      "id": "antbyte",
+      "aliases": ["Antbyte", "AntByte"],
+      "extensions": [".ant"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "antbyte",
+      "scopeName": "source.ant",
+      "path": "./syntaxes/ant.tmLanguage.json"
+    }]
+  }
+}

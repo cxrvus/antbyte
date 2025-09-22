@@ -1,0 +1,74 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Ant",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#constants"
+    },
+    {
+      "include": "#function_calls"
+    },
+    {
+      "include": "#literals"
+    },
+    {
+      "include": "#brackets"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "name": "comment.line.hash.ant",
+      "match": "#.*$"
+    },
+    "keywords": {
+      "name": "keyword.control.ant",
+      "match": "^[a-z][a-z0-9_]*"
+    },
+    "constants": {
+      "name": "constant.language.ant",
+      "match": "\\b[A-Z][A-Z0-9_]*\\b"
+    },
+    "function_calls": {
+      "name": "entity.name.function.ant",
+      "match": "\\b[a-z][a-z0-9_]*(?=\\s*\\()"
+    },
+    "literals": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.ant",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.ant",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "constant.numeric.ant",
+          "match": "\\b(0x[0-9a-fA-F]+|0b[01]+|[0-9]+)\\b"
+        }
+      ]
+    },
+    "brackets": {
+      "patterns": [
+        {
+          "name": "punctuation.section.braces.ant",
+          "match": "[{}]"
+        },
+        {
+          "name": "punctuation.section.parens.ant",
+          "match": "[()]"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.ant"
+}
