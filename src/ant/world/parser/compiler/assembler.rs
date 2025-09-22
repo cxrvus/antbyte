@@ -65,8 +65,6 @@ impl CompFunc {
 			)?;
 		}
 
-		inputs.reverse();
-
 		if inputs.len() > 8 {
 			Err(anyhow!(
 				"may not have more than 8 inputs, got {}\n{:?}:\n",
@@ -161,10 +159,10 @@ impl CompFunc {
 
 	fn tick(&self, input: u8) -> u32 {
 		let mut variables = HashMap::<String, bool>::new();
-		let input_bits = Self::bits_from_int(input);
+		let mut input_bits = Self::bits_from_int(input).to_vec();
 
-		for (n, input) in self.signature.params.iter().enumerate() {
-			variables.insert(input.clone(), input_bits[n]);
+		for input in self.signature.params.iter().rev() {
+			variables.insert(input.clone(), input_bits.pop().unwrap());
 		}
 
 		for statement in &self.comp_statements {
@@ -199,18 +197,17 @@ impl CompFunc {
 
 	fn bits_from_int(value: u8) -> [bool; 8] {
 		let mut bits = [false; 8];
-
 		for (i, bit) in bits.iter_mut().enumerate() {
 			*bit = (value >> i & 1) == 1;
 		}
-
+		bits.reverse();
 		bits
 	}
 
 	fn int_from_bits(bits: &[bool]) -> u32 {
 		let mut value = 0;
 
-		for (i, &bit) in bits.iter().enumerate() {
+		for (i, &bit) in bits.iter().rev().enumerate() {
 			if bit {
 				value |= 1 << i;
 			}

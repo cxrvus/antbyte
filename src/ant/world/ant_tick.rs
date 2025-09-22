@@ -58,7 +58,7 @@ impl World {
 		// condense output bits into bytes
 		let mut output_values: Vec<OutputValue> = vec![];
 
-		for output_spec in outputs.iter() {
+		for output_spec in outputs.iter().rev() {
 			let output_bit = (output_bits & 1) as u8;
 			let bit_index = output_spec.bit;
 			let new_value = output_bit << bit_index;
