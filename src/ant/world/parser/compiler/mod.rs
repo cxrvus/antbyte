@@ -145,7 +145,7 @@ pub fn compile_world(
 		properties.config.set_setting(key, value)?;
 	}
 
-	let comp_funcs = compile_funcs(parsed_funcs)?;
+	let comp_funcs = compile_funcs(parsed_funcs, log_cfg)?;
 
 	let mut behaviors: [Option<Behavior>; 0x100] = [const { None }; 0x100];
 
@@ -248,7 +248,7 @@ pub fn compile_world_simple(code: &str) -> Result<WorldProperties> {
 
 pub fn compile_func(code: &str, signature: SignatureSpec) -> TruthTable {
 	let parsed_world = Parser::new(code).unwrap().parse_world().unwrap();
-	let comp_funcs = compile_funcs(parsed_world.funcs).unwrap();
+	let comp_funcs = compile_funcs(parsed_world.funcs, &LogConfig::default()).unwrap();
 	let func = signature.get_overload(&comp_funcs).unwrap();
 	let log_cfg = LogConfig { all: true };
 

@@ -2,13 +2,21 @@ use anyhow::{Result, bail};
 
 use super::CompFunc;
 
-use crate::ant::{compiler::CompStatement, world::parser::Func};
+use crate::ant::{
+	compiler::{CompStatement, LogConfig},
+	world::parser::Func,
+};
 
-pub(super) fn compile_funcs(funcs: Vec<Func>) -> Result<Vec<CompFunc>> {
+pub(super) fn compile_funcs(funcs: Vec<Func>, log_cfg: &LogConfig) -> Result<Vec<CompFunc>> {
 	let mut comp_funcs = vec![];
 
 	for func in funcs.into_iter() {
 		let comp_func = func.compile(&comp_funcs)?;
+
+		if log_cfg.all {
+			println!("{comp_func}");
+		}
+
 		comp_funcs.push(comp_func);
 	}
 
