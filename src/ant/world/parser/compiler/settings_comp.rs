@@ -29,7 +29,7 @@ impl WorldConfig {
 			}
 			"fps" => {
 				if let Token::Number(number) = value {
-					self.fps = number.clamp(1, 30) as u8;
+					self.fps = number.clamp(1, 30);
 					Ok(())
 				} else {
 					invalid_type(&value, "number (pixel count)", &key)

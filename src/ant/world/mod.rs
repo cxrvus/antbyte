@@ -19,7 +19,7 @@ use crate::{
 pub struct WorldConfig {
 	pub width: usize,
 	pub height: usize,
-	pub fps: u8,
+	pub fps: u32,
 	pub border_mode: BorderMode,
 	pub starting_pos: StartingPos,
 	pub color_mode: ColorMode,

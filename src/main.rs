@@ -2,10 +2,10 @@ use std::path::PathBuf;
 
 use antbyte::ant::{
 	compiler::{LogConfig, compile_world_file},
-	world::{WorldConfig, run::run},
+	world::{World, WorldConfig},
 };
 
-use anyhow::{Ok, Result};
+use anyhow::{Context, Ok, Result};
 use clap::Parser;
 
 fn main() {
@@ -22,10 +22,9 @@ struct Args {
 	/// Path to the .ant file to execute
 	path: PathBuf,
 
-	// TODO: migrate to FPS setting
-	/// Auto-step through simulation without waiting for input
+	/// Step through the simulation, waiting for input after each frame (same as setting FPS = 0)
 	#[arg(short, long)]
-	auto_step: bool,
+	stepped: bool,
 
 	// todo: make this a world property
 	/// Log debug info instead of running the simulation
@@ -41,7 +40,7 @@ fn setup() -> Result<()> {
 	let args = Args::parse();
 
 	let log_config = LogConfig { all: args.log };
-	let properties = compile_world_file(&args.path, &log_config)?;
+	let mut properties = compile_world_file(&args.path, &log_config)?;
 
 	if args.preview {
 		let WorldConfig { width, height, .. } = properties.config;
@@ -49,7 +48,13 @@ fn setup() -> Result<()> {
 		print!("{preview_str}");
 		Ok(())
 	} else if !args.log {
-		run(properties, args.auto_step)
+		if args.stepped {
+			properties.config.fps = 0;
+		}
+
+		let mut world = World::new(properties).context("world error!")?;
+
+		world.run()
 	} else {
 		Ok(())
 	}

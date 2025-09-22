@@ -1,31 +1,59 @@
-use super::{World, WorldProperties};
-use anyhow::{Context, Result};
+use super::{World, WorldConfig};
+use anyhow::Result;
 use std::io::{self, Write};
 
-pub fn run(properties: WorldProperties, auto_step: bool) -> Result<()> {
-	let mut auto_step = auto_step;
-	let mut world = World::new(properties).context("world error!")?;
+impl World {
+	pub fn run(&mut self) -> Result<()> {
+		let mut fps = self.properties.config.fps;
 
-	loop {
-		println!("\n<<ANTBYTE>>\n===========\n\n");
-		println!("{:0>10}", world.age());
-		println!("{}\n\n", world_to_string(&world));
+		loop {
+			println!("\n<<ANTBYTE>>\n===========\n\n");
+			println!("{:0>10}", self.age());
+			println!("{}\n\n", self.full_render());
 
-		if !auto_step {
-			io::stderr().flush().unwrap();
-			let mut input = String::new();
+			if fps == 0 {
+				io::stderr().flush().unwrap();
+				let mut input = String::new();
 
-			io::stdin().read_line(&mut input).unwrap();
-			if input.trim() == "a" {
-				auto_step = true;
+				io::stdin().read_line(&mut input).unwrap();
+				if input.trim() == "a" {
+					fps = WorldConfig::default().fps;
+				}
+			}
+
+			let world_active = self.tick();
+
+			if !world_active {
+				return Ok(());
+			}
+		}
+	}
+
+	fn full_render(&self) -> String {
+		let cells = &self.cells;
+		let mut string = String::new();
+
+		for (i, cell) in cells.values.iter().enumerate() {
+			if i % cells.width == 0 {
+				string.push('\n');
+			}
+
+			let pos = cells.get_pos(i).unwrap();
+			let ant = self.ants().iter().find(|ant| ant.pos == pos);
+
+			match ant {
+				None => {
+					string.push_str(&color_cell(*cell, "  "));
+				}
+				Some(ant) => {
+					let (char1, char2) = ant.dir_vec().principal_chars();
+					let ant_chars = format!("{char1}{char2}");
+					string.push_str(&color_cell(*cell, &ant_chars));
+				}
 			}
 		}
 
-		let world_active = world.tick();
-
-		if !world_active {
-			return Ok(());
-		}
+		string
 	}
 }
 
@@ -47,31 +75,4 @@ fn color_codes(value: u8) -> (u8, u8) {
 fn color_cell(value: u8, content: &str) -> String {
 	let (bg, fg) = color_codes(value);
 	format!("\x1b[{fg};{bg}m{content}\x1b[0m")
-}
-
-fn world_to_string(world: &World) -> String {
-	let cells = &world.cells;
-	let mut string = String::new();
-
-	for (i, cell) in cells.values.iter().enumerate() {
-		if i % cells.width == 0 {
-			string.push('\n');
-		}
-
-		let pos = cells.get_pos(i).unwrap();
-		let ant = world.ants().iter().find(|ant| ant.pos == pos);
-
-		match ant {
-			None => {
-				string.push_str(&color_cell(*cell, "  "));
-			}
-			Some(ant) => {
-				let (char1, char2) = ant.dir_vec().principal_chars();
-				let ant_chars = format!("{char1}{char2}");
-				string.push_str(&color_cell(*cell, &ant_chars));
-			}
-		}
-	}
-
-	string
 }
