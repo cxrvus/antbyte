@@ -1,0 +1,17 @@
+set size = 16;
+set tpf = 256;
+set fps = 12;
+
+ant main {
+	paint = and(M1, M0);
+
+	(M1, M0) = buf(
+		and(-paint, M1),
+		and(-paint, M0)
+	);
+
+	(cout, M0) = add(M0, T0);
+	(_, M1) = add(M1, 0, cout);
+
+	(C2, C1) = buf(M1, M0);
+}
