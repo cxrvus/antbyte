@@ -1,5 +1,6 @@
 set height = 8;
-set width = 16;
+set width = 32;
+set tpf = 8;
 set start = top_left;
 set border = wrap;
 
@@ -11,5 +12,5 @@ ant main {
 	
 	C3 = 1;
 
-	DIE = T7;
+	DIE = CN0;
 }

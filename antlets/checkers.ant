@@ -1,19 +1,25 @@
-set size = 16;
+set height = 8;
+set width = 32;
 set start = top_left;
+set tpf = 8;
 set colors = bin;
 set border = obs;
 
 ant main {
-	C0 = T0;
+	C0 = -T0;
 
-	D1 = or(M0, OBS);
-	D2 = and(D1, M1);
+	# M0: OBS in previous tick
+	# M1: last direction
+	# M2: initial state
+	D1 = or(M0, OBS, -M2);
+	D2 = and(D1, -M1);
+	M2 = 1;
 
+	# toggle: toggle last direction
 	toggle = and(M0, -OBS);
 	M1 = xor(M1, toggle);
 
-	M0 = OBS;
+	M0 = and(-M0, OBS);
 
-	M2 = or(M2, T7);
-	DIE = and(M2, -T7);
+	DIE = CN0;
 }
