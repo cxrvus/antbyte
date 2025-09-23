@@ -49,12 +49,14 @@ fn setup() -> Result<()> {
 		Ok(())
 	} else if !args.log {
 		if args.stepped {
-			properties.config.fps = 0;
+			properties.config.fps = None;
 		}
 
 		let mut world = World::new(properties).context("world error!")?;
 
-		world.run()
+		world.run();
+
+		Ok(())
 	} else {
 		Ok(())
 	}

@@ -3,7 +3,6 @@ use "../langton2";
 set desc = "Langton's Ant, but self-replicating (+other variation)";
 
 set size = 128;
-set border = die;
 set colors = bin;
 
 ant main {

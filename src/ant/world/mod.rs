@@ -19,7 +19,10 @@ use crate::{
 pub struct WorldConfig {
 	pub width: usize,
 	pub height: usize,
-	pub fps: u32,
+	pub fps: Option<u32>,
+	pub tpf: Option<u32>,
+	pub ticks: Option<u32>,
+	pub looping: bool,
 	pub border_mode: BorderMode,
 	pub starting_pos: StartingPos,
 	pub color_mode: ColorMode,
@@ -32,7 +35,10 @@ impl Default for WorldConfig {
 		Self {
 			width: 32,
 			height: 32,
-			fps: 24,
+			fps: Some(60),
+			tpf: Some(1),
+			ticks: None,
+			looping: false,
 			border_mode: BorderMode::Wrap,
 			starting_pos: StartingPos::Center,
 			color_mode: ColorMode::RGBI,
@@ -59,7 +65,7 @@ impl Default for WorldProperties {
 
 pub struct WorldState {
 	rng: StdRng,
-	frame: usize,
+	tick_count: u32,
 	pub cells: Matrix<u8>,
 	ants: Vec<Ant>,
 	ant_cache: Matrix<bool>,
@@ -87,7 +93,7 @@ impl World {
 
 		let state = WorldState {
 			rng,
-			frame: 0,
+			tick_count: 0,
 			cells: Matrix::new(width, height),
 			ant_cache: Matrix::new(width, height),
 			ants: vec![],
@@ -115,7 +121,7 @@ impl World {
 	}
 
 	pub fn tick(&mut self) -> bool {
-		self.frame += 1;
+		self.tick_count += 1;
 
 		for i in 0..self.ants.len() {
 			if self.ants[i].is_alive() {
@@ -128,11 +134,17 @@ impl World {
 
 		let no_ants = self.ants.is_empty();
 
-		!no_ants
+		let tick_overflow = self
+			.config()
+			.ticks
+			.map(|max| self.tick_count >= max)
+			.unwrap_or_default();
+
+		!(no_ants || tick_overflow)
 	}
 
-	pub fn frame(&self) -> usize {
-		self.frame
+	pub fn tick_count(&self) -> u32 {
+		self.tick_count
 	}
 
 	pub fn config(&self) -> &WorldConfig {

@@ -1,5 +1,4 @@
 set size = 128;
-set seed = 69;
 set border = die;
 
 ant main {

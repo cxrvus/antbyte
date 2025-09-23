@@ -47,7 +47,7 @@ pub enum Token {
 
 impl Token {
 	const COMMENT_PTN: &'static str = r"#.*(?:\r?\n|$)";
-	const NUMBER_PTN: &'static str = r"\d{1,3}"; // todo: parse bin and hex numbers
+	const NUMBER_PTN: &'static str = r"\d{1,8}"; // todo: parse bin and hex numbers
 	const STRING_PTN: &'static str = r#""(.*?)""#;
 	const IDENT_PTN: &'static str = r"[a-zA-Z_]\w*";
 	const LOWER_IDENT: &'static str = r"[a-z][a-z0-9_]*";

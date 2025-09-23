@@ -29,10 +29,38 @@ impl WorldConfig {
 			}
 			"fps" => {
 				if let Token::Number(number) = value {
-					self.fps = number.clamp(1, 30);
+					self.fps = match number {
+						0 => None,
+						number => Some(number.clamp(1, 60)),
+					};
+
 					Ok(())
 				} else {
-					invalid_type(&value, "number (pixel count)", &key)
+					invalid_type(&value, "number (FPS)", &key)
+				}
+			}
+			"tpf" => {
+				if let Token::Number(number) = value {
+					self.tpf = match number {
+						0 => None,
+						number => Some(number.clamp(1, 16)),
+					};
+
+					Ok(())
+				} else {
+					invalid_type(&value, "number (TPF / ticks per frame)", &key)
+				}
+			}
+			"ticks" => {
+				if let Token::Number(number) = value {
+					self.ticks = match number {
+						0 => None,
+						number => Some(number),
+					};
+
+					Ok(())
+				} else {
+					invalid_type(&value, "number (max ticks)", &key)
 				}
 			}
 			"border" => {

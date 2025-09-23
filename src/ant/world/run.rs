@@ -1,35 +1,99 @@
-use super::{World, WorldConfig};
-use anyhow::Result;
-use std::io::{self, Write};
+use super::World;
+use std::{
+	io::{self, Write},
+	thread,
+	time::{Duration, Instant},
+};
+
+const MAX_TICKS: u32 = 1 << 16;
 
 impl World {
-	pub fn run(&mut self) -> Result<()> {
-		let mut fps = self.properties.config.fps;
+	pub fn run(&mut self) {
+		// TODO: let max_ticks = self.config().ticks.unwrap_or(MAX_TICKS);
 
-		loop {
-			println!("\n<<ANTBYTE>>\n===========\n\n");
-			println!("{:0>10}", self.frame());
-			println!("{}\n\n", self.full_render());
+		self.render();
 
-			if fps == 0 {
-				io::stderr().flush().unwrap();
-				let mut input = String::new();
+		if self.config().tpf.is_some() {
+			let mut last_frame = Instant::now();
 
-				io::stdin().read_line(&mut input).unwrap();
-				if input.trim() == "a" {
-					fps = WorldConfig::default().fps;
+			let frame_ms = match self.config().fps {
+				Some(0) => panic!(),
+				Some(fps) => Some(1000 / fps),
+				None => None,
+			};
+
+			while self.frame_tick() {
+				if let Some(frame_ms) = frame_ms {
+					let elapsed = last_frame.elapsed().as_millis() as u32;
+					if elapsed < frame_ms {
+						// add a small buffer to prevent flickering
+						let sleep_ms = (frame_ms - elapsed).max(1);
+						thread::sleep(Duration::from_millis(sleep_ms as u64));
+					}
+					last_frame = Instant::now();
+				} else {
+					// wait for key input to continue
+					println!("<i> Press <Enter> to step to next frame");
+					let mut input = String::new();
+					io::stdin().read_line(&mut input).unwrap();
 				}
-			}
 
-			let world_active = self.tick();
-
-			if !world_active {
-				return Ok(());
+				self.render()
 			}
+		} else {
+			self.instant_run()
+		}
+
+		self.render();
+	}
+
+	fn instant_run(&mut self) {
+		let max_ticks = self.config().ticks.unwrap_or(MAX_TICKS);
+		self.properties.config.ticks = Some(max_ticks);
+
+		while self.tick() {
+			print!("{}", title());
+			print!("processing tick {} out of {max_ticks:0>4}", self.tick_str());
+			println!();
+			clear_screen();
 		}
 	}
 
-	fn full_render(&self) -> String {
+	fn frame_tick(&mut self) -> bool {
+		for _ in 0..self.config().tpf.unwrap() {
+			if !self.tick() {
+				return false;
+			}
+		}
+
+		true
+	}
+
+	fn render(&self) {
+		// pre-render
+		let title = title();
+		let world = self.color_render();
+		let frame = self.tick_str();
+
+		// print
+		clear_screen();
+		println!();
+		println!("{title}");
+		println!();
+		println!("{world}\n");
+		println!();
+		println!("{frame}");
+		println!("\n\n");
+
+		io::stdout().flush().unwrap();
+	}
+
+	#[inline]
+	fn tick_str(&self) -> String {
+		format!("{:0>8}", self.tick_count())
+	}
+
+	fn color_render(&self) -> String {
 		let cells = &self.cells;
 		let mut string = String::new();
 
@@ -55,6 +119,23 @@ impl World {
 
 		string
 	}
+}
+
+#[inline]
+fn clear_screen() {
+	print!("\x1B[2J\x1B[1;1H");
+}
+
+fn title() -> String {
+	r#"
+░░      ░░░   ░░░  ░░        ░░       ░░░  ░░░░  ░░        ░░        ░
+▒  ▒▒▒▒  ▒▒    ▒▒  ▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒
+▓  ▓▓▓▓  ▓▓  ▓  ▓  ▓▓▓▓▓  ▓▓▓▓▓       ▓▓▓▓▓    ▓▓▓▓▓▓▓  ▓▓▓▓▓      ▓▓▓
+█        ██  ██    █████  █████  ████  █████  ████████  █████  ███████
+█  ████  ██  ███   █████  █████       ██████  ████████  █████        █
+                                                                                                                                                      
+	"#
+	.into()
 }
 
 fn color_codes(value: u8) -> (u8, u8) {
