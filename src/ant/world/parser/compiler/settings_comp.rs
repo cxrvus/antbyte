@@ -1,4 +1,4 @@
-use anyhow::{Result, anyhow};
+use anyhow::{Result, anyhow, bail};
 
 use crate::ant::{
 	BorderMode, ColorMode, StartingPos,
@@ -10,14 +10,17 @@ impl WorldConfig {
 		// idea: more elegant match block
 		match key.as_str() {
 			key @ ("height" | "width" | "size") => {
-				if let Token::Number(number) = value {
-					let number = number.clamp(1, 0x100) as usize;
+				if let Token::Number(value) = value {
+					expect_non_zero(value, key)?;
+
+					let value = value.clamp(1, 0x100) as usize;
+
 					match key {
-						"width" => self.width = number,
-						"height" => self.height = number,
+						"width" => self.width = value,
+						"height" => self.height = value,
 						"size" => {
-							self.width = number;
-							self.height = number;
+							self.width = value;
+							self.height = value;
 						}
 						_ => unreachable!(),
 					}
@@ -110,8 +113,15 @@ fn non_zero(value: u32, max: Option<u32>) -> Option<u32> {
 	}
 }
 
+#[inline]
+fn expect_non_zero(value: u32, key: &str) -> Result<()> {
+	match value > 0 {
+		true => Ok(()),
+		false => Err(anyhow!("number must be greater than 0 for setting '{key}'")),
+	}
+}
+
+#[inline]
 fn invalid_type(actual: &Token, expected: &str, key: &str) -> Result<()> {
-	Err(anyhow!(
-		"expected {expected}, got {actual:?}\nfor key '{key}'"
-	))
+	bail!("expected {expected}, got {actual:?} for setting '{key}'");
 }
