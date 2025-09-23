@@ -115,7 +115,7 @@ fn non_zero(value: u32, max: Option<u32>) -> Option<u32> {
 		0 => None,
 		value => Some(match max {
 			None => value,
-			Some(max) => max.clamp(1, max),
+			Some(max) => value.clamp(1, max),
 		}),
 	}
 }
