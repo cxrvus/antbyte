@@ -29,7 +29,7 @@ struct Args {
 	// todo: make this a world property
 	/// Log debug info instead of running the simulation
 	#[arg(short, long)]
-	log: bool,
+	debug: bool,
 
 	/// Show a preview of the dimensions of the antlet
 	#[arg(short, long)]
@@ -39,7 +39,7 @@ struct Args {
 fn setup() -> Result<()> {
 	let args = Args::parse();
 
-	let log_config = LogConfig { all: args.log };
+	let log_config = LogConfig { all: args.debug };
 	let mut properties = compile_world_file(&args.path, &log_config)?;
 
 	if args.preview {
@@ -47,7 +47,7 @@ fn setup() -> Result<()> {
 		let preview_str = "\\/\n".repeat(height) + "|_" + &">>".repeat(width) + "\n\n";
 		print!("{preview_str}");
 		Ok(())
-	} else if !args.log {
+	} else if !args.debug {
 		if args.stepped {
 			properties.config.fps = None;
 		}
