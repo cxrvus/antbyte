@@ -9,8 +9,6 @@ const MAX_TICKS: u32 = 1 << 16;
 
 impl World {
 	pub fn run(&mut self) {
-		// TODO: let max_ticks = self.config().ticks.unwrap_or(MAX_TICKS);
-
 		self.render();
 
 		if self.config().tpf.is_some() {
@@ -24,6 +22,7 @@ impl World {
 
 			while self.frame_tick() {
 				if let Some(frame_ms) = frame_ms {
+					// wait for frame interval to elapse
 					let elapsed = last_frame.elapsed().as_millis() as u32;
 					if elapsed < frame_ms {
 						// add a small buffer to prevent flickering
