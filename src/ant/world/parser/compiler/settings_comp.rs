@@ -28,11 +28,8 @@ impl WorldConfig {
 				}
 			}
 			"fps" => {
-				if let Token::Number(number) = value {
-					self.fps = match number {
-						0 => None,
-						number => Some(number.clamp(1, 60)),
-					};
+				if let Token::Number(value) = value {
+					self.fps = non_zero(value, Some(60));
 
 					Ok(())
 				} else {
@@ -40,11 +37,8 @@ impl WorldConfig {
 				}
 			}
 			"tpf" => {
-				if let Token::Number(number) = value {
-					self.tpf = match number {
-						0 => None,
-						number => Some(number.clamp(1, 16)),
-					};
+				if let Token::Number(value) = value {
+					self.tpf = non_zero(value, Some(16));
 
 					Ok(())
 				} else {
@@ -52,11 +46,8 @@ impl WorldConfig {
 				}
 			}
 			"ticks" => {
-				if let Token::Number(number) = value {
-					self.ticks = match number {
-						0 => None,
-						number => Some(number),
-					};
+				if let Token::Number(value) = value {
+					self.ticks = non_zero(value, None);
 
 					Ok(())
 				} else {
@@ -108,7 +99,18 @@ impl WorldConfig {
 	}
 }
 
-pub fn invalid_type(actual: &Token, expected: &str, key: &str) -> Result<()> {
+#[inline]
+fn non_zero(value: u32, max: Option<u32>) -> Option<u32> {
+	match value {
+		0 => None,
+		value => Some(match max {
+			None => value,
+			Some(max) => max.clamp(1, max),
+		}),
+	}
+}
+
+fn invalid_type(actual: &Token, expected: &str, key: &str) -> Result<()> {
 	Err(anyhow!(
 		"expected {expected}, got {actual:?}\nfor key '{key}'"
 	))
