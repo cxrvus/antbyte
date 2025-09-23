@@ -1,5 +1,8 @@
-set size = 64;
+set size = 128;
 set border = obs;
+set tpf = 16;
+set fps = 8;
+
 
 ant main {
 	A0 = 1;
