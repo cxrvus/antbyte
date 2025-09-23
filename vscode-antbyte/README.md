@@ -7,6 +7,5 @@ Provides syntax highlighting for `.ant` files.
 1. Copy this folder to your VS Code extensions directory:
    - **Windows**: `%USERPROFILE%\.vscode\extensions\`
    - **Linux** / **macOS**: `~/.vscode/extensions/`
-   - **Linux**: `~/.vscode/extensions/`
 
 2. Restart VS Code
