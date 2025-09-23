@@ -41,7 +41,7 @@ impl WorldConfig {
 			}
 			"tpf" => {
 				if let Token::Number(value) = value {
-					self.tpf = non_zero(value, Some(16));
+					self.tpf = non_zero(value, Some(0x100));
 
 					Ok(())
 				} else {
