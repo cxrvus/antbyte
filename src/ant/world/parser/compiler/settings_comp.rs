@@ -7,7 +7,7 @@ use crate::ant::{
 
 impl WorldConfig {
 	pub(super) fn set_setting(&mut self, key: String, value: Token) -> Result<()> {
-		// idea: more elegant match block
+		// todo: more elegant match block
 		match key.as_str() {
 			key @ ("height" | "width" | "size") => {
 				if let Token::Number(value) = value {
@@ -56,6 +56,13 @@ impl WorldConfig {
 				} else {
 					invalid_type(&value, "number (max ticks)", &key)
 				}
+			}
+			"loop" => {
+				match value {
+					Token::Bit(value) => self.looping = value,
+					value => return invalid_type(&value, "bit (is looping?)", &key),
+				}
+				Ok(())
 			}
 			"border" => {
 				if let Token::Ident(border_mode) = value {

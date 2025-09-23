@@ -48,7 +48,7 @@ impl Default for WorldConfig {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WorldProperties {
 	pub behaviors: [Option<Behavior>; 0x100],
 	pub config: WorldConfig,

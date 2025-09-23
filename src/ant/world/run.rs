@@ -1,4 +1,5 @@
 use super::World;
+use anyhow::Result;
 use std::{
 	io::{self, Write},
 	thread,
@@ -8,7 +9,20 @@ use std::{
 const MAX_TICKS: u32 = 1 << 16;
 
 impl World {
-	pub fn run(&mut self) {
+	pub fn run(&mut self) -> Result<()> {
+		if self.config().looping {
+			let properties = self.properties.clone();
+			loop {
+				let mut world = World::new(properties.clone())?;
+				world.run_once();
+			}
+		} else {
+			self.run_once();
+			Ok(())
+		}
+	}
+
+	pub fn run_once(&mut self) {
 		self.render();
 
 		if self.config().tpf.is_some() {

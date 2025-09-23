@@ -26,6 +26,10 @@ struct Args {
 	#[arg(short, long)]
 	stepped: bool,
 
+	/// Loop the simulation
+	#[arg(short, long)]
+	looping: bool,
+
 	// todo: make this a world property
 	/// Log debug info instead of running the simulation
 	#[arg(short, long)]
@@ -48,16 +52,20 @@ fn setup() -> Result<()> {
 		print!("{preview_str}");
 		Ok(())
 	} else if !args.debug {
-		if args.stepped {
-			properties.config.fps = None;
-		}
+		set_config(&mut properties.config, &args);
 
 		let mut world = World::new(properties).context("world error!")?;
 
-		world.run();
+		world.run().context("world error!")?;
 
 		Ok(())
 	} else {
 		Ok(())
 	}
+}
+
+#[rustfmt::skip]
+fn set_config(config: &mut WorldConfig, args: &Args) {
+	if args.stepped { config.fps = None; }
+	if args.looping { config.looping = true; }
 }
