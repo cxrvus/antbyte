@@ -1,3 +1,9 @@
+set desc = "randomly wanders in diagonal lines, generating interesting patterns!";
+set tpf = 32;
+set fps = 16;
+set loop = 1;
+
+
 set colors = bin;
 set border = die;
 
