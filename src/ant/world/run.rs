@@ -40,7 +40,7 @@ impl World {
 					let elapsed = last_frame.elapsed().as_millis() as u32;
 					if elapsed < frame_ms {
 						// add a small buffer to prevent flickering
-						let sleep_ms = (frame_ms - elapsed).max(1);
+						let sleep_ms = (frame_ms - elapsed).max(8);
 						thread::sleep(Duration::from_millis(sleep_ms as u64));
 					}
 					last_frame = Instant::now();
