@@ -34,7 +34,7 @@ impl World {
 				None => None,
 			};
 
-			while self.frame_tick() {
+			loop {
 				if let Some(frame_ms) = frame_ms {
 					// wait for frame interval to elapse
 					let elapsed = last_frame.elapsed().as_millis() as u32;
@@ -51,7 +51,11 @@ impl World {
 					io::stdin().read_line(&mut input).unwrap();
 				}
 
-				self.render()
+				let world_active = self.frame_tick();
+				self.render();
+				if !world_active {
+					break;
+				}
 			}
 		} else {
 			self.instant_run()
