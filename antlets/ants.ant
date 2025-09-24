@@ -1,0 +1,31 @@
+set ticks = 16;
+
+ant main {
+	A1 = -T0;
+	DIE = T0;
+}
+
+ant letter_a = 2 {
+	C1 = 1;
+
+	D0 = or(
+		and(-T3, -T2, +T1, +T0),
+		and(-T3, +T2, +T1, -T0),
+		0
+	);
+
+	D1 = or(
+		and(-T3, -T2, -T1, -T0),
+		and(-T3, +T2, -T1),
+		and(-T3, +T2, +T1, +T0),
+		0
+	);
+
+	D2 = or(
+		and(-T3, -T2, -T1, -T0),
+		and(-T3, +T2, +T1, -T0),
+		0
+	);
+
+	DIE = and(T3, T0);
+}
