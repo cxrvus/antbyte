@@ -10,5 +10,5 @@ ant main {
 	D1 = or(turn_right, turn_left);
 	D2 = turn_left;
 
-	DIE = and(+T2, +T1, -T0);
+	DIE = and(+T2, -T1, +T0);
 }
