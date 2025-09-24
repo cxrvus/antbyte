@@ -69,7 +69,6 @@ impl World {
 		self.properties.config.ticks = Some(max_ticks);
 
 		while self.tick() {
-			print!("{}", title());
 			print!("processing tick {} out of {max_ticks:0>4}", self.tick_str());
 			println!();
 			clear_screen();
