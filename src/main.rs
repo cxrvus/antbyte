@@ -30,6 +30,14 @@ struct Args {
 	#[arg(short, long)]
 	looping: bool,
 
+	/// instant simulation
+	#[arg(short, long)]
+	instant: bool,
+
+	// tick limit
+	#[arg(short, long)]
+	ticks: Option<u32>,
+
 	// todo: make this a world property
 	/// Log debug info instead of running the simulation
 	#[arg(short, long)]
@@ -68,4 +76,6 @@ fn setup() -> Result<()> {
 fn set_config(config: &mut WorldConfig, args: &Args) {
 	if args.stepped { config.fps = None; }
 	if args.looping { config.looping = true; }
+	if args.instant { config.tpf = None; }
+	if args.ticks.is_some() { config.ticks = args.ticks; }
 }
