@@ -23,9 +23,9 @@ impl World {
 	}
 
 	pub fn run_once(&mut self) {
-		self.render();
-
 		if self.config().tpf.is_some() {
+			self.render();
+
 			let mut last_frame = Instant::now();
 
 			let frame_ms = match self.config().fps {
@@ -69,9 +69,11 @@ impl World {
 		self.properties.config.ticks = Some(max_ticks);
 
 		while self.tick() {
-			print!("processing tick {} out of {max_ticks:0>4}", self.tick_str());
-			println!();
-			clear_screen();
+			if self.tick_count % 0x100 == 0 {
+				clear_screen();
+				print!("processing tick {} out of {max_ticks:0>4}", self.tick_str());
+				println!();
+			}
 		}
 	}
 
