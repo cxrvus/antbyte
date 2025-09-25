@@ -118,6 +118,8 @@ pub fn compile_world(
 		println!("{code}");
 	}
 
+	println!("Parsing...");
+
 	let mut parsed_world = Parser::new(code)?.parse_world()?;
 
 	let mut parsed_funcs = vec![];
@@ -128,6 +130,8 @@ pub fn compile_world(
 	}
 
 	let mut visited = HashSet::new();
+
+	println!("Linking...");
 
 	for import in &parsed_world.imports {
 		let path = if let Some(source_path) = source_path {
@@ -149,6 +153,8 @@ pub fn compile_world(
 		properties.config.set_setting(key, value)?;
 	}
 
+	println!("Compiling...");
+
 	let comp_funcs = compile_funcs(parsed_funcs, log_cfg)?;
 
 	let mut behaviors: [Option<Behavior>; 0x100] = [const { None }; 0x100];
@@ -158,6 +164,8 @@ pub fn compile_world(
 		target_id,
 	} in parsed_world.ants
 	{
+		println!("Assembling ant '{target_name}' @ {target_id}.");
+
 		if let Some(behavior) = &behaviors[target_id as usize] {
 			bail!(
 				"tried to assign ID #{target_id} to '{target_name}', but it's already assigned to '{}'",
