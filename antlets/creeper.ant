@@ -1,0 +1,74 @@
+set size = 8;
+set start = top_left;
+set border = wrap;
+set fps = 32;
+
+fn in_col = (t2, t1, t0) => out {
+	out = and(
+		eq(T2, t2),
+		eq(T1, t1),
+		eq(T0, t0)
+	);
+}
+
+fn in_row = (t5, t4, t3) => out {
+	out = and(
+		eq(T5, t5),
+		eq(T4, t4),
+		eq(T3, t3)
+	);
+}
+
+ant main {
+	black = or(
+		and(
+			or(
+				in_row(0, 0, 1),
+				in_row(0, 1, 0)
+			),
+			or(
+				in_col(0, 0, 1),
+				in_col(0, 1, 0),
+				in_col(1, 0, 1),
+				in_col(1, 1, 0)
+			)
+		),
+
+		and(
+			in_row(0, 1, 1),
+			or(
+				in_col(0, 1, 1),
+				in_col(1, 0, 0)
+			)
+		),
+
+		and(
+			or(
+				in_row(1, 0, 0),
+				in_row(1, 0, 1)
+			),
+			or(
+				in_col(0, 1, 0),
+				in_col(0, 1, 1),
+				in_col(1, 0, 0),
+				in_col(1, 0, 1)
+			)
+		),
+
+		and(
+			in_row(1, 1, 0),
+			or(
+				in_col(0, 1, 0),
+				in_col(1, 0, 1)
+			)
+		)
+	);
+
+	red = and(in_row(0, 1, 0), or(in_col(0, 1, 0), in_col(1, 0, 1)));
+
+	C0 = red;
+	C1 = -or(red, black);
+	C3 = or(red, and(-black, R0));
+
+	AX = T6;
+}
