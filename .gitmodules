@@ -1,0 +1,3 @@
+[submodule "antbyte_examples"]
+	path = antbyte_examples
+	url = https://github.com/cxrvus/antbyte_examples
