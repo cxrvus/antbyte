@@ -1,9 +1,0 @@
-set start = top_left;
-set tpf = 00;
-
-ant main {
-	DX = and(R2, R1, R0);
-	CC = 1;
-	(C1, C0) = -buf(C1, C0);
-	AX = CN0;
-}

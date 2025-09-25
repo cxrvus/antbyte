@@ -1,6 +1,0 @@
-set tpf = 256;
-
-ant main {
-	DX = and(T3, T2, T1, T0);
-	(C3, C2, C1, C0) = buf(T3, T2, T1, T0);
-}

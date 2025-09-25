@@ -1,9 +1,0 @@
-fn on = (t3, t2, t1, t0) => out {
-	out = and(
-		eq(T3, t3),
-		eq(T2, t2),
-		eq(T1, t1),
-		eq(T0, t0)
-	);
-}
-
