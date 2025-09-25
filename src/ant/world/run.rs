@@ -71,6 +71,7 @@ impl World {
 		while self.tick() {
 			if self.tick_count % 0x100 == 0 {
 				clear_screen();
+				print_title_short();
 				print!("processing tick {} out of {max_ticks:0>4}", self.tick_str());
 				println!();
 			}
@@ -89,14 +90,12 @@ impl World {
 
 	fn render(&self) {
 		// pre-render
-		let title = title();
 		let world = self.color_render();
 		let frame = self.tick_str();
 
 		// print
 		clear_screen();
-		println!();
-		println!("{title}");
+		print_title();
 		println!();
 		println!("{world}\n");
 		println!();
@@ -144,16 +143,21 @@ fn clear_screen() {
 	print!("\x1B[2J\x1B[1;1H");
 }
 
-fn title() -> String {
-	r#"
+fn print_title() {
+	let title = r#"
 ░░      ░░░   ░░░  ░░        ░░       ░░░  ░░░░  ░░        ░░        ░
 ▒  ▒▒▒▒  ▒▒    ▒▒  ▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒
 ▓  ▓▓▓▓  ▓▓  ▓  ▓  ▓▓▓▓▓  ▓▓▓▓▓       ▓▓▓▓▓    ▓▓▓▓▓▓▓  ▓▓▓▓▓      ▓▓▓
 █        ██  ██    █████  █████  ████  █████  ████████  █████  ███████
 █  ████  ██  ███   █████  █████       ██████  ████████  █████        █
                                                                                                                                                       
-	"#
-	.into()
+	"#;
+
+	println!("{title}");
+}
+
+fn print_title_short() {
+	println!("<<ANTBYTE>>");
 }
 
 fn color_codes(value: u8) -> (u8, u8) {
