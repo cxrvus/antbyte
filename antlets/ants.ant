@@ -1,9 +1,4 @@
-set ticks = 16;
-
-ant main {
-	A1 = 1;
-	DIE = 1;
-}
+# set ticks = 96;
 
 fn on = (t3, t2, t1, t0) => out {
 	out = and(
@@ -14,8 +9,16 @@ fn on = (t3, t2, t1, t0) => out {
 	);
 }
 
+
+ant main {
+	A1 = on(0, 0, 0, 0);
+	A2 = on(0, 1, 0, 0);
+	DIE = on(1, 1, 1, 1);
+}
+
 ant letter_a = 2 {
 	C1 = 1;
+	C3 = 1;
 
 	D0 = or(
 		on(0, 0, 1, 1),
@@ -38,4 +41,20 @@ ant letter_a = 2 {
 	);
 
 	DIE = on(1, 0, 0, 1);
+}
+
+ant letter_n = 4 {
+	C1 = 1;
+
+	D0 = or(
+		on(0, 0, 1, 0),
+		on(0, 1, 0, 0)
+	);
+	D1 = or(
+		on(0, 0, 0, 0),
+		on(0, 0, 1, 1)
+	);
+	D2 = on(0, 0, 0, 0);
+
+	DIE = on(0, 1, 1, 0);
 }
