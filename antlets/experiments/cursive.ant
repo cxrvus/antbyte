@@ -13,5 +13,5 @@ ant main {
 
 ant clone = 2 {
 	() = langton();
-	DIE = OBS;
+	AX = CX;
 }

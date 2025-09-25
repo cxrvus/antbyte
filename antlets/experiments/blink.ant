@@ -3,22 +3,22 @@ set start = top_left;
 set border = wrap;
 
 ant main {
-	(A1, A0, DIE) = cpy(T1);
+	(A1, A0, AX) = cpy(T1);
 }
 
 ant queen = 3 {
 	A1 = -M1;
-	HALT = -T0;
+	DX = -T0;
 
 	CC = 1;
 	C0 = and(M1, -CN0);
 
 	M1 = M0;
-	M0 = OBS;
+	M0 = CX;
 }
 
 ant clone = 2 {
-	HALT = -T0;
+	DX = -T0;
 	CC = 1;
 	C0 = T0;
 }

@@ -24,7 +24,7 @@ fn reproduce = () => spawn {
 		# T0,
 		0
 	));
-	DIE = and(T7, T4);
+	AX = and(T7, T4);
 }
 
 ant clone2 = 4 {

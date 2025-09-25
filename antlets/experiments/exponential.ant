@@ -10,5 +10,5 @@ ant main {
 	(C1, D1) = cpy(R1);
 	(C2, D2) = cpy(R2);
 
-	DIE = T3;
+	AX = T3;
 }

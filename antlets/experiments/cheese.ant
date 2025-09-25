@@ -2,8 +2,8 @@ set start = top_left;
 set tpf = 00;
 
 ant main {
-	HALT = and(R2, R1, R0);
+	DX = and(R2, R1, R0);
 	CC = 1;
 	(C1, C0) = -buf(C1, C0);
-	DIE = CN0;
+	AX = CN0;
 }

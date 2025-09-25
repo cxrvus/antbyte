@@ -13,7 +13,7 @@ fn on = (t3, t2, t1, t0) => out {
 ant main {
 	A1 = on(0, 0, 0, 0);
 	A2 = on(0, 1, 0, 0);
-	DIE = on(1, 1, 1, 1);
+	AX = on(1, 1, 1, 1);
 }
 
 ant letter_a = 2 {
@@ -40,7 +40,7 @@ ant letter_a = 2 {
 		0
 	);
 
-	DIE = on(1, 0, 0, 1);
+	AX = on(1, 0, 0, 1);
 }
 
 ant letter_n = 4 {
@@ -56,5 +56,5 @@ ant letter_n = 4 {
 	);
 	D2 = on(0, 0, 0, 0);
 
-	DIE = on(0, 1, 1, 0);
+	AX = on(0, 1, 1, 0);
 }

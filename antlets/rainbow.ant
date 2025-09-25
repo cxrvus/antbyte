@@ -12,5 +12,5 @@ ant main {
 	
 	C3 = 1;
 
-	DIE = CN0;
+	AX = CN0;
 }

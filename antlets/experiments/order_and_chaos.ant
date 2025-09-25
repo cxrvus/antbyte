@@ -13,11 +13,11 @@ ant main {
 
 	A1 = -or(T3, T2, T1, T0);
 	C1 = 1;
-	DIE = and(T1, T2, M0, OBS);
-	M0 = OBS;
+	AX = and(T1, T2, M0, CX);
+	M0 = CX;
 }
 
 ant clone = 2 {
 	() = langton_keep_c1();
-	DIE = OBS;
+	AX = CX;
 }

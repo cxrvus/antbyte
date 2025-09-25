@@ -18,5 +18,5 @@ ant main {
 
 ant clone = 2 {
 	() = langton_keep_c02();
-	DIE = and(T4, T3, T2, T1, T0);
+	AX = and(T4, T3, T2, T1, T0);
 }
