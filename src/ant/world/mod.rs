@@ -124,6 +124,20 @@ impl World {
 		Ok(world)
 	}
 
+	pub fn frame_tick(&mut self) -> bool {
+		for _ in 0..self
+			.config()
+			.tpf
+			.expect("TPF must be greater than 0 to use frame_tick")
+		{
+			if !self.tick() {
+				return false;
+			}
+		}
+
+		true
+	}
+
 	pub fn tick(&mut self) -> bool {
 		self.tick_count += 1;
 

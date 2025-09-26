@@ -1,4 +1,5 @@
 use super::World;
+use crate::cli::{clear_screen, print_title, print_title_short};
 use anyhow::Result;
 use std::{
 	io::{self, Write},
@@ -78,16 +79,6 @@ impl World {
 		}
 	}
 
-	fn frame_tick(&mut self) -> bool {
-		for _ in 0..self.config().tpf.unwrap() {
-			if !self.tick() {
-				return false;
-			}
-		}
-
-		true
-	}
-
 	fn render(&self) {
 		// pre-render
 		let world = self.color_render();
@@ -103,11 +94,6 @@ impl World {
 		println!("\n\n");
 
 		io::stdout().flush().unwrap();
-	}
-
-	#[inline]
-	fn tick_str(&self) -> String {
-		format!("{:0>8}", self.tick_count())
 	}
 
 	fn color_render(&self) -> String {
@@ -136,28 +122,11 @@ impl World {
 
 		string
 	}
-}
 
-#[inline]
-fn clear_screen() {
-	print!("\x1B[2J\x1B[1;1H");
-}
-
-fn print_title() {
-	let title = r#"
-░░      ░░░   ░░░  ░░        ░░       ░░░  ░░░░  ░░        ░░        ░
-▒  ▒▒▒▒  ▒▒    ▒▒  ▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒
-▓  ▓▓▓▓  ▓▓  ▓  ▓  ▓▓▓▓▓  ▓▓▓▓▓       ▓▓▓▓▓    ▓▓▓▓▓▓▓  ▓▓▓▓▓      ▓▓▓
-█        ██  ██    █████  █████  ████  █████  ████████  █████  ███████
-█  ████  ██  ███   █████  █████       ██████  ████████  █████        █
-                                                                                                                                                      
-	"#;
-
-	println!("{title}");
-}
-
-fn print_title_short() {
-	println!("<<ANTBYTE>>");
+	#[inline]
+	fn tick_str(&self) -> String {
+		format!("{:0>8}", self.tick_count())
+	}
 }
 
 fn color_codes(value: u8) -> (u8, u8) {

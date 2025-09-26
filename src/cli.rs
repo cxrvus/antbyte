@@ -72,3 +72,25 @@ fn set_config(config: &mut WorldConfig, args: &Args) {
 	if args.looping { config.looping = true; }
 	if args.ticks.is_some() { config.ticks = args.ticks; }
 }
+
+#[inline]
+pub fn clear_screen() {
+	print!("\x1B[2J\x1B[1;1H");
+}
+
+pub fn print_title() {
+	let title = r#"
+░░      ░░░   ░░░  ░░        ░░       ░░░  ░░░░  ░░        ░░        ░
+▒  ▒▒▒▒  ▒▒    ▒▒  ▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒
+▓  ▓▓▓▓  ▓▓  ▓  ▓  ▓▓▓▓▓  ▓▓▓▓▓       ▓▓▓▓▓    ▓▓▓▓▓▓▓  ▓▓▓▓▓      ▓▓▓
+█        ██  ██    █████  █████  ████  █████  ████████  █████  ███████
+█  ████  ██  ███   █████  █████       ██████  ████████  █████        █
+                                                                                                                                                      
+	"#;
+
+	println!("{title}");
+}
+
+pub fn print_title_short() {
+	println!("<<ANTBYTE>>");
+}
