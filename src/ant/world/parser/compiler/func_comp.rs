@@ -1,4 +1,4 @@
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
 
 use super::CompFunc;
 
@@ -11,7 +11,9 @@ pub(super) fn compile_funcs(funcs: Vec<Func>, log_cfg: &LogConfig) -> Result<Vec
 	let mut comp_funcs = vec![];
 
 	for func in funcs.into_iter() {
-		let comp_func = func.compile(&comp_funcs)?;
+		let comp_func = func
+			.compile(&comp_funcs)
+			.with_context(|| format!("in function '{}'!", func.signature.name))?;
 
 		if log_cfg.all {
 			println!("{comp_func}");

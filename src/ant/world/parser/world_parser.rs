@@ -1,5 +1,5 @@
 use super::{Keyword, ParsedWorld, Parser, Token};
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 impl Parser {
 	pub(super) fn parse_world(&mut self) -> Result<ParsedWorld> {
@@ -31,11 +31,17 @@ impl Parser {
 					world.settings.push((key, value));
 				}
 				Fn => {
-					let func = self.parse_func()?;
+					let name = self.next_ident()?;
+					let func = self
+						.parse_func(name.clone())
+						.with_context(|| format!("in function '{name}'!"))?;
 					world.funcs.push(func);
 				}
 				Ant => {
-					let (func, ant) = self.parse_ant()?;
+					let name = self.next_ident()?;
+					let (func, ant) = self
+						.parse_ant(name.clone())
+						.with_context(|| format!("in ant '{name}'!"))?;
 					world.funcs.push(func);
 					world.ants.push(ant);
 				}
