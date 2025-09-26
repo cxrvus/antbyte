@@ -169,6 +169,10 @@ impl World {
 		&self.properties.config
 	}
 
+	pub fn config_mut(&mut self) -> &mut WorldConfig {
+		&mut self.properties.config
+	}
+
 	pub fn ants(&self) -> &Vec<Ant> {
 		&self.ants
 	}

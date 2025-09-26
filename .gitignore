@@ -21,6 +21,7 @@ target/
 #.idea/
 
 /tmp
+/export
 
 # the original stdlib is contained in stdlib.rs
 std.ant

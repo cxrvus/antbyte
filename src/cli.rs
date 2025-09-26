@@ -32,6 +32,10 @@ struct Args {
 	#[arg(short, long)]
 	ticks: Option<u32>,
 
+	/// Export as GIF
+	#[arg(long)]
+	gif: Option<Option<PathBuf>>,
+
 	/// Log debug info instead of running the simulation
 	#[arg(short, long)]
 	debug: bool,
@@ -45,33 +49,43 @@ pub fn run() -> Result<()> {
 	let args = Args::parse();
 
 	let log_config = LogConfig { all: args.debug };
-	let mut properties = compile_world_file(&args.path, &log_config)?;
+	let properties = compile_world_file(&args.path, &log_config)?;
 
 	if args.preview {
 		let WorldConfig { width, height, .. } = properties.config;
 		let preview_str = "\\/\n".repeat(height) + "|_" + &">>".repeat(width) + "\n\n";
 		print!("{preview_str}");
-		Ok(())
-	} else if !args.debug {
-		set_config(&mut properties.config, &args);
-
+	} else if args.debug {
+		// logging happens on compilation
+	} else {
 		let mut world = World::new(properties).context("world error!")?;
 
-		world.run().context("world error!")?;
-
-		Ok(())
-	} else {
-		Ok(())
+		if let Some(opt_path) = args.gif {
+			export_gif(world, opt_path).context("GIF export error!")?;
+		} else {
+			set_config(&mut world, &args);
+			world.run().context("world error!")?;
+		}
 	}
+
+	Ok(())
 }
 
 #[rustfmt::skip]
-fn set_config(config: &mut WorldConfig, args: &Args) {
+fn set_config(world: &mut World, args: &Args) {
+	let config = world.config_mut();
 	if args.stepped { config.fps = None; }
 	if args.instant { config.tpf = None; }
 	if args.looping { config.looping = true; }
 	if args.ticks.is_some() { config.ticks = args.ticks; }
 }
+
+#[rustfmt::skip]
+fn export_gif(world: World, opt_path: Option<PathBuf>) -> Result<()> {
+	#[cfg(feature = "gif")] { crate::gif_export::export(world, opt_path) }
+	#[cfg(not(feature = "gif"))] { _ = (world, opt_path); anyhow::bail!("need to enable the `gif` feature-flag in the antbyte crate"); }
+}
+
 
 #[inline]
 pub fn clear_screen() {
