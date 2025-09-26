@@ -1,80 +1,39 @@
-use std::path::PathBuf;
-
-use antbyte::ant::{
-	compiler::{LogConfig, compile_world_file},
-	world::{World, WorldConfig},
-};
-
-use anyhow::{Context, Ok, Result};
-use clap::Parser;
+use anyhow::Result;
 
 fn main() {
-	setup().unwrap_or_else(|e| {
-		// need to conventionally provide all anyhow context messages ending in a '!'
+	run().unwrap_or_else(|e| {
+		// need to conventionally make all anyhow context messages end in a '!'
 		eprintln!("{}", format!("<!> {e:#}").replace("!: ", ":\n    "));
 		std::process::exit(1);
 	});
 }
 
-#[derive(Parser, Debug, Default)]
-#[command(version, about, long_about = None)]
-struct Args {
-	/// Path to the .ant file to execute
-	path: PathBuf,
+pub fn run() -> Result<()> {
+	#[cfg(feature = "clap")]
+	{
+		antbyte::cli::run()
+	}
 
-	/// Step through the simulation, waiting for input after each frame (FPS = 0)
-	#[arg(short, long)]
-	stepped: bool,
+	#[cfg(not(feature = "clap"))]
+	{
+		use antbyte::ant::{
+			compiler::{LogConfig, compile_world_file},
+			world::World,
+		};
 
-	/// Looping simulation
-	#[arg(short, long)]
-	looping: bool,
+		use anyhow::Context;
 
-	/// Instant simulation
-	#[arg(short, long)]
-	instant: bool,
+		let args: Vec<String> = std::env::args().collect();
 
-	/// Set tick limit
-	#[arg(short, long)]
-	ticks: Option<u32>,
+		if args.len() < 2 {
+			anyhow::bail!("Usage: {} <PATH>", args[0]);
+		}
 
-	/// Log debug info instead of running the simulation
-	#[arg(short, long)]
-	debug: bool,
+		let path = std::path::PathBuf::from(&args[1]);
 
-	/// Show a preview of the dimensions of the antlet
-	#[arg(short, long)]
-	preview: bool,
-}
-
-fn setup() -> Result<()> {
-	let args = Args::parse();
-
-	let log_config = LogConfig { all: args.debug };
-	let mut properties = compile_world_file(&args.path, &log_config)?;
-
-	if args.preview {
-		let WorldConfig { width, height, .. } = properties.config;
-		let preview_str = "\\/\n".repeat(height) + "|_" + &">>".repeat(width) + "\n\n";
-		print!("{preview_str}");
-		Ok(())
-	} else if !args.debug {
-		set_config(&mut properties.config, &args);
-
+		let properties = compile_world_file(&path, &LogConfig::default())?;
 		let mut world = World::new(properties).context("world error!")?;
 
-		world.run().context("world error!")?;
-
-		Ok(())
-	} else {
-		Ok(())
+		world.run().context("world error!")
 	}
-}
-
-#[rustfmt::skip]
-fn set_config(config: &mut WorldConfig, args: &Args) {
-	if args.stepped { config.fps = None; }
-	if args.instant { config.tpf = None; }
-	if args.looping { config.looping = true; }
-	if args.ticks.is_some() { config.ticks = args.ticks; }
 }
