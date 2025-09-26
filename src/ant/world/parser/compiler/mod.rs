@@ -125,7 +125,7 @@ pub fn compile_world(
 	let mut parsed_funcs = vec![];
 
 	if !parsed_world.no_std {
-		let std_funcs = Parser::new(STDLIB)?.parse_world()?.funcs;
+		let std_funcs = Parser::new(STDLIB)?.parse_world().unwrap().funcs;
 		parsed_funcs.extend(std_funcs);
 	}
 
