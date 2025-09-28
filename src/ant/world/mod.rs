@@ -18,10 +18,15 @@ use crate::{
 
 #[derive(Debug, Clone)]
 pub struct WorldConfig {
+	/// width in pixels
 	pub width: usize,
+	/// height in pixels
 	pub height: usize,
+	/// rendered frames per second
 	pub fps: Option<u32>,
+	/// simulated ticks per frame (defaults to 1)
 	pub speed: Option<u32>,
+	/// simulation tick limit
 	pub ticks: Option<u32>,
 	pub looping: bool,
 	pub border_mode: BorderMode,
