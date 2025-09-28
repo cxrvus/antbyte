@@ -25,7 +25,7 @@ impl World {
 
 		let max_dim = (*width).max(*height);
 		#[rustfmt::skip]
-	let scale = if max_dim <= MAX_PX { MAX_PX / max_dim } else { 1 }.max(1);
+		let scale = if max_dim <= MAX_PX { MAX_PX / max_dim } else { 1 }.max(1);
 		let scaled_width = (width * scale) as u16;
 		let scaled_height = (height * scale) as u16;
 
@@ -64,13 +64,16 @@ impl World {
 		let mut scaled_pixels = Vec::with_capacity(scaled_width * scaled_height);
 
 		for y in 0..*height {
-			for _ in 0..scale {
-				for x in 0..*width {
-					let pixel = self.cells.values[y * width + x];
-					for _ in 0..scale {
-						scaled_pixels.push(pixel);
-					}
+			let mut scaled_row = Vec::with_capacity(scaled_width);
+			for x in 0..*width {
+				let pixel = self.cells.values[y * width + x];
+				for _ in 0..scale {
+					scaled_row.push(pixel);
 				}
+			}
+
+			for _ in 0..scale {
+				scaled_pixels.extend_from_slice(&scaled_row);
 			}
 		}
 
