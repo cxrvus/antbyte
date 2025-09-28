@@ -39,13 +39,13 @@ impl WorldConfig {
 					invalid_type(&value, "number (FPS)", &key)
 				}
 			}
-			"tpf" => {
+			"speed" => {
 				if let Token::Number(value) = value {
-					self.tpf = non_zero(value, Some(0x100));
+					self.speed = non_zero(value, Some(0x100));
 
 					Ok(())
 				} else {
-					invalid_type(&value, "number (TPF / ticks per frame)", &key)
+					invalid_type(&value, "number (speed / ticks per frame)", &key)
 				}
 			}
 			"ticks" => {

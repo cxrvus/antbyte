@@ -75,7 +75,7 @@ pub fn run() -> Result<()> {
 fn set_config(world: &mut World, args: &Args) {
 	let config = world.config_mut();
 	if args.stepped { config.fps = None; }
-	if args.instant { config.tpf = None; }
+	if args.instant { config.speed = None; }
 	if args.looping { config.looping = true; }
 	if args.ticks.is_some() { config.ticks = args.ticks; }
 }

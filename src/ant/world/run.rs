@@ -24,7 +24,7 @@ impl World {
 	}
 
 	pub fn run_once(&mut self) {
-		if self.config().tpf.is_some() {
+		if self.config().speed.is_some() {
 			self.render();
 
 			let mut last_frame = Instant::now();

@@ -21,7 +21,7 @@ pub struct WorldConfig {
 	pub width: usize,
 	pub height: usize,
 	pub fps: Option<u32>,
-	pub tpf: Option<u32>,
+	pub speed: Option<u32>,
 	pub ticks: Option<u32>,
 	pub looping: bool,
 	pub border_mode: BorderMode,
@@ -37,7 +37,7 @@ impl Default for WorldConfig {
 			width: 32,
 			height: 32,
 			fps: Some(60),
-			tpf: Some(1),
+			speed: Some(1),
 			ticks: None,
 			looping: false,
 			border_mode: BorderMode::Wrap,
@@ -128,8 +128,8 @@ impl World {
 	pub fn frame_tick(&mut self) -> bool {
 		for _ in 0..self
 			.config()
-			.tpf
-			.expect("TPF must be greater than 0 to use frame_tick")
+			.speed
+			.expect("speed must be greater than 0 to use frame_tick")
 		{
 			if !self.tick() {
 				return false;
