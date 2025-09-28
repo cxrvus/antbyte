@@ -82,10 +82,9 @@ fn set_config(world: &mut World, args: &Args) {
 
 #[rustfmt::skip]
 fn export_gif(world: World, opt_path: Option<PathBuf>) -> Result<()> {
-	#[cfg(feature = "gif")] { crate::gif_export::export(world, opt_path) }
+	#[cfg(feature = "gif")] { world.gif_export(opt_path) }
 	#[cfg(not(feature = "gif"))] { _ = (world, opt_path); anyhow::bail!("need to enable the `gif` feature-flag in the antbyte crate"); }
 }
-
 
 #[inline]
 pub fn clear_screen() {
