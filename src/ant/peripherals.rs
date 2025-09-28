@@ -55,15 +55,15 @@ impl Peripheral {
 
 		#[rustfmt::skip]
 		let props = match self {
+			Memory 		=> Props { size: BYTE, io_type: None, },
 			Cell 		=> Props { size: CELL, io_type: None, },
-			CellClear 	=> Props { size: BIT, io_type: Some(Output), },
 			CellNext 	=> Props { size: CELL, io_type: Some(Input), },
 			Time 		=> Props { size: BYTE, io_type: Some(Input), },
-			Memory 		=> Props { size: BYTE, io_type: None, },
 			Random 		=> Props { size: BYTE, io_type: Some(Input), },
 			Obstacle 	=> Props { size: BIT, io_type: Some(Input), },
-			Direction 	=> Props { size: DIR, io_type: None, },
-			Halted 		=> Props { size: BIT, io_type: None, },
+			CellClear 	=> Props { size: BIT, io_type: Some(Output), },
+			Direction 	=> Props { size: DIR, io_type: Some(Output), },
+			Halted 		=> Props { size: BIT, io_type: Some(Output), },
 			SpawnAnt 	=> Props { size: ANT_ID, io_type: Some(Output), },
 			Kill 		=> Props { size: BIT, io_type: Some(Output), },
 			Die 		=> Props { size: BIT, io_type: Some(Output), },
