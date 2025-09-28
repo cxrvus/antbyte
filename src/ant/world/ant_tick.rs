@@ -98,7 +98,7 @@ impl World {
 						self.kill_at(&pos);
 					}
 				}
-				(Die, 1) => self.kill(&mut ant),
+				(Die, 1) => self.die(&mut ant),
 				_ => {}
 			};
 		}
@@ -171,7 +171,7 @@ impl World {
 				ant.pos = new_pos;
 			}
 		} else if let BorderMode::Despawn = self.config().border_mode {
-			self.kill(ant);
+			self.die(ant);
 		}
 	}
 
@@ -214,12 +214,13 @@ impl World {
 
 	fn kill_at(&mut self, pos: &Vec2u) {
 		if let Some(index) = self.get_ant_index(pos) {
-			let mut ant = self.ants[index];
-			self.kill(&mut ant);
+			let ant_pos = self.ants[index].pos;
+			self.ants[index].status = AntStatus::Dead;
+			self.occupy(&ant_pos, false);
 		}
 	}
 
-	fn kill(&mut self, target: &mut Ant) {
+	fn die(&mut self, target: &mut Ant) {
 		target.status = AntStatus::Dead;
 		self.occupy(&target.pos, false);
 	}
