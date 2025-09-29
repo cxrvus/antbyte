@@ -4,24 +4,32 @@ use crate::{
 	ant::world::{World, WorldConfig},
 	cli::{clear_screen, print_title_short},
 };
-use anyhow::{Result, bail};
+use anyhow::Result;
 use gif::{Encoder, Frame, Repeat};
-use std::{fs::File, path::PathBuf};
+use std::{
+	fs::File,
+	path::{Path, PathBuf},
+};
 
-const MAX_FRAMES: u32 = 0x100;
+const MAX_FRAMES: u32 = 0x400;
 const MAX_PX: usize = 0x200;
 
 impl World {
-	pub fn gif_export(self, opt_path: Option<PathBuf>) -> Result<()> {
-		let path = match opt_path {
+	pub fn gif_export(self, source: &Path, target: Option<PathBuf>) -> Result<()> {
+		let path = match target {
 			Some(path) => path,
 			None => {
-				// todo: add default path generation
-				bail!("please provide a target path for the exported GIF")
+				let mut path = source.to_path_buf();
+				let mut file_name = path.file_name().unwrap().to_string_lossy().to_string();
+				file_name.push_str(".gif");
+				path.set_file_name(file_name);
+				dbg!(path)
 			}
 		};
 
-		let WorldConfig { width, height, .. } = self.config();
+		let WorldConfig {
+			width, height, fps, ..
+		} = self.config();
 
 		let max_dim = (*width).max(*height);
 		#[rustfmt::skip]
@@ -29,17 +37,21 @@ impl World {
 		let scaled_width = (width * scale) as u16;
 		let scaled_height = (height * scale) as u16;
 
+		let fps = fps.unwrap_or(30).clamp(1, 30);
+		let delay = (100.0 / fps as f32).round() as u16;
+
 		let mut image = File::create(&path)?;
 		let mut encoder = Encoder::new(&mut image, scaled_width, scaled_height, &PALETTE)?;
-		encoder.set_repeat(Repeat::Infinite)?; // idea: set repeat corresponding to loop setting
+		encoder.set_repeat(Repeat::Infinite)?;
 
 		let mut world = self;
 
+		// todo: implement looping
 		for i in 0..MAX_FRAMES {
 			clear_screen();
 			print_title_short();
 			println!("rendering frame {i} out of {MAX_FRAMES}...");
-			world.gif_render(&mut encoder, scale);
+			world.gif_render(&mut encoder, scale, delay);
 
 			if !world.frame_tick() {
 				break;
@@ -47,16 +59,14 @@ impl World {
 		}
 
 		println!("rendering final frame...");
-		world.gif_render(&mut encoder, scale);
+		world.gif_render(&mut encoder, scale, delay);
 		println!("done!\nGIF exported as '{}'", path.to_string_lossy());
 
 		Ok(())
 	}
 
-	fn gif_render(&mut self, encoder: &mut Encoder<&mut File>, scale: usize) {
-		let WorldConfig {
-			width, height, fps, ..
-		} = self.config();
+	fn gif_render(&mut self, encoder: &mut Encoder<&mut File>, scale: usize, delay: u16) {
+		let WorldConfig { width, height, .. } = self.config();
 
 		let scaled_width = width * scale;
 		let scaled_height = height * scale;
@@ -76,9 +86,6 @@ impl World {
 				scaled_pixels.extend_from_slice(&scaled_row);
 			}
 		}
-
-		let fps = fps.unwrap_or(30).clamp(1, 30);
-		let delay = (100.0 / fps as f32).round() as u16;
 
 		let frame = Frame {
 			width: scaled_width as u16,

@@ -2,7 +2,7 @@
 
 use crate::ant::world::parser::token::Token;
 use clap::{self, Parser as ClapParser};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::ant::{
 	compiler::{LogConfig, compile_world_file},
@@ -86,11 +86,15 @@ pub fn run_once(args: Args) -> Result<()> {
 		// logging happens on compilation
 	} else {
 		let mut world = World::new(properties).context("world error!")?;
+		set_config(&mut world, &args).context("config-arg error!")?;
 
-		if let Some(opt_path) = args.gif {
-			export_gif(world, opt_path).context("GIF export error!")?;
+		if let Some(target) = args.gif {
+			if world.config().speed.is_none() {
+				world.config_mut().speed = Some(1);
+			}
+
+			export_gif(world, &args.path, target).context("GIF export error!")?;
 		} else {
-			set_config(&mut world, &args).context("config-arg error!")?;
 			world.run().context("world error!")?;
 		}
 	}
@@ -121,7 +125,7 @@ fn set_config(world: &mut World, args: &Args) -> Result<()> {
 }
 
 #[rustfmt::skip]
-fn export_gif(world: World, opt_path: Option<PathBuf>) -> Result<()> {
-	#[cfg(feature = "extras")] { world.gif_export(opt_path) }
-	#[cfg(not(feature = "extras"))] { _ = (world, opt_path); anyhow::bail!("need to enable the `extras` feature-flag in the antbyte crate"); }
+fn export_gif(world: World, source: &Path, target: Option<PathBuf>) -> Result<()> {
+	#[cfg(feature = "extras")] { world.gif_export(source, target) }
+	#[cfg(not(feature = "extras"))] { _ = (world, source, target); anyhow::bail!("need to enable the `extras` feature-flag in the antbyte crate"); }
 }
