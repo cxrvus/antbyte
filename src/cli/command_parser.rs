@@ -9,7 +9,7 @@ use crate::ant::{
 	world::{World, WorldConfig, parser::Parser},
 };
 
-use anyhow::{Context, Ok, Result};
+use anyhow::{Context, Ok, Result, bail};
 
 #[derive(ClapParser, Debug, Default, Clone)]
 #[command(version, about, long_about = None)]
@@ -61,8 +61,13 @@ pub fn run() -> Result<()> {
 	if args.watch {
 		#[cfg(feature = "extras")]
 		{
+			if args.stepped {
+				bail!("cannot run in watch-mode with --stepped enabled");
+			}
+
 			crate::cli::watch::watch_file(&mut args).context("watch-mode error!")?;
 		}
+
 		#[cfg(not(feature = "extras"))]
 		{
 			anyhow::bail!("watch-mode requires the `extras` feature flag to be enabled");
@@ -89,10 +94,6 @@ pub fn run_once(args: Args) -> Result<()> {
 		set_config(&mut world, &args).context("config-arg error!")?;
 
 		if let Some(target) = args.gif {
-			if world.config().speed.is_none() {
-				world.config_mut().speed = Some(1);
-			}
-
 			export_gif(world, &args.path, target).context("GIF export error!")?;
 		} else {
 			world.run().context("world error!")?;
@@ -109,6 +110,10 @@ fn set_config(world: &mut World, args: &Args) -> Result<()> {
 	if args.instant { config.speed = None; }
 	if args.looping { config.looping = true; }
 	if args.ticks.is_some() { config.ticks = args.ticks; }
+
+	if args.gif.is_some() && (config.speed.is_none() | config.fps.is_none()) {
+		bail!("need a speed and an FPS of at least 1 to export as GIF");
+	}
 
 	if let Some(cfg) = &args.cfg {
 		let cfg = if cfg.trim().ends_with(';') { cfg } else { &format!("{cfg};") };
