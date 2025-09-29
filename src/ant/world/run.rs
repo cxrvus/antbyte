@@ -16,6 +16,13 @@ impl World {
 			loop {
 				let mut world = World::new(properties.clone())?;
 				world.run_once();
+
+				#[cfg(feature = "extras")]
+				{
+					if crate::cli::interrupt::get_interrupt() {
+						return Ok(());
+					}
+				}
 			}
 		} else {
 			self.run_once();
@@ -23,7 +30,7 @@ impl World {
 		}
 	}
 
-	pub fn run_once(&mut self) {
+	fn run_once(&mut self) {
 		if self.config().speed.is_some() {
 			self.render();
 

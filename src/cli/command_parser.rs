@@ -11,11 +11,11 @@ use crate::ant::{
 
 use anyhow::{Context, Ok, Result};
 
-#[derive(ClapParser, Debug, Default)]
+#[derive(ClapParser, Debug, Default, Clone)]
 #[command(version, about, long_about = None)]
-struct Args {
+pub struct Args {
 	/// Path to the .ant file to execute
-	path: PathBuf,
+	pub path: PathBuf,
 
 	/// Step through the simulation, waiting for input after each frame (FPS = 0)
 	#[arg(short = 'S', long)]
@@ -37,6 +37,10 @@ struct Args {
 	#[arg(short, long)]
 	cfg: Option<String>,
 
+	/// watch-mode, combine with -d / --debug for dry-runs
+	#[arg(short, long)]
+	pub watch: bool,
+
 	// todo: turn these into sub-commands, since the config args are ignored anyway
 	/// Export as GIF
 	#[arg(long)]
@@ -52,8 +56,25 @@ struct Args {
 }
 
 pub fn run() -> Result<()> {
-	let args = Args::parse();
+	let mut args = Args::parse();
 
+	if args.watch {
+		#[cfg(feature = "extras")]
+		{
+			crate::cli::watch::watch_file(&mut args).context("watch-mode error!")?;
+		}
+		#[cfg(not(feature = "extras"))]
+		{
+			anyhow::bail!("watch-mode requires the `extras` feature flag to be enabled");
+		}
+	} else {
+		run_once(args)?;
+	}
+
+	Ok(())
+}
+
+pub fn run_once(args: Args) -> Result<()> {
 	let log_config = LogConfig { all: args.debug };
 	let properties = compile_world_file(&args.path, &log_config)?;
 

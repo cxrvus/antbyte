@@ -1,4 +1,6 @@
 pub mod command_parser;
+pub mod interrupt;
+mod watch;
 
 #[inline]
 pub fn clear_screen() {

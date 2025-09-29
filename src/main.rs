@@ -2,6 +2,11 @@ use antbyte::cli::print_error;
 use anyhow::Result;
 
 fn main() {
+	#[cfg(feature = "extras")]
+	{
+		antbyte::cli::interrupt::disable_interrupt();
+	}
+
 	run().unwrap_or_else(|e| {
 		print_error(e);
 		std::process::exit(1);
