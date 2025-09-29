@@ -1,4 +1,4 @@
-#![cfg(feature = "gif")]
+#![cfg(feature = "extras")]
 
 use crate::{
 	ant::world::{World, WorldConfig},
@@ -48,7 +48,7 @@ impl World {
 
 		println!("rendering final frame...");
 		world.gif_render(&mut encoder, scale);
-		println!("done!\nGif exported to {}", path.to_string_lossy());
+		println!("done!\nGIF exported as '{}'", path.to_string_lossy());
 
 		Ok(())
 	}

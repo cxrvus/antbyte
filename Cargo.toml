@@ -11,7 +11,7 @@ clap = { version = "*", features = ["derive"], optional = true }
 gif = { version = "*", optional = true }
 
 [features]
-default = ["clap", "gif"]
+default = ["clap", "extras"]
 # default = ["clap"]
 clap = ["dep:clap"]
-gif = ["dep:gif"]
+extras = ["dep:gif"]
