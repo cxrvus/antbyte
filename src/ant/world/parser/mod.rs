@@ -1,8 +1,7 @@
 pub mod compiler;
-
 mod expression_parser;
 mod func_parser;
-mod token;
+pub mod token;
 mod world_parser;
 
 use std::fmt::Display;
@@ -12,7 +11,7 @@ use anyhow::{Error, Ok, Result, anyhow};
 
 #[rustfmt::skip]
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum Keyword { Set, Fn, Ant, Use, NoStd }
+pub enum Keyword { Set, Fn, Ant, Use, NoStd }
 
 impl Keyword {
 	pub(super) fn from_ident(ident: &str) -> Option<Self> {
@@ -145,28 +144,28 @@ struct AntFunc {
 }
 
 #[derive(Default)]
-struct Parser {
+pub struct Parser {
 	tokens: Vec<Token>,
 }
 
 impl Parser {
-	fn new(code: &str) -> Result<Self> {
+	pub fn new(code: &str) -> Result<Self> {
 		let mut tokens = Token::tokenize(code)?;
 		tokens.reverse();
 		Ok(Self { tokens })
 	}
 
 	#[inline]
-	fn next_token(&mut self) -> Token {
+	pub fn next_token(&mut self) -> Token {
 		self.tokens.pop().unwrap_or_default()
 	}
 
 	#[inline]
-	fn unexpected(unexpected: Token, expected: &str) -> Error {
+	pub fn unexpected(unexpected: Token, expected: &str) -> Error {
 		anyhow!("unexpected token: {unexpected:?}, expected {expected}")
 	}
 
-	fn expect(actual: Token, expected: Token) -> Result<()> {
+	pub fn expect(actual: Token, expected: Token) -> Result<()> {
 		if actual != expected {
 			Err(Self::unexpected(actual, format!("{expected:?}").as_str()))
 		} else {
@@ -175,11 +174,11 @@ impl Parser {
 	}
 
 	#[inline]
-	fn expect_next(&mut self, expected: Token) -> Result<()> {
+	pub fn expect_next(&mut self, expected: Token) -> Result<()> {
 		Self::expect(self.next_token(), expected)
 	}
 
-	fn assume_next(&mut self, expected: Token) -> bool {
+	pub fn assume_next(&mut self, expected: Token) -> bool {
 		let actual = self.next_token();
 		if actual == expected {
 			true
@@ -189,7 +188,7 @@ impl Parser {
 		}
 	}
 
-	fn next_ident(&mut self) -> Result<String> {
+	pub fn next_ident(&mut self) -> Result<String> {
 		let token = self.next_token();
 
 		if let Token::Ident(ident) = token {
@@ -199,7 +198,7 @@ impl Parser {
 		}
 	}
 
-	fn next_ident_list(&mut self) -> Result<Vec<String>> {
+	pub fn next_ident_list(&mut self) -> Result<Vec<String>> {
 		self.next_tuple(Self::next_ident)
 	}
 
@@ -216,7 +215,7 @@ impl Parser {
 		self.next_tuple(Self::next_assignee)
 	}
 
-	fn next_tuple<T>(&mut self, get_item: fn(&mut Self) -> Result<T>) -> Result<Vec<T>> {
+	pub fn next_tuple<T>(&mut self, get_item: fn(&mut Self) -> Result<T>) -> Result<Vec<T>> {
 		let items = if self.assume_next(Token::ParenthesisLeft) {
 			if self.assume_next(Token::ParenthesisRight) {
 				vec![]
