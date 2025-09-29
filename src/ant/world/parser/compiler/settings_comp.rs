@@ -6,7 +6,7 @@ use crate::ant::{
 };
 
 impl WorldConfig {
-	pub(super) fn set_setting(&mut self, key: String, value: Token) -> Result<()> {
+	pub fn set_setting(&mut self, key: String, value: Token) -> Result<()> {
 		// todo: more elegant match block
 		match key.as_str() {
 			key @ ("height" | "width" | "size") => {
