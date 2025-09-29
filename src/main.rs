@@ -11,7 +11,7 @@ fn main() {
 pub fn run() -> Result<()> {
 	#[cfg(feature = "clap")]
 	{
-		antbyte::cli::run()
+		antbyte::cli::command_parser::run()
 	}
 
 	#[cfg(not(feature = "clap"))]
