@@ -55,9 +55,9 @@ impl Parser {
 		Ok(world)
 	}
 
-	pub(super) fn parse_setting(&mut self) -> Result<(String, Token)> {
+	pub fn parse_setting(&mut self) -> Result<(String, Token)> {
 		let key = self.next_ident()?;
-		self.assume_next(Token::Assign);
+		self.expect_next(Token::Assign)?;
 		let value = self.next_token();
 		self.expect_next(Token::Semicolon)?;
 
