@@ -17,7 +17,7 @@ pub mod command_parser {
 		path: PathBuf,
 
 		/// Step through the simulation, waiting for input after each frame (FPS = 0)
-		#[arg(short, long)]
+		#[arg(short = 'S', long)]
 		stepped: bool,
 
 		/// Looping simulation
