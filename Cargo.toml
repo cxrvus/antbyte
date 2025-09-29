@@ -9,9 +9,10 @@ rand = "*"
 regex = "*"
 clap = { version = "*", features = ["derive"], optional = true }
 gif = { version = "*", optional = true }
+notify = { version = "*", optional = true }
 
 [features]
 default = ["clap", "extras"]
 # default = ["clap"]
 clap = ["dep:clap"]
-extras = ["dep:gif"]
+extras = ["dep:gif", "notify"]
