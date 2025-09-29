@@ -5,6 +5,9 @@ use crate::ant::{
 	world::{WorldConfig, parser::token::Token},
 };
 
+const FPS_CAP: u32 = 60;
+const SPEED_CAP: u32 = 0x2000;
+
 impl WorldConfig {
 	pub fn set_setting(&mut self, key: String, value: Token) -> Result<()> {
 		// todo: more elegant match block
@@ -32,7 +35,7 @@ impl WorldConfig {
 			}
 			"fps" => {
 				if let Token::Number(value) = value {
-					self.fps = non_zero(value, Some(60));
+					self.fps = non_zero(value, Some(FPS_CAP));
 
 					Ok(())
 				} else {
@@ -41,7 +44,7 @@ impl WorldConfig {
 			}
 			"speed" => {
 				if let Token::Number(value) = value {
-					self.speed = non_zero(value, Some(0x100));
+					self.speed = non_zero(value, Some(SPEED_CAP));
 
 					Ok(())
 				} else {
