@@ -1,9 +1,9 @@
+use antbyte::cli::print_error;
 use anyhow::Result;
 
 fn main() {
 	run().unwrap_or_else(|e| {
-		// need to conventionally make all anyhow context messages end in a '!'
-		eprintln!("{}", format!("<!> {e:#}").replace("!: ", ":\n    "));
+		print_error(e);
 		std::process::exit(1);
 	});
 }

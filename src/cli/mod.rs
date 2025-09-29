@@ -18,6 +18,13 @@ pub fn print_title() {
 	println!("{title}");
 }
 
+#[inline]
 pub fn print_title_short() {
 	println!("<<ANTBYTE>>");
+}
+
+#[inline]
+pub fn print_error(e: anyhow::Error) {
+	// need to conventionally make all anyhow context messages end in a '!'
+	eprintln!("{}", format!("<!> {e:#}").replace("!: ", ":\n    "));
 }
