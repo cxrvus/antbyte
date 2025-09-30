@@ -1,6 +1,6 @@
 #![cfg(feature = "extras")]
 
-use crate::cli::interrupt;
+use crate::cli::{interrupt, sleep};
 
 use super::{
 	command_parser::{Args, run_once},
@@ -57,7 +57,7 @@ pub fn watch_file(args: &mut Args) -> Result<()> {
 					pending_change = false;
 
 					interrupt::enable_interrupt();
-					std::thread::sleep(Duration::from_millis(200));
+					sleep(200);
 					interrupt::disable_interrupt();
 
 					let _handle = std::thread::spawn({

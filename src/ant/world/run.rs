@@ -1,10 +1,9 @@
 use super::World;
-use crate::cli::{clear_screen, print_title, print_title_short};
+use crate::cli::{clear_screen, print_title, print_title_short, sleep};
 use anyhow::Result;
 use std::{
 	io::{self, Write},
-	thread,
-	time::{Duration, Instant},
+	time::Instant,
 };
 
 const MAX_TICKS: u32 = 1 << 16;
@@ -49,7 +48,7 @@ impl World {
 					if elapsed < frame_ms {
 						// add a small buffer to prevent flickering
 						let sleep_ms = (frame_ms - elapsed).max(8);
-						thread::sleep(Duration::from_millis(sleep_ms as u64));
+						sleep(sleep_ms);
 					}
 					last_frame = Instant::now();
 				} else {

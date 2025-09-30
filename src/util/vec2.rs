@@ -1,9 +1,3 @@
-use std::{thread, time::Duration};
-
-pub fn sleep(secs: f32) {
-	thread::sleep(Duration::from_secs_f32(secs));
-}
-
 use std::ops;
 
 #[derive(Debug, Default, Copy, Clone, PartialEq)]
