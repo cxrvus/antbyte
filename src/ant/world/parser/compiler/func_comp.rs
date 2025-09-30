@@ -16,7 +16,7 @@ pub(super) fn compile_funcs(funcs: Vec<Func>, log_cfg: &LogConfig) -> Result<Vec
 			.with_context(|| format!("in function '{}'!", func.signature.name))?;
 
 		if log_cfg.all {
-			println!("{comp_func}");
+			eprintln!("{comp_func}");
 		}
 
 		comp_funcs.push(comp_func);

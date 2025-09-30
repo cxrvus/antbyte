@@ -54,7 +54,7 @@ impl World {
 					last_frame = Instant::now();
 				} else {
 					// wait for key input to continue
-					println!("<i> Press <Enter> to step to next frame");
+					eprintln!("<i> Press <Enter> to step to next frame");
 					let mut input = String::new();
 					io::stdin().read_line(&mut input).unwrap();
 				}
@@ -80,7 +80,7 @@ impl World {
 			if self.tick_count % 0x100 == 0 {
 				clear_screen();
 				print_title_short();
-				print!("processing tick {} out of {max_ticks:0>4}", self.tick_str());
+				eprint!("processing tick {} out of {max_ticks:0>4}", self.tick_str());
 				println!();
 			}
 		}

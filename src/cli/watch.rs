@@ -25,7 +25,7 @@ pub fn watch_file(args: &mut Args) -> Result<()> {
 	)?;
 
 	let file_path = args.path.canonicalize().unwrap();
-	println!("watching file: {file_path:?}");
+	eprintln!("watching file: {file_path:?}");
 	watcher.watch(&file_path, RecursiveMode::NonRecursive)?;
 	args.watch = false;
 

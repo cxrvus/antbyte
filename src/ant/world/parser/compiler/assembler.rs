@@ -21,13 +21,13 @@ impl CompFunc {
 		// dbg!((&inputs, &outputs));
 
 		if log_cfg.all {
-			println!("\n{func}");
+			eprintln!("\n{func}");
 		}
 
 		let logic = func.simulate();
 
 		if log_cfg.all {
-			println!("{logic}");
+			eprintln!("{logic}");
 		}
 
 		let behavior = Behavior {

@@ -112,11 +112,11 @@ pub fn compile_world(
 	source_path: Option<&PathBuf>,
 ) -> Result<WorldProperties> {
 	if log_cfg.all {
-		println!("\n\n========LOG========\n\n");
-		println!("{code}");
+		eprintln!("\n\n========LOG========\n\n");
+		eprintln!("{code}");
 	}
 
-	println!("Parsing...");
+	eprintln!("Parsing...");
 
 	let mut parsed_world = Parser::new(code)?.parse_world()?;
 
@@ -129,7 +129,7 @@ pub fn compile_world(
 
 	let mut imported = HashSet::new();
 
-	println!("Linking...");
+	eprintln!("Linking...");
 
 	for import in &parsed_world.imports {
 		let path = if let Some(source_path) = source_path {
@@ -151,7 +151,7 @@ pub fn compile_world(
 		properties.config.set_setting(key, value)?;
 	}
 
-	println!("Compiling...");
+	eprintln!("Compiling...");
 
 	let comp_funcs = compile_funcs(parsed_funcs, log_cfg)?;
 
@@ -162,7 +162,7 @@ pub fn compile_world(
 		target_id,
 	} in parsed_world.ants
 	{
-		println!("Assembling ant '{target_name}' @ {target_id}.");
+		eprintln!("Assembling ant '{target_name}' @ {target_id}.");
 
 		if let Some(behavior) = &behaviors[target_id as usize] {
 			bail!(
