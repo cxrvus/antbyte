@@ -64,17 +64,23 @@ impl Parser {
 
 	fn next_number(&mut self, max: Option<u32>) -> Result<Option<u32>> {
 		let token = self.next_token();
-		if let Token::Number(value) = token {
-			// ensure number is non-zero
-			Ok(match value {
-				0 => None,
-				value => Some(match max {
-					None => value,
-					Some(max) => value.clamp(1, max),
-				}),
-			})
-		} else {
-			Err(Self::unexpected(token, "number"))
+
+		match token {
+			Token::Number(value) => {
+				// ensure number is non-zero
+				Ok(match value {
+					0 => None,
+					value => Some(match max {
+						None => value,
+						Some(max) => value.clamp(1, max),
+					}),
+				})
+			}
+			Token::Bit(value) => Ok(match value {
+				true => Some(1),
+				false => None,
+			}),
+			token => Err(Self::unexpected(token, "number")),
 		}
 	}
 
