@@ -69,6 +69,10 @@ impl World {
 		}
 
 		self.render();
+
+		if let Some(ms) = self.config().sleep {
+			sleep(ms);
+		}
 	}
 
 	fn instant_run(&mut self) {

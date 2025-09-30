@@ -28,6 +28,7 @@ pub struct WorldConfig {
 	pub speed: Option<u32>,
 	/// simulation tick limit
 	pub ticks: Option<u32>,
+	pub sleep: Option<u32>,
 	pub looping: bool,
 	pub border_mode: BorderMode,
 	pub starting_pos: StartingPos,
@@ -44,6 +45,7 @@ impl Default for WorldConfig {
 			fps: Some(60),
 			speed: Some(1),
 			ticks: None,
+			sleep: Some(200),
 			looping: false,
 			border_mode: BorderMode::Wrap,
 			starting_pos: StartingPos::Center,

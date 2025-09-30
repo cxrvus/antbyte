@@ -43,6 +43,7 @@ impl Parser {
 
 			"fps" => config.fps = self.next_number(Some(FPS_CAP))?,
 			"speed" => config.speed = self.next_number(Some(SPEED_CAP))?,
+			"sleep" => config.sleep = self.next_number(Some(10000))?,
 			"ticks" => config.ticks = self.next_number(None)?,
 			"seed" => config.noise_seed = self.next_number(None)?,
 
