@@ -70,7 +70,7 @@ impl Parser {
 				0 => None,
 				value => Some(match max {
 					None => value,
-					Some(max) => value.max(max),
+					Some(max) => value.clamp(1, max),
 				}),
 			})
 		} else {
