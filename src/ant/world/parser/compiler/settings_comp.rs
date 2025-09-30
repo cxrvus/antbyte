@@ -28,9 +28,7 @@ impl Parser {
 	fn set_setting(&mut self, config: &mut WorldConfig, key: &str) -> Result<()> {
 		match key {
 			key @ ("height" | "width" | "size") => {
-				let value = self
-					.next_number(Some(SIZE_CAP))?
-					.ok_or_else(|| anyhow!("number must be greater than 0"))? as usize;
+				let value = self.next_non_zero(Some(SIZE_CAP))? as usize;
 
 				match key {
 					"width" => config.width = value,
@@ -47,6 +45,17 @@ impl Parser {
 			"speed" => config.speed = self.next_number(Some(SPEED_CAP))?,
 			"ticks" => config.ticks = self.next_number(None)?,
 			"seed" => config.noise_seed = self.next_number(None)?,
+
+			"dur" => {
+				// set tick limit: ticks = duration (seconds) * speed (ticks / frame) * fps (frames / second)
+				if let Some(fps) = config.fps
+					&& let Some(speed) = config.speed
+				{
+					let duration = self.next_non_zero(None)?;
+					let ticks = duration.saturating_mul(speed).saturating_mul(fps);
+					config.ticks = Some(ticks);
+				}
+			}
 
 			"loop" => config.looping = self.next_bit()?,
 
@@ -82,6 +91,12 @@ impl Parser {
 			}),
 			token => Err(Self::unexpected(token, "number")),
 		}
+	}
+
+	#[inline]
+	fn next_non_zero(&mut self, max: Option<u32>) -> Result<u32> {
+		self.next_number(max)?
+			.ok_or_else(|| anyhow!("number must be greater than 0"))
 	}
 
 	#[rustfmt::skip]
