@@ -1,7 +1,7 @@
 mod assembler;
 mod call;
 mod func_comp;
-mod settings_comp;
+pub mod settings_comp;
 mod statement;
 mod stdlib;
 mod test_std;

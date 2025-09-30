@@ -12,7 +12,7 @@ use std::ops::{Deref, DerefMut};
 use super::{Ant, Behavior, BorderMode, StartingPos};
 
 use crate::{
-	ant::ColorMode,
+	ant::{ColorMode, compiler::settings_comp::FPS_CAP},
 	util::{matrix::Matrix, vec2::Vec2u},
 };
 
@@ -42,7 +42,7 @@ impl Default for WorldConfig {
 		Self {
 			width: 32,
 			height: 32,
-			fps: Some(60),
+			fps: Some(FPS_CAP),
 			speed: Some(1),
 			ticks: None,
 			sleep: Some(200),

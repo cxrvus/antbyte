@@ -8,9 +8,9 @@ use crate::ant::{
 	},
 };
 
-const FPS_CAP: u32 = 60;
-const SIZE_CAP: u32 = 0x100;
-const SPEED_CAP: u32 = 0x2000;
+pub const FPS_CAP: u32 = 50;
+pub const SIZE_CAP: u32 = 0x100;
+pub const SPEED_CAP: u32 = 0x2000;
 
 impl WorldConfig {
 	pub fn set_setting(&mut self, key: String, value: Token) -> Result<()> {
