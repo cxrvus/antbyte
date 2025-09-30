@@ -14,8 +14,6 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use super::Parser;
-
 use crate::{
 	ant::{
 		Behavior,
@@ -23,8 +21,8 @@ use crate::{
 		world::{
 			WorldProperties,
 			parser::{
-				AntFunc, Expression, Func, ParamValue, Signature, SignatureSpec, func_parser::MAIN,
-				token::Token,
+				AntFunc, Expression, Func, ParamValue, Parser, Signature, SignatureSpec,
+				func_parser::MAIN, token::Token,
 			},
 		},
 	},
