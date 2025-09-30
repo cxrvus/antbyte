@@ -105,16 +105,6 @@ pub fn run_once(args: Args) -> Result<()> {
 
 #[rustfmt::skip]
 fn set_config(world: &mut World, args: &Args) -> Result<()> {
-	let config = world.config_mut();
-	if args.stepped { config.fps = None; }
-	if args.instant { config.speed = None; }
-	if args.looping { config.looping = true; }
-	if args.ticks.is_some() { config.ticks = args.ticks; }
-
-	if args.gif.is_some() && (config.speed.is_none() | config.fps.is_none()) {
-		bail!("need a speed and an FPS of at least 1 to export as GIF");
-	}
-
 	if let Some(cfg) = &args.cfg {
 		let cfg = if cfg.trim().ends_with(';') { cfg } else { &format!("{cfg};") };
 
@@ -124,6 +114,16 @@ fn set_config(world: &mut World, args: &Args) -> Result<()> {
 			let (key, value) = parser.parse_setting()?;
 			world.config_mut().set_setting(key, value)?;
 		}
+	}
+
+	let config = world.config_mut();
+	if args.stepped { config.fps = None; }
+	if args.instant { config.speed = None; }
+	if args.looping { config.looping = true; }
+	if args.ticks.is_some() { config.ticks = args.ticks; }
+
+	if args.gif.is_some() && (config.speed.is_none() | config.fps.is_none()) {
+		bail!("need a speed and an FPS of at least 1 to export as GIF");
 	}
 
 	Ok(())
