@@ -127,7 +127,7 @@ pub fn compile_world(
 		parsed_funcs.extend(std_funcs);
 	}
 
-	let mut visited = HashSet::new();
+	let mut imported = HashSet::new();
 
 	println!("Linking...");
 
@@ -139,7 +139,7 @@ pub fn compile_world(
 			bail!("cannot import other files in path-less compilations");
 		};
 
-		import_funcs(&path, &mut parsed_funcs, &mut visited)?;
+		import_funcs(&path, &mut parsed_funcs, &mut imported)?;
 	}
 
 	// add source file's functions after imports so imported functions are available
@@ -191,22 +191,28 @@ pub fn compile_world(
 fn import_funcs(
 	path: &PathBuf,
 	parsed_funcs: &mut Vec<Func>,
-	visited: &mut HashSet<PathBuf>,
+	imported: &mut HashSet<PathBuf>,
 ) -> Result<()> {
-	import_funcs_recursive(path, parsed_funcs, visited)
+	import_funcs_recursive(path, parsed_funcs, imported, &mut HashSet::new())
 		.with_context(|| format!("in file '{}'!", path.to_string_lossy()))
 }
 
 fn import_funcs_recursive(
 	path: &PathBuf,
 	parsed_funcs: &mut Vec<Func>,
-	visited: &mut HashSet<PathBuf>,
+	imported: &mut HashSet<PathBuf>,
+	visiting: &mut HashSet<PathBuf>,
 ) -> Result<()> {
-	if visited.contains(path) {
+	if visiting.contains(path) {
 		bail!("circular import detected: '{}'", path.to_string_lossy());
 	}
 
-	visited.insert(path.clone());
+	if imported.contains(path) {
+		return Ok(());
+	}
+
+	visiting.insert(path.clone());
+	imported.insert(path.clone());
 
 	let code = read_file(path)?;
 	let parsed_world = Parser::new(&code)?.parse_world()?;
@@ -215,14 +221,14 @@ fn import_funcs_recursive(
 
 	for import in &parsed_world.imports {
 		let import_path = base_dir.join(format!("{import}.ant"));
-		import_funcs(&import_path, parsed_funcs, visited)?
+		import_funcs_recursive(&import_path, parsed_funcs, imported, visiting)?
 	}
 
 	let mut new_parsed_funcs = parsed_world.funcs;
 	sanitize_main(&mut new_parsed_funcs, path);
 	parsed_funcs.extend(new_parsed_funcs);
 
-	visited.remove(path);
+	visiting.remove(path);
 	Ok(())
 }
 
