@@ -162,7 +162,7 @@ pub fn compile_world(
 		target_id,
 	} in parsed_world.ants
 	{
-		eprintln!("Assembling ant '{target_name}' @ {target_id}.");
+		eprintln!("Assembling ant '{target_name}' @ {target_id}...");
 
 		if let Some(behavior) = &behaviors[target_id as usize] {
 			bail!(
