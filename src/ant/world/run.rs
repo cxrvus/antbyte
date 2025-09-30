@@ -83,8 +83,8 @@ impl World {
 			if self.tick_count % 0x100 == 0 {
 				clear_screen();
 				print_title_short();
-				eprint!("processing tick {} out of {max_ticks:0>4}", self.tick_str());
-				println!();
+				eprintln!("processing tick {} out of {max_ticks:0>4}", self.tick_str());
+				eprintln!();
 			}
 		}
 	}
