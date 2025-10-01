@@ -81,7 +81,7 @@ pub fn run() -> Result<()> {
 
 pub fn run_once(args: Args) -> Result<()> {
 	let log_config = LogConfig { all: args.debug };
-	let properties = compile_world_file(&args.path, &log_config)?;
+	let mut properties = compile_world_file(&args.path, &log_config)?;
 
 	if args.preview {
 		let WorldConfig { width, height, .. } = properties.config;
@@ -90,8 +90,8 @@ pub fn run_once(args: Args) -> Result<()> {
 	} else if args.debug {
 		// logging happens on compilation
 	} else {
+		set_config(&mut properties.config, &args).context("config-arg error!")?;
 		let mut world = World::new(properties).context("world error!")?;
-		set_config(&mut world, &args).context("config-arg error!")?;
 
 		if let Some(target) = args.gif {
 			export_gif(world, &args.path, target).context("GIF export error!")?;
@@ -104,7 +104,7 @@ pub fn run_once(args: Args) -> Result<()> {
 }
 
 #[rustfmt::skip]
-fn set_config(world: &mut World, args: &Args) -> Result<()> {
+fn set_config(config: &mut WorldConfig, args: &Args) -> Result<()> {
 	if let Some(cfg) = &args.cfg {
 		let cfg = if cfg.trim().ends_with(';') { cfg } else { &format!("{cfg};") };
 
@@ -112,11 +112,10 @@ fn set_config(world: &mut World, args: &Args) -> Result<()> {
 
 		while !parser.assume_next(Token::EndOfFile) {
 			let (key, value) = parser.parse_setting()?;
-			world.config_mut().set_setting(key, value)?;
+			config.set_setting(key, value)?;
 		}
 	}
 
-	let config = world.config_mut();
 	if args.stepped { config.fps = None; }
 	if args.instant { config.speed = None; }
 	if args.looping { config.looping = true; }
