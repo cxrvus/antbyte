@@ -24,9 +24,8 @@ pub fn watch_file(args: &mut Args) -> Result<()> {
 		Config::default(),
 	)?;
 
-	let file_path = args.path.canonicalize().unwrap();
-	eprintln!("watching file: {file_path:?}");
-	watcher.watch(&file_path, RecursiveMode::NonRecursive)?;
+	eprintln!("watching file: {:?}", args.path);
+	watcher.watch(&args.path, RecursiveMode::NonRecursive)?;
 	args.watch = false;
 
 	let _handle = std::thread::spawn({
@@ -47,7 +46,7 @@ pub fn watch_file(args: &mut Args) -> Result<()> {
 					&& event
 						.paths
 						.iter()
-						.any(|p| p.canonicalize().is_ok_and(|cp| cp == file_path))
+						.any(|p| p.canonicalize().is_ok_and(|cp| cp == args.path))
 				{
 					pending_change = true;
 				}
