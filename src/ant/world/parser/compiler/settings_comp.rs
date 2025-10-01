@@ -9,7 +9,7 @@ use crate::ant::{
 };
 
 pub const FPS_CAP: u32 = 50;
-pub const SIZE_CAP: u32 = 0x100;
+pub const SIZE_CAP: u32 = 0x400;
 pub const SPEED_CAP: u32 = 0x2000;
 
 impl WorldConfig {
