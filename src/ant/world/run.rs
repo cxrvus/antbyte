@@ -96,7 +96,11 @@ impl World {
 
 		// print
 		clear_screen();
-		print_title();
+
+                if !self.config().hide_title {
+                    print_title();
+                }
+
 		println!();
 		println!("{world}\n");
 		println!();

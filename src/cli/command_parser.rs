@@ -37,6 +37,10 @@ pub struct Args {
 	#[arg(short, long)]
 	cfg: Option<String>,
 
+	/// Hide Title Banner
+	#[arg(short = 'T', long)]
+	hide_title: bool,
+
 	/// watch-mode, combine with -d / --debug for dry-runs
 	#[arg(short, long)]
 	pub watch: bool,
@@ -116,6 +120,7 @@ fn set_config(config: &mut WorldConfig, args: &Args) -> Result<()> {
 		}
 	}
 
+        if args.hide_title { config.hide_title = true; }
 	if args.stepped { config.fps = None; }
 	if args.instant { config.speed = None; }
 	if args.looping { config.looping = true; }
