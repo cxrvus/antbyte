@@ -34,7 +34,7 @@ pub struct WorldConfig {
 	pub starting_pos: StartingPos,
 	pub color_mode: ColorMode,
 	pub noise_seed: Option<u32>,
-        pub hide_title: bool, // TODO: move to renderer
+	pub hide_title: bool, // TODO: move to renderer
 	pub description: String,
 }
 
@@ -52,7 +52,7 @@ impl Default for WorldConfig {
 			starting_pos: StartingPos::Center,
 			color_mode: ColorMode::RGBI,
 			noise_seed: None,
-                        hide_title: false,
+			hide_title: false,
 			description: "".into(),
 		}
 	}
