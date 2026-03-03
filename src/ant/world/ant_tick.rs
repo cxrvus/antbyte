@@ -20,7 +20,7 @@ impl World {
 			..
 		} = self
 			.get_behavior(ant.behavior)
-			.clone()
+			.cloned()
 			.expect("invalid Behavior ID");
 
 		let mut input_bits = 0u8;

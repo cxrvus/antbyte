@@ -6,7 +6,10 @@ use anyhow::{Result, bail};
 use rand::{Rng, SeedableRng, rngs::StdRng};
 use serde::{Deserialize, Serialize};
 
-use std::ops::{Deref, DerefMut};
+use std::{
+	collections::BTreeMap,
+	ops::{Deref, DerefMut},
+};
 
 use super::{Ant, Behavior, BorderMode, StartingPos};
 
@@ -92,19 +95,10 @@ impl WorldConfig {
 	}
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct WorldProperties {
-	pub behaviors: [Option<Behavior>; 0x100],
+	pub behaviors: BTreeMap<u8, Behavior>,
 	pub config: WorldConfig,
-}
-
-impl Default for WorldProperties {
-	fn default() -> Self {
-		Self {
-			behaviors: [const { None }; 0x100],
-			config: Default::default(),
-		}
-	}
 }
 
 pub struct WorldState {
@@ -159,7 +153,7 @@ impl World {
 			},
 		};
 
-		if world.properties.behaviors[1].is_some() {
+		if world.properties.behaviors.contains_key(&1) {
 			let mut ant = Ant::new(starting_pos, 0, 1);
 			ant.grow_up();
 			world.spawn(ant);
@@ -230,8 +224,8 @@ impl World {
 		&self.ants
 	}
 
-	fn get_behavior(&self, id: u8) -> &Option<Behavior> {
-		&self.properties.behaviors[id as usize]
+	fn get_behavior(&self, id: u8) -> Option<&Behavior> {
+		self.properties.behaviors.get(&id)
 	}
 
 	fn rng(&mut self) -> u8 {

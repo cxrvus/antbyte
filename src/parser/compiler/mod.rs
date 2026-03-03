@@ -7,7 +7,7 @@ mod stdlib;
 mod test_std;
 
 use std::{
-	collections::HashSet,
+	collections::{BTreeMap, HashSet},
 	fmt::Display,
 	fs,
 	mem::take,
@@ -153,7 +153,7 @@ pub fn compile_world(
 
 	let comp_funcs = compile_funcs(parsed_funcs, log_cfg)?;
 
-	let mut behaviors: [Option<Behavior>; 0x100] = [const { None }; 0x100];
+	let mut behaviors: BTreeMap<u8, Behavior> = BTreeMap::new();
 
 	for AntFunc {
 		target_name,
@@ -162,7 +162,7 @@ pub fn compile_world(
 	{
 		eprintln!("Assembling ant '{target_name}' @ {target_id}...");
 
-		if let Some(behavior) = &behaviors[target_id as usize] {
+		if let Some(behavior) = behaviors.get(&target_id) {
 			bail!(
 				"tried to assign ID #{target_id} to '{target_name}', but it's already assigned to '{}'",
 				behavior.name
@@ -176,8 +176,8 @@ pub fn compile_world(
 			};
 
 			let target_func = signature.get_overload(&comp_funcs).unwrap();
-			let behavior = target_func.assemble(log_cfg).map(Some)?;
-			behaviors[target_id as usize] = behavior;
+			let behavior = target_func.assemble(log_cfg)?;
+			behaviors.insert(target_id, behavior);
 		}
 	}
 
