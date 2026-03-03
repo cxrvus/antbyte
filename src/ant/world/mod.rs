@@ -65,8 +65,8 @@ impl WorldConfig {
 	pub fn validate(&self) -> Result<()> {
 		Self::non_zero(self.height, "height")?;
 		Self::non_zero(self.width, "width")?;
-		Self::cap(self.height, "height", FPS_CAP)?;
-		Self::cap(self.width, "width", FPS_CAP)?;
+		Self::cap(self.height, "height", SIZE_CAP)?;
+		Self::cap(self.width, "width", SIZE_CAP)?;
 
 		Self::cap_opt(self.fps, "FPS", FPS_CAP)?;
 		Self::cap_opt(self.speed, "speed", SPEED_CAP)?;
