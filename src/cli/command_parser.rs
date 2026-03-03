@@ -7,9 +7,10 @@ use clap::{self, Parser as ClapParser};
 
 use crate::{
 	ant::{
-		compiler::{LogConfig, compile_world_file},
+		compiler::LogConfig,
 		world::{World, WorldConfig},
 	},
+	files::compile_world_file,
 	parser::{Parser, token::Token},
 };
 

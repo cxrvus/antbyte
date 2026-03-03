@@ -9,7 +9,6 @@ mod test_std;
 use std::{
 	collections::{BTreeMap, HashSet},
 	fmt::Display,
-	fs,
 	mem::take,
 	path::{Path, PathBuf},
 };
@@ -20,9 +19,9 @@ use crate::{
 		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
 		world::WorldProperties,
 	},
+	files::read_file,
 	parser::{
 		AntFunc, Expression, Func, ParamValue, Parser, Signature, SignatureSpec, func_parser::MAIN,
-		token::Token,
 	},
 	truth_table::TruthTable,
 };
@@ -70,38 +69,6 @@ struct CompStatement {
 #[derive(Default)]
 pub struct LogConfig {
 	pub all: bool,
-}
-
-pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldProperties> {
-	let code = read_file(path)?;
-	compile_world(&code, log_cfg, Some(path))
-		.with_context(|| format!("compiler error in file '{}'!", path.to_string_lossy()))
-}
-
-fn read_file(path: &PathBuf) -> Result<String> {
-	let extension = path.extension().unwrap_or_default().to_string_lossy();
-
-	if extension != "ant" {
-		bail!("ant files need to have a '.ant' extension");
-	}
-
-	let file_name = path.file_stem().unwrap_or_default().to_string_lossy();
-
-	if !validate_file_name(&file_name) {
-		bail!("ant file names need to be in snake_case")
-	}
-
-	fs::read_to_string(path)
-		.with_context(|| format!("error reading file '{}'!", path.to_string_lossy()))
-}
-
-#[rustfmt::skip]
-fn validate_file_name(file_name: &str) -> bool {
-	if let Ok(tokens) = Token::tokenize(file_name)
-		&& let Some(Token::Ident(ident)) = tokens.first()
-		&& ident == file_name
-	{ true }
-	else { false }
 }
 
 pub fn compile_world(
