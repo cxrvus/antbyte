@@ -10,9 +10,13 @@ use std::ops::{Deref, DerefMut};
 use super::{Ant, Behavior, BorderMode, StartingPos};
 
 use crate::{
-	ant::{ColorMode, compiler::settings_comp::FPS_CAP},
+	ant::ColorMode,
 	util::{matrix::Matrix, vec2::Vec2u},
 };
+
+pub const FPS_CAP: u32 = 50;
+pub const SIZE_CAP: u32 = 0x400;
+pub const SPEED_CAP: u32 = 0x2000;
 
 #[derive(Debug, Clone)]
 pub struct WorldConfig {
@@ -56,6 +60,37 @@ impl Default for WorldConfig {
 	}
 }
 
+impl WorldConfig {
+	pub fn validate(&self) -> Result<()> {
+		Self::non_zero(self.height, "height")?;
+		Self::non_zero(self.width, "width")?;
+		Self::cap(self.height, "height", FPS_CAP)?;
+		Self::cap(self.width, "width", FPS_CAP)?;
+
+		Self::cap_opt(self.fps, "FPS", FPS_CAP)?;
+		Self::cap_opt(self.speed, "speed", SPEED_CAP)?;
+		Self::cap_opt(self.sleep, "sleep", 10000)?;
+
+		Ok(())
+	}
+
+	#[inline]
+	#[rustfmt::skip]
+	fn cap(number: usize, property: &str, max: u32) -> Result<()> {
+		if number > max as usize { bail!("[{property}] must not exceed {max}") } Ok(())
+	}
+
+	fn cap_opt(number: Option<u32>, property: &str, max: u32) -> Result<()> {
+		Self::cap(number.unwrap_or_default() as usize, property, max)
+	}
+
+	#[inline]
+	#[rustfmt::skip]
+	fn non_zero(number: usize, property: &str) -> Result<()> {
+		if number == 0 { bail!("[{property}] must be greater than 0"); } Ok(())
+	}
+}
+
 #[derive(Debug, Clone)]
 pub struct WorldProperties {
 	pub behaviors: [Option<Behavior>; 0x100],
@@ -85,6 +120,8 @@ pub struct World {
 }
 impl World {
 	pub fn new(properties: WorldProperties) -> Result<Self> {
+		properties.config.validate()?;
+
 		let WorldConfig {
 			width,
 			height,
