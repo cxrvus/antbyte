@@ -1,7 +1,9 @@
 #![cfg(feature = "clap")]
 
-use clap::{self, Parser as ClapParser};
+use std::fs;
 use std::path::{Path, PathBuf};
+
+use clap::{self, Parser as ClapParser};
 
 use crate::{
 	ant::{
@@ -47,6 +49,10 @@ pub struct Args {
 	#[arg(short, long)]
 	pub watch: bool,
 
+	/// create a JSON world file upon compilation
+	#[arg(short, long)]
+	pub json: bool,
+
 	// todo: turn these into sub-commands, since the config args are ignored anyway
 	/// Export as GIF
 	#[arg(long)]
@@ -88,6 +94,16 @@ pub fn run() -> Result<()> {
 pub fn run_once(args: Args) -> Result<()> {
 	let log_config = LogConfig { all: args.debug };
 	let mut properties = compile_world_file(&args.path, &log_config)?;
+
+	if args.json {
+		let mut json_path = args.path.as_os_str().to_os_string();
+		json_path.push(".json");
+		let json_path = PathBuf::from(json_path);
+		let json = serde_json::to_string_pretty(&properties)?;
+		fs::write(&json_path, json).with_context(|| {
+			format!("failed to write JSON world file to {}", json_path.display())
+		})?;
+	}
 
 	if args.preview {
 		let WorldConfig { width, height, .. } = properties.config;
