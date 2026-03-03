@@ -18,13 +18,11 @@ use crate::{
 	ant::{
 		Behavior,
 		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
-		world::{
-			WorldProperties,
-			parser::{
-				AntFunc, Expression, Func, ParamValue, Parser, Signature, SignatureSpec,
-				func_parser::MAIN, token::Token,
-			},
-		},
+		world::WorldProperties,
+	},
+	parser::{
+		AntFunc, Expression, Func, ParamValue, Parser, Signature, SignatureSpec, func_parser::MAIN,
+		token::Token,
 	},
 	truth_table::TruthTable,
 };

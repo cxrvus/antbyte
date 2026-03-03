@@ -1,11 +1,8 @@
 use anyhow::{Context, Result, anyhow};
 
-use crate::ant::{
-	BorderMode, ColorMode, StartingPos,
-	world::{
-		WorldConfig,
-		parser::{Parser, token::Token},
-	},
+use crate::{
+	ant::{BorderMode, ColorMode, StartingPos, world::WorldConfig},
+	parser::{Parser, token::Token},
 };
 
 pub const FPS_CAP: u32 = 50;

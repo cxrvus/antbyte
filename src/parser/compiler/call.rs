@@ -1,6 +1,6 @@
-use crate::ant::{
-	compiler::{CompFunc, CompStatement, FuncCall},
-	world::parser::{ParamValue, SignatureSpec, token::Token},
+use crate::{
+	ant::compiler::{CompFunc, CompStatement, FuncCall},
+	parser::{ParamValue, SignatureSpec, token::Token},
 };
 
 use anyhow::{Result, anyhow, bail};

@@ -1,5 +1,5 @@
 use crate::{
-	ant::world::parser::{AntFunc, Func, Signature},
+	parser::{AntFunc, Func, Signature},
 	util::find_dupe,
 };
 

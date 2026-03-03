@@ -1,12 +1,14 @@
 #![cfg(feature = "clap")]
 
-use crate::ant::world::parser::token::Token;
 use clap::{self, Parser as ClapParser};
 use std::path::{Path, PathBuf};
 
-use crate::ant::{
-	compiler::{LogConfig, compile_world_file},
-	world::{World, WorldConfig, parser::Parser},
+use crate::{
+	ant::{
+		compiler::{LogConfig, compile_world_file},
+		world::{World, WorldConfig},
+	},
+	parser::{Parser, token::Token},
 };
 
 use anyhow::{Context, Ok, Result, bail};

@@ -1,4 +1,3 @@
-pub mod parser;
 pub mod run;
 
 mod ant_tick;

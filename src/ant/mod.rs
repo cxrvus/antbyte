@@ -1,7 +1,7 @@
 pub mod peripherals;
 pub mod world;
 
-pub use world::parser::compiler;
+pub use crate::parser::compiler;
 
 use crate::{
 	ant::peripherals::{IoType, PeripheralBit},
