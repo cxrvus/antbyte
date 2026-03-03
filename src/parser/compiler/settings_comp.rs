@@ -42,7 +42,7 @@ impl Parser {
 			"speed" => config.speed = self.next_number(Some(SPEED_CAP))?,
 			"sleep" => config.sleep = self.next_number(Some(10000))?,
 			"ticks" => config.ticks = self.next_number(None)?,
-			"seed" => config.noise_seed = self.next_number(None)?,
+			"noise_seed" | "seed" => config.noise_seed = self.next_number(None)?,
 
 			"dur" => {
 				// set tick limit: ticks = duration (seconds) * speed (ticks / frame) * fps (frames / second)
@@ -55,11 +55,17 @@ impl Parser {
 				}
 			}
 
-			"loop" => config.looping = self.next_bit()?,
+			"looping" | "loop" => config.looping = self.next_bit()?,
 
-			"border" => config.border_mode = BorderMode::try_from(self.next_ident()?)?,
-			"start" => config.starting_pos = StartingPos::try_from(self.next_ident()?)?,
-			"colors" => config.color_mode = ColorMode::try_from(self.next_ident()?)?,
+			"border_mode" | "border" => {
+				config.border_mode = BorderMode::try_from(self.next_ident()?)?
+			}
+
+			"starting_pos" | "start" => {
+				config.starting_pos = StartingPos::try_from(self.next_ident()?)?
+			}
+
+			"color_mode" | "colors" => config.color_mode = ColorMode::try_from(self.next_ident()?)?,
 
 			"desc" | "description" => config.description = self.next_str()?,
 
