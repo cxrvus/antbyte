@@ -70,7 +70,7 @@ impl World {
 				output_value.value |= new_value;
 			} else {
 				output_values.push(OutputValue {
-					output: output_spec.peripheral.clone(),
+					output: output_spec.peripheral,
 					value: new_value,
 				});
 			}
