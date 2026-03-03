@@ -95,7 +95,7 @@ impl WorldConfig {
 	}
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct WorldProperties {
 	pub behaviors: BTreeMap<u8, Behavior>,
 	pub config: WorldConfig,
