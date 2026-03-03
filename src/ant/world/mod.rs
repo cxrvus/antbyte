@@ -4,6 +4,7 @@ mod ant_tick;
 
 use anyhow::{Result, bail};
 use rand::{Rng, SeedableRng, rngs::StdRng};
+use serde::{Deserialize, Serialize};
 
 use std::ops::{Deref, DerefMut};
 
@@ -18,7 +19,7 @@ pub const FPS_CAP: u32 = 50;
 pub const SIZE_CAP: u32 = 0x400;
 pub const SPEED_CAP: u32 = 0x2000;
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WorldConfig {
 	/// width in pixels
 	pub width: usize,

@@ -7,7 +7,11 @@ edition = "2024"
 anyhow = "*"
 rand = "*"
 regex = "*"
+
 clap = { version = "*", features = ["derive"], optional = true }
+serde = { version = "*", features = ["derive"] }
+serde_json = { version = "*" }
+
 gif = { version = "*", optional = true }
 notify = { version = "*", optional = true }
 

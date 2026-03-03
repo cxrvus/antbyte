@@ -13,9 +13,10 @@ use crate::{
 };
 
 use anyhow::{Error, Result, anyhow};
+use serde::{Deserialize, Serialize};
 
 #[rustfmt::skip]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum BorderMode { Collide, Despawn, Cycle, Wrap }
 
 impl TryFrom<String> for BorderMode {
@@ -33,7 +34,7 @@ impl TryFrom<String> for BorderMode {
 }
 
 #[rustfmt::skip]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum StartingPos { TopLeft, MiddleLeft, Center }
 
 impl TryFrom<String> for StartingPos {
@@ -49,7 +50,7 @@ impl TryFrom<String> for StartingPos {
 	}
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ColorMode {
 	Binary,
 	RGBI,

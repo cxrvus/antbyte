@@ -1,8 +1,9 @@
 use std::fmt::Display;
 
 use anyhow::{Result, anyhow};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct TruthTable {
 	input_count: u8,
 	output_count: u8,
