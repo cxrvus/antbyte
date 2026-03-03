@@ -23,6 +23,9 @@ pub const SIZE_CAP: u32 = 0x400;
 pub const SPEED_CAP: u32 = 0x2000;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
 pub struct WorldConfig {
 	/// width in pixels
 	pub width: usize,
@@ -96,6 +99,9 @@ impl WorldConfig {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
 pub struct WorldProperties {
 	pub behaviors: BTreeMap<u8, Behavior>,
 	pub config: WorldConfig,

@@ -97,10 +97,12 @@ pub fn run_once(args: Args) -> Result<()> {
 	let mut properties = compile_world_file(&args.path, &log_config)?;
 
 	if args.json {
-		let mut json_path = args.path.as_os_str().to_os_string();
-		json_path.push(".json");
-		let json_path = PathBuf::from(json_path);
-		let json = serde_json::to_string_pretty(&properties)?;
+		let mut json_path = args.path.clone();
+		json_path.set_extension("ant.json");
+
+		// idea: remove properties with default values
+		let json = serde_json::to_string(&properties)?;
+
 		fs::write(&json_path, json).with_context(|| {
 			format!("failed to write JSON world file to {}", json_path.display())
 		})?;

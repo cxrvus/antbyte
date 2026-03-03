@@ -4,6 +4,8 @@ use anyhow::{Result, anyhow};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase")]
 pub struct TruthTable {
 	input_count: u8,
 	output_count: u8,

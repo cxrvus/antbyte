@@ -135,6 +135,8 @@ impl Ant {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase")]
 pub struct Behavior {
 	pub name: String,
 	pub logic: TruthTable,

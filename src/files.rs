@@ -27,5 +27,5 @@ pub fn read_file(path: &PathBuf) -> Result<String> {
 }
 
 pub fn compile_json(code: &str) -> Result<WorldProperties> {
-	serde_json::from_str::<WorldProperties>(code).context("invalid JSON world file")
+	serde_json::from_str::<WorldProperties>(code).context("invalid JSON world file!")
 }
