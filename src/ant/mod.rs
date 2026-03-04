@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 
 #[rustfmt::skip]
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum BorderMode { Collide, Despawn, Cycle, Wrap }
 
 impl TryFrom<String> for BorderMode {
@@ -35,6 +36,7 @@ impl TryFrom<String> for BorderMode {
 
 #[rustfmt::skip]
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all="snake_case")]
 pub enum StartingPos { TopLeft, MiddleLeft, Center }
 
 impl TryFrom<String> for StartingPos {
@@ -51,6 +53,7 @@ impl TryFrom<String> for StartingPos {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum ColorMode {
 	Binary,
 	RGBI,
