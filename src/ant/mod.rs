@@ -52,12 +52,10 @@ impl TryFrom<String> for StartingPos {
 	}
 }
 
+#[rustfmt::skip]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum ColorMode {
-	Binary,
-	RGBI,
-}
+pub enum ColorMode { Binary, RGBI }
 
 impl TryFrom<String> for ColorMode {
 	type Error = Error;
