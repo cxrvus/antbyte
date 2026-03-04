@@ -135,13 +135,44 @@ impl Ant {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(deny_unknown_fields)]
-#[serde(rename_all = "camelCase")]
+#[serde(try_from = "BehaviorJSON", into = "BehaviorJSON")]
 pub struct Behavior {
 	pub name: String,
 	pub logic: TruthTable,
 	pub inputs: Vec<PeripheralBit>,
 	pub outputs: Vec<PeripheralBit>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase")]
+struct BehaviorJSON {
+	name: String,
+	logic: Vec<u32>,
+	inputs: Vec<PeripheralBit>,
+	outputs: Vec<PeripheralBit>,
+}
+
+impl TryFrom<BehaviorJSON> for Behavior {
+	type Error = String;
+
+	fn try_from(value: BehaviorJSON) -> std::result::Result<Self, Self::Error> {
+		let logic = TruthTable::new(value.inputs.len(), value.outputs.len(), value.logic)
+			.map_err(|e| e.to_string())?;
+
+		Behavior::new(value.name, logic, value.inputs, value.outputs).map_err(|e| e.to_string())
+	}
+}
+
+impl From<Behavior> for BehaviorJSON {
+	fn from(value: Behavior) -> Self {
+		Self {
+			name: value.name,
+			logic: value.logic.entries().clone(),
+			inputs: value.inputs,
+			outputs: value.outputs,
+		}
+	}
 }
 
 impl Behavior {
