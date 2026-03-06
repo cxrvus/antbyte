@@ -17,7 +17,7 @@ export function ant(name, func) {
 	}
 
 	const inputCount = inputs.length
-	const entryCount = 2 ^ inputCount
+	const entryCount = 2 ** inputCount
 	
 	/** @type {Record<string, boolean>[]} */
 	const outputRecords = [];

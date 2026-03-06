@@ -2,7 +2,7 @@
 export function toByte(...params) {
 	let result = 0
 	for (let i = 0; i < params.length; i++) {
-		if (params[i]) result |= (1 << i)
+		if (params[i]) result |= (1 << (params.length - 1 - i))
 	}
 	return result
 }
