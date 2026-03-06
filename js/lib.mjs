@@ -1,3 +1,6 @@
+// @ts-check
+/** @typedef {import("../js/lib").Behavior} Behavior */
+
 import { toBits, toByte } from './util.mjs';
 
 /**

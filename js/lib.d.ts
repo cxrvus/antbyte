@@ -1,9 +1,9 @@
-type World = {
+export type World = {
 	cfg: WorldConfig,
 	ants: Behaviors,
 }
 
-type WorldConfig = {
+export type WorldConfig = {
 	width: number
 	height: number
 	fps?: number
@@ -19,9 +19,9 @@ type WorldConfig = {
 	description: string
 }
 
-type Behaviors = { [key: number]: Behavior }
+export type Behaviors = { [key: number]: Behavior }
 
-type Behavior = {
+export type Behavior = {
 	name: string
 	logic: number[]
 	inputs: string[]
