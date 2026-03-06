@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, process};
 
 use anyhow::{Context, Result, bail};
 
@@ -17,7 +17,9 @@ pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldPr
 
 		"json" => compile_json(&code),
 
-		_ => bail!("input files need to have a '.ant', '.json' or '.js' extension"),
+		"mjs" => compile_mjs(path),
+
+		_ => bail!("input files need to have a '.ant', '.json' or '.mjs' extension"),
 	}
 }
 
@@ -28,4 +30,22 @@ pub fn read_file(path: &PathBuf) -> Result<String> {
 
 pub fn compile_json(code: &str) -> Result<WorldProperties> {
 	serde_json::from_str::<WorldProperties>(code).context("invalid JSON world file!")
+}
+
+pub fn compile_mjs(path: &PathBuf) -> Result<WorldProperties> {
+	// idea: insert node JS warning
+
+	let output = process::Command::new("node")
+		.arg(path)
+		.output()
+		.context("failed to execute node!")?;
+
+	let code = String::from_utf8(output.stdout).context("invalid UTF-8 in stdout!")?;
+	let error = String::from_utf8(output.stderr).context("invalid UTF-8 in stderr!")?;
+
+	if !output.status.success() {
+		bail!("node execution failed: {error}");
+	}
+
+	serde_json::from_str::<WorldProperties>(&code).context("invalid JSON from node output!")
 }
