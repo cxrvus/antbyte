@@ -38,7 +38,7 @@ pub fn compile_mjs(path: &PathBuf) -> Result<WorldProperties> {
 	let output = process::Command::new("node")
 		.arg(path)
 		.output()
-		.context("failed to execute node!")?;
+		.context("failed to execute node-JS script!")?;
 
 	let code = String::from_utf8(output.stdout).context("invalid UTF-8 in stdout!")?;
 	let error = String::from_utf8(output.stderr).context("invalid UTF-8 in stderr!")?;
@@ -47,5 +47,5 @@ pub fn compile_mjs(path: &PathBuf) -> Result<WorldProperties> {
 		bail!("node execution failed: {error}");
 	}
 
-	serde_json::from_str::<WorldProperties>(&code).context("invalid JSON from node output!")
+	serde_json::from_str::<WorldProperties>(&code).context("invalid JSON from node-JS output!")
 }
