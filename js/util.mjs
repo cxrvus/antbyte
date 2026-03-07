@@ -54,3 +54,14 @@ export const $1 = true;
 
 /** @param {string} msg */
 export const err = msg => console.error(msg)
+
+// from stdlib.ant
+
+/** @param {boolean[]} params @returns {boolean} */
+export const and = (...params) => params.every(x => x)
+
+/** @param {boolean[]} params @returns {boolean} */
+export const or = (...params) => !params.every(x => !x)
+
+/** @param {boolean[]} params @returns {boolean[]} */
+export const inv = (...params) => params.map(x => !x)
