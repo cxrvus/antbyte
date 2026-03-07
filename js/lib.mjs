@@ -2,7 +2,7 @@
 /** @typedef {import("../js/lib").Behavior} Behavior */
 /** @typedef {import("../js/lib").World} World */
 
-import { toBits, toByte } from './util.mjs';
+import { bits, byte } from './util.mjs';
 
 /**
  * @param {string} name
@@ -30,7 +30,7 @@ export function ant(name, func) {
 	const outputs = [];
 
 	for (let i = 0; i < entryCount; i++) {
-		let inputBits = toBits(inputCount, i)
+		let inputBits = bits(inputCount, i)
 		let outputRecord = func(...inputBits)
 		outputRecords.push(outputRecord)
 
@@ -46,7 +46,7 @@ export function ant(name, func) {
 
 	for (const outputRecord of outputRecords) {
 		const outputBits = outputs.map(output => outputRecord[output] ?? false)
-		outputValues.push(toByte(...outputBits));
+		outputValues.push(byte(...outputBits));
 	}
 
 	return { name, inputs, outputs, logic: outputValues }
