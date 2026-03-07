@@ -4,19 +4,19 @@ export type World = {
 }
 
 export type WorldConfig = {
-	width: number
-	height: number
+	width?: number
+	height?: number
 	fps?: number
 	speed?: number
 	ticks?: number
 	sleep?: number
-	looping: boolean
-	border_mode: "collide" | "despawn" | "cycle" | "wrap"
-	starting_pos: "top_left" | "middle_left" | "center"
-	color_mode: "binary" | "rgbi"
+	looping?: boolean
+	border_mode?: "collide" | "despawn" | "cycle" | "wrap"
+	starting_pos?: "top_left" | "middle_left" | "center"
+	color_mode?: "binary" | "rgbi"
 	noise_seed?: number
-	hide_title: boolean
-	description: string
+	hide_title?: boolean
+	description?: string
 }
 
 export type Behaviors = { [key: number]: Behavior }
