@@ -57,6 +57,9 @@ export const bits_8 = value => bits(8, value);
 
 // other wrappers
 
+/** @returns {import('./lib').World} */
+export const newWorld = () => ({ cfg: {}, ants: {} })
+
 export const $0 = false;
 export const $1 = true;
 

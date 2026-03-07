@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+should_exit=0
+child_pid=""
+
+stop_child() {
+	if [[ -n "$child_pid" ]] && kill -0 "$child_pid" 2>/dev/null; then
+		kill "$child_pid" 2>/dev/null
+	fi
+}
+
+on_int() {
+	should_exit=1
+	stop_child
+}
+
+trap on_int INT
+trap 'stop_child' EXIT
+
+while (( !should_exit )); do
+	skip_delay=0
+	antbyte js/examples/random_world.mjs -Tc "height=64;width=128;speed=16;dur=8" &
+	child_pid=$!
+
+	# Watch keyboard input while antbyte is running.
+	while kill -0 "$child_pid" 2>/dev/null; do
+		key=""
+		IFS= read -rsn1 -t 0.1 key < /dev/tty
+		read_status=$?
+
+		if [[ $read_status -eq 0 && $key == $'\x04' ]]; then
+			# Ctrl+D: stop current antbyte run and continue the loop immediately.
+			skip_delay=1
+			stop_child
+			break
+		fi
+
+		if [[ $read_status -eq 1 ]]; then
+			# Ctrl+D is reported as EOF by read in canonical terminal mode.
+			skip_delay=1
+			stop_child
+			break
+		fi
+	done
+
+	wait "$child_pid" 2>/dev/null
+	child_pid=""
+
+	if (( should_exit )); then
+		break
+	fi
+
+	if (( skip_delay )); then
+		continue
+	fi
+
+	sleep 2
+done
