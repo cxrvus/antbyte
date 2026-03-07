@@ -1,22 +1,18 @@
+export type { Behavior as BehaviorJSON } from "./bindings/Behavior";
+export type { BorderMode } from "./bindings/BorderMode";
+export type { ColorMode } from "./bindings/ColorMode";
+export type { Peripheral } from "./bindings/Peripheral";
+export type { PeripheralBit } from "./bindings/PeripheralBit";
+export type { StartingPos } from "./bindings/StartingPos";
+export type { TruthTable } from "./bindings/TruthTable";
+export type { WorldProperties } from "./bindings/WorldProperties";
+import type { WorldConfig as WorldConfigFull } from "./bindings/WorldConfig";
+
+export type WorldConfig = Partial<WorldConfigFull>
+
 export type World = {
 	cfg: WorldConfig,
 	ants: Behaviors,
-}
-
-export type WorldConfig = {
-	width?: number
-	height?: number
-	fps?: number
-	speed?: number
-	ticks?: number
-	sleep?: number
-	looping?: boolean
-	border_mode?: "collide" | "despawn" | "cycle" | "wrap"
-	starting_pos?: "top_left" | "middle_left" | "center"
-	color_mode?: "binary" | "rgbi"
-	noise_seed?: number
-	hide_title?: boolean
-	description?: string
 }
 
 export type Behaviors = { [key: number]: Behavior }
