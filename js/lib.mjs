@@ -1,5 +1,6 @@
 // @ts-check
 /** @typedef {import("../js/lib").Behavior} Behavior */
+/** @typedef {import("../js/lib").World} World */
 
 import { toBits, toByte } from './util.mjs';
 
@@ -49,4 +50,9 @@ export function ant(name, func) {
 	}
 
 	return { name, inputs, outputs, logic: outputValues }
+}
+
+/** @param {World} world */
+export function run(world) {
+	console.log(JSON.stringify(world, null, '\t'))
 }
