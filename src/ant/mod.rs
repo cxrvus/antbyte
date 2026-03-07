@@ -14,9 +14,10 @@ use crate::{
 
 use anyhow::{Error, Result, anyhow};
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
 #[rustfmt::skip]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "snake_case")]
 pub enum BorderMode { Collide, Despawn, Cycle, Wrap }
 
@@ -35,7 +36,7 @@ impl TryFrom<String> for BorderMode {
 }
 
 #[rustfmt::skip]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all="snake_case")]
 pub enum StartingPos { TopLeft, MiddleLeft, Center }
 
@@ -53,7 +54,7 @@ impl TryFrom<String> for StartingPos {
 }
 
 #[rustfmt::skip]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "snake_case")]
 pub enum ColorMode { Binary, RGBI }
 
@@ -135,7 +136,7 @@ impl Ant {
 	}
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, TS)]
 #[serde(try_from = "BehaviorJSON", into = "BehaviorJSON")]
 pub struct Behavior {
 	pub name: String,
@@ -144,7 +145,7 @@ pub struct Behavior {
 	pub outputs: Vec<PeripheralBit>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, TS)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "camelCase")]
 struct BehaviorJSON {

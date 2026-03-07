@@ -3,8 +3,9 @@ use std::cmp::Ordering;
 use anyhow::{Ok, Result, anyhow, bail};
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use ts_rs::TS;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, TS)]
 pub enum Peripheral {
 	// ## cell interaction
 	CellClear,
@@ -195,7 +196,7 @@ impl Ord for OutputValue {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, TS)]
 pub struct PeripheralBit {
 	pub peripheral: Peripheral,
 	pub bit: u8,

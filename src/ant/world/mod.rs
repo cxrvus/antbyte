@@ -5,6 +5,7 @@ mod ant_tick;
 use anyhow::{Result, bail};
 use rand::{Rng, SeedableRng, rngs::StdRng};
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
 use std::{
 	collections::BTreeMap,
@@ -22,7 +23,7 @@ pub const FPS_CAP: u32 = 50;
 pub const SIZE_CAP: u32 = 0x400;
 pub const SPEED_CAP: u32 = 0x2000;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, TS)]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct WorldConfig {
@@ -97,7 +98,8 @@ impl WorldConfig {
 	}
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, TS)]
+#[ts(export)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
