@@ -17,3 +17,9 @@ export function toBits(count, value) {
 	}
 	return result
 }
+
+export const $0 = false;
+export const $1 = true;
+
+/** @param {string} msg */
+export const err = msg => console.error(msg)
