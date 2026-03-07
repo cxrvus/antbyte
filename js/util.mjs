@@ -1,3 +1,5 @@
+// @ts-check
+
 /** @param {...boolean} params  */
 export function byte(...params) {
 	let result = 0
@@ -21,6 +23,12 @@ export function bits(count, value) {
 	}
 	return result
 }
+
+
+// config wrappers
+
+/** @param {number} value */
+export const size = value => ({ height: value, width: value})
 
 
 // wrapper functions for 1-8 bits
