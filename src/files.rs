@@ -11,7 +11,7 @@ pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldPr
 	let code = read_file(path)?;
 	let extension = path.extension().unwrap_or_default().to_string_lossy();
 
-	match extension.as_ref() {
+	let mut properties = match extension.as_ref() {
 		"ant" => compile_world(&code, log_cfg, Some(path))
 			.with_context(|| format!("compiler error in file '{}'!", path.to_string_lossy())),
 
@@ -20,7 +20,15 @@ pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldPr
 		"mjs" => compile_mjs(path),
 
 		_ => bail!("input files need to have a '.ant', '.json' or '.mjs' extension"),
+	}?;
+
+	if properties.name.is_none() {
+		if let Some(name) = path.file_name() {
+			properties.name = Some(name.to_string_lossy().to_string());
+		}
 	}
+
+	Ok(properties)
 }
 
 pub fn read_file(path: &PathBuf) -> Result<String> {

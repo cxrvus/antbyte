@@ -97,10 +97,15 @@ impl World {
 		// print
 		clear_screen();
 
-                if !self.config().hide_title {
-                    print_title();
-                }
+		if !self.config().hide_title {
+			print_title();
+		}
 
+		if let Some(name) = &self.properties.name {
+			println!("{name}\n");
+		}
+
+		println!();
 		println!();
 		println!("{world}\n");
 		println!();

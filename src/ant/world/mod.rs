@@ -102,6 +102,7 @@ impl WorldConfig {
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct WorldProperties {
+	pub name: Option<String>,
 	#[serde(rename = "ants")]
 	pub behaviors: BTreeMap<u8, Behavior>,
 	#[serde(rename = "cfg")]
