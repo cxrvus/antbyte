@@ -10,13 +10,13 @@ import { bits, byte } from './util.mjs';
  * @returns {Behavior}
  */
 export function ant(name, func) {
-	const inputs = func.toString().match(/\(([^)]*)\)/)?.[1].split(',').map(p => p.trim())
+	const inputs = func.toString().match(/\(([^)]*)\)/)?.[1].split(',').map(p => p.trim()).filter(p => p)
 
 	if (!inputs) throw "malformed function parameters"
 
 	for (const name of inputs) {
 		if (!/^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$/.test(name)) {
-			throw `malformed parameter: "${name}"`
+			throw `malformed function parameter: "${name}"`
 		}
 	}
 
