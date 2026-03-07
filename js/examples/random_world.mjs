@@ -43,7 +43,7 @@ function generateAnt(index) {
 	// todo: just pass probability object
 	// manual tweaking...
 	const mandatoryInputs = ['T6', 'T7']
-	const blockedInputs = [...['R4', 'R5', 'R6', 'R7' ], ...mandatoryInputs]
+	const blockedInputs = [...['R4', 'R5', 'R6', 'R7'], ...mandatoryInputs]
 	const filteredInputs = peripherals.input.filter(p => !blockedInputs.includes(p))
 	const mandatoryOutputs = ['A0', 'A1', 'AK', 'D0']
 	const blockedOutputs = [...['A4', 'A5', 'A6', 'A7'], ...mandatoryOutputs]
@@ -56,6 +56,11 @@ function generateAnt(index) {
 	// todo: automate
 	inputs = [...inputs, ...mandatoryInputs]
 	outputs = [...outputs, ...mandatoryOutputs]
+
+	// memory alignment
+	const inputMem = inputs.filter(x => x.startsWith('M'))
+	outputs = outputs.filter(x => !x.startsWith('M') !== inputMem.includes(x))
+		.concat(inputMem.filter(x => !outputs.includes(x)))
 
 	const inputCount = inputs.length;
 	const outputCount = outputs.length;
