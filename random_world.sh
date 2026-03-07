@@ -3,6 +3,11 @@
 should_exit=0
 child_pid=""
 
+run_antbyte() {
+	antbyte js/examples/random_world.mjs -Tc "border=die;size=128;speed=2;fps=12;dur=20" &
+	child_pid=$!
+}
+
 stop_child() {
 	if [[ -n "$child_pid" ]] && kill -0 "$child_pid" 2>/dev/null; then
 		kill "$child_pid" 2>/dev/null
@@ -19,8 +24,7 @@ trap 'stop_child' EXIT
 
 while (( !should_exit )); do
 	skip_delay=0
-	antbyte js/examples/random_world.mjs -Tc "height=64;width=128;speed=16;dur=8" &
-	child_pid=$!
+	run_antbyte
 
 	# Watch keyboard input while antbyte is running.
 	while kill -0 "$child_pid" 2>/dev/null; do

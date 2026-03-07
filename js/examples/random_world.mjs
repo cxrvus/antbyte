@@ -4,7 +4,7 @@
 import { writeFileSync } from 'fs'
 
 import { run } from "../lib.mjs"
-import { newWorld, peripherals} from "../util.mjs"
+import { newWorld, peripherals, size} from "../util.mjs"
 
 const KEEP_FILES = false;
 
@@ -32,32 +32,30 @@ function generateWorld() {
 	const antCount = randomInt(16) + 1
 
 	for (let i = 0; i <= antCount; i++) {
-		world.ants[i] = generateAnt(i.toString())
+		world.ants[i] = generateAnt(i)
 	}
 
 	return world
 }
 
-/** @param {string} name @returns {AntByte.Behavior} */
-function generateAnt(name) {
+/** @param {number} index @returns {AntByte.Behavior} */
+function generateAnt(index) {
+	// todo: just pass probability object
 	// manual tweaking...
-	const mandatoryOutputs = ['A0', 'A1', 'A2', 'A3']
-	const blockedOutputs = [...mandatoryOutputs, ['A4', 'A5', 'A6', 'A7']]
+	const mandatoryInputs = ['T6', 'T7']
+	const blockedInputs = [...['R4', 'R5', 'R6', 'R7' ], ...mandatoryInputs]
+	const filteredInputs = peripherals.input.filter(p => !blockedInputs.includes(p))
+	const mandatoryOutputs = ['A0', 'A1', 'AK', 'D0']
+	const blockedOutputs = [...['A4', 'A5', 'A6', 'A7'], ...mandatoryOutputs]
 	const filteredOutputs = peripherals.output.filter(p => !blockedOutputs.includes(p))
 	//
 
-	const inputs = getSubset(peripherals.input, randomInt(4) + 4);
-	const outputs = getSubset(filteredOutputs, randomInt(12) + 4);
+	let inputs = getSubset(filteredInputs, randomInt(4) + 2);
+	let outputs = getSubset(filteredOutputs, randomInt(4) + 4);
 
-	// more manual tweaking...
-	//  increase chance of spawning
-	outputs.concat(mandatoryOutputs)
-
-	// decrease chance of dying
-	if (outputs.includes('AX') && (randomChance(0.8))) {
-		outputs.splice(outputs.indexOf('AX'), 1)
-	}
-	//
+	// todo: automate
+	inputs = [...inputs, ...mandatoryInputs]
+	outputs = [...outputs, ...mandatoryOutputs]
 
 	const inputCount = inputs.length;
 	const outputCount = outputs.length;
@@ -69,7 +67,7 @@ function generateAnt(name) {
 
 	for (let i = 0; i < valueCount; i++) logic.push(randomInt(maxValue))
 
-	return { name, outputs, inputs, logic }
+	return { name: index.toString(), outputs, inputs, logic }
 }
 
 /** @param {string[]} superSet @param {number} amount @returns {string[]} */
@@ -90,6 +88,8 @@ function getSubset(superSet, amount) {
 }
 
 const world = generateWorld()
+
+world.cfg = { ...size(128), speed: 2, fps: 12 }
 
 if (KEEP_FILES) {
 	const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '-')
