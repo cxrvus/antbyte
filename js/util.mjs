@@ -73,3 +73,26 @@ export const or = (...params) => !params.every(x => !x)
 
 /** @param {boolean[]} params @returns {boolean[]} */
 export const inv = (...params) => params.map(x => !x)
+
+
+// manually created peripheral spec
+
+export const peripherals = {
+	input: [
+		"CX",
+		"C0", "C1", "C2", "C3",
+		"CN0", "CN1", "CN2", "CN3",
+		"T0", "T1", "T2", "T3", "T4", "T5", "T6", "T7",
+		"M0", "M1", "M2", "M3", "M4", "M5", "M6", "M7",
+		"R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7",
+	],
+
+	output: [
+		"CC",
+		"C0", "C1", "C2", "C3",
+		"M0", "M1", "M2", "M3", "M4", "M5", "M6", "M7",
+		"D0", "D1", "D2", "DX",
+		"A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7",
+		"AK", "AX",
+	],
+}

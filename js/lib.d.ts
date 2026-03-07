@@ -1,3 +1,5 @@
+// todo: only generate useful bindings
+
 export type { Behavior as BehaviorJSON } from "./bindings/Behavior";
 export type { BorderMode } from "./bindings/BorderMode";
 export type { ColorMode } from "./bindings/ColorMode";
