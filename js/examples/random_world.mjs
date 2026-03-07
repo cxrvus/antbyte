@@ -3,8 +3,10 @@
 
 import { writeFileSync } from 'fs'
 
-import { ant, run } from "../lib.mjs"
-import { size, bits, byte, newWorld, peripherals} from "../util.mjs"
+import { run } from "../lib.mjs"
+import { newWorld, peripherals} from "../util.mjs"
+
+const KEEP_FILES = false;
 
 /** @returns {number} */
 function random() {
@@ -89,14 +91,10 @@ function getSubset(superSet, amount) {
 
 const world = generateWorld()
 
-world.cfg = {
-	// @ts-ignore
-	border_mode: "despawn",
-	...size(64),
+if (KEEP_FILES) {
+	const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '-')
+	const dirname = import.meta.dirname;
+	writeFileSync(`${dirname}/../../tmp/random_world-${timestamp}.ant.json`, JSON.stringify(world), 'utf-8')
 }
-
-const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '-')
-const dirname = import.meta.dirname;
-writeFileSync(`${dirname}/../../tmp/random_world-${timestamp}.ant.json`, JSON.stringify(world), 'utf-8')
 
 run(world)
