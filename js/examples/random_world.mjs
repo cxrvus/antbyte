@@ -29,7 +29,7 @@ function randomChance(probability) {
 function generateWorld() {
 	const world = newWorld()
 
-	const antCount = randomInt(16) + 1
+	const antCount = randomInt(16) + 5
 
 	for (let i = 0; i <= antCount; i++) {
 		world.ants[i] = generateAnt(i)
