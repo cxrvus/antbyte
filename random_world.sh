@@ -2,9 +2,39 @@
 
 should_exit=0
 child_pid=""
+gif_enabled=0
+
+world_script="js/examples/random_world.mjs"
+world_settings_normal="border=die;size=128;speed=2;fps=12;dur=20"
+world_settings_gif="border=die;size=256;speed=8;fps=24;dur=20"
+
+for arg in "$@"; do
+	case "$arg" in
+		--gif)
+			gif_enabled=1
+			;;
+		*)
+			echo "Usage: $0 [--gif]" >&2
+			exit 1
+			;;
+	esac
+done
+
+random_gif_name() {
+	local suffix
+	suffix=$(tr -dc 'a-z0-9' </dev/urandom | head -c 8)
+	echo "generated/random_${suffix}.gif"
+}
 
 run_antbyte() {
-	antbyte js/examples/random_world.mjs -Tc "border=die;size=128;speed=2;fps=12;dur=20" &
+	if (( gif_enabled )); then
+		local gif_name
+		gif_name=$(random_gif_name)
+		echo "Creating GIF: $gif_name"
+		antbyte --gif "$gif_name" "$world_script" -Tc "$world_settings_gif" &
+	else
+		antbyte "$world_script" -Tc "$world_settings_normal" &
+	fi
 	child_pid=$!
 }
 
