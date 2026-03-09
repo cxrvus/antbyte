@@ -80,7 +80,7 @@ impl World {
 		self.properties.config.ticks = Some(max_ticks);
 
 		while self.tick() {
-			if self.tick_count % 0x100 == 0 {
+			if self.tick_count.is_multiple_of(0x100) {
 				clear_screen();
 				print_title_short();
 				eprintln!("processing tick {} out of {max_ticks:0>4}", self.tick_str());

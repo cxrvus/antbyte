@@ -22,10 +22,10 @@ pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldPr
 		_ => bail!("input files need to have a '.ant', '.json' or '.mjs' extension"),
 	}?;
 
-	if properties.name.is_none() {
-		if let Some(name) = path.file_name() {
-			properties.name = Some(name.to_string_lossy().to_string());
-		}
+	if properties.name.is_none()
+		&& let Some(name) = path.file_name()
+	{
+		properties.name = Some(name.to_string_lossy().to_string());
 	}
 
 	Ok(properties)
