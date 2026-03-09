@@ -46,7 +46,6 @@ impl World {
 
 		let mut world = self;
 
-		// todo: implement looping
 		for i in 0..MAX_FRAMES {
 			clear_screen();
 			print_title_short();

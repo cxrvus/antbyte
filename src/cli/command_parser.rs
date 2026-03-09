@@ -54,7 +54,7 @@ pub struct Args {
 	#[arg(short, long)]
 	pub json: bool,
 
-	// todo: turn these into sub-commands, since the config args are ignored anyway
+	// idea: turn these into sub-commands, since the config args are ignored anyway
 	/// Export as GIF
 	#[arg(long)]
 	gif: Option<Option<PathBuf>>,

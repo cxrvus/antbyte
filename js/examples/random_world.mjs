@@ -8,6 +8,8 @@ import { newWorld, peripherals, size} from "../util.mjs"
 
 const KEEP_FILES = false;
 
+// todo: extract helper functions to random.mjs
+
 /** @returns {number} */
 function random() {
 	return Math.random()
