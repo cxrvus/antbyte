@@ -7,9 +7,8 @@ mod stdlib;
 mod test_std;
 
 use std::{
-	collections::HashSet,
+	collections::{BTreeMap, HashSet},
 	fmt::Display,
-	fs,
 	mem::take,
 	path::{Path, PathBuf},
 };
@@ -18,13 +17,11 @@ use crate::{
 	ant::{
 		Behavior,
 		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
-		world::{
-			WorldProperties,
-			parser::{
-				AntFunc, Expression, Func, ParamValue, Parser, Signature, SignatureSpec,
-				func_parser::MAIN, token::Token,
-			},
-		},
+		world::WorldProperties,
+	},
+	files::read_file,
+	parser::{
+		AntFunc, Expression, Func, ParamValue, Parser, Signature, SignatureSpec, func_parser::MAIN,
 	},
 	truth_table::TruthTable,
 };
@@ -72,38 +69,6 @@ struct CompStatement {
 #[derive(Default)]
 pub struct LogConfig {
 	pub all: bool,
-}
-
-pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldProperties> {
-	let code = read_file(path)?;
-	compile_world(&code, log_cfg, Some(path))
-		.with_context(|| format!("compiler error in file '{}'!", path.to_string_lossy()))
-}
-
-fn read_file(path: &PathBuf) -> Result<String> {
-	let extension = path.extension().unwrap_or_default().to_string_lossy();
-
-	if extension != "ant" {
-		bail!("ant files need to have a '.ant' extension");
-	}
-
-	let file_name = path.file_stem().unwrap_or_default().to_string_lossy();
-
-	if !validate_file_name(&file_name) {
-		bail!("ant file names need to be in snake_case")
-	}
-
-	fs::read_to_string(path)
-		.with_context(|| format!("error reading file '{}'!", path.to_string_lossy()))
-}
-
-#[rustfmt::skip]
-fn validate_file_name(file_name: &str) -> bool {
-	if let Ok(tokens) = Token::tokenize(file_name)
-		&& let Some(Token::Ident(ident)) = tokens.first()
-		&& ident == file_name
-	{ true }
-	else { false }
 }
 
 pub fn compile_world(
@@ -155,7 +120,7 @@ pub fn compile_world(
 
 	let comp_funcs = compile_funcs(parsed_funcs, log_cfg)?;
 
-	let mut behaviors: [Option<Behavior>; 0x100] = [const { None }; 0x100];
+	let mut behaviors: BTreeMap<u8, Behavior> = BTreeMap::new();
 
 	for AntFunc {
 		target_name,
@@ -164,7 +129,7 @@ pub fn compile_world(
 	{
 		eprintln!("Assembling ant '{target_name}' @ {target_id}...");
 
-		if let Some(behavior) = &behaviors[target_id as usize] {
+		if let Some(behavior) = behaviors.get(&target_id) {
 			bail!(
 				"tried to assign ID #{target_id} to '{target_name}', but it's already assigned to '{}'",
 				behavior.name
@@ -178,8 +143,8 @@ pub fn compile_world(
 			};
 
 			let target_func = signature.get_overload(&comp_funcs).unwrap();
-			let behavior = target_func.assemble(log_cfg).map(Some)?;
-			behaviors[target_id as usize] = behavior;
+			let behavior = target_func.assemble(log_cfg)?;
+			behaviors.insert(target_id, behavior);
 		}
 	}
 

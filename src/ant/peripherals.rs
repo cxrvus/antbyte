@@ -2,8 +2,10 @@ use std::cmp::Ordering;
 
 use anyhow::{Ok, Result, anyhow, bail};
 use regex::Regex;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use ts_rs::TS;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, TS)]
 pub enum Peripheral {
 	// ## cell interaction
 	CellClear,
@@ -46,27 +48,115 @@ const CELL: u8 = NIBBLE;
 const ANT_ID: u8 = BYTE;
 const BYTE: u8 = 8;
 
-impl Peripheral {
-	// idea: use Vec / HashMap instead of match and incorporate idents
-	pub fn properties(&self) -> PeripheralProperties {
-		use IoType::*;
-		use Peripheral::*;
-		type Props = PeripheralProperties;
+struct MetadataRecord {
+	peripheral: Peripheral,
+	short: &'static str,
+	aliases: &'static [&'static str],
+	size: u8,
+	io_type: Option<IoType>,
+}
 
-		#[rustfmt::skip]
-		let props = match self {
-			Memory 		=> Props { size: BYTE, io_type: None, },
-			Cell 		=> Props { size: CELL, io_type: None, },
-			CellNext 	=> Props { size: CELL, io_type: Some(Input), },
-			Time 		=> Props { size: BYTE, io_type: Some(Input), },
-			Random 		=> Props { size: BYTE, io_type: Some(Input), },
-			Obstacle 	=> Props { size: BIT, io_type: Some(Input), },
-			CellClear 	=> Props { size: BIT, io_type: Some(Output), },
-			Direction 	=> Props { size: DIR, io_type: Some(Output), },
-			Halted 		=> Props { size: BIT, io_type: Some(Output), },
-			SpawnAnt 	=> Props { size: ANT_ID, io_type: Some(Output), },
-			Kill 		=> Props { size: BIT, io_type: Some(Output), },
-			Die 		=> Props { size: BIT, io_type: Some(Output), },
+impl Peripheral {
+	const METADATA: [MetadataRecord; 12] = [
+		MetadataRecord {
+			peripheral: Self::Cell,
+			short: "C",
+			aliases: &["CELL_"],
+			size: CELL,
+			io_type: None,
+		},
+		MetadataRecord {
+			peripheral: Self::CellClear,
+			short: "CC",
+			aliases: &["CLEAR"],
+			size: BIT,
+			io_type: Some(IoType::Output),
+		},
+		MetadataRecord {
+			peripheral: Self::CellNext,
+			short: "CN",
+			aliases: &["NEXT_CELL_"],
+			size: CELL,
+			io_type: Some(IoType::Input),
+		},
+		MetadataRecord {
+			peripheral: Self::Obstacle,
+			short: "CX",
+			aliases: &["OBS", "OBSTACLE"],
+			size: BIT,
+			io_type: Some(IoType::Input),
+		},
+		MetadataRecord {
+			peripheral: Self::Time,
+			short: "T",
+			aliases: &["CLOCK_"],
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		MetadataRecord {
+			peripheral: Self::Memory,
+			short: "M",
+			aliases: &["MEM_"],
+			size: BYTE,
+			io_type: None,
+		},
+		MetadataRecord {
+			peripheral: Self::Random,
+			short: "R",
+			aliases: &["RAND_"],
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		MetadataRecord {
+			peripheral: Self::Direction,
+			short: "D",
+			aliases: &["DIR_"],
+			size: DIR,
+			io_type: Some(IoType::Output),
+		},
+		MetadataRecord {
+			peripheral: Self::Halted,
+			short: "DX",
+			aliases: &["HALT"],
+			size: BIT,
+			io_type: Some(IoType::Output),
+		},
+		MetadataRecord {
+			peripheral: Self::SpawnAnt,
+			short: "A",
+			aliases: &["SPAWN_"],
+			size: ANT_ID,
+			io_type: Some(IoType::Output),
+		},
+		MetadataRecord {
+			peripheral: Self::Kill,
+			short: "AK",
+			aliases: &["KILL"],
+			size: BIT,
+			io_type: Some(IoType::Output),
+		},
+		MetadataRecord {
+			peripheral: Self::Die,
+			short: "AX",
+			aliases: &["DIE"],
+			size: BIT,
+			io_type: Some(IoType::Output),
+		},
+	];
+
+	fn metadata(&self) -> &MetadataRecord {
+		Self::METADATA
+			.iter()
+			.find(|m| m.peripheral == *self)
+			.expect("peripheral without metadata specification")
+	}
+
+	pub fn properties(&self) -> PeripheralProperties {
+		let metadata = self.metadata();
+
+		let props = PeripheralProperties {
+			size: metadata.size,
+			io_type: metadata.io_type,
 		};
 
 		debug_assert_ne!(props.size, 0);
@@ -75,21 +165,14 @@ impl Peripheral {
 	}
 
 	pub fn from_ident(ident: &str) -> Option<Self> {
-		match ident {
-			"C" | "CELL_" => Some(Self::Cell),
-			"CC" | "CLEAR" => Some(Self::CellClear),
-			"CN" | "NEXT_CELL_" => Some(Self::CellNext),
-			"CX" | "OBS" | "OBSTACLE" => Some(Self::Obstacle),
-			"T" | "CLOCK_" => Some(Self::Time),
-			"M" | "MEM_" => Some(Self::Memory),
-			"R" | "RAND_" => Some(Self::Random),
-			"D" | "DIR_" => Some(Self::Direction),
-			"DX" | "HALT" => Some(Self::Halted),
-			"A" | "SPAWN_" => Some(Self::SpawnAnt),
-			"AK" | "KILL" => Some(Self::Kill),
-			"AX" | "DIE" => Some(Self::Die),
-			_ => None,
-		}
+		Self::METADATA
+			.iter()
+			.find(|x| x.short == ident || x.aliases.contains(&ident))
+			.map(|x| x.peripheral)
+	}
+
+	pub fn short_ident(&self) -> &'static str {
+		self.metadata().short
 	}
 }
 
@@ -113,13 +196,42 @@ impl Ord for OutputValue {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, TS)]
 pub struct PeripheralBit {
 	pub peripheral: Peripheral,
 	pub bit: u8,
 }
 
+impl Serialize for PeripheralBit {
+	fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+	where
+		S: Serializer,
+	{
+		serializer.serialize_str(&self.to_ident())
+	}
+}
+
+impl<'de> Deserialize<'de> for PeripheralBit {
+	fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+	where
+		D: Deserializer<'de>,
+	{
+		let ident = String::deserialize(deserializer)?;
+		Self::from_ident(&ident).map_err(serde::de::Error::custom)
+	}
+}
+
 impl PeripheralBit {
+	pub fn to_ident(&self) -> String {
+		let mut ident = self.peripheral.short_ident().to_owned();
+
+		if self.peripheral.properties().size > BIT {
+			ident.push_str(&format!("{:x}", self.bit));
+		}
+
+		ident
+	}
+
 	pub fn validate(&self, io_type: &IoType) -> Result<()> {
 		let properties = self.peripheral.properties();
 

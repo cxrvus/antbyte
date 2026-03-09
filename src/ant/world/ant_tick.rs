@@ -20,7 +20,7 @@ impl World {
 			..
 		} = self
 			.get_behavior(ant.behavior)
-			.clone()
+			.cloned()
 			.expect("invalid Behavior ID");
 
 		let mut input_bits = 0u8;
@@ -70,7 +70,7 @@ impl World {
 				output_value.value |= new_value;
 			} else {
 				output_values.push(OutputValue {
-					output: output_spec.peripheral.clone(),
+					output: output_spec.peripheral,
 					value: new_value,
 				});
 			}

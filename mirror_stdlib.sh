@@ -9,7 +9,7 @@
 set -e  # Exit on any error
 
 # Define file paths
-STDLIB_RS="src/ant/world/parser/compiler/stdlib.rs"
+STDLIB_RS="src/parser/compiler/stdlib.rs"
 STD_ANT="std.ant"
 
 # Check if the source file exists

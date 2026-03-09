@@ -1,22 +1,31 @@
-pub mod gif_export;
-pub mod parser;
 pub mod run;
 
 mod ant_tick;
 
 use anyhow::{Result, bail};
 use rand::{Rng, SeedableRng, rngs::StdRng};
+use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
-use std::ops::{Deref, DerefMut};
+use std::{
+	collections::BTreeMap,
+	ops::{Deref, DerefMut},
+};
 
 use super::{Ant, Behavior, BorderMode, StartingPos};
 
 use crate::{
-	ant::{ColorMode, compiler::settings_comp::FPS_CAP},
+	ant::ColorMode,
 	util::{matrix::Matrix, vec2::Vec2u},
 };
 
-#[derive(Debug, Clone)]
+pub const FPS_CAP: u32 = 50;
+pub const SIZE_CAP: u32 = 0x400;
+pub const SPEED_CAP: u32 = 0x2000;
+
+#[derive(Serialize, Deserialize, Debug, Clone, TS)]
+#[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct WorldConfig {
 	/// width in pixels
 	pub width: usize,
@@ -34,7 +43,7 @@ pub struct WorldConfig {
 	pub starting_pos: StartingPos,
 	pub color_mode: ColorMode,
 	pub noise_seed: Option<u32>,
-        pub hide_title: bool, // TODO: move to renderer
+	pub hide_title: bool, // TODO: move to renderer
 	pub description: String,
 }
 
@@ -52,25 +61,54 @@ impl Default for WorldConfig {
 			starting_pos: StartingPos::Center,
 			color_mode: ColorMode::RGBI,
 			noise_seed: None,
-                        hide_title: false,
+			hide_title: false,
 			description: "".into(),
 		}
 	}
 }
 
-#[derive(Debug, Clone)]
-pub struct WorldProperties {
-	pub behaviors: [Option<Behavior>; 0x100],
-	pub config: WorldConfig,
+impl WorldConfig {
+	pub fn validate(&self) -> Result<()> {
+		Self::non_zero(self.height, "height")?;
+		Self::non_zero(self.width, "width")?;
+		Self::cap(self.height, "height", SIZE_CAP)?;
+		Self::cap(self.width, "width", SIZE_CAP)?;
+
+		Self::cap_opt(self.fps, "FPS", FPS_CAP)?;
+		Self::cap_opt(self.speed, "speed", SPEED_CAP)?;
+		Self::cap_opt(self.sleep, "sleep", 10000)?;
+
+		Ok(())
+	}
+
+	#[inline]
+	#[rustfmt::skip]
+	fn cap(number: usize, property: &str, max: u32) -> Result<()> {
+		if number > max as usize { bail!("[{property}] must not exceed {max}") } Ok(())
+	}
+
+	fn cap_opt(number: Option<u32>, property: &str, max: u32) -> Result<()> {
+		Self::cap(number.unwrap_or_default() as usize, property, max)
+	}
+
+	#[inline]
+	#[rustfmt::skip]
+	fn non_zero(number: usize, property: &str) -> Result<()> {
+		if number == 0 { bail!("[{property}] must be greater than 0"); } Ok(())
+	}
 }
 
-impl Default for WorldProperties {
-	fn default() -> Self {
-		Self {
-			behaviors: [const { None }; 0x100],
-			config: Default::default(),
-		}
-	}
+#[derive(Serialize, Deserialize, Debug, Clone, Default, TS)]
+#[ts(export)]
+#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
+pub struct WorldProperties {
+	pub name: Option<String>,
+	#[serde(rename = "ants")]
+	pub behaviors: BTreeMap<u8, Behavior>,
+	#[serde(rename = "cfg")]
+	pub config: WorldConfig,
 }
 
 pub struct WorldState {
@@ -87,6 +125,8 @@ pub struct World {
 }
 impl World {
 	pub fn new(properties: WorldProperties) -> Result<Self> {
+		properties.config.validate()?;
+
 		let WorldConfig {
 			width,
 			height,
@@ -123,7 +163,7 @@ impl World {
 			},
 		};
 
-		if world.properties.behaviors[1].is_some() {
+		if world.properties.behaviors.contains_key(&1) {
 			let mut ant = Ant::new(starting_pos, 0, 1);
 			ant.grow_up();
 			world.spawn(ant);
@@ -194,8 +234,8 @@ impl World {
 		&self.ants
 	}
 
-	fn get_behavior(&self, id: u8) -> &Option<Behavior> {
-		&self.properties.behaviors[id as usize]
+	fn get_behavior(&self, id: u8) -> Option<&Behavior> {
+		self.properties.behaviors.get(&id)
 	}
 
 	fn rng(&mut self) -> u8 {

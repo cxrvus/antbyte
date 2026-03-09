@@ -1,8 +1,8 @@
 use std::fmt::{self, Display};
 
-use crate::ant::{
-	compiler::{CompStatement, FuncCall, ParamValue},
-	world::parser::{Expression, Statement},
+use crate::{
+	ant::compiler::{CompStatement, FuncCall, ParamValue},
+	parser::{Expression, Statement},
 };
 
 impl Statement {

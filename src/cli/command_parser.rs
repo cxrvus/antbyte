@@ -1,12 +1,17 @@
 #![cfg(feature = "clap")]
 
-use crate::ant::world::parser::token::Token;
-use clap::{self, Parser as ClapParser};
+use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::ant::{
-	compiler::{LogConfig, compile_world_file},
-	world::{World, WorldConfig, parser::Parser},
+use clap::{self, Parser as ClapParser};
+
+use crate::{
+	ant::{
+		compiler::LogConfig,
+		world::{World, WorldConfig},
+	},
+	files::compile_world_file,
+	parser::{Parser, token::Token},
 };
 
 use anyhow::{Context, Ok, Result, bail};
@@ -44,6 +49,10 @@ pub struct Args {
 	/// watch-mode, combine with -d / --debug for dry-runs
 	#[arg(short, long)]
 	pub watch: bool,
+
+	/// create a JSON world file upon compilation
+	#[arg(short, long)]
+	pub json: bool,
 
 	// todo: turn these into sub-commands, since the config args are ignored anyway
 	/// Export as GIF
@@ -86,6 +95,18 @@ pub fn run() -> Result<()> {
 pub fn run_once(args: Args) -> Result<()> {
 	let log_config = LogConfig { all: args.debug };
 	let mut properties = compile_world_file(&args.path, &log_config)?;
+
+	if args.json {
+		let mut json_path = args.path.clone();
+		json_path.set_extension("ant.json");
+
+		// idea: remove properties with default values
+		let json = serde_json::to_string(&properties)?;
+
+		fs::write(&json_path, json).with_context(|| {
+			format!("failed to write JSON world file to {}", json_path.display())
+		})?;
+	}
 
 	if args.preview {
 		let WorldConfig { width, height, .. } = properties.config;

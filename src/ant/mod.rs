@@ -1,7 +1,7 @@
 pub mod peripherals;
 pub mod world;
 
-pub use world::parser::compiler;
+pub use crate::parser::compiler;
 
 use crate::{
 	ant::peripherals::{IoType, PeripheralBit},
@@ -13,9 +13,12 @@ use crate::{
 };
 
 use anyhow::{Error, Result, anyhow};
+use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
 #[rustfmt::skip]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
 pub enum BorderMode { Collide, Despawn, Cycle, Wrap }
 
 impl TryFrom<String> for BorderMode {
@@ -33,7 +36,8 @@ impl TryFrom<String> for BorderMode {
 }
 
 #[rustfmt::skip]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all="snake_case")]
 pub enum StartingPos { TopLeft, MiddleLeft, Center }
 
 impl TryFrom<String> for StartingPos {
@@ -49,11 +53,10 @@ impl TryFrom<String> for StartingPos {
 	}
 }
 
-#[derive(Debug, Clone)]
-pub enum ColorMode {
-	Binary,
-	RGBI,
-}
+#[rustfmt::skip]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+pub enum ColorMode { Binary, RGBI }
 
 impl TryFrom<String> for ColorMode {
 	type Error = Error;
@@ -133,12 +136,45 @@ impl Ant {
 	}
 }
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, TS)]
+#[serde(try_from = "BehaviorJSON", into = "BehaviorJSON")]
 pub struct Behavior {
 	pub name: String,
 	pub logic: TruthTable,
 	pub inputs: Vec<PeripheralBit>,
 	pub outputs: Vec<PeripheralBit>,
+}
+
+#[derive(Serialize, Deserialize, TS)]
+#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase")]
+struct BehaviorJSON {
+	name: String,
+	logic: Vec<u32>,
+	inputs: Vec<PeripheralBit>,
+	outputs: Vec<PeripheralBit>,
+}
+
+impl TryFrom<BehaviorJSON> for Behavior {
+	type Error = String;
+
+	fn try_from(value: BehaviorJSON) -> std::result::Result<Self, Self::Error> {
+		let logic = TruthTable::new(value.inputs.len(), value.outputs.len(), value.logic)
+			.map_err(|e| e.to_string())?;
+
+		Behavior::new(value.name, logic, value.inputs, value.outputs).map_err(|e| e.to_string())
+	}
+}
+
+impl From<Behavior> for BehaviorJSON {
+	fn from(value: Behavior) -> Self {
+		Self {
+			name: value.name,
+			logic: value.logic.entries().clone(),
+			inputs: value.inputs,
+			outputs: value.outputs,
+		}
+	}
 }
 
 impl Behavior {
@@ -148,6 +184,20 @@ impl Behavior {
 		inputs: Vec<PeripheralBit>,
 		outputs: Vec<PeripheralBit>,
 	) -> Result<Self> {
+		if inputs.len() > 8 {
+			return Err(anyhow!(
+				"may not have more than 8 inputs, got {}\n{:?}:\n",
+				inputs.len(),
+				inputs
+			));
+		} else if outputs.len() > 32 {
+			return Err(anyhow!(
+				"may not have more than 32 inputs, got {}\n{:?}:\n",
+				outputs.len(),
+				outputs
+			));
+		}
+
 		Self::validate_periphs(&inputs, IoType::Input)?;
 		Self::validate_periphs(&outputs, IoType::Output)?;
 

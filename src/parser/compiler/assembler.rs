@@ -5,8 +5,8 @@ use crate::{
 		Behavior,
 		compiler::{CompFunc, LogConfig},
 		peripherals::{IoType, PeripheralBit},
-		world::parser::{ParamValue, Signature, token::Token},
 	},
+	parser::{ParamValue, Signature, token::Token},
 	truth_table::TruthTable,
 };
 

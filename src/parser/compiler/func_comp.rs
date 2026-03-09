@@ -2,9 +2,9 @@ use anyhow::{Context, Result, bail};
 
 use super::CompFunc;
 
-use crate::ant::{
-	compiler::{CompStatement, LogConfig},
-	world::parser::Func,
+use crate::{
+	ant::compiler::{CompStatement, LogConfig},
+	parser::Func,
 };
 
 pub(super) fn compile_funcs(funcs: Vec<Func>, log_cfg: &LogConfig) -> Result<Vec<CompFunc>> {
