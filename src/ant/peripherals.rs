@@ -48,7 +48,7 @@ const CELL: u8 = NIBBLE;
 const ANT_ID: u8 = BYTE;
 const BYTE: u8 = 8;
 
-struct MetadataRecord {
+pub struct MetadataRecord {
 	peripheral: Peripheral,
 	short: &'static str,
 	aliases: &'static [&'static str],
@@ -57,7 +57,7 @@ struct MetadataRecord {
 }
 
 impl Peripheral {
-	const METADATA: [MetadataRecord; 12] = [
+	pub const METADATA: [MetadataRecord; 12] = [
 		MetadataRecord {
 			peripheral: Self::Cell,
 			short: "C",
@@ -288,5 +288,52 @@ impl PeripheralBit {
 			peripheral,
 			bit: bit_index.unwrap_or_default(),
 		})
+	}
+}
+
+#[cfg(test)]
+mod test {
+	use super::{IoType, MetadataRecord, Peripheral};
+	use IoType::*;
+
+	#[test]
+	#[rustfmt::skip]
+	fn show_metadata() {
+		let entries = Peripheral::METADATA;
+
+		let inputs = entries.iter().filter(|x| x.io_type == Some(Input)).collect::<Vec<_>>();
+		let outputs = entries.iter().filter(|x| x.io_type == Some(Output)).collect::<Vec<_>>();
+
+		// number literals accounting for special peripherals (C and M) and planned peripherals (TQ, RQ, XI, XO, AD)
+		let input_count = inputs.len() + 2 + 3;
+		let output_count = outputs.len() + 2 + 2;
+
+		let input_size = inputs.iter().map(|x| x.size).sum::<u8>() + 8 + 4 + 8 + 8 + 8;
+		let output_size = outputs.iter().map(|x| x.size).sum::<u8>() + 8 + 4 + 8 + 3;
+
+		println!("input count: {input_count}");
+		println!("output count: {output_count}");
+		println!("total count: {}", input_count + output_count);
+
+		println!();
+
+		println!("input size: {input_size}");
+		println!("output size: {output_size}");
+		println!("total size: {}", input_size + output_size);
+
+		println!();
+		println!();
+
+		for entry in entries {
+			let MetadataRecord { short, size, io_type, ..  } = entry;
+
+			let io_type = match io_type {
+				None => "IO",
+				Some(Input) => "I",
+				Some(Output) => "*",
+			};
+
+			println!("{short}; {size}; {io_type}")
+		}
 	}
 }
