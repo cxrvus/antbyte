@@ -82,7 +82,7 @@ export const inv = (...params) => params.map(x => !x)
 
 export const peripherals = {
 	input: [
-		"CX",
+		"AC",
 		"C0", "C1", "C2", "C3",
 		"CN0", "CN1", "CN2", "CN3",
 		"T0", "T1", "T2", "T3", "T4", "T5", "T6", "T7",

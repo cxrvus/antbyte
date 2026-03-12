@@ -81,7 +81,7 @@ impl Peripheral {
 		},
 		MetadataRecord {
 			peripheral: Self::Obstacle,
-			short: "CX",
+			short: "AC",
 			aliases: &["OBS", "OBSTACLE"],
 			size: BIT,
 			io_type: Some(IoType::Input),
@@ -258,7 +258,6 @@ impl PeripheralBit {
 	pub fn from_ident(ident: &str) -> Result<Self> {
 		let re = Regex::new(Self::PERIPH_PTN).unwrap();
 
-		// let (periph_string, bit_index) =
 		let captures = re
 			.captures(ident)
 			.ok_or(anyhow!("'{ident}' is not a valid peripheral"))?;
@@ -304,7 +303,8 @@ mod test {
 		let inputs = entries.iter().filter(|x| x.io_type == Some(Input)).collect::<Vec<_>>();
 		let outputs = entries.iter().filter(|x| x.io_type == Some(Output)).collect::<Vec<_>>();
 
-		// number literals accounting for special peripherals (C and M) and planned peripherals (TQ, RQ, XI, XO, AD)
+		// number literals accounting for special peripherals (C and M) and planned peripherals (TT, RR, K, X, AD)...
+
 		let input_count = inputs.len() + 2 + 3;
 		let output_count = outputs.len() + 2 + 2;
 
