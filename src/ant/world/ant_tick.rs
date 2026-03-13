@@ -8,6 +8,10 @@ use crate::{
 
 use super::{Ant, Behavior, BorderMode, World};
 
+fn zero_count_mask(x: u8) -> u8 {
+	0xff_u8.unbounded_shr(8 - x.trailing_zeros())
+}
+
 impl World {
 	// idea: split up into sub-methods and rename
 	pub(super) fn ant_tick(&mut self, ant_index: usize) {
@@ -30,6 +34,7 @@ impl World {
 		for input_spec in inputs.iter() {
 			let input_value: u8 = match input_spec.peripheral {
 				Time => ant.age as u8,
+				TimeRhythm => zero_count_mask(ant.age as u8),
 				Cell => *self.cells.at(&ant.pos.sign()).unwrap(),
 				CellNext => self
 					.next_pos(&ant)
@@ -37,6 +42,7 @@ impl World {
 					.unwrap_or(0u8),
 				Memory => ant.memory,
 				Random => self.rng(),
+				RandomChance => zero_count_mask(self.rng()),
 				Obstacle => match self.next_pos(&ant) {
 					Some(pos) => self.is_occupied(&pos).into(),
 					None => 1,

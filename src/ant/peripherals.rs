@@ -14,8 +14,10 @@ pub enum Peripheral {
 
 	// ## universal inputs:
 	Time,
+	TimeRhythm,
 	Memory,
 	Random,
+	RandomChance,
 
 	// ## ant interaction inputs
 	Obstacle,
@@ -57,7 +59,7 @@ pub struct MetadataRecord {
 }
 
 impl Peripheral {
-	pub const METADATA: [MetadataRecord; 12] = [
+	pub const METADATA: [MetadataRecord; 14] = [
 		MetadataRecord {
 			peripheral: Self::Cell,
 			short: "C",
@@ -94,6 +96,13 @@ impl Peripheral {
 			io_type: Some(IoType::Input),
 		},
 		MetadataRecord {
+			peripheral: Self::TimeRhythm,
+			short: "TT",
+			aliases: &["RHYTHM_"],
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		MetadataRecord {
 			peripheral: Self::Memory,
 			short: "M",
 			aliases: &["MEM_"],
@@ -104,6 +113,13 @@ impl Peripheral {
 			peripheral: Self::Random,
 			short: "R",
 			aliases: &["RAND_"],
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		MetadataRecord {
+			peripheral: Self::RandomChance,
+			short: "RR",
+			aliases: &["CHANCE_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
@@ -303,12 +319,12 @@ mod test {
 		let inputs = entries.iter().filter(|x| x.io_type == Some(Input)).collect::<Vec<_>>();
 		let outputs = entries.iter().filter(|x| x.io_type == Some(Output)).collect::<Vec<_>>();
 
-		// number literals accounting for special peripherals (C and M) and planned peripherals (TT, RR, K, X, AD)...
+		// number literals accounting for special peripherals (C and M) and planned peripherals (AD, K, X)...
 
-		let input_count = inputs.len() + 2 + 3;
+		let input_count = inputs.len() + 2 + 1;
 		let output_count = outputs.len() + 2 + 2;
 
-		let input_size = inputs.iter().map(|x| x.size).sum::<u8>() + 8 + 4 + 8 + 8 + 8;
+		let input_size = inputs.iter().map(|x| x.size).sum::<u8>() + 4 + 8 + 8;
 		let output_size = outputs.iter().map(|x| x.size).sum::<u8>() + 8 + 4 + 8 + 3;
 
 		println!("input count: {input_count}");
