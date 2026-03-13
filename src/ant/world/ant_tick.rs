@@ -190,10 +190,11 @@ impl World {
 		}
 	}
 
-	const ANT_LIMIT: usize = 0x100;
+	const ANT_LIMIT: u32 = 0x100;
 
 	pub fn spawn(&mut self, ant: Ant) {
-		if self.ants.len() < Self::ANT_LIMIT && !self.is_occupied(&ant.pos) {
+		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
+		if self.ants.len() < ant_limit && !self.is_occupied(&ant.pos) {
 			self.ants.push(ant);
 			self.occupy(&ant.pos, true);
 		}

@@ -45,6 +45,8 @@ pub struct WorldConfig {
 	pub border_mode: BorderMode,
 	/// position of the first ant
 	pub starting_pos: StartingPos,
+	/// max number of ants before additional spawning gets blocked
+	pub ant_limit: Option<u32>,
 	pub color_mode: ColorMode,
 	pub noise_seed: Option<u32>,
 	pub hide_title: bool, // TODO: move to renderer
@@ -63,6 +65,7 @@ impl Default for WorldConfig {
 			looping: false,
 			border_mode: BorderMode::Wrap,
 			starting_pos: StartingPos::Center,
+			ant_limit: None,
 			color_mode: ColorMode::RGBI,
 			noise_seed: None,
 			hide_title: false,

@@ -66,6 +66,8 @@ impl Parser {
 				config.starting_pos = StartingPos::try_from(self.next_ident()?)?
 			}
 
+			"ant_limit" => config.ant_limit = self.next_number()?,
+
 			"color_mode" | "colors" => config.color_mode = ColorMode::try_from(self.next_ident()?)?,
 
 			"desc" | "description" => config.description = self.next_str()?,
