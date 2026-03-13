@@ -38,7 +38,7 @@ impl TryFrom<String> for BorderMode {
 #[rustfmt::skip]
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all="snake_case")]
-pub enum StartingPos { TopLeft, MiddleLeft, Center }
+pub enum StartingPos { TopLeft, Top, Left, Center }
 
 impl TryFrom<String> for StartingPos {
 	type Error = Error;
@@ -46,7 +46,8 @@ impl TryFrom<String> for StartingPos {
 	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
 		match value.as_str() {
 			"top_left" => Ok(Self::TopLeft),
-			"mid_left" => Ok(Self::MiddleLeft),
+			"top" => Ok(Self::Top),
+			"left" => Ok(Self::Left),
 			"center" => Ok(Self::Center),
 			invalid => Err(anyhow!("invalid starting pos: '{invalid}'")),
 		}
