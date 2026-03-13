@@ -37,9 +37,13 @@ pub struct WorldConfig {
 	pub speed: Option<u32>,
 	/// simulation tick limit
 	pub ticks: Option<u32>,
+	/// amount of ms to sleep for after end of simulation, i.e. between loops
 	pub sleep: Option<u32>,
+	/// re-run simulation after it ends
 	pub looping: bool,
+	/// behavior if ants touch the worlds border
 	pub border_mode: BorderMode,
+	/// position of the first ant
 	pub starting_pos: StartingPos,
 	pub color_mode: ColorMode,
 	pub noise_seed: Option<u32>,
