@@ -8,8 +8,8 @@ use clap::{self, Parser as ClapParser};
 use super::args::Args;
 use super::file_compiler::compile_world_file;
 
-use crate::ant::{
-	compiler::LogConfig,
+use crate::{
+	ant::compiler::LogConfig,
 	world::{World, WorldConfig},
 };
 

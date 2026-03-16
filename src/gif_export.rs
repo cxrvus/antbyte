@@ -1,9 +1,10 @@
 #![cfg(feature = "extras")]
 
 use crate::{
-	ant::world::{World, WorldConfig},
 	cli::{clear_screen, print_title_short},
+	world::{World, WorldConfig},
 };
+
 use anyhow::Result;
 use gif::{Encoder, Frame, Repeat};
 use std::{

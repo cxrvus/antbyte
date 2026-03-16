@@ -11,10 +11,8 @@ use std::{
 	ops::{Deref, DerefMut},
 };
 
-use super::{Ant, Behavior, BorderMode, StartingPos};
-
 use crate::{
-	ant::ColorMode,
+	ant::{Ant, Behavior, BorderMode, ColorMode, StartingPos},
 	util::{matrix::Matrix, vec2::Vec2u},
 };
 
@@ -123,7 +121,7 @@ pub struct WorldState {
 	rng: StdRng,
 	tick_count: u32,
 	pub cells: Matrix<u8>,
-	ants: Vec<Ant>,
+	pub ants: Vec<Ant>,
 	ant_cache: Matrix<bool>,
 }
 

@@ -1,7 +1,8 @@
 use crate::{
-	ant::world::WorldConfig,
 	parser::{Parser, token::Token},
+	world::WorldConfig,
 };
+
 use clap::{self, Parser as ClapParser};
 use std::path::PathBuf;
 

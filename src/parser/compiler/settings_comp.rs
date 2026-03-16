@@ -1,8 +1,9 @@
 use anyhow::{Context, Result, anyhow};
 
 use crate::{
-	ant::{BorderMode, ColorMode, StartingPos, world::WorldConfig},
+	ant::{BorderMode, ColorMode, StartingPos},
 	parser::{Parser, token::Token},
+	world::WorldConfig,
 };
 
 impl WorldConfig {

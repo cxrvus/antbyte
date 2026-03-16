@@ -1,5 +1,4 @@
 pub mod peripherals;
-pub mod world;
 
 pub use crate::parser::compiler;
 
@@ -74,7 +73,7 @@ impl TryFrom<String> for ColorMode {
 }
 
 #[derive(Clone, Copy, Default)]
-enum AntStatus {
+pub enum AntStatus {
 	#[default]
 	Newborn,
 	Alive,
@@ -84,7 +83,7 @@ enum AntStatus {
 #[derive(Clone, Copy, Default)]
 pub struct Ant {
 	pub behavior: u8,
-	status: AntStatus,
+	pub status: AntStatus,
 	pub pos: Vec2u,
 	/// principle direction - number between 0 and 7
 	pub dir: u8,

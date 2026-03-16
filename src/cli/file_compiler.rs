@@ -2,8 +2,8 @@ use std::{fs, path::PathBuf, process};
 
 use anyhow::{Context, Result, bail};
 
-use crate::ant::{
-	compiler::{LogConfig, compile_world},
+use crate::{
+	ant::compiler::{LogConfig, compile_world},
 	world::WorldProperties,
 };
 
