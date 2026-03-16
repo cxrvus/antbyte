@@ -4,7 +4,7 @@ use crate::util::vec2::*;
 pub struct Matrix<T> {
 	pub width: usize,
 	pub height: usize,
-	pub values: Vec<T>,
+	pub entries: Vec<T>,
 }
 
 impl<T> Matrix<T> {
@@ -14,7 +14,7 @@ impl<T> Matrix<T> {
 		Self {
 			width,
 			height,
-			values,
+			entries: values,
 		}
 	}
 
@@ -27,7 +27,7 @@ impl<T> Matrix<T> {
 	pub fn at(&self, pos: &Vec2) -> Option<&T> {
 		let Vec2u { x, y } = pos.unsign()?;
 		if self.in_bounds(pos) {
-			Some(&self.values[y * self.width + x])
+			Some(&self.entries[y * self.width + x])
 		} else {
 			None
 		}
@@ -37,14 +37,14 @@ impl<T> Matrix<T> {
 	pub fn set_at(&mut self, pos: &Vec2, value: T) {
 		if self.in_bounds(pos) {
 			let Vec2u { x, y } = pos.unsign().unwrap();
-			self.values[y * self.width + x] = value;
+			self.entries[y * self.width + x] = value;
 		} else {
 			panic!("map index is out of range: {pos:?}")
 		}
 	}
 
 	pub fn get_pos(&self, i: usize) -> Option<Vec2u> {
-		self.values.get(i)?;
+		self.entries.get(i)?;
 		Some(Vec2u {
 			x: (i % self.width),
 			y: (i / self.width),
@@ -64,7 +64,7 @@ impl<T> Matrix<T> {
 		} else {
 			let start = i * self.width;
 			let end = (i + 1) * self.width;
-			let row = self.values[start..end].iter().collect::<Vec<&T>>();
+			let row = self.entries[start..end].iter().collect::<Vec<&T>>();
 			Some(row)
 		}
 	}
@@ -74,7 +74,7 @@ impl<T> Matrix<T> {
 			None
 		} else {
 			let col = (0..self.height)
-				.map(|row| &self.values[row * self.width + i])
+				.map(|row| &self.entries[row * self.width + i])
 				.collect::<Vec<&T>>();
 			Some(col)
 		}
@@ -89,7 +89,7 @@ where
 		Self {
 			width,
 			height,
-			values: (0..width * height).map(|_| T::default()).collect(),
+			entries: (0..width * height).map(|_| T::default()).collect(),
 		}
 	}
 }
@@ -99,7 +99,7 @@ where
 	T: Default + PartialEq,
 {
 	pub fn find_all(&self, target: T) -> Vec<Vec2u> {
-		self.values
+		self.entries
 			.iter()
 			.enumerate()
 			.filter(|(_, value)| **value == target)
@@ -116,7 +116,7 @@ mod tests {
 		Matrix {
 			width: 3,
 			height: 3,
-			values: vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
+			entries: vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
 		}
 	}
 
@@ -165,7 +165,7 @@ impl ProxyMatrix {
 		Matrix {
 			width: self.width,
 			height: self.height,
-			values: parser(self.string),
+			entries: parser(self.string),
 		}
 	}
 }

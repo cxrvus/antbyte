@@ -34,12 +34,21 @@ pub struct WorldProperties {
 	pub config: WorldConfig,
 }
 
+pub type Cells = Matrix<Cell>;
+
+impl Cells {}
+
+#[derive(Debug, Clone, Default)]
+pub struct Cell {
+	pub value: u8,
+	pub occupied: bool,
+}
+
 pub struct WorldState {
 	rng: StdRng,
 	tick_count: u32,
-	pub cells: Matrix<u8>,
+	pub cells: Cells,
 	pub ants: Vec<Ant>,
-	ant_cache: Matrix<bool>,
 }
 
 pub struct World {
@@ -68,7 +77,6 @@ impl World {
 			rng,
 			tick_count: 0,
 			cells: Matrix::new(width, height),
-			ant_cache: Matrix::new(width, height),
 			ants: vec![],
 		};
 
@@ -136,6 +144,21 @@ impl World {
 			.unwrap_or_default();
 
 		!(no_ants || tick_overflow)
+	}
+
+	#[rustfmt::skip]
+	pub fn set_value(&mut self, pos: &Vec2u, value: u8) {
+		let old_cell = self.cells.at(&pos.sign()).unwrap();
+		let cell = Cell { value, ..*old_cell };
+		self.cells.set_at(&pos.sign(), cell);
+	}
+
+	#[rustfmt::skip]
+	#[inline]
+	pub(super) fn occupy(&mut self, pos: &Vec2u, occupied: bool) {
+		let old_cell = self.cells.at(&pos.sign()).unwrap();
+		let cell = Cell { occupied, ..*old_cell };
+		self.cells.set_at(&pos.sign(), cell);
 	}
 
 	pub fn tick_count(&self) -> u32 {

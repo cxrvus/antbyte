@@ -112,7 +112,7 @@ impl World {
 		let cells = &self.cells;
 		let mut string = String::new();
 
-		for (i, cell) in cells.values.iter().enumerate() {
+		for (i, cell) in cells.entries.iter().enumerate() {
 			if i % cells.width == 0 {
 				string.push('\n');
 			}
@@ -122,12 +122,12 @@ impl World {
 
 			match ant {
 				None => {
-					string.push_str(&color_cell(*cell, "  "));
+					string.push_str(&color_cell(cell.value, "  "));
 				}
 				Some(ant) => {
 					let (char1, char2) = ant.dir_vec().principal_chars();
 					let ant_chars = format!("{char1}{char2}");
-					string.push_str(&color_cell(*cell, &ant_chars));
+					string.push_str(&color_cell(cell.value, &ant_chars));
 				}
 			}
 		}

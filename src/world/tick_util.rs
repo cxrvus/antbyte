@@ -49,14 +49,10 @@ impl World {
 
 	#[inline]
 	pub(super) fn is_occupied(&self, pos: &Vec2u) -> bool {
-		*self
-			.ant_cache
+		self.cells
 			.at(&pos.sign())
 			.expect("position out of bounds: {pos:?}")
-	}
-
-	pub(super) fn occupy(&mut self, pos: &Vec2u, value: bool) {
-		self.ant_cache.set_at(&pos.sign(), value)
+			.occupied
 	}
 
 	pub(super) fn move_tick(&mut self, ant: &mut Ant) {

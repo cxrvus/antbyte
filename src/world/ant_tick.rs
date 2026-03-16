@@ -28,10 +28,10 @@ impl World {
 			let input_value: u8 = match input_spec.event {
 				Time => ant.age as u8,
 				Pulse => zero_count_mask(ant.age as u8),
-				Cell => *self.cells.at(&ant.pos.sign()).unwrap(),
+				Cell => self.cells.at(&ant.pos.sign()).unwrap().value,
 				CellNext => self
 					.next_pos(&ant)
-					.map(|pos| *self.cells.at(&pos.sign()).unwrap())
+					.map(|pos| self.cells.at(&pos.sign()).unwrap().value)
 					.unwrap_or(0u8),
 				Memory => ant.memory,
 				Random => self.rng(),
@@ -96,12 +96,12 @@ impl World {
 				(Direction, _) => ant.set_dir(ant.dir + value),
 				(Halted, _) => ant.halted = value != 0,
 				(Cell, _) => {
-					let old_value = self.cells.at(&ant.pos.sign()).unwrap();
+					let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
 					let value = value | (old_value & output_cell_mask);
 					let adjusted = self.adjusted_color(value);
-					self.cells.set_at(&ant.pos.sign(), adjusted);
+					self.set_value(&ant.pos, adjusted);
 				}
-				(CellClear, 1) => self.cells.set_at(&ant.pos.sign(), 0),
+				(CellClear, 1) => self.set_value(&ant.pos, 0),
 				(Memory, value) => ant.memory = value,
 				(SpawnAnt, _) if value != 0 => self.reproduce(&ant, value),
 				(Kill, 1) => {

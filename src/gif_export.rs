@@ -76,7 +76,7 @@ impl World {
 		for y in 0..*height {
 			let mut scaled_row = Vec::with_capacity(scaled_width);
 			for x in 0..*width {
-				let pixel = self.cells.values[y * width + x];
+				let pixel = self.cells.entries[y * width + x].value;
 				for _ in 0..scale {
 					scaled_row.push(pixel);
 				}
