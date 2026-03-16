@@ -17,9 +17,11 @@ pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldPr
 
 		"json" => compile_json(&code),
 
-		"mjs" => compile_mjs(path),
+		"js" | "mjs" => compile_js(path),
 
-		_ => bail!("input files need to have a '.ant', '.json' or '.mjs' extension"),
+		_ => bail!(
+			"invalid file extension: {extension}.\n needs to be either: '.ant', '.json', '.js', '.mjs'"
+		),
 	}?;
 
 	if properties.name.is_none()
@@ -40,20 +42,20 @@ pub fn compile_json(code: &str) -> Result<WorldProperties> {
 	serde_json::from_str::<WorldProperties>(code).context("invalid JSON world file!")
 }
 
-pub fn compile_mjs(path: &PathBuf) -> Result<WorldProperties> {
+pub fn compile_js(path: &PathBuf) -> Result<WorldProperties> {
 	// idea: insert node JS warning
 
 	let output = process::Command::new("node")
 		.arg(path)
 		.output()
-		.context("failed to execute node-JS script!")?;
+		.context("failed to execute nodejs script!")?;
 
 	let code = String::from_utf8(output.stdout).context("invalid UTF-8 in stdout!")?;
 	let error = String::from_utf8(output.stderr).context("invalid UTF-8 in stderr!")?;
 
 	if !output.status.success() {
-		bail!("node execution failed: {error}");
+		bail!("nodejs execution failed: {error}");
 	}
 
-	serde_json::from_str::<WorldProperties>(&code).context("invalid JSON from node-JS output!")
+	serde_json::from_str::<WorldProperties>(&code).context("invalid JSON from nodejs output!")
 }
