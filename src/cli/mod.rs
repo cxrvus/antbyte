@@ -1,5 +1,6 @@
 use std::{thread, time::Duration};
 
+mod args;
 pub mod command_parser;
 pub mod file_compiler;
 

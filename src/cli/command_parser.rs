@@ -5,73 +5,15 @@ use std::path::{Path, PathBuf};
 
 use clap::{self, Parser as ClapParser};
 
+use super::args::Args;
 use super::file_compiler::compile_world_file;
 
-use crate::{
-	ant::{
-		compiler::LogConfig,
-		world::{World, WorldConfig},
-	},
-	parser::{Parser, token::Token},
+use crate::ant::{
+	compiler::LogConfig,
+	world::{World, WorldConfig},
 };
 
-use anyhow::{Context, Ok, Result, bail};
-
-#[derive(ClapParser, Debug, Default, Clone)]
-#[command(version, about, long_about = None)]
-pub struct Args {
-	/// Path to the .ant file to execute
-	pub path: PathBuf,
-
-	/// Step through the simulation, waiting for input after each frame (FPS = 0)
-	#[arg(short = 'S', long)]
-	stepped: bool,
-
-	/// Looping simulation
-	#[arg(short, long)]
-	looping: bool,
-
-	/// Instant simulation
-	#[arg(short, long)]
-	instant: bool,
-
-	/// Set tick limit
-	#[arg(short, long)]
-	ticks: Option<u32>,
-
-	/// Configure settings
-	#[arg(short, long)]
-	cfg: Option<String>,
-
-	/// Hide Title Banner
-	#[arg(short = 'T', long)]
-	hide_title: bool,
-
-	/// watch-mode, combine with -d / --debug for dry-runs
-	#[arg(short, long)]
-	pub watch: bool,
-
-	/// pass args to sub-process, e.g. a nodejs file
-	#[arg(short = 'a', long = "args")]
-	pub sub_args: Option<String>,
-
-	/// create a JSON world file upon compilation
-	#[arg(short, long)]
-	pub json: bool,
-
-	// idea: turn these into sub-commands, since the config args are ignored anyway
-	/// Export as GIF
-	#[arg(long)]
-	gif: Option<Option<PathBuf>>,
-
-	/// Log debug info instead of running the simulation
-	#[arg(short, long)]
-	debug: bool,
-
-	/// Show a preview of the dimensions of the antlet
-	#[arg(short, long)]
-	preview: bool,
-}
+use anyhow::{Context, Ok, Result};
 
 pub fn run() -> Result<()> {
 	let args = Args::parse();
@@ -98,7 +40,8 @@ pub fn run() -> Result<()> {
 	} else if args.debug {
 		// logging happens on compilation
 	} else {
-		set_config(&mut properties.config, &args).context("config-arg error!")?;
+		args.set_config(&mut properties.config)
+			.context("config-arg error!")?;
 		let mut world = World::new(properties).context("world error!")?;
 
 		if let Some(target) = args.gif {
@@ -106,32 +49,6 @@ pub fn run() -> Result<()> {
 		} else {
 			world.run().context("world error!")?;
 		}
-	}
-
-	Ok(())
-}
-
-#[rustfmt::skip]
-fn set_config(config: &mut WorldConfig, args: &Args) -> Result<()> {
-	if let Some(cfg) = &args.cfg {
-		let cfg = if cfg.trim().ends_with(';') { cfg } else { &format!("{cfg};") };
-
-		let mut parser = Parser::new(cfg)?;
-
-		while !parser.assume_next(Token::EndOfFile) {
-			let (key, value) = parser.parse_setting()?;
-			config.set_setting(key, value)?;
-		}
-	}
-
-        if args.hide_title { config.hide_title = true; }
-	if args.stepped { config.fps = None; }
-	if args.instant { config.speed = None; }
-	if args.looping { config.looping = true; }
-	if args.ticks.is_some() { config.ticks = args.ticks; }
-
-	if args.gif.is_some() && (config.speed.is_none() | config.fps.is_none()) {
-		bail!("need a speed and an FPS of at least 1 to export as GIF");
 	}
 
 	Ok(())
