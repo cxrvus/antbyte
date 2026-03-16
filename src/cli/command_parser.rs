@@ -10,7 +10,7 @@ use super::file_compiler::compile_world_file;
 
 use crate::{
 	ant::compiler::LogConfig,
-	world::{World, WorldConfig},
+	world::{World, config::WorldConfig},
 };
 
 use anyhow::{Context, Ok, Result};

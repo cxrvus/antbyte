@@ -11,66 +11,8 @@ use crate::{
 	},
 };
 
-use anyhow::{Error, Result, anyhow};
+use anyhow::{Result, anyhow};
 use serde::{Deserialize, Serialize};
-
-#[rustfmt::skip]
-#[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum BorderMode { Collide, Despawn, Cycle, Wrap }
-
-impl TryFrom<String> for BorderMode {
-	type Error = Error;
-
-	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
-		match value.as_str() {
-			"obs" | "collide" => Ok(Self::Collide),
-			"die" | "despawn" => Ok(Self::Despawn),
-			"cycle" => Ok(Self::Cycle),
-			"wrap" => Ok(Self::Wrap),
-			invalid => Err(anyhow!("invalid border mode: '{invalid}'")),
-		}
-	}
-}
-
-#[rustfmt::skip]
-#[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all="snake_case")]
-pub enum StartingPos { TopLeft, Top, Left, Center }
-
-impl TryFrom<String> for StartingPos {
-	type Error = Error;
-
-	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
-		match value.as_str() {
-			"top_left" => Ok(Self::TopLeft),
-			"top" => Ok(Self::Top),
-			"left" => Ok(Self::Left),
-			"center" => Ok(Self::Center),
-			invalid => Err(anyhow!("invalid starting pos: '{invalid}'")),
-		}
-	}
-}
-
-#[rustfmt::skip]
-#[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ColorMode { Binary, RGBI }
-
-impl TryFrom<String> for ColorMode {
-	type Error = Error;
-
-	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
-		match value.as_str() {
-			"rgb" | "rbgi" => Ok(Self::RGBI),
-			"bin" => Ok(Self::Binary),
-			invalid => Err(anyhow!("invalid starting pos: '{invalid}'")),
-		}
-	}
-}
 
 #[derive(Clone, Copy, Default)]
 pub enum AntStatus {

@@ -1,10 +1,10 @@
 pub mod run;
 
 mod ant_tick;
-mod config;
 mod tick_util;
 
-pub use config::WorldConfig;
+pub mod config;
+use config::{StartingPos, WorldConfig};
 
 use anyhow::{Result, bail};
 use rand::{Rng, SeedableRng, rngs::StdRng};
@@ -16,7 +16,7 @@ use std::{
 };
 
 use crate::{
-	ant::{Ant, Behavior, BorderMode, StartingPos},
+	ant::{Ant, Behavior},
 	util::{matrix::Matrix, vec2::Vec2u},
 };
 

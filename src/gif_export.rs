@@ -2,7 +2,7 @@
 
 use crate::{
 	cli::{clear_screen, print_title_short},
-	world::{World, WorldConfig},
+	world::{World, config::WorldConfig},
 };
 
 use anyhow::Result;

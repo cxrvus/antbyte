@@ -1,7 +1,10 @@
 use crate::{
-	ant::{Ant, AntStatus, ColorMode},
+	ant::{Ant, AntStatus},
 	util::vec2::Vec2u,
-	world::World,
+	world::{
+		World,
+		config::{BorderMode, ColorMode},
+	},
 };
 
 impl World {
@@ -12,7 +15,7 @@ impl World {
 		if self.cells.in_bounds(&new_pos) {
 			Some(new_pos.unsign().unwrap())
 		} else {
-			use crate::ant::BorderMode::*;
+			use BorderMode::*;
 
 			match self.config().border_mode {
 				Collide | Despawn => None,
@@ -63,7 +66,7 @@ impl World {
 				self.occupy(&ant.pos, false);
 				ant.pos = new_pos;
 			}
-		} else if let super::BorderMode::Despawn = self.config().border_mode {
+		} else if let BorderMode::Despawn = self.config().border_mode {
 			self.die(ant);
 		}
 	}

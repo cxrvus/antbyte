@@ -1,6 +1,6 @@
 use crate::{
 	parser::{Parser, token::Token},
-	world::WorldConfig,
+	world::config::WorldConfig,
 };
 
 use clap::{self, Parser as ClapParser};
