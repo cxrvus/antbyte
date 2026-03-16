@@ -1,6 +1,7 @@
 pub mod run;
 
 mod ant_tick;
+mod tick_util;
 
 use anyhow::{Result, bail};
 use rand::{Rng, SeedableRng, rngs::StdRng};
