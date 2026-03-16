@@ -64,10 +64,17 @@ impl World {
 		// condense output bits into bytes
 		let mut output_values: Vec<OutputValue> = vec![];
 
+		let mut output_cell_mask = 0u8;
+
 		for output_spec in outputs.iter().rev() {
 			let output_bit = (output_bits & 1) as u8;
 			let bit_index = output_spec.bit;
 			let new_value = output_bit << bit_index;
+
+			// only overwrite targeted cell bits
+			if let Peripheral::Cell = output_spec.peripheral {
+				output_cell_mask |= 1 << output_spec.bit;
+			}
 
 			if let Some(output_value) = output_values
 				.iter_mut()
@@ -88,11 +95,16 @@ impl World {
 
 		let mut ant = ant;
 
+		// invert mask to only keep bits that are not targeted
+		output_cell_mask = !output_cell_mask;
+
 		for OutputValue { output, value } in output_values.into_iter() {
 			match (output, value) {
 				(Direction, _) => ant.set_dir(ant.dir + value),
 				(Halted, _) => ant.halted = value != 0,
-				(Cell, _) if value != 0 => {
+				(Cell, _) => {
+					let old_value = self.cells.at(&ant.pos.sign()).unwrap();
+					let value = value | (old_value & output_cell_mask);
 					let adjusted = self.adjusted_color(value);
 					self.cells.set_at(&ant.pos.sign(), adjusted);
 				}
