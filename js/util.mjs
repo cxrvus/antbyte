@@ -78,9 +78,9 @@ export const or = (...params) => !params.every(x => !x)
 export const inv = (...params) => params.map(x => !x)
 
 
-// manually created peripheral spec
+// manually created event spec
 
-export const peripherals = {
+export const events = {
 	input: [
 		"AC",
 		"C0", "C1", "C2", "C3",

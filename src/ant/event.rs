@@ -6,7 +6,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Peripheral {
+pub enum Event {
 	// ## cell interaction
 	CellClear,
 	Cell,
@@ -32,7 +32,7 @@ pub enum Peripheral {
 }
 
 #[derive(Debug, Default)]
-pub struct PeripheralProperties {
+pub struct EventProperties {
 	pub size: u8,
 	pub io_type: Option<IoType>,
 }
@@ -51,108 +51,108 @@ const ANT_ID: u8 = BYTE;
 const BYTE: u8 = 8;
 
 pub struct MetadataRecord {
-	peripheral: Peripheral,
+	event: Event,
 	short: &'static str,
 	aliases: &'static [&'static str],
 	size: u8,
 	io_type: Option<IoType>,
 }
 
-impl Peripheral {
+impl Event {
 	pub const METADATA: [MetadataRecord; 14] = [
 		MetadataRecord {
-			peripheral: Self::Cell,
+			event: Self::Cell,
 			short: "C",
 			aliases: &["CELL_"],
 			size: CELL,
 			io_type: None,
 		},
 		MetadataRecord {
-			peripheral: Self::CellClear,
+			event: Self::CellClear,
 			short: "CC",
 			aliases: &["CLEAR"],
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		MetadataRecord {
-			peripheral: Self::CellNext,
+			event: Self::CellNext,
 			short: "CN",
 			aliases: &["NEXT_CELL_"],
 			size: CELL,
 			io_type: Some(IoType::Input),
 		},
 		MetadataRecord {
-			peripheral: Self::Obstacle,
+			event: Self::Obstacle,
 			short: "AC",
 			aliases: &["OBS", "OBSTACLE"],
 			size: BIT,
 			io_type: Some(IoType::Input),
 		},
 		MetadataRecord {
-			peripheral: Self::Time,
+			event: Self::Time,
 			short: "T",
 			aliases: &["CLOCK_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		MetadataRecord {
-			peripheral: Self::Pulse,
+			event: Self::Pulse,
 			short: "TT",
 			aliases: &["PULSE_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		MetadataRecord {
-			peripheral: Self::Memory,
+			event: Self::Memory,
 			short: "M",
 			aliases: &["MEM_"],
 			size: BYTE,
 			io_type: None,
 		},
 		MetadataRecord {
-			peripheral: Self::Random,
+			event: Self::Random,
 			short: "R",
 			aliases: &["RAND_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		MetadataRecord {
-			peripheral: Self::Chance,
+			event: Self::Chance,
 			short: "RR",
 			aliases: &["CHANCE_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		MetadataRecord {
-			peripheral: Self::Direction,
+			event: Self::Direction,
 			short: "D",
 			aliases: &["DIR_"],
 			size: DIR,
 			io_type: Some(IoType::Output),
 		},
 		MetadataRecord {
-			peripheral: Self::Halted,
+			event: Self::Halted,
 			short: "DX",
 			aliases: &["HALT"],
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		MetadataRecord {
-			peripheral: Self::SpawnAnt,
+			event: Self::SpawnAnt,
 			short: "A",
 			aliases: &["SPAWN_"],
 			size: ANT_ID,
 			io_type: Some(IoType::Output),
 		},
 		MetadataRecord {
-			peripheral: Self::Kill,
+			event: Self::Kill,
 			short: "AK",
 			aliases: &["KILL"],
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		MetadataRecord {
-			peripheral: Self::Die,
+			event: Self::Die,
 			short: "AX",
 			aliases: &["DIE"],
 			size: BIT,
@@ -163,14 +163,14 @@ impl Peripheral {
 	fn metadata(&self) -> &MetadataRecord {
 		Self::METADATA
 			.iter()
-			.find(|m| m.peripheral == *self)
-			.expect("peripheral without metadata specification")
+			.find(|m| m.event == *self)
+			.expect("event without metadata specification")
 	}
 
-	pub fn properties(&self) -> PeripheralProperties {
+	pub fn properties(&self) -> EventProperties {
 		let metadata = self.metadata();
 
-		let props = PeripheralProperties {
+		let props = EventProperties {
 			size: metadata.size,
 			io_type: metadata.io_type,
 		};
@@ -184,7 +184,7 @@ impl Peripheral {
 		Self::METADATA
 			.iter()
 			.find(|x| x.short == ident || x.aliases.contains(&ident))
-			.map(|x| x.peripheral)
+			.map(|x| x.event)
 	}
 
 	pub fn short_ident(&self) -> &'static str {
@@ -194,7 +194,7 @@ impl Peripheral {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OutputValue {
-	pub output: Peripheral,
+	pub output: Event,
 	pub value: u8,
 }
 
@@ -214,12 +214,12 @@ impl Ord for OutputValue {
 
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct PeripheralBit {
-	pub peripheral: Peripheral,
+pub struct EventBit {
+	pub event: Event,
 	pub bit: u8,
 }
 
-impl Serialize for PeripheralBit {
+impl Serialize for EventBit {
 	fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
 	where
 		S: Serializer,
@@ -228,7 +228,7 @@ impl Serialize for PeripheralBit {
 	}
 }
 
-impl<'de> Deserialize<'de> for PeripheralBit {
+impl<'de> Deserialize<'de> for EventBit {
 	fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
 	where
 		D: Deserializer<'de>,
@@ -238,11 +238,11 @@ impl<'de> Deserialize<'de> for PeripheralBit {
 	}
 }
 
-impl PeripheralBit {
+impl EventBit {
 	pub fn to_ident(&self) -> String {
-		let mut ident = self.peripheral.short_ident().to_owned();
+		let mut ident = self.event.short_ident().to_owned();
 
-		if self.peripheral.properties().size > BIT {
+		if self.event.properties().size > BIT {
 			ident.push_str(&format!("{:x}", self.bit));
 		}
 
@@ -250,7 +250,7 @@ impl PeripheralBit {
 	}
 
 	pub fn validate(&self, io_type: &IoType) -> Result<()> {
-		let properties = self.peripheral.properties();
+		let properties = self.event.properties();
 
 		let bit_exceeding_size = self.bit >= properties.size;
 
@@ -262,46 +262,44 @@ impl PeripheralBit {
 		if bit_exceeding_size {
 			Err(anyhow!("bit index exceeding size: {self:?}",))
 		} else if wrong_io_type {
-			Err(anyhow!(
-				"wrong Input / Output type for Peripheral: {self:?}",
-			))
+			Err(anyhow!("wrong Input / Output type for Event: {self:?}",))
 		} else {
 			Ok(())
 		}
 	}
 
-	const PERIPH_PTN: &str = r"^([A-Z_]+)([0-8])?$";
+	const EVENT_PTN: &str = r"^([A-Z_]+)([0-8])?$";
 
 	pub fn from_ident(ident: &str) -> Result<Self> {
-		let re = Regex::new(Self::PERIPH_PTN).unwrap();
+		let re = Regex::new(Self::EVENT_PTN).unwrap();
 
 		let captures = re
 			.captures(ident)
-			.ok_or(anyhow!("'{ident}' is not a valid peripheral"))?;
+			.ok_or(anyhow!("'{ident}' is not a valid event"))?;
 
-		let periph_ident = captures.get(1).unwrap().as_str();
+		let event_ident = captures.get(1).unwrap().as_str();
 
-		let peripheral = Peripheral::from_ident(periph_ident)
-			.ok_or(anyhow!("'{periph_ident}' is not a valid peripheral type"))?;
+		let event = Event::from_ident(event_ident)
+			.ok_or(anyhow!("'{event_ident}' is not a valid event type"))?;
 
 		let bit_index = captures
 			.get(2)
 			.map(|m| u8::from_str_radix(m.as_str(), 16).unwrap());
 
-		let size = peripheral.properties().size;
+		let size = event.properties().size;
 
 		if let Some(bit_index) = bit_index {
 			if size == 1 {
-				bail!("may not have a bit index in one-bit peripherals\n(in '{ident}')");
+				bail!("may not have a bit index in one-bit events\n(in '{ident}')");
 			} else if bit_index >= size {
 				bail!(
-					"bit index may not exceed peripheral bit capacity:\n{bit_index} >= {size}\n(in '{ident}')"
+					"bit index may not exceed event bit capacity:\n{bit_index} >= {size}\n(in '{ident}')"
 				);
 			}
 		};
 
 		Ok(Self {
-			peripheral,
+			event,
 			bit: bit_index.unwrap_or_default(),
 		})
 	}
@@ -309,18 +307,18 @@ impl PeripheralBit {
 
 #[cfg(test)]
 mod test {
-	use super::{IoType, MetadataRecord, Peripheral};
+	use super::{Event, IoType, MetadataRecord};
 	use IoType::*;
 
 	#[test]
 	#[rustfmt::skip]
 	fn show_metadata() {
-		let entries = Peripheral::METADATA;
+		let entries = Event::METADATA;
 
 		let inputs = entries.iter().filter(|x| x.io_type == Some(Input)).collect::<Vec<_>>();
 		let outputs = entries.iter().filter(|x| x.io_type == Some(Output)).collect::<Vec<_>>();
 
-		// number literals accounting for special peripherals (C and M) and planned peripherals (AD, K, X)...
+		// number literals accounting for special events (C and M) and planned events (AD, K, X)...
 
 		let input_count = inputs.len() + 2 + 1;
 		let output_count = outputs.len() + 2 + 2;

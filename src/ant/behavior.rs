@@ -1,5 +1,5 @@
 use crate::{
-	ant::peripherals::{IoType, PeripheralBit},
+	ant::event::{EventBit, IoType},
 	truth_table::TruthTable,
 	util::find_dupe,
 };
@@ -12,8 +12,8 @@ use serde::{Deserialize, Serialize};
 pub struct Behavior {
 	pub name: String,
 	pub logic: TruthTable,
-	pub inputs: Vec<PeripheralBit>,
-	pub outputs: Vec<PeripheralBit>,
+	pub inputs: Vec<EventBit>,
+	pub outputs: Vec<EventBit>,
 }
 
 #[cfg_attr(test, derive(ts_rs::TS))]
@@ -23,8 +23,8 @@ pub struct Behavior {
 struct BehaviorJSON {
 	name: String,
 	logic: Vec<u32>,
-	inputs: Vec<PeripheralBit>,
-	outputs: Vec<PeripheralBit>,
+	inputs: Vec<EventBit>,
+	outputs: Vec<EventBit>,
 }
 
 impl TryFrom<BehaviorJSON> for Behavior {
@@ -53,8 +53,8 @@ impl Behavior {
 	pub fn new(
 		name: String,
 		truth_table: TruthTable,
-		inputs: Vec<PeripheralBit>,
-		outputs: Vec<PeripheralBit>,
+		inputs: Vec<EventBit>,
+		outputs: Vec<EventBit>,
 	) -> Result<Self> {
 		if inputs.len() > 8 {
 			return Err(anyhow!(
@@ -70,8 +70,8 @@ impl Behavior {
 			));
 		}
 
-		Self::validate_periphs(&inputs, IoType::Input)?;
-		Self::validate_periphs(&outputs, IoType::Output)?;
+		Self::validate_events(&inputs, IoType::Input)?;
+		Self::validate_events(&outputs, IoType::Output)?;
 
 		Ok(Self {
 			logic: truth_table,
@@ -81,12 +81,12 @@ impl Behavior {
 		})
 	}
 
-	pub fn validate_periphs(periphs: &Vec<PeripheralBit>, io_type: IoType) -> Result<()> {
-		if let Some(dupe) = find_dupe(periphs) {
-			Err(anyhow!("found duplicate peripheral in Behavior: {dupe:?}"))
+	pub fn validate_events(events: &Vec<EventBit>, io_type: IoType) -> Result<()> {
+		if let Some(dupe) = find_dupe(events) {
+			Err(anyhow!("found duplicate event in Behavior: {dupe:?}"))
 		} else {
-			for periph in periphs {
-				periph.validate(&io_type)?;
+			for event in events {
+				event.validate(&io_type)?;
 			}
 
 			Ok(())

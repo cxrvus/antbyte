@@ -1,4 +1,4 @@
-pub mod peripherals;
+pub mod event;
 
 pub use crate::parser::compiler;
 use crate::util::vec2::{Vec2, Vec2u};

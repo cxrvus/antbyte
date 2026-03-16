@@ -1,4 +1,4 @@
-use crate::ant::peripherals::{OutputValue, Peripheral};
+use crate::ant::event::{Event, OutputValue};
 
 use super::{Behavior, World};
 
@@ -22,10 +22,10 @@ impl World {
 
 		let mut input_bits = 0u8;
 
-		use Peripheral::*;
+		use Event::*;
 
 		for input_spec in inputs.iter() {
-			let input_value: u8 = match input_spec.peripheral {
+			let input_value: u8 = match input_spec.event {
 				Time => ant.age as u8,
 				Pulse => zero_count_mask(ant.age as u8),
 				Cell => *self.cells.at(&ant.pos.sign()).unwrap(),
@@ -65,18 +65,18 @@ impl World {
 			let new_value = output_bit << bit_index;
 
 			// only overwrite targeted cell bits
-			if let Peripheral::Cell = output_spec.peripheral {
+			if let Event::Cell = output_spec.event {
 				output_cell_mask |= 1 << output_spec.bit;
 			}
 
 			if let Some(output_value) = output_values
 				.iter_mut()
-				.find(|output_value| output_value.output == output_spec.peripheral)
+				.find(|output_value| output_value.output == output_spec.event)
 			{
 				output_value.value |= new_value;
 			} else {
 				output_values.push(OutputValue {
-					output: output_spec.peripheral,
+					output: output_spec.event,
 					value: new_value,
 				});
 			}

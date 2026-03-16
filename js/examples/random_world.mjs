@@ -4,7 +4,7 @@
 import { writeFileSync } from 'fs'
 
 import { run } from "../lib.mjs"
-import { newWorld, peripherals, size} from "../util.mjs"
+import { newWorld, events, size} from "../util.mjs"
 
 const KEEP_FILES = false;
 
@@ -46,10 +46,10 @@ function generateAnt(index) {
 	// manual tweaking...
 	const mandatoryInputs = ['T6', 'T7']
 	const blockedInputs = [...['R4', 'R5', 'R6', 'R7'], ...mandatoryInputs]
-	const filteredInputs = peripherals.input.filter(p => !blockedInputs.includes(p))
+	const filteredInputs = events.input.filter(p => !blockedInputs.includes(p))
 	const mandatoryOutputs = ['A0', 'A1', 'AK', 'D0']
 	const blockedOutputs = [...['A4', 'A5', 'A6', 'A7'], ...mandatoryOutputs]
-	const filteredOutputs = peripherals.output.filter(p => !blockedOutputs.includes(p))
+	const filteredOutputs = events.output.filter(p => !blockedOutputs.includes(p))
 	//
 
 	let inputs = getSubset(filteredInputs, randomInt(4) + 2);

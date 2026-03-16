@@ -4,7 +4,7 @@ use crate::{
 	ant::{
 		behavior::Behavior,
 		compiler::{CompFunc, LogConfig},
-		peripherals::{IoType, PeripheralBit},
+		event::{EventBit, IoType},
 	},
 	parser::{ParamValue, Signature, token::Token},
 	truth_table::TruthTable,
@@ -16,7 +16,7 @@ impl CompFunc {
 	pub fn assemble(&self, log_cfg: &LogConfig) -> Result<Behavior> {
 		let mut func = self.clone();
 
-		let (inputs, outputs) = func.extract_peripherals()?;
+		let (inputs, outputs) = func.extract_events()?;
 
 		// dbg!((&inputs, &outputs));
 
@@ -40,14 +40,14 @@ impl CompFunc {
 		Ok(behavior)
 	}
 
-	fn extract_peripherals(&mut self) -> Result<(Vec<PeripheralBit>, Vec<PeripheralBit>)> {
-		let mut inputs: Vec<PeripheralBit> = vec![];
-		let mut outputs: Vec<PeripheralBit> = vec![];
+	fn extract_events(&mut self) -> Result<(Vec<EventBit>, Vec<EventBit>)> {
+		let mut inputs: Vec<EventBit> = vec![];
+		let mut outputs: Vec<EventBit> = vec![];
 		let mut variables: Vec<String> = vec![];
 
 		for statement in &mut self.comp_statements {
 			for param in &mut statement.params {
-				Self::extract_peripheral(
+				Self::extract_event(
 					&mut self.signature,
 					&mut variables,
 					&mut inputs,
@@ -56,7 +56,7 @@ impl CompFunc {
 				)?;
 			}
 
-			Self::extract_peripheral(
+			Self::extract_event(
 				&mut self.signature,
 				&mut variables,
 				&mut outputs,
@@ -82,10 +82,10 @@ impl CompFunc {
 		}
 	}
 
-	fn extract_peripheral(
+	fn extract_event(
 		signature: &mut Signature,
 		variables: &mut Vec<String>,
-		periphs: &mut Vec<PeripheralBit>,
+		events: &mut Vec<EventBit>,
 		param: &mut ParamValue,
 		io_type: IoType,
 	) -> Result<()> {
@@ -95,7 +95,7 @@ impl CompFunc {
 			let original_target = target.clone();
 
 			if io_type == IoType::Input {
-				let reassigned_output_name = format_periph(&original_target, IoType::Output);
+				let reassigned_output_name = format_event(&original_target, IoType::Output);
 
 				if signature.assignees.contains(&reassigned_output_name) {
 					*target = reassigned_output_name;
@@ -103,30 +103,30 @@ impl CompFunc {
 				}
 			}
 
-			let periph = PeripheralBit::from_ident(&original_target)?;
+			let event = EventBit::from_ident(&original_target)?;
 
-			if let Some(req_io) = periph.peripheral.properties().io_type
+			if let Some(req_io) = event.event.properties().io_type
 				&& req_io != io_type
 			{
 				return Err(match req_io {
-					IoType::Input => anyhow!("cannot assign to input-only peripheral '{target}'"),
+					IoType::Input => anyhow!("cannot assign to input-only event '{target}'"),
 					IoType::Output => anyhow!(
-						"cannot use output-only peripheral '{target}' like an input\n(except if it has been assigned a value before)"
+						"cannot use output-only event '{target}' like an input\n(except if it has been assigned a value before)"
 					),
 				});
 			}
 
-			*target = format_periph(&original_target, io_type);
+			*target = format_event(&original_target, io_type);
 
-			if !periphs.contains(&periph) {
-				periphs.push(periph);
+			if !events.contains(&event) {
+				events.push(event);
 
-				let signature_periphs = match io_type {
+				let signature_events = match io_type {
 					IoType::Input => &mut signature.params,
 					IoType::Output => &mut signature.assignees,
 				};
 
-				signature_periphs.push(target.clone());
+				signature_events.push(target.clone());
 			}
 		} else if !variables.contains(target) {
 			match io_type {
@@ -217,7 +217,7 @@ fn int_from_bits(bits: &[bool]) -> u32 {
 	value
 }
 
-fn format_periph(ident: &str, io_type: IoType) -> String {
+fn format_event(ident: &str, io_type: IoType) -> String {
 	let ident = ident.to_ascii_lowercase();
 
 	let prefix = match io_type {
