@@ -7,7 +7,11 @@ use crate::ant::{
 	world::WorldProperties,
 };
 
-pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldProperties> {
+pub fn compile_world_file(
+	path: &PathBuf,
+	log_cfg: &LogConfig,
+	sub_args: &Option<String>,
+) -> Result<WorldProperties> {
 	let code = read_file(path)?;
 	let extension = path.extension().unwrap_or_default().to_string_lossy();
 
@@ -17,7 +21,7 @@ pub fn compile_world_file(path: &PathBuf, log_cfg: &LogConfig) -> Result<WorldPr
 
 		"json" => compile_json(&code),
 
-		"js" | "mjs" => compile_js(path),
+		"js" | "mjs" => compile_js(path, sub_args.clone()),
 
 		_ => bail!(
 			"invalid file extension: {extension}.\n needs to be either: '.ant', '.json', '.js', '.mjs'"
@@ -42,11 +46,12 @@ pub fn compile_json(code: &str) -> Result<WorldProperties> {
 	serde_json::from_str::<WorldProperties>(code).context("invalid JSON world file!")
 }
 
-pub fn compile_js(path: &PathBuf) -> Result<WorldProperties> {
+pub fn compile_js(path: &PathBuf, args: Option<String>) -> Result<WorldProperties> {
 	// idea: insert node JS warning
 
 	let output = process::Command::new("node")
 		.arg(path)
+		.arg(args.unwrap_or_default())
 		.output()
 		.context("failed to execute nodejs script!")?;
 
@@ -55,6 +60,11 @@ pub fn compile_js(path: &PathBuf) -> Result<WorldProperties> {
 
 	if !output.status.success() {
 		bail!("nodejs execution failed: {error}");
+	}
+
+	if !error.trim().is_empty() {
+		eprintln!("nodejs stderr output:");
+		eprintln!("{error}");
 	}
 
 	serde_json::from_str::<WorldProperties>(&code).context("invalid JSON from nodejs output!")

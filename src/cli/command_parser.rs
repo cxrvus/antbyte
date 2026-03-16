@@ -50,6 +50,10 @@ pub struct Args {
 	#[arg(short, long)]
 	pub watch: bool,
 
+	/// pass args to sub-process, e.g. a nodejs file
+	#[arg(short = 'a', long = "args")]
+	pub sub_args: Option<String>,
+
 	/// create a JSON world file upon compilation
 	#[arg(short, long)]
 	pub json: bool,
@@ -94,7 +98,7 @@ pub fn run() -> Result<()> {
 
 pub fn run_once(args: Args) -> Result<()> {
 	let log_config = LogConfig { all: args.debug };
-	let mut properties = compile_world_file(&args.path, &log_config)?;
+	let mut properties = compile_world_file(&args.path, &log_config, &args.sub_args)?;
 
 	if args.json {
 		let mut json_path = args.path.clone();
