@@ -15,13 +15,6 @@ impl World {
 			loop {
 				let mut world = World::new(properties.clone())?;
 				world.run_once();
-
-				#[cfg(feature = "extras")]
-				{
-					if crate::cli::interrupt::get_interrupt() {
-						return Ok(());
-					}
-				}
 			}
 		} else {
 			self.run_once();

@@ -73,30 +73,8 @@ pub struct Args {
 }
 
 pub fn run() -> Result<()> {
-	let mut args = Args::parse();
+	let args = Args::parse();
 
-	if args.watch {
-		#[cfg(feature = "extras")]
-		{
-			if args.stepped {
-				bail!("cannot run in watch-mode with --stepped enabled");
-			}
-
-			crate::cli::watch::watch_file(&mut args).context("watch-mode error!")?;
-		}
-
-		#[cfg(not(feature = "extras"))]
-		{
-			anyhow::bail!("watch-mode requires the `extras` feature flag to be enabled");
-		}
-	} else {
-		run_once(args)?;
-	}
-
-	Ok(())
-}
-
-pub fn run_once(args: Args) -> Result<()> {
 	let log_config = LogConfig { all: args.debug };
 	let mut properties = compile_world_file(&args.path, &log_config, &args.sub_args)?;
 

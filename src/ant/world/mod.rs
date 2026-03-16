@@ -186,13 +186,6 @@ impl World {
 	}
 
 	pub fn frame_tick(&mut self) -> bool {
-		#[cfg(feature = "extras")]
-		{
-			if crate::cli::interrupt::get_interrupt() {
-				return false;
-			}
-		}
-
 		for _ in 0..self
 			.config()
 			.speed
