@@ -23,4 +23,24 @@ speed: number | null,
 /**
  * simulation tick limit
  */
-ticks: number | null, sleep: number | null, looping: boolean, border_mode: BorderMode, starting_pos: StartingPos, color_mode: ColorMode, noise_seed: number | null, hide_title: boolean, description: string, };
+ticks: number | null, 
+/**
+ * amount of ms to sleep for after end of simulation, i.e. between loops
+ */
+sleep: number | null, 
+/**
+ * re-run simulation after it ends
+ */
+looping: boolean, 
+/**
+ * behavior if ants touch the worlds border
+ */
+border_mode: BorderMode, 
+/**
+ * position of the first ant
+ */
+starting_pos: StartingPos, 
+/**
+ * max number of ants before additional spawning gets blocked
+ */
+ant_limit: number | null, color_mode: ColorMode, noise_seed: number | null, hide_title: boolean, description: string, };
