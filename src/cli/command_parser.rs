@@ -5,12 +5,13 @@ use std::path::{Path, PathBuf};
 
 use clap::{self, Parser as ClapParser};
 
+use super::file_compiler::compile_world_file;
+
 use crate::{
 	ant::{
 		compiler::LogConfig,
 		world::{World, WorldConfig},
 	},
-	files::compile_world_file,
 	parser::{Parser, token::Token},
 };
 

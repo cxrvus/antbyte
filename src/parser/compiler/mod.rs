@@ -19,7 +19,7 @@ use crate::{
 		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
 		world::WorldProperties,
 	},
-	files::read_file,
+	cli::file_compiler::read_file,
 	parser::{
 		AntFunc, Expression, Func, ParamValue, Parser, Signature, SignatureSpec, func_parser::MAIN,
 	},

@@ -18,7 +18,7 @@ pub fn run() -> Result<()> {
 	{
 		use antbyte::{
 			ant::{compiler::LogConfig, world::World},
-			files::compile_world_file,
+			file_compiler::compile_world_file,
 		};
 
 		use anyhow::Context;

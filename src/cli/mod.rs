@@ -1,6 +1,7 @@
 use std::{thread, time::Duration};
 
 pub mod command_parser;
+pub mod file_compiler;
 
 #[inline]
 pub fn clear_screen() {
