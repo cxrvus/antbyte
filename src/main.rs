@@ -16,9 +16,9 @@ pub fn run() -> Result<()> {
 
 	#[cfg(not(feature = "clap"))]
 	{
-		use antbyte::ant::{
-			compiler::{LogConfig, compile_world_file},
-			world::World,
+		use antbyte::{
+			ant::{compiler::LogConfig, world::World},
+			files::compile_world_file,
 		};
 
 		use anyhow::Context;
@@ -31,7 +31,7 @@ pub fn run() -> Result<()> {
 
 		let path = std::path::PathBuf::from(&args[1]);
 
-		let properties = compile_world_file(&path, &LogConfig::default())?;
+		let properties = compile_world_file(&path, &LogConfig::default(), &None)?;
 		let mut world = World::new(properties).context("world error!")?;
 
 		world.run().context("world error!")
