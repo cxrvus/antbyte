@@ -14,10 +14,10 @@ pub enum Peripheral {
 
 	// ## universal inputs:
 	Time,
-	TimeRhythm,
+	Pulse,
 	Memory,
 	Random,
-	RandomChance,
+	Chance,
 
 	// ## ant interaction inputs
 	Obstacle,
@@ -96,9 +96,9 @@ impl Peripheral {
 			io_type: Some(IoType::Input),
 		},
 		MetadataRecord {
-			peripheral: Self::TimeRhythm,
+			peripheral: Self::Pulse,
 			short: "TT",
-			aliases: &["RHYTHM_"],
+			aliases: &["PULSE_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
@@ -117,7 +117,7 @@ impl Peripheral {
 			io_type: Some(IoType::Input),
 		},
 		MetadataRecord {
-			peripheral: Self::RandomChance,
+			peripheral: Self::Chance,
 			short: "RR",
 			aliases: &["CHANCE_"],
 			size: BYTE,
