@@ -15,7 +15,7 @@ use std::{
 
 use crate::{
 	ant::{
-		Behavior,
+		behavior::Behavior,
 		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
 	},
 	cli::file_compiler::read_file,

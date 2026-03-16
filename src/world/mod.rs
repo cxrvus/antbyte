@@ -16,7 +16,7 @@ use std::{
 };
 
 use crate::{
-	ant::{Ant, Behavior},
+	ant::{Ant, behavior::Behavior},
 	util::{matrix::Matrix, vec2::Vec2u},
 };
 

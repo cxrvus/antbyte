@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
 	ant::{
-		Behavior,
+		behavior::Behavior,
 		compiler::{CompFunc, LogConfig},
 		peripherals::{IoType, PeripheralBit},
 	},
