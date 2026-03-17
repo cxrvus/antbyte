@@ -47,7 +47,7 @@ function generateAnt(index) {
 	const mandatoryInputs = ['T6', 'T7']
 	const blockedInputs = [...['R4', 'R5', 'R6', 'R7'], ...mandatoryInputs]
 	const filteredInputs = events.input.filter(p => !blockedInputs.includes(p))
-	const mandatoryOutputs = ['A0', 'A1', 'AK', 'D0']
+	const mandatoryOutputs = ['A0', 'A1', 'AK', 'D0', 'DX']
 	const blockedOutputs = [...['A4', 'A5', 'A6', 'A7'], ...mandatoryOutputs]
 	const filteredOutputs = events.output.filter(p => !blockedOutputs.includes(p))
 	//
