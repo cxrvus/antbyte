@@ -42,6 +42,7 @@ impl Cells {}
 pub struct Cell {
 	pub value: u8,
 	pub occupied: bool,
+	pub expiration: Option<u16>,
 }
 
 pub struct WorldState {
@@ -135,6 +136,10 @@ impl World {
 		self.ants.iter_mut().for_each(|ant| ant.grow_up());
 		self.ants.retain(|ant| ant.is_alive());
 
+		if self.config().decay.is_some() {
+			self.cell_decay();
+		}
+
 		let no_ants = self.ants.is_empty();
 
 		let tick_overflow = self
@@ -149,7 +154,17 @@ impl World {
 	#[rustfmt::skip]
 	pub fn set_value(&mut self, pos: &Vec2u, value: u8) {
 		let old_cell = self.cells.at(&pos.sign()).unwrap();
-		let cell = Cell { value, ..*old_cell };
+
+		let expiration = match self.config().decay {
+			Some(decay) if value != 0 => {
+				let clock = self.tick_count as u16;
+				Some(clock.wrapping_add(decay))
+			}
+			_ => None
+		};
+
+		let cell = Cell { value, expiration, ..*old_cell };
+
 		self.cells.set_at(&pos.sign(), cell);
 	}
 
@@ -159,6 +174,19 @@ impl World {
 		let old_cell = self.cells.at(&pos.sign()).unwrap();
 		let cell = Cell { occupied, ..*old_cell };
 		self.cells.set_at(&pos.sign(), cell);
+	}
+
+	fn cell_decay(&mut self) {
+		let clock = self.tick_count as u16;
+
+		self.cells
+			.entries
+			.iter_mut()
+			.filter(|cell| cell.expiration == Some(clock))
+			.for_each(|cell| {
+				cell.value = 0;
+				cell.expiration = None;
+			});
 	}
 
 	pub fn tick_count(&self) -> u32 {

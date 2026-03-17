@@ -5,8 +5,8 @@ child_pid=""
 gif_enabled=0
 
 world_script="js/examples/random_world.mjs"
-world_settings_normal="border=die;size=128;speed=2;fps=12;dur=20"
-world_settings_gif="border=die;size=256;speed=8;fps=24;dur=20"
+world_settings_normal="border=die;decay=64;height=128;width=256;speed=4;fps=12;dur=20"
+world_settings_gif="border=die;decay=1024;size=512;speed=8;fps=24;dur=20"
 
 for arg in "$@"; do
 	case "$arg" in

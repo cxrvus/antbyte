@@ -20,6 +20,8 @@ pub struct WorldConfig {
 	pub speed: Option<u32>,
 	/// simulation tick limit
 	pub ticks: Option<u32>,
+	/// amount of ticks after which a cell will automatically reset
+	pub decay: Option<u16>,
 	/// amount of ms to sleep for after end of simulation, i.e. between loops
 	pub sleep: Option<u32>,
 	/// re-run simulation after it ends
@@ -44,6 +46,7 @@ impl Default for WorldConfig {
 			fps: Some(FPS_CAP),
 			speed: Some(1),
 			ticks: None,
+			decay: None,
 			sleep: Some(200),
 			looping: false,
 			border_mode: BorderMode::Wrap,

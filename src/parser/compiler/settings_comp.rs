@@ -38,6 +38,7 @@ impl Parser {
 
 			"fps" => config.fps = self.next_number()?,
 			"speed" => config.speed = self.next_number()?,
+			"decay" => config.decay = self.next_number().map(|x| x.map(|v| v as u16))?,
 			"sleep" => config.sleep = self.next_number()?,
 			"ticks" => config.ticks = self.next_number()?,
 			"noise_seed" | "seed" => config.noise_seed = self.next_number()?,
