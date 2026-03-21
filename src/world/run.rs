@@ -1,58 +1,35 @@
 use super::World;
-use crate::cli::{clear_screen, print_title, print_title_short, sleep};
-use anyhow::Result;
-use std::{
-	io::{self, Write},
-	time::Instant,
+use crate::plugins::render::{
+	Renderer,
+	term_render::{clear_screen, print_title_short},
 };
+use anyhow::Result;
 
 const MAX_TICKS: u32 = 1 << 16;
 
 impl World {
-	pub fn run(&mut self) -> Result<()> {
+	pub fn run(&mut self, renderer: &mut impl Renderer) -> Result<()> {
 		if self.config().looping {
 			let properties = self.properties.clone();
 			loop {
 				let mut world = World::new(properties.clone())?;
-				world.run_once();
+				world.run_once(renderer);
 			}
 		} else {
-			self.run_once();
+			self.run_once(renderer);
 			Ok(())
 		}
 	}
 
-	fn run_once(&mut self) {
+	fn run_once(&mut self, renderer: &mut impl Renderer) {
 		if self.config().speed.is_some() {
-			self.render();
-
-			let mut last_frame = Instant::now();
-
-			let frame_ms = match self.config().fps {
-				Some(0) => panic!(),
-				Some(fps) => Some(1000 / fps),
-				None => None,
-			};
+			renderer.render(self);
 
 			loop {
-				if let Some(frame_ms) = frame_ms {
-					// wait for frame interval to elapse
-					let elapsed = last_frame.elapsed().as_millis() as u32;
-					if elapsed < frame_ms {
-						// add a small buffer to prevent flickering
-						let sleep_ms = (frame_ms - elapsed).max(8);
-						sleep(sleep_ms);
-					}
-					last_frame = Instant::now();
-				} else {
-					// wait for key input to continue
-					eprintln!("<i> Press <Enter> to step to next frame");
-					let mut input = String::new();
-					io::stdin().read_line(&mut input).unwrap();
-				}
-
 				let world_active = self.frame_tick();
-				self.render();
+
+				renderer.render(self);
+
 				if !world_active {
 					break;
 				}
@@ -61,11 +38,7 @@ impl World {
 			self.instant_run()
 		}
 
-		self.render();
-
-		if let Some(ms) = self.config().sleep {
-			sleep(ms);
-		}
+		renderer.render(self);
 	}
 
 	fn instant_run(&mut self) {
@@ -82,81 +55,8 @@ impl World {
 		}
 	}
 
-	fn render(&self) {
-		// pre-render
-		let world = self.color_render();
-		let frame = self.tick_str();
-
-		// print
-		clear_screen();
-
-		if !self.config().hide_title {
-			print_title();
-		}
-
-		if let Some(name) = &self.properties.name {
-			println!("{name}\n");
-		}
-
-		println!();
-		println!();
-		println!("{world}\n");
-		println!();
-		println!("{frame}");
-		println!("\n\n");
-
-		io::stdout().flush().unwrap();
-	}
-
-	fn color_render(&self) -> String {
-		let cells = &self.cells;
-		let mut string = String::new();
-
-		for (i, cell) in cells.entries.iter().enumerate() {
-			if i % cells.width == 0 {
-				string.push('\n');
-			}
-
-			let pos = cells.get_pos(i).unwrap();
-			let ant = self.ants().iter().find(|ant| ant.pos == pos);
-
-			match ant {
-				None => {
-					string.push_str(&color_cell(cell.value, "  "));
-				}
-				Some(ant) => {
-					let (char1, char2) = ant.dir_vec().principal_chars();
-					let ant_chars = format!("{char1}{char2}");
-					string.push_str(&color_cell(cell.value, &ant_chars));
-				}
-			}
-		}
-
-		string
-	}
-
 	#[inline]
-	fn tick_str(&self) -> String {
+	pub fn tick_str(&self) -> String {
 		format!("{:0>8}", self.tick_count())
 	}
-}
-
-fn color_codes(value: u8) -> (u8, u8) {
-	let color = value & 0b0111;
-	let intensity = (value & 0b1000) != 0;
-	let bg_color = if intensity { 100 + color } else { 40 + color };
-	let flipped_color = color ^ 0b0111;
-
-	let fg_color = if intensity {
-		90 + flipped_color
-	} else {
-		30 + flipped_color
-	};
-
-	(bg_color, fg_color)
-}
-
-fn color_cell(value: u8, content: &str) -> String {
-	let (bg, fg) = color_codes(value);
-	format!("\x1b[{fg};{bg}m{content}\x1b[0m")
 }

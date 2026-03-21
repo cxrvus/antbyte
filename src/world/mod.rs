@@ -56,6 +56,7 @@ pub struct World {
 	properties: WorldProperties,
 	pub state: WorldState,
 }
+
 impl World {
 	pub fn new(properties: WorldProperties) -> Result<Self> {
 		properties.config.validate()?;
@@ -189,26 +190,37 @@ impl World {
 			});
 	}
 
+	#[inline]
+	pub fn name(&self) -> Option<String> {
+		self.properties.name.clone()
+	}
+
+	#[inline]
 	pub fn tick_count(&self) -> u32 {
 		self.tick_count
 	}
 
+	#[inline]
 	pub fn config(&self) -> &WorldConfig {
 		&self.properties.config
 	}
 
+	#[inline]
 	pub fn config_mut(&mut self) -> &mut WorldConfig {
 		&mut self.properties.config
 	}
 
+	#[inline]
 	pub fn ants(&self) -> &Vec<Ant> {
 		&self.ants
 	}
 
+	#[inline]
 	fn get_behavior(&self, id: u8) -> Option<&Behavior> {
 		self.properties.behaviors.get(&id)
 	}
 
+	#[inline]
 	fn rng(&mut self) -> u8 {
 		self.rng.random()
 	}

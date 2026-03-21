@@ -1,5 +1,10 @@
-use antbyte::cli::print_error;
 use anyhow::Result;
+
+#[inline]
+/// need to conventionally make all anyhow context messages end in a '!'
+fn print_error(e: anyhow::Error) {
+	eprintln!("{}", format!("<!> {e:#}").replace("!: ", ":\n    "));
+}
 
 fn main() {
 	run().unwrap_or_else(|e| {
