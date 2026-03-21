@@ -47,7 +47,7 @@ pub fn run() -> Result<()> {
 			.context("config-arg error!")?;
 		let mut world = World::new(properties.clone()).context("world error!")?;
 
-		let mut renderer = TermRenderer::new(&properties.config);
+		let mut renderer = TermRenderer::new(&world);
 
 		if let Some(target) = args.gif {
 			export_gif(world, &args.path, target).context("GIF export error!")?;

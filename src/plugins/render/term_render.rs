@@ -1,8 +1,5 @@
 use super::Renderer;
-use crate::{
-	util::sleep,
-	world::{World, config::WorldConfig},
-};
+use crate::{util::sleep, world::World};
 
 use std::{
 	io::{self, Write},
@@ -32,9 +29,9 @@ pub fn clear_screen() { print!("\x1B[2J\x1B[1;1H"); }
 pub fn print_title_short() { println!("<<ANTBYTE>>"); }
 
 pub struct TermRenderer {
-	config: WorldConfig,
-	frame_ms: Option<u32>,
 	last_frame: Instant,
+	frame_ms: Option<u32>,
+	cfg_sleep: Option<u32>,
 }
 
 impl Renderer for TermRenderer {
@@ -62,23 +59,23 @@ impl Renderer for TermRenderer {
 	}
 
 	fn end(&self) {
-		if let Some(ms) = self.config.sleep {
+		if let Some(ms) = self.cfg_sleep {
 			sleep(ms);
 		}
 	}
 }
 
 impl TermRenderer {
-	pub fn new(config: &WorldConfig) -> Self {
-		let frame_ms = match config.fps {
+	pub fn new(world: &World) -> Self {
+		let frame_ms = match world.config().fps {
 			Some(0) => panic!(),
 			Some(fps) => Some(1000 / fps),
 			None => None,
 		};
 
 		Self {
-			config: config.clone(),
 			last_frame: Instant::now(),
+			cfg_sleep: world.config().sleep,
 			frame_ms,
 		}
 	}
@@ -99,12 +96,8 @@ impl TermRenderer {
 			println!("{name}\n");
 		}
 
-		println!();
-		println!();
-		println!("{world_str}\n");
-		println!();
-		println!("{tick_str}");
-		println!("\n\n");
+		println!("\n\n{world_str}\n\n");
+		println!("{tick_str}\n\n\n");
 
 		io::stdout().flush().unwrap();
 	}

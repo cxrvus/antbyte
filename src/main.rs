@@ -40,7 +40,7 @@ pub fn run() -> Result<()> {
 		let properties = compile_world(&path, &LogConfig::default(), &None)?;
 		let mut world = World::new(properties.clone()).context("world error!")?;
 
-		let mut renderer = TermRenderer::new(&properties.config);
+		let mut renderer = TermRenderer::new(&world);
 		world.run(&mut renderer).context("world error!")
 	}
 }
