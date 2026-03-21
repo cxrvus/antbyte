@@ -1,8 +1,7 @@
 // @ts-check
 /** @import * as AntByte from "../js/lib" AntByte */
 
-import { ant, run } from "../js/lib.mjs"
-import { size, bits, byte} from "../js/util.mjs"
+import { ant, run,  size, bits, byte } from "../js/lib.mjs"
 
 run({
 	cfg: {

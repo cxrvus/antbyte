@@ -2,30 +2,9 @@
 /** @import * as AntByte from "../lib" AntByte */
 
 import { writeFileSync } from 'fs'
-
-import { run } from "../lib.mjs"
-import { newWorld, events, size} from "../util.mjs"
+import { run, size, newWorld, events, randomInt } from "../lib.mjs"
 
 const KEEP_FILES = false;
-
-// todo: extract helper functions to random.mjs
-
-/** @returns {number} */
-function random() {
-	return Math.random()
-}
-
-/** @param {number} n @returns {number} */
-function randomInt(n) {
-	return Math.floor(random() * n)
-}
-
-/** @param {number} probability @returns {boolean} */
-function randomChance(probability) {
-	if (probability < 0 || probability > 1) throw new RangeError('Probability must be between 0 and 1')
-
-	return random() < probability
-}
 
 /** @returns {AntByte.World} */
 function generateWorld() {

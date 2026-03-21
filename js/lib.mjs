@@ -2,7 +2,10 @@
 /** @typedef {import("../js/lib").Behavior} Behavior */
 /** @typedef {import("../js/lib").World} World */
 
-import { bits, byte } from './util.mjs';
+import * as util from './util.mjs'
+
+export * from './util.mjs'
+export * from './random.mjs'
 
 /**
  * @param {string} name
@@ -30,7 +33,7 @@ export function ant(name, func) {
 	const outputs = [];
 
 	for (let i = 0; i < entryCount; i++) {
-		let inputBits = bits(inputCount, i)
+		let inputBits = util.bits(inputCount, i)
 		let outputRecord = func(...inputBits)
 		outputRecords.push(outputRecord)
 
@@ -46,7 +49,7 @@ export function ant(name, func) {
 
 	for (const outputRecord of outputRecords) {
 		const outputBits = outputs.map(output => outputRecord[output] ?? false)
-		outputValues.push(byte(...outputBits));
+		outputValues.push(util.byte(...outputBits));
 	}
 
 	return { name, inputs, outputs, logic: outputValues }
