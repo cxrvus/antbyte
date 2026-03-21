@@ -16,14 +16,15 @@ fn main() {
 pub fn run() -> Result<()> {
 	#[cfg(feature = "clap")]
 	{
-		antbyte::cli::command_parser::run()
+		antbyte::cli::run()
 	}
 
 	#[cfg(not(feature = "clap"))]
 	{
 		use antbyte::{
-			ant::{compiler::LogConfig, world::World},
-			file_compiler::compile_world_file,
+			ant::compiler::LogConfig,
+			plugins::render::term_render::TermRenderer,
+			world::{World, file_compiler::compile_world},
 		};
 
 		use anyhow::Context;
@@ -36,9 +37,10 @@ pub fn run() -> Result<()> {
 
 		let path = std::path::PathBuf::from(&args[1]);
 
-		let properties = compile_world_file(&path, &LogConfig::default(), &None)?;
-		let mut world = World::new(properties).context("world error!")?;
+		let properties = compile_world(&path, &LogConfig::default(), &None)?;
+		let mut world = World::new(properties.clone()).context("world error!")?;
 
-		world.run().context("world error!")
+		let mut renderer = TermRenderer::new(&properties.config);
+		world.run(&mut renderer).context("world error!")
 	}
 }

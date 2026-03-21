@@ -3,11 +3,11 @@ use std::{fs, path::PathBuf, process};
 use anyhow::{Context, Result, bail};
 
 use crate::{
-	ant::compiler::{LogConfig, compile_world},
+	ant::compiler::{LogConfig, compile_world as compile_dot_ant},
 	world::WorldProperties,
 };
 
-pub fn compile_world_file(
+pub fn compile_world(
 	path: &PathBuf,
 	log_cfg: &LogConfig,
 	sub_args: &Option<String>,
@@ -16,7 +16,7 @@ pub fn compile_world_file(
 	let extension = path.extension().unwrap_or_default().to_string_lossy();
 
 	let mut properties = match extension.as_ref() {
-		"ant" => compile_world(&code, log_cfg, Some(path))
+		"ant" => compile_dot_ant(&code, log_cfg, Some(path))
 			.with_context(|| format!("compiler error in file '{}'!", path.to_string_lossy())),
 
 		"json" => compile_json(&code),

@@ -18,12 +18,11 @@ use crate::{
 		behavior::Behavior,
 		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
 	},
-	cli::file_compiler::read_file,
 	parser::{
 		AntFunc, Expression, Func, ParamValue, Parser, Signature, SignatureSpec, func_parser::MAIN,
 	},
 	truth_table::TruthTable,
-	world::WorldProperties,
+	world::{WorldProperties, file_compiler::read_file},
 };
 
 use anyhow::{Context, Result, bail};

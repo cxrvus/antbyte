@@ -1,69 +1,66 @@
+#![cfg(feature = "clap")]
+
+use std::{
+	fs,
+	path::{Path, PathBuf},
+};
+
+use anyhow::{Context, Ok, Result};
+use clap::{self, Parser};
+
+use crate::{
+	ant::compiler::LogConfig,
+	plugins::render::term_render::TermRenderer,
+	world::{World, config::WorldConfig, file_compiler::compile_world},
+};
+
 mod args;
-pub mod file_compiler;
 
-#[cfg(feature = "clap")]
-pub mod command_parser {
+use args::Args;
 
-	use std::fs;
-	use std::path::{Path, PathBuf};
+pub fn run() -> Result<()> {
+	let args = Args::parse();
 
-	use clap::{self, Parser as ClapParser};
+	let log_config = LogConfig { all: args.debug };
+	let mut properties = compile_world(&args.path, &log_config, &args.sub_args)?;
 
-	use super::args::Args;
-	use super::file_compiler::compile_world_file;
+	if args.json {
+		let mut json_path = args.path.clone();
+		json_path.set_extension("ant.json");
 
-	use crate::{
-		ant::compiler::LogConfig,
-		plugins::render::term_render::TermRenderer,
-		world::{World, config::WorldConfig},
-	};
+		// idea: remove properties with default values
+		let json = serde_json::to_string(&properties)?;
 
-	use anyhow::{Context, Ok, Result};
-
-	pub fn run() -> Result<()> {
-		let args = Args::parse();
-
-		let log_config = LogConfig { all: args.debug };
-		let mut properties = compile_world_file(&args.path, &log_config, &args.sub_args)?;
-
-		if args.json {
-			let mut json_path = args.path.clone();
-			json_path.set_extension("ant.json");
-
-			// idea: remove properties with default values
-			let json = serde_json::to_string(&properties)?;
-
-			fs::write(&json_path, json).with_context(|| {
-				format!("failed to write JSON world file to {}", json_path.display())
-			})?;
-		}
-
-		if args.preview {
-			let WorldConfig { width, height, .. } = properties.config;
-			let preview_str = "\\/\n".repeat(height) + "|_" + &">>".repeat(width) + "\n\n";
-			print!("{preview_str}");
-		} else if args.debug {
-			// logging happens on compilation
-		} else {
-			args.set_config(&mut properties.config)
-				.context("config-arg error!")?;
-			let mut world = World::new(properties.clone()).context("world error!")?;
-
-			let mut renderer = TermRenderer::new(&properties.config);
-
-			if let Some(target) = args.gif {
-				export_gif(world, &args.path, target).context("GIF export error!")?;
-			} else {
-				world.run(&mut renderer).context("world error!")?;
-			}
-		}
-
-		Ok(())
+		fs::write(&json_path, json).with_context(|| {
+			format!("failed to write JSON world file to {}", json_path.display())
+		})?;
 	}
 
-	#[rustfmt::skip]
+	if args.preview {
+		let WorldConfig { width, height, .. } = properties.config;
+		let preview_str = "\\/\n".repeat(height) + "|_" + &">>".repeat(width) + "\n\n";
+		print!("{preview_str}");
+	} else if args.debug {
+		// logging happens on compilation
+	} else {
+		args.set_config(&mut properties.config)
+			.context("config-arg error!")?;
+		let mut world = World::new(properties.clone()).context("world error!")?;
+
+		let mut renderer = TermRenderer::new(&properties.config);
+
+		if let Some(target) = args.gif {
+			export_gif(world, &args.path, target).context("GIF export error!")?;
+		} else {
+			world.run(&mut renderer).context("world error!")?;
+		}
+	}
+
+	Ok(())
+}
+
+#[rustfmt::skip]
 fn export_gif(world: World, source: &Path, target: Option<PathBuf>) -> Result<()> {
 	#[cfg(feature = "extras")] { world.gif_export(source, target) }
 	#[cfg(not(feature = "extras"))] { _ = (world, source, target); anyhow::bail!("need to enable the `extras` feature-flag in the antbyte crate"); }
-}
 }

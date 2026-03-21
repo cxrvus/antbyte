@@ -1,3 +1,4 @@
+pub mod file_compiler;
 pub mod run;
 
 mod ant_tick;
