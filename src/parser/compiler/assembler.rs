@@ -3,10 +3,13 @@ use std::collections::HashMap;
 use crate::{
 	ant::{
 		behavior::Behavior,
-		compiler::{CompFunc, LogConfig},
 		event::{EventBit, IoType},
 	},
-	parser::{ParamValue, Signature, token::Token},
+	parser::{
+		ParamValue, Signature,
+		compiler::{CompFunc, LogConfig},
+		token::Token,
+	},
 	truth_table::TruthTable,
 };
 

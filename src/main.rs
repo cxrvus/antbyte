@@ -22,7 +22,7 @@ pub fn run() -> Result<()> {
 	#[cfg(not(feature = "clap"))]
 	{
 		use antbyte::{
-			ant::compiler::LogConfig,
+			parser::compiler::LogConfig,
 			plugins::render::term_render::TermRenderer,
 			world::{World, file_compiler::compile_world},
 		};

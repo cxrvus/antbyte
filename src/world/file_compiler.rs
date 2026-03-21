@@ -3,7 +3,7 @@ use std::{fs, path::PathBuf, process};
 use anyhow::{Context, Result, bail};
 
 use crate::{
-	ant::compiler::{LogConfig, compile_world as compile_dot_ant},
+	parser::compiler::{LogConfig, compile_world as compile_dot_ant},
 	world::WorldProperties,
 };
 

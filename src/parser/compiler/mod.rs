@@ -14,12 +14,11 @@ use std::{
 };
 
 use crate::{
-	ant::{
-		behavior::Behavior,
-		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
-	},
+	ant::behavior::Behavior,
 	parser::{
-		AntFunc, Expression, Func, ParamValue, Parser, Signature, SignatureSpec, func_parser::MAIN,
+		AntFunc, Expression, Func, ParamValue, Parser, Signature, SignatureSpec,
+		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
+		func_parser::MAIN,
 	},
 	truth_table::TruthTable,
 	world::{WorldProperties, file_compiler::read_file},

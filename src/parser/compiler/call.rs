@@ -1,5 +1,5 @@
 use crate::{
-	ant::compiler::{CompFunc, CompStatement, FuncCall},
+	parser::compiler::{CompFunc, CompStatement, FuncCall},
 	parser::{ParamValue, SignatureSpec, token::Token},
 };
 

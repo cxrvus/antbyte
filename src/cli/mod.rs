@@ -9,7 +9,7 @@ use anyhow::{Context, Ok, Result};
 use clap::{self, Parser};
 
 use crate::{
-	ant::compiler::LogConfig,
+	parser::compiler::LogConfig,
 	plugins::render::term_render::TermRenderer,
 	world::{World, config::WorldConfig, file_compiler::compile_world},
 };
