@@ -1,4 +1,9 @@
-use std::{fs, path::PathBuf, process};
+use std::{
+	fs,
+	io::{IsTerminal, read_to_string, stdin},
+	path::PathBuf,
+	process,
+};
 
 use anyhow::{Context, Result, bail};
 
@@ -12,20 +17,31 @@ pub fn compile_world(
 	log_cfg: &LogConfig,
 	sub_args: &Option<String>,
 ) -> Result<WorldProperties> {
-	let code = read_file(path)?;
-	let extension = path.extension().unwrap_or_default().to_string_lossy();
+	let mut properties = if use_stdin(path) {
+		if stdin().is_terminal() {
+			bail!("path '-' requires piped stdin JSON");
+		}
 
-	let mut properties = match extension.as_ref() {
-		"ant" => compile_dot_ant(&code, log_cfg, Some(path))
-			.with_context(|| format!("compiler error in file '{}'!", path.to_string_lossy())),
+		let code = read_to_string(stdin()).context("error reading from stdin!")?;
 
-		"json" => compile_json(&code),
+		compile_json(&code)
+	} else {
+		let code = read_file(path)?;
 
-		"js" | "mjs" => compile_js(path, sub_args.clone()),
+		let extension = path.extension().unwrap_or_default().to_string_lossy();
 
-		_ => bail!(
-			"invalid file extension: {extension}.\n needs to be either: '.ant', '.json', '.js', '.mjs'"
-		),
+		match extension.as_ref() {
+			"ant" => compile_dot_ant(&code, log_cfg, Some(path))
+				.with_context(|| format!("compiler error in file '{}'!", path.to_string_lossy())),
+
+			"json" => compile_json(&code),
+
+			"js" | "mjs" => compile_js(path, sub_args.clone()),
+
+			_ => bail!(
+				"invalid file extension: {extension}.\n needs to be either: '.ant', '.json', '.js', '.mjs'"
+			),
+		}
 	}?;
 
 	if properties.name.is_none()
@@ -35,6 +51,10 @@ pub fn compile_world(
 	}
 
 	Ok(properties)
+}
+
+fn use_stdin(path: &PathBuf) -> bool {
+	path == "-"
 }
 
 pub fn read_file(path: &PathBuf) -> Result<String> {
