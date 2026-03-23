@@ -8,26 +8,28 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Pin {
 	// ## cell interaction
-	CellClear,
+	Clear,
 	Cell,
-	CellNext,
+	NextCell,
 
 	// ## universal inputs:
 	Time,
 	Pulse,
-	Memory,
+	Mem,
 	Random,
 	Chance,
 
 	// ## ant interaction inputs
-	Obstacle,
+	See,
 	Kill,
 
 	// ## ant interaction outputs
 	/// 3 bits indicating number of 45 degrees rotations
-	Direction,
-	Halted,
-	SpawnAnt,
+	Dir,
+	Halt,
+
+	Ant,
+
 	Die,
 }
 
@@ -68,30 +70,30 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::CellClear,
+			pin: Self::Clear,
 			short: "CC",
 			aliases: &["CLEAR"],
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::CellNext,
+			pin: Self::NextCell,
 			short: "CN",
 			aliases: &["NEXT_CELL_"],
 			size: CELL,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::Obstacle,
+			pin: Self::See,
 			short: "AC",
-			aliases: &["OBS", "OBSTACLE"],
+			aliases: &["ANT_SEE"],
 			size: BIT,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::Time,
 			short: "T",
-			aliases: &["CLOCK_"],
+			aliases: &["TIME_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
@@ -103,7 +105,7 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::Memory,
+			pin: Self::Mem,
 			short: "M",
 			aliases: &["MEM_"],
 			size: BYTE,
@@ -124,23 +126,23 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::Direction,
+			pin: Self::Dir,
 			short: "D",
 			aliases: &["DIR_"],
 			size: DIR,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::Halted,
+			pin: Self::Halt,
 			short: "DX",
 			aliases: &["HALT"],
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::SpawnAnt,
+			pin: Self::Ant,
 			short: "A",
-			aliases: &["SPAWN_"],
+			aliases: &["ANT_"],
 			size: ANT_ID,
 			io_type: Some(IoType::Output),
 		},

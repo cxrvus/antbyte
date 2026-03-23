@@ -14,11 +14,11 @@ pub enum AntStatus {
 
 #[derive(Clone, Copy, Default)]
 pub struct Ant {
+	/// principle direction - number between 0 and 7
+	pub dir: u8,
 	pub behavior: u8,
 	pub status: AntStatus,
 	pub pos: Vec2u,
-	/// principle direction - number between 0 and 7
-	pub dir: u8,
 	pub memory: u8,
 	pub age: u32,
 }

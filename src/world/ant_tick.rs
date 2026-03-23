@@ -29,14 +29,14 @@ impl World {
 				Time => ant.age as u8,
 				Pulse => zero_count_mask(ant.age as u8),
 				Cell => self.cells.at(&ant.pos.sign()).unwrap().value,
-				CellNext => self
+				NextCell => self
 					.next_pos(&ant)
 					.map(|pos| self.cells.at(&pos.sign()).unwrap().value)
 					.unwrap_or(0u8),
-				Memory => ant.memory,
+				Mem => ant.memory,
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
-				Obstacle => match self.next_pos(&ant) {
+				See => match self.next_pos(&ant) {
 					Some(pos) => self.is_occupied(&pos).into(),
 					None => 1,
 				},
@@ -93,17 +93,17 @@ impl World {
 
 		for PinValue { pin: output, value } in output_values.into_iter() {
 			match (output, value) {
-				(Direction, _) => ant.set_dir(ant.dir + value),
-				(Halted, _) => halted = value != 0,
+				(Dir, _) => ant.set_dir(ant.dir + value),
+				(Halt, _) => halted = value != 0,
 				(Cell, _) => {
 					let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
 					let value = value | (old_value & output_cell_mask);
 					let adjusted = self.adjusted_color(value);
 					self.set_value(&ant.pos, adjusted);
 				}
-				(CellClear, 1) => self.set_value(&ant.pos, 0),
-				(Memory, value) => ant.memory = value,
-				(SpawnAnt, _) if value != 0 => self.reproduce(&ant, value),
+				(Clear, 1) => self.set_value(&ant.pos, 0),
+				(Mem, value) => ant.memory = value,
+				(Ant, _) if value != 0 => self.reproduce(&ant, value),
 				(Kill, 1) => {
 					if let Some(pos) = self.next_pos(&ant) {
 						self.kill_at(&pos);
