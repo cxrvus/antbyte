@@ -9,6 +9,8 @@ const MAX_TICKS: u32 = 1 << 16;
 
 impl World {
 	pub fn run(&mut self, renderer: &mut impl Renderer) -> Result<()> {
+		renderer.open();
+
 		if self.config().looping {
 			let properties = self.properties.clone();
 			loop {

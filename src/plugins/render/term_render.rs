@@ -58,7 +58,13 @@ impl Renderer for TermRenderer {
 		self.render_frame(world);
 	}
 
-	fn end(&self) {
+	fn open(&mut self) {
+		clear_screen();
+		println!();
+		sleep(100);
+	}
+
+	fn close(&self) {
 		if let Some(ms) = self.cfg_sleep {
 			sleep(ms);
 		}
