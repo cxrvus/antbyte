@@ -40,8 +40,6 @@ impl World {
 					Some(pos) => self.is_occupied(&pos).into(),
 					None => 1,
 				},
-				Direction => ant.dir,
-				Halted => ant.halted as u8,
 				_ => panic!("unhandled input: {input_sub_pin:?}"),
 			};
 
@@ -91,10 +89,12 @@ impl World {
 		// invert mask to only keep bits that are not targeted
 		output_cell_mask = !output_cell_mask;
 
+		let mut halted = false;
+
 		for PinValue { pin: output, value } in output_values.into_iter() {
 			match (output, value) {
 				(Direction, _) => ant.set_dir(ant.dir + value),
-				(Halted, _) => ant.halted = value != 0,
+				(Halted, _) => halted = value != 0,
 				(Cell, _) => {
 					let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
 					let value = value | (old_value & output_cell_mask);
@@ -114,7 +114,7 @@ impl World {
 			};
 		}
 
-		if ant.is_alive() && !ant.halted {
+		if ant.is_alive() && !halted {
 			self.move_tick(&mut ant);
 		}
 

@@ -19,7 +19,6 @@ pub struct Ant {
 	pub pos: Vec2u,
 	/// principle direction - number between 0 and 7
 	pub dir: u8,
-	pub halted: bool,
 	pub memory: u8,
 	pub age: u32,
 }
