@@ -10,7 +10,7 @@ use clap::{self, Parser};
 
 use crate::{
 	parser::compiler::LogConfig,
-	plugins::render::term_render::TermRenderer,
+	plugins::{Plugins, render::term_render::TermRenderer},
 	world::{World, config::WorldConfig, file_compiler::compile_world},
 };
 
@@ -47,12 +47,16 @@ pub fn run() -> Result<()> {
 			.context("config-arg error!")?;
 		let mut world = World::new(properties.clone()).context("world error!")?;
 
-		let mut renderer = TermRenderer::new(&world);
+		let renderer = TermRenderer::new(&world);
+
+		let mut plugins = Plugins {
+			renderer: Box::new(renderer),
+		};
 
 		if let Some(target) = args.gif {
 			export_gif(world, &args.path, target).context("GIF export error!")?;
 		} else {
-			world.run(&mut renderer).context("world error!")?;
+			world.run(&mut plugins).context("world error!")?;
 		}
 	}
 
