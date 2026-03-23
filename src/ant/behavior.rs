@@ -1,5 +1,5 @@
 use crate::{
-	ant::event::{EventBit, IoType},
+	ant::pin::{IoType, SubPin},
 	truth_table::TruthTable,
 	util::find_dupe,
 };
@@ -12,8 +12,8 @@ use serde::{Deserialize, Serialize};
 pub struct Behavior {
 	pub name: String,
 	pub logic: TruthTable,
-	pub inputs: Vec<EventBit>,
-	pub outputs: Vec<EventBit>,
+	pub inputs: Vec<SubPin>,
+	pub outputs: Vec<SubPin>,
 }
 
 #[cfg_attr(test, derive(ts_rs::TS))]
@@ -23,8 +23,8 @@ pub struct Behavior {
 struct BehaviorJSON {
 	name: String,
 	logic: Vec<u32>,
-	inputs: Vec<EventBit>,
-	outputs: Vec<EventBit>,
+	inputs: Vec<SubPin>,
+	outputs: Vec<SubPin>,
 }
 
 impl TryFrom<BehaviorJSON> for Behavior {
@@ -53,8 +53,8 @@ impl Behavior {
 	pub fn new(
 		name: String,
 		truth_table: TruthTable,
-		inputs: Vec<EventBit>,
-		outputs: Vec<EventBit>,
+		inputs: Vec<SubPin>,
+		outputs: Vec<SubPin>,
 	) -> Result<Self> {
 		if inputs.len() > 8 {
 			return Err(anyhow!(
@@ -70,8 +70,8 @@ impl Behavior {
 			));
 		}
 
-		Self::validate_events(&inputs, IoType::Input)?;
-		Self::validate_events(&outputs, IoType::Output)?;
+		Self::validate_pins(&inputs, IoType::Input)?;
+		Self::validate_pins(&outputs, IoType::Output)?;
 
 		Ok(Self {
 			logic: truth_table,
@@ -81,12 +81,12 @@ impl Behavior {
 		})
 	}
 
-	pub fn validate_events(events: &Vec<EventBit>, io_type: IoType) -> Result<()> {
-		if let Some(dupe) = find_dupe(events) {
-			Err(anyhow!("found duplicate event in Behavior: {dupe:?}"))
+	pub fn validate_pins(pins: &Vec<SubPin>, io_type: IoType) -> Result<()> {
+		if let Some(dupe) = find_dupe(pins) {
+			Err(anyhow!("found duplicate pin in Behavior: {dupe:?}"))
 		} else {
-			for event in events {
-				event.validate(&io_type)?;
+			for pin in pins {
+				pin.validate(&io_type)?;
 			}
 
 			Ok(())

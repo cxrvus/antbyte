@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{
 	ant::{
 		behavior::Behavior,
-		event::{EventBit, IoType},
+		pin::{IoType, SubPin},
 	},
 	parser::{
 		ParamValue, Signature,
@@ -19,7 +19,7 @@ impl CompFunc {
 	pub fn assemble(&self, log_cfg: &LogConfig) -> Result<Behavior> {
 		let mut func = self.clone();
 
-		let (inputs, outputs) = func.extract_events()?;
+		let (inputs, outputs) = func.extract_pins()?;
 
 		// dbg!((&inputs, &outputs));
 
@@ -43,14 +43,14 @@ impl CompFunc {
 		Ok(behavior)
 	}
 
-	fn extract_events(&mut self) -> Result<(Vec<EventBit>, Vec<EventBit>)> {
-		let mut inputs: Vec<EventBit> = vec![];
-		let mut outputs: Vec<EventBit> = vec![];
+	fn extract_pins(&mut self) -> Result<(Vec<SubPin>, Vec<SubPin>)> {
+		let mut inputs: Vec<SubPin> = vec![];
+		let mut outputs: Vec<SubPin> = vec![];
 		let mut variables: Vec<String> = vec![];
 
 		for statement in &mut self.comp_statements {
 			for param in &mut statement.params {
-				Self::extract_event(
+				Self::extract_pin(
 					&mut self.signature,
 					&mut variables,
 					&mut inputs,
@@ -59,7 +59,7 @@ impl CompFunc {
 				)?;
 			}
 
-			Self::extract_event(
+			Self::extract_pin(
 				&mut self.signature,
 				&mut variables,
 				&mut outputs,
@@ -85,10 +85,10 @@ impl CompFunc {
 		}
 	}
 
-	fn extract_event(
+	fn extract_pin(
 		signature: &mut Signature,
 		variables: &mut Vec<String>,
-		events: &mut Vec<EventBit>,
+		pins: &mut Vec<SubPin>,
 		param: &mut ParamValue,
 		io_type: IoType,
 	) -> Result<()> {
@@ -98,7 +98,7 @@ impl CompFunc {
 			let original_target = target.clone();
 
 			if io_type == IoType::Input {
-				let reassigned_output_name = format_event(&original_target, IoType::Output);
+				let reassigned_output_name = format_pin(&original_target, IoType::Output);
 
 				if signature.assignees.contains(&reassigned_output_name) {
 					*target = reassigned_output_name;
@@ -106,30 +106,30 @@ impl CompFunc {
 				}
 			}
 
-			let event = EventBit::from_ident(&original_target)?;
+			let pin = SubPin::from_ident(&original_target)?;
 
-			if let Some(req_io) = event.event.properties().io_type
+			if let Some(req_io) = pin.pin.properties().io_type
 				&& req_io != io_type
 			{
 				return Err(match req_io {
-					IoType::Input => anyhow!("cannot assign to input-only event '{target}'"),
+					IoType::Input => anyhow!("cannot assign to input-only pin '{target}'"),
 					IoType::Output => anyhow!(
-						"cannot use output-only event '{target}' like an input\n(except if it has been assigned a value before)"
+						"cannot use output-only pin '{target}' like an input\n(except if it has been assigned a value before)"
 					),
 				});
 			}
 
-			*target = format_event(&original_target, io_type);
+			*target = format_pin(&original_target, io_type);
 
-			if !events.contains(&event) {
-				events.push(event);
+			if !pins.contains(&pin) {
+				pins.push(pin);
 
-				let signature_events = match io_type {
+				let signature_pins = match io_type {
 					IoType::Input => &mut signature.params,
 					IoType::Output => &mut signature.assignees,
 				};
 
-				signature_events.push(target.clone());
+				signature_pins.push(target.clone());
 			}
 		} else if !variables.contains(target) {
 			match io_type {
@@ -220,7 +220,7 @@ fn int_from_bits(bits: &[bool]) -> u32 {
 	value
 }
 
-fn format_event(ident: &str, io_type: IoType) -> String {
+fn format_pin(ident: &str, io_type: IoType) -> String {
 	let ident = ident.to_ascii_lowercase();
 
 	let prefix = match io_type {

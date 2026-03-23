@@ -1,4 +1,4 @@
-use crate::ant::event::{Event, OutputValue};
+use crate::ant::pin::{Pin, PinValue};
 
 use super::{Behavior, World};
 
@@ -22,10 +22,10 @@ impl World {
 
 		let mut input_bits = 0u8;
 
-		use Event::*;
+		use Pin::*;
 
-		for input_spec in inputs.iter() {
-			let input_value: u8 = match input_spec.event {
+		for input_sub_pin in inputs.iter() {
+			let input_value: u8 = match input_sub_pin.pin {
 				Time => ant.age as u8,
 				Pulse => zero_count_mask(ant.age as u8),
 				Cell => self.cells.at(&ant.pos.sign()).unwrap().value,
@@ -42,10 +42,10 @@ impl World {
 				},
 				Direction => ant.dir,
 				Halted => ant.halted as u8,
-				_ => panic!("unhandled input: {input_spec:?}"),
+				_ => panic!("unhandled input: {input_sub_pin:?}"),
 			};
 
-			let bit_index = input_spec.bit;
+			let bit_index = input_sub_pin.line;
 			let masked_input_value = (input_value >> bit_index) & 1;
 			input_bits <<= 1;
 			input_bits |= masked_input_value;
@@ -55,28 +55,28 @@ impl World {
 		let mut output_bits = truth_table.get(input_bits);
 
 		// condense output bits into bytes
-		let mut output_values: Vec<OutputValue> = vec![];
+		let mut output_values: Vec<PinValue> = vec![];
 
 		let mut output_cell_mask = 0u8;
 
-		for output_spec in outputs.iter().rev() {
+		for output_sub_pin in outputs.iter().rev() {
 			let output_bit = (output_bits & 1) as u8;
-			let bit_index = output_spec.bit;
+			let bit_index = output_sub_pin.line;
 			let new_value = output_bit << bit_index;
 
 			// only overwrite targeted cell bits
-			if let Event::Cell = output_spec.event {
-				output_cell_mask |= 1 << output_spec.bit;
+			if let Pin::Cell = output_sub_pin.pin {
+				output_cell_mask |= 1 << output_sub_pin.line;
 			}
 
 			if let Some(output_value) = output_values
 				.iter_mut()
-				.find(|output_value| output_value.output == output_spec.event)
+				.find(|output_value| output_value.pin == output_sub_pin.pin)
 			{
 				output_value.value |= new_value;
 			} else {
-				output_values.push(OutputValue {
-					output: output_spec.event,
+				output_values.push(PinValue {
+					pin: output_sub_pin.pin,
 					value: new_value,
 				});
 			}
@@ -91,7 +91,7 @@ impl World {
 		// invert mask to only keep bits that are not targeted
 		output_cell_mask = !output_cell_mask;
 
-		for OutputValue { output, value } in output_values.into_iter() {
+		for PinValue { pin: output, value } in output_values.into_iter() {
 			match (output, value) {
 				(Direction, _) => ant.set_dir(ant.dir + value),
 				(Halted, _) => ant.halted = value != 0,

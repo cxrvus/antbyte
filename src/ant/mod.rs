@@ -1,4 +1,4 @@
-pub mod event;
+pub mod pin;
 
 use crate::util::vec2::{Vec2, Vec2u};
 
