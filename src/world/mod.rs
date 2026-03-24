@@ -106,8 +106,8 @@ impl World {
 				y: height / 2,
 			},
 			StartingPos::Center => Vec2u {
-				x: width / 2,
-				y: height / 2,
+				x: width / 2 - 1,
+				y: height / 2 - 1,
 			},
 		};
 
