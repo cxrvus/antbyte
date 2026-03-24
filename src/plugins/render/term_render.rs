@@ -125,7 +125,7 @@ impl TermRenderer {
 		// TODO: move this to world fn metadata_str()
 		println!("\n\n{world_str}\n\n");
 		println!("{tick_str}");
-		println!("K: {:02x}", world.ext_in);
+		println!("K: {:02x}", world.ext_input);
 		println!("X: {ext_out_str}");
 		println!("\n\n");
 
@@ -203,7 +203,7 @@ impl World {
 
 	pub fn ext_out_str(&self) -> String {
 		let ext_out_str = self
-			.ext_out
+			.ext_output
 			.iter()
 			.map(|x| format!("{x:02x}"))
 			.collect::<Vec<_>>()

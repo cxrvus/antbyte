@@ -51,8 +51,10 @@ pub struct WorldState {
 	tick_count: u32,
 	pub cells: Cells,
 	pub ants: Vec<Ant>,
-	pub ext_in: u8,
-	pub ext_out: Vec<u8>,
+	pub event_in: u8,
+	pub event_out: u8,
+	pub ext_input: u8,
+	pub ext_output: Vec<u8>,
 }
 
 impl WorldState {
@@ -62,8 +64,10 @@ impl WorldState {
 			tick_count: 0,
 			cells: Matrix::new(width, height),
 			ants: vec![],
-			ext_in: 0,
-			ext_out: vec![],
+			event_in: 0,
+			event_out: 0,
+			ext_input: 0,
+			ext_output: vec![],
 		}
 	}
 }
@@ -138,6 +142,9 @@ impl World {
 
 	pub fn tick(&mut self) -> bool {
 		self.tick_count += 1;
+
+		self.event_in = self.event_out;
+		self.event_out = 0;
 
 		for i in 0..self.ants.len() {
 			if self.ants[i].is_alive() {

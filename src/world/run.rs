@@ -44,15 +44,15 @@ impl World {
 			plugins.renderer.render(self);
 
 			loop {
-				self.ext_in = plugins.ext_input.frame(self.config());
+				self.ext_input = plugins.ext_input.frame(self.config());
 
 				let world_active = self.frame_tick();
 
 				plugins.renderer.render(self);
 
-				plugins.ext_output.frame(self.config(), &self.ext_out);
+				plugins.ext_output.frame(self.config(), &self.ext_output);
 
-				self.ext_out.clear();
+				self.ext_output.clear();
 
 				if !world_active {
 					break;
