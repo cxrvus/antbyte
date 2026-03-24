@@ -90,6 +90,7 @@ impl TermRenderer {
 		// pre-render
 		let world_str = self.color_render(world);
 		let tick_str = world.tick_str();
+		let ext_out_str = world.ext_out_str();
 
 		// print
 		clear_screen();
@@ -102,8 +103,12 @@ impl TermRenderer {
 			println!("{name}\n");
 		}
 
+		// TODO: move this to world fn metadata_str()
 		println!("\n\n{world_str}\n\n");
-		println!("{tick_str}\n\n\n");
+		println!("{tick_str}");
+		println!("K: {:02x}", world.ext_in);
+		println!("X: {ext_out_str}");
+		println!("\n\n");
 
 		io::stdout().flush().unwrap();
 	}

@@ -56,9 +56,4 @@ impl World {
 			}
 		}
 	}
-
-	#[inline]
-	pub fn tick_str(&self) -> String {
-		format!("{:0>8}", self.tick_count())
-	}
 }

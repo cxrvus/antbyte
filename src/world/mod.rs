@@ -51,6 +51,21 @@ pub struct WorldState {
 	tick_count: u32,
 	pub cells: Cells,
 	pub ants: Vec<Ant>,
+	pub ext_in: u8,
+	pub ext_out: Vec<u8>,
+}
+
+impl WorldState {
+	pub fn new(rng: StdRng, width: usize, height: usize) -> Self {
+		Self {
+			rng,
+			tick_count: 0,
+			cells: Matrix::new(width, height),
+			ants: vec![],
+			ext_in: 0,
+			ext_out: vec![],
+		}
+	}
 }
 
 pub struct World {
@@ -76,12 +91,7 @@ impl World {
 			StdRng::from_seed(rand::random::<[u8; 32]>())
 		};
 
-		let state = WorldState {
-			rng,
-			tick_count: 0,
-			cells: Matrix::new(width, height),
-			ants: vec![],
-		};
+		let state = WorldState::new(rng, width, height);
 
 		let mut world = Self { properties, state };
 
@@ -224,6 +234,28 @@ impl World {
 	#[inline]
 	fn rng(&mut self) -> u8 {
 		self.rng.random()
+	}
+
+	// formatting...
+
+	#[inline]
+	pub fn tick_str(&self) -> String {
+		format!("{:0>8}", self.tick_count())
+	}
+
+	pub fn ext_out_str(&self) -> String {
+		let ext_out_str = self
+			.ext_out
+			.iter()
+			.map(|x| format!("{x:02x}"))
+			.collect::<Vec<_>>()
+			.join(", ");
+
+		if ext_out_str.is_empty() {
+			"--".into()
+		} else {
+			ext_out_str
+		}
 	}
 }
 
