@@ -10,20 +10,17 @@ pub const SPEED_CAP: u32 = 0x2000;
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct WorldConfig {
+	// ## Core
 	/// width in pixels
 	pub width: usize,
 	/// height in pixels
 	pub height: usize,
-	/// rendered frames per second
-	pub fps: Option<u32>,
 	/// simulated ticks per frame (defaults to 1)
 	pub speed: Option<u32>,
 	/// simulation tick limit
 	pub ticks: Option<u32>,
 	/// amount of ticks after which a cell will automatically reset
 	pub decay: Option<u16>,
-	/// amount of ms to sleep for after end of simulation, i.e. between loops
-	pub sleep: Option<u32>,
 	/// re-run simulation after it ends
 	pub looping: bool,
 	/// behavior if ants touch the worlds border
@@ -36,6 +33,14 @@ pub struct WorldConfig {
 	pub noise_seed: Option<u32>,
 	pub hide_title: bool, // TODO: move to renderer
 	pub description: String,
+
+	// ## Plugins
+
+	// ### Renderer
+	/// rendered frames per second
+	pub fps: Option<u32>,
+	/// amount of ms to sleep for after end of simulation, i.e. between loops
+	pub sleep: Option<u32>,
 }
 
 impl Default for WorldConfig {
