@@ -170,7 +170,7 @@ fn color_cell(value: u8, content: &str) -> String {
 impl World {
 	#[inline]
 	pub fn tick_str(&self) -> String {
-		format!("{:0>8}", self.tick_count())
+		format!("T: {:0>8}", self.tick_count())
 	}
 
 	pub fn ext_out_str(&self) -> String {

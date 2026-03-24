@@ -8,19 +8,35 @@ use anyhow::Result;
 const MAX_TICKS: u32 = 1 << 16;
 
 impl World {
-	pub fn run(&mut self, plugins: &mut PluginSet) -> Result<()> {
+	fn init(&self, plugins: &mut PluginSet) {
 		plugins.renderer.open(self.config());
+		plugins.ext_input.open(self.config());
+		plugins.ext_output.open(self.config());
+	}
+
+	fn end(&self, plugins: &mut PluginSet) {
+		plugins.renderer.close();
+		plugins.ext_input.close();
+		plugins.ext_output.close();
+	}
+
+	pub fn run(&mut self, plugins: &mut PluginSet) -> Result<()> {
+		self.init(plugins);
 
 		if self.config().looping {
 			let properties = self.properties.clone();
 			loop {
+				// todo: add break condition
 				let mut world = World::new(properties.clone())?;
 				world.run_once(plugins);
 			}
 		} else {
 			self.run_once(plugins);
-			Ok(())
 		}
+
+		self.end(plugins);
+
+		Ok(())
 	}
 
 	fn run_once(&mut self, plugins: &mut PluginSet) {
@@ -28,9 +44,15 @@ impl World {
 			plugins.renderer.render(self);
 
 			loop {
+				self.ext_in = plugins.ext_input.frame(self.config());
+
 				let world_active = self.frame_tick();
 
 				plugins.renderer.render(self);
+
+				plugins.ext_output.frame(self.config(), &self.ext_out);
+
+				self.ext_out.clear();
 
 				if !world_active {
 					break;

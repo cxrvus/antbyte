@@ -145,9 +145,11 @@ impl World {
 			}
 		}
 
+		// todo: optimize defragmentation
 		self.ants.iter_mut().for_each(|ant| ant.grow_up());
 		self.ants.retain(|ant| ant.is_alive());
 
+		// todo: optimize decay
 		if self.config().decay.is_some() {
 			self.cell_decay();
 		}

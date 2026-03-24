@@ -33,6 +33,10 @@ pub enum Pin {
 	Ant,
 
 	Die,
+
+	// ## external
+	ExtIn,
+	ExtOut,
 }
 
 #[derive(Debug, Default)]
@@ -63,7 +67,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	pub const PIN_DEFINITIONS: [PinDefinition; 16] = [
+	pub const PIN_DEFINITIONS: [PinDefinition; 18] = [
 		PinDefinition {
 			pin: Self::Cell,
 			short: "C",
@@ -174,6 +178,20 @@ impl Pin {
 			short: "AX",
 			aliases: &["DIE"],
 			size: BIT,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::ExtIn,
+			short: "K",
+			aliases: &["INPUT", "KEY"],
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
+			pin: Self::ExtOut,
+			short: "X",
+			aliases: &["OUTPUT", "AUDIO"],
+			size: BYTE,
 			io_type: Some(IoType::Output),
 		},
 	];

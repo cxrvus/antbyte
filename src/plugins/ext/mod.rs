@@ -8,7 +8,7 @@ pub trait ExtInput: Plugin {
 }
 
 pub trait ExtOutput: Plugin {
-	fn frame(&mut self, config: &WorldConfig, values: Vec<u8>) {
+	fn frame(&mut self, config: &WorldConfig, values: &Vec<u8>) {
 		_ = config;
 		_ = values;
 	}

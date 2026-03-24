@@ -40,6 +40,7 @@ impl World {
 					Some(pos) => self.is_occupied(&pos).into(),
 					None => 1,
 				},
+				ExtIn => self.ext_in,
 				_ => panic!("unhandled input: {input_sub_pin:?}"),
 			};
 
@@ -114,6 +115,7 @@ impl World {
 					}
 				}
 				(Die, 1) => self.die(&mut ant),
+				(ExtOut, value) => self.ext_out.push(value),
 				_ => {}
 			};
 		}
