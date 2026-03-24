@@ -1,0 +1,16 @@
+set hide_ants = 1;
+set height = 16;
+set width = 5;
+set decay = 128;
+
+ant main {
+	(ES1, ES0) = buf(and(RR1, R1), and(RR1, R0));
+	M0 = or(M0, T2);
+	A1 = -M0;
+	AD1 = 1;
+}
+
+ant other = 2 {
+	C0 = E0;
+	C1 = E1;
+}

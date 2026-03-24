@@ -399,7 +399,7 @@ mod test {
 				Some(Output) => "O",
 			};
 
-			println!("{short}; {size}; {io_type}")
+			println!("{short}; {size}; {io_type};")
 		}
 	}
 }
