@@ -90,6 +90,8 @@ impl World {
 		output_cell_mask = !output_cell_mask;
 
 		let mut halted = false;
+		let mut child_dir = 0;
+		let mut child_mem = 0;
 
 		for PinValue { pin: output, value } in output_values.into_iter() {
 			match (output, value) {
@@ -103,7 +105,9 @@ impl World {
 				}
 				(Clear, 1) => self.set_value(&ant.pos, 0),
 				(Mem, value) => ant.memory = value,
-				(Ant, _) if value != 0 => self.reproduce(&ant, value),
+				(AntDir, value) => child_dir = value,
+				(AntMem, value) => child_mem = value,
+				(Ant, _) if value != 0 => self.reproduce(&ant, value, child_dir, child_mem),
 				(Kill, 1) => {
 					if let Some(pos) = self.next_pos(&ant) {
 						self.kill_at(&pos);

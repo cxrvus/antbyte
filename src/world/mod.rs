@@ -102,7 +102,7 @@ impl World {
 		};
 
 		if world.properties.behaviors.contains_key(&1) {
-			let mut ant = Ant::new(starting_pos, 0, 1);
+			let mut ant = Ant::new(starting_pos, 0, 1, 0);
 			ant.grow_up();
 			world.spawn(ant);
 		} else {

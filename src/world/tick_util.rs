@@ -67,17 +67,26 @@ impl World {
 		}
 	}
 
-	pub(super) fn reproduce(&mut self, origin: &Ant, behavior_id: u8) {
-		// direction gets flipped, so that the new ant
-		// spawns behind the old one and not in front of her
+	pub(super) fn reproduce(
+		&mut self,
+		origin: &Ant,
+		behavior_id: u8,
+		child_dir: u8,
+		child_mem: u8,
+	) {
 		let original_dir = origin.dir;
+		let child_dir = child_dir + original_dir;
+
 		let mut ant = *origin;
+
+		// direction gets flipped, so that the new ant
+		// spawns behind the old one and not in front of it
 		ant.flip_dir();
 
 		if let Some(pos) = self.next_pos(&ant)
 			&& self.get_behavior(behavior_id).is_some()
 		{
-			let new_ant = Ant::new(pos, original_dir, behavior_id);
+			let new_ant = Ant::new(pos, child_dir, behavior_id, child_mem);
 			self.spawn(new_ant);
 		}
 	}

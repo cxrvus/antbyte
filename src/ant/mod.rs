@@ -24,11 +24,12 @@ pub struct Ant {
 }
 
 impl Ant {
-	pub fn new(pos: Vec2u, dir: u8, behavior: u8) -> Self {
+	pub fn new(pos: Vec2u, dir: u8, behavior: u8, memory: u8) -> Self {
 		Self {
 			pos,
-			dir,
 			behavior,
+			memory,
+			dir: Self::wrap_dir(dir),
 			..Default::default()
 		}
 	}

@@ -28,6 +28,8 @@ pub enum Pin {
 	Dir,
 	Halt,
 
+	AntDir,
+	AntMem,
 	Ant,
 
 	Die,
@@ -61,7 +63,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	pub const PIN_DEFINITIONS: [PinDefinition; 14] = [
+	pub const PIN_DEFINITIONS: [PinDefinition; 16] = [
 		PinDefinition {
 			pin: Self::Cell,
 			short: "C",
@@ -144,6 +146,20 @@ impl Pin {
 			short: "A",
 			aliases: &["ANT_"],
 			size: ANT_ID,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::AntDir,
+			short: "AD",
+			aliases: &["ANT_DIR_"],
+			size: DIR,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::AntMem,
+			short: "AM",
+			aliases: &["ANT_MEM_"],
+			size: BYTE,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
@@ -318,13 +334,13 @@ mod test {
 		let inputs = entries.iter().filter(|x| x.io_type == Some(Input)).collect::<Vec<_>>();
 		let outputs = entries.iter().filter(|x| x.io_type == Some(Output)).collect::<Vec<_>>();
 
-		// number literals accounting for special pins (C and M) and planned pins (AD, K, X)...
+		// number literals accounting for special pins (C and M) and planned pins (I, E, K | ES, X)...
 
-		let input_count = inputs.len() + 2 + 1;
+		let input_count = inputs.len() + 2 + 3;
 		let output_count = outputs.len() + 2 + 2;
 
-		let input_size = inputs.iter().map(|x| x.size).sum::<u8>() + 4 + 8 + 8;
-		let output_size = outputs.iter().map(|x| x.size).sum::<u8>() + 8 + 4 + 8 + 3;
+		let input_size = inputs.iter().map(|x| x.size).sum::<u8>() + (8 + 8) + 1 + 8 + 8;
+		let output_size = outputs.iter().map(|x| x.size).sum::<u8>() + (8 + 8) + 8 + 8;
 
 		println!("input count: {input_count}");
 		println!("output count: {output_count}");
