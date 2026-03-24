@@ -41,6 +41,9 @@ pub struct WorldConfig {
 	pub fps: Option<u32>,
 	/// amount of ms to sleep for after end of simulation, i.e. between loops
 	pub sleep: Option<u32>,
+	/// 16 ASCII characters to render cells, start is value = 0
+	/// can  also set to empty string to get a default ASCII palette
+	pub ascii: Option<String>,
 }
 
 impl Default for WorldConfig {
@@ -48,11 +51,9 @@ impl Default for WorldConfig {
 		Self {
 			width: 32,
 			height: 32,
-			fps: Some(FPS_CAP),
 			speed: Some(1),
 			ticks: None,
 			decay: None,
-			sleep: Some(200),
 			looping: false,
 			border_mode: BorderMode::Wrap,
 			starting_pos: StartingPos::Center,
@@ -61,6 +62,10 @@ impl Default for WorldConfig {
 			noise_seed: None,
 			hide_title: false,
 			description: "".into(),
+
+			fps: Some(FPS_CAP),
+			sleep: Some(200),
+			ascii: None,
 		}
 	}
 }
@@ -133,6 +138,15 @@ impl WorldConfig {
 		Self::cap_opt(self.fps, "FPS", FPS_CAP)?;
 		Self::cap_opt(self.speed, "speed", SPEED_CAP)?;
 		Self::cap_opt(self.sleep, "sleep", 10000)?;
+
+		if let Some(ascii) = &self.ascii {
+			let ascii_len = ascii.len();
+			if !ascii.is_empty() && ascii_len != 16 {
+				bail!(
+					"the ascii setting must be None, an empty string, or 16 characters long. found {ascii_len}"
+				);
+			};
+		};
 
 		Ok(())
 	}

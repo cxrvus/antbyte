@@ -77,6 +77,8 @@ impl Renderer for TermRenderer {
 	}
 }
 
+type CellRenderer = Box<dyn Fn(u8, &str) -> String + 'static>;
+
 impl TermRenderer {
 	pub fn new(world: &World) -> Self {
 		let frame_ms = match world.config().fps {
@@ -94,7 +96,18 @@ impl TermRenderer {
 
 	fn render_frame(&self, world: &World) {
 		// pre-render
-		let world_str = self.color_render(world);
+		let cell_renderer = if let Some(ascii) = &world.config().ascii {
+			let palette = if ascii.is_empty() {
+				ASCII_DEFAULT
+			} else {
+				ascii
+			};
+			ascii_cell(palette)
+		} else {
+			Box::new(color_cell)
+		};
+
+		let world_str = self.render_cells(world, &cell_renderer);
 		let tick_str = world.tick_str();
 		let ext_out_str = world.ext_out_str();
 
@@ -119,7 +132,7 @@ impl TermRenderer {
 		io::stdout().flush().unwrap();
 	}
 
-	fn color_render(&self, world: &World) -> String {
+	fn render_cells(&self, world: &World, render_cell: &CellRenderer) -> String {
 		let cells = &world.cells;
 		let mut string = String::new();
 
@@ -133,18 +146,38 @@ impl TermRenderer {
 
 			match ant {
 				None => {
-					string.push_str(&color_cell(cell.value, "  "));
+					string.push_str(&render_cell(cell.value, "  "));
 				}
 				Some(ant) => {
 					let (char1, char2) = ant.dir_vec().principal_chars();
 					let ant_chars = format!("{char1}{char2}");
-					string.push_str(&color_cell(cell.value, &ant_chars));
+					string.push_str(&render_cell(cell.value, &ant_chars));
 				}
 			}
 		}
 
 		string
 	}
+}
+
+const ASCII_DEFAULT: &str = ".,-=+:;cna!?$W#@";
+
+fn ascii_cell(palette: &str) -> CellRenderer {
+	let palette = palette.to_string();
+	Box::new(move |value: u8, content: &str| -> String {
+		if !content.trim().is_empty() {
+			content.into()
+		} else {
+			let value = value.clamp(0, 15) as usize;
+			let char = &palette[value..value + 1];
+			char.repeat(2)
+		}
+	})
+}
+
+fn color_cell(value: u8, content: &str) -> String {
+	let (bg, fg) = color_codes(value);
+	format!("\x1b[{fg};{bg}m{content}\x1b[0m")
 }
 
 fn color_codes(value: u8) -> (u8, u8) {
@@ -160,11 +193,6 @@ fn color_codes(value: u8) -> (u8, u8) {
 	};
 
 	(bg_color, fg_color)
-}
-
-fn color_cell(value: u8, content: &str) -> String {
-	let (bg, fg) = color_codes(value);
-	format!("\x1b[{fg};{bg}m{content}\x1b[0m")
 }
 
 impl World {
