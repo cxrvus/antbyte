@@ -44,6 +44,10 @@ pub struct WorldConfig {
 	/// 16 ASCII characters to render cells, start is value = 0
 	/// can  also set to empty string to get a default ASCII palette
 	pub ascii: Option<String>,
+
+	// ### External Input
+	/// 1 to 8 characters as key bindings, representing K0-K7 in ascending order
+	pub keys: Option<String>,
 }
 
 impl Default for WorldConfig {
@@ -66,6 +70,8 @@ impl Default for WorldConfig {
 			fps: Some(FPS_CAP),
 			sleep: Some(200),
 			ascii: None,
+
+			keys: None,
 		}
 	}
 }
@@ -147,6 +153,12 @@ impl WorldConfig {
 				);
 			};
 		};
+
+		if let Some(keys) = &self.keys
+			&& keys.len() > 8
+		{
+			bail!("can only specify up to 8 keys. found {}", keys.len())
+		}
 
 		Ok(())
 	}

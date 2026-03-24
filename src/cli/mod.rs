@@ -10,7 +10,7 @@ use clap::{self, Parser};
 
 use crate::{
 	parser::compiler::LogConfig,
-	plugins::{PluginSet, render::term_render::TermRenderer},
+	plugins::{PluginSet, ext::term_input::TermInput, render::term_render::TermRenderer},
 	world::{World, config::WorldConfig, file_compiler::compile_world},
 };
 
@@ -47,11 +47,12 @@ pub fn run() -> Result<()> {
 			.context("config-arg error!")?;
 		let mut world = World::new(properties.clone()).context("world error!")?;
 
-		// TODO: create and use TermInput
-		let renderer = TermRenderer::new(&world);
+		let term_renderer = TermRenderer::new(&world);
+		let term_input = TermInput;
 
 		let mut plugins = PluginSet {
-			renderer: Box::new(renderer),
+			renderer: Box::new(term_renderer),
+			ext_input: Box::new(term_input),
 			..Default::default()
 		};
 

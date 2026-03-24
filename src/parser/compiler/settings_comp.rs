@@ -74,6 +74,7 @@ impl Parser {
 			"desc" | "description" => config.description = self.next_str()?,
 
 			"ascii" => config.ascii = Some(self.next_str()?),
+			"keys" => config.keys = Some(self.next_str()?),
 
 			other => return Err(anyhow!("unknown setting: '{other}'")),
 		}

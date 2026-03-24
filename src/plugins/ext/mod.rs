@@ -1,3 +1,5 @@
+pub mod term_input;
+
 use crate::{plugins::Plugin, world::config::WorldConfig};
 
 pub trait ExtInput: Plugin {
