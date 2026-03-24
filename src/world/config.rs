@@ -31,7 +31,6 @@ pub struct WorldConfig {
 	pub ant_limit: Option<u32>,
 	pub color_mode: ColorMode,
 	pub noise_seed: Option<u32>,
-	pub hide_title: bool, // TODO: move to renderer
 	pub description: String,
 
 	// ## Plugins
@@ -39,6 +38,10 @@ pub struct WorldConfig {
 	// ### Renderer
 	/// rendered frames per second
 	pub fps: Option<u32>,
+	/// don't render title banner
+	pub hide_title: bool, // TODO: move to renderer
+	/// don't render ants
+	pub hide_ants: bool,
 	/// amount of ms to sleep for after end of simulation, i.e. between loops
 	pub sleep: Option<u32>,
 	/// 16 ASCII characters to render cells, start is value = 0
@@ -64,10 +67,11 @@ impl Default for WorldConfig {
 			ant_limit: None,
 			color_mode: ColorMode::RGBI,
 			noise_seed: None,
-			hide_title: false,
 			description: "".into(),
 
 			fps: Some(FPS_CAP),
+			hide_title: false,
+			hide_ants: false,
 			sleep: Some(200),
 			ascii: None,
 

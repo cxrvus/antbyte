@@ -144,11 +144,11 @@ impl TermRenderer {
 			let pos = cells.get_pos(i).unwrap();
 			let ant = world.ants().iter().find(|ant| ant.pos == pos);
 
-			match ant {
-				None => {
+			match (ant, world.config().hide_ants) {
+				(None, _) | (_, true) => {
 					string.push_str(&render_cell(cell.value, "  "));
 				}
-				Some(ant) => {
+				(Some(ant), false) => {
 					let (char1, char2) = ant.dir_vec().principal_chars();
 					let ant_chars = format!("{char1}{char2}");
 					string.push_str(&render_cell(cell.value, &ant_chars));

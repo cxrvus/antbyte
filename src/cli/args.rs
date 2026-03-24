@@ -36,6 +36,10 @@ pub struct Args {
 	#[arg(short = 'T', long)]
 	hide_title: bool,
 
+	/// Hide Ants
+	#[arg(short = 'A', long)]
+	hide_ants: bool,
+
 	/// watch-mode, combine with -d / --debug for dry-runs
 	#[arg(short, long)]
 	pub watch: bool,
@@ -77,6 +81,7 @@ impl Args {
 		}
 
 		if self.hide_title { config.hide_title = true; }
+		if self.hide_ants { config.hide_ants = true; }
 		if self.stepped { config.fps = None; }
 		if self.instant { config.speed = None; }
 		if self.looping { config.looping = true; }

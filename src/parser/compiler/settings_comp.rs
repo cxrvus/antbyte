@@ -73,6 +73,8 @@ impl Parser {
 
 			"desc" | "description" => config.description = self.next_str()?,
 
+			"hide_ants" => config.hide_ants = self.next_bit()?,
+
 			"ascii" => config.ascii = Some(self.next_str()?),
 			"keys" => config.keys = Some(self.next_str()?),
 
