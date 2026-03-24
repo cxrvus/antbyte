@@ -1,5 +1,9 @@
 use super::Renderer;
-use crate::{util::sleep, world::World};
+use crate::{
+	plugins::Plugin,
+	util::sleep,
+	world::{World, config::WorldConfig},
+};
 
 use std::{
 	io::{self, Write},
@@ -34,6 +38,20 @@ pub struct TermRenderer {
 	cfg_sleep: Option<u32>,
 }
 
+impl Plugin for TermRenderer {
+	fn open(&mut self, _config: &WorldConfig) {
+		clear_screen();
+		println!();
+		sleep(100);
+	}
+
+	fn close(&self) {
+		if let Some(ms) = self.cfg_sleep {
+			sleep(ms);
+		}
+	}
+}
+
 impl Renderer for TermRenderer {
 	fn render(&mut self, world: &World) {
 		// wait before every frame (except frame 0)
@@ -56,18 +74,6 @@ impl Renderer for TermRenderer {
 		}
 
 		self.render_frame(world);
-	}
-
-	fn open(&mut self) {
-		clear_screen();
-		println!();
-		sleep(100);
-	}
-
-	fn close(&self) {
-		if let Some(ms) = self.cfg_sleep {
-			sleep(ms);
-		}
 	}
 }
 
@@ -159,4 +165,26 @@ fn color_codes(value: u8) -> (u8, u8) {
 fn color_cell(value: u8, content: &str) -> String {
 	let (bg, fg) = color_codes(value);
 	format!("\x1b[{fg};{bg}m{content}\x1b[0m")
+}
+
+impl World {
+	#[inline]
+	pub fn tick_str(&self) -> String {
+		format!("{:0>8}", self.tick_count())
+	}
+
+	pub fn ext_out_str(&self) -> String {
+		let ext_out_str = self
+			.ext_out
+			.iter()
+			.map(|x| format!("{x:02x}"))
+			.collect::<Vec<_>>()
+			.join(", ");
+
+		if ext_out_str.is_empty() {
+			"--".into()
+		} else {
+			ext_out_str
+		}
+	}
 }

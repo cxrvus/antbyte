@@ -1,19 +1,15 @@
 pub mod term_render;
 
-use crate::{util::vec2::Vec2u, world::World};
+use crate::{plugins::Plugin, util::vec2::Vec2u, world::World};
 
-pub trait Renderer {
-	fn open(&mut self);
+pub trait Renderer: Plugin {
 	fn render(&mut self, world: &World);
-	fn close(&self);
 }
 
 pub struct DefaultRenderer;
+impl Plugin for DefaultRenderer {}
 
 impl Renderer for DefaultRenderer {
-	fn open(&mut self) {}
-	fn close(&self) {}
-
 	fn render(&mut self, world: &World) {
 		let cells = world.cells.clone();
 

@@ -1,6 +1,6 @@
 use super::World;
 use crate::plugins::{
-	Plugins,
+	PluginSet,
 	render::term_render::{clear_screen, print_title_short},
 };
 use anyhow::Result;
@@ -8,8 +8,8 @@ use anyhow::Result;
 const MAX_TICKS: u32 = 1 << 16;
 
 impl World {
-	pub fn run(&mut self, plugins: &mut Plugins) -> Result<()> {
-		plugins.renderer.open();
+	pub fn run(&mut self, plugins: &mut PluginSet) -> Result<()> {
+		plugins.renderer.open(self.config());
 
 		if self.config().looping {
 			let properties = self.properties.clone();
@@ -23,7 +23,7 @@ impl World {
 		}
 	}
 
-	fn run_once(&mut self, plugins: &mut Plugins) {
+	fn run_once(&mut self, plugins: &mut PluginSet) {
 		if self.config().speed.is_some() {
 			plugins.renderer.render(self);
 

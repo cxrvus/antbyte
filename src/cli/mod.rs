@@ -10,7 +10,7 @@ use clap::{self, Parser};
 
 use crate::{
 	parser::compiler::LogConfig,
-	plugins::{Plugins, render::term_render::TermRenderer},
+	plugins::{PluginSet, render::term_render::TermRenderer},
 	world::{World, config::WorldConfig, file_compiler::compile_world},
 };
 
@@ -47,10 +47,12 @@ pub fn run() -> Result<()> {
 			.context("config-arg error!")?;
 		let mut world = World::new(properties.clone()).context("world error!")?;
 
+		// TODO: create and use TermInput
 		let renderer = TermRenderer::new(&world);
 
-		let mut plugins = Plugins {
+		let mut plugins = PluginSet {
 			renderer: Box::new(renderer),
+			..Default::default()
 		};
 
 		if let Some(target) = args.gif {
