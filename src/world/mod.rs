@@ -50,6 +50,7 @@ pub struct WorldState {
 	rng: StdRng,
 	tick_count: u32,
 	pub cells: Cells,
+	pub queen: Option<Ant>,
 	pub ants: Vec<Ant>,
 	pub event_in: u8,
 	pub event_out: u8,
@@ -63,6 +64,7 @@ impl WorldState {
 			rng,
 			tick_count: 0,
 			cells: Matrix::new(width, height),
+			queen: None,
 			ants: vec![],
 			event_in: 0,
 			event_out: 0,
@@ -115,12 +117,23 @@ impl World {
 			},
 		};
 
-		if world.properties.behaviors.contains_key(&1) {
+		if world.properties.behaviors.contains_key(&0) {
+			// validate pins for queen
+
+			let behavior = &world.properties.behaviors[&0];
+			let queen_pins = [behavior.inputs.clone(), behavior.outputs.clone()].concat();
+
+			if let Some(forbidden) = queen_pins.iter().find(|x| !x.pin.definition().queen) {
+				bail!("forbidden pin for queen ant: {:?}", forbidden.pin);
+			}
+
+			world.queen = Some(Ant::new_queen(starting_pos));
+		} else if world.properties.behaviors.contains_key(&1) {
 			let mut ant = Ant::new(starting_pos, 0, 1, 0);
 			ant.grow_up();
 			world.spawn(ant);
 		} else {
-			bail!("no entry point: could not find `ant main` or other ant with ID = 1")
+			bail!("no entry point: could not find `ant main` or other ant with ID = 0 or 1")
 		}
 
 		Ok(world)
@@ -146,9 +159,13 @@ impl World {
 		self.event_in = self.event_out;
 		self.event_out = 0;
 
+		if self.queen.is_some() {
+			self.ant_tick(None);
+		}
+
 		for i in 0..self.ants.len() {
 			if self.ants[i].is_alive() {
-				self.ant_tick(i);
+				self.ant_tick(Some(i));
 			}
 		}
 
@@ -156,12 +173,18 @@ impl World {
 		self.ants.iter_mut().for_each(|ant| ant.grow_up());
 		self.ants.retain(|ant| ant.is_alive());
 
+		if let Some(queen) = self.queen
+			&& !queen.is_alive()
+		{
+			self.queen = None;
+		}
+
 		// todo: optimize decay
 		if self.config().decay.is_some() {
 			self.cell_decay();
 		}
 
-		let no_ants = self.ants.is_empty();
+		let no_ants = self.ants.is_empty() && self.queen.is_none();
 
 		let tick_overflow = self
 			.config()

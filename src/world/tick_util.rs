@@ -10,7 +10,7 @@ use crate::{
 impl World {
 	pub(super) fn next_pos(&self, ant: &Ant) -> Option<Vec2u> {
 		let (pos, dir) = (ant.pos.sign(), ant.dir_vec());
-		let new_pos = pos + dir;
+		let new_pos = if ant.is_queen { pos } else { pos + dir };
 
 		if self.cells.in_bounds(&new_pos) {
 			Some(new_pos.unsign().unwrap())

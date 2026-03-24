@@ -21,6 +21,7 @@ pub struct Ant {
 	pub pos: Vec2u,
 	pub memory: u8,
 	pub age: u32,
+	pub is_queen: bool,
 }
 
 impl Ant {
@@ -30,6 +31,15 @@ impl Ant {
 			behavior,
 			memory,
 			dir: Self::wrap_dir(dir),
+			..Default::default()
+		}
+	}
+
+	pub fn new_queen(pos: Vec2u) -> Self {
+		Self {
+			pos,
+			is_queen: true,
+			status: AntStatus::Alive,
 			..Default::default()
 		}
 	}

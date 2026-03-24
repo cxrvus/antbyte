@@ -42,12 +42,6 @@ pub enum Pin {
 	ExtOut,
 }
 
-#[derive(Debug, Default)]
-pub struct PinProperties {
-	pub size: u8,
-	pub io_type: Option<IoType>,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IoType {
 	Input,
@@ -62,11 +56,12 @@ const ANT_ID: u8 = BYTE;
 const BYTE: u8 = 8;
 
 pub struct PinDefinition {
-	pin: Pin,
-	short: &'static str,
-	aliases: &'static [&'static str],
-	size: u8,
-	io_type: Option<IoType>,
+	pub pin: Pin,
+	pub short: &'static str,
+	pub aliases: &'static [&'static str],
+	pub size: u8,
+	pub io_type: Option<IoType>,
+	pub queen: bool,
 }
 
 impl Pin {
@@ -77,6 +72,7 @@ impl Pin {
 			aliases: &["CELL_"],
 			size: CELL,
 			io_type: None,
+			queen: false,
 		},
 		PinDefinition {
 			pin: Self::Clear,
@@ -84,6 +80,7 @@ impl Pin {
 			aliases: &["CLEAR"],
 			size: BIT,
 			io_type: Some(IoType::Output),
+			queen: false,
 		},
 		PinDefinition {
 			pin: Self::NextCell,
@@ -91,6 +88,7 @@ impl Pin {
 			aliases: &["NEXT_CELL_"],
 			size: CELL,
 			io_type: Some(IoType::Input),
+			queen: false,
 		},
 		PinDefinition {
 			pin: Self::See,
@@ -98,6 +96,7 @@ impl Pin {
 			aliases: &["ANT_SEE"],
 			size: BIT,
 			io_type: Some(IoType::Input),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Time,
@@ -105,6 +104,7 @@ impl Pin {
 			aliases: &["TIME_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Pulse,
@@ -112,6 +112,7 @@ impl Pin {
 			aliases: &["PULSE_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Mem,
@@ -119,6 +120,7 @@ impl Pin {
 			aliases: &["MEM_"],
 			size: BYTE,
 			io_type: None,
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Random,
@@ -126,6 +128,7 @@ impl Pin {
 			aliases: &["RAND_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Chance,
@@ -133,6 +136,7 @@ impl Pin {
 			aliases: &["CHANCE_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Dir,
@@ -140,6 +144,7 @@ impl Pin {
 			aliases: &["DIR_"],
 			size: DIR,
 			io_type: Some(IoType::Output),
+			queen: false,
 		},
 		PinDefinition {
 			pin: Self::Halt,
@@ -147,6 +152,7 @@ impl Pin {
 			aliases: &["HALT"],
 			size: BIT,
 			io_type: Some(IoType::Output),
+			queen: false,
 		},
 		PinDefinition {
 			pin: Self::Ant,
@@ -154,6 +160,7 @@ impl Pin {
 			aliases: &["ANT_"],
 			size: ANT_ID,
 			io_type: Some(IoType::Output),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::AntDir,
@@ -161,6 +168,7 @@ impl Pin {
 			aliases: &["ANT_DIR_"],
 			size: DIR,
 			io_type: Some(IoType::Output),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::AntMem,
@@ -168,6 +176,7 @@ impl Pin {
 			aliases: &["ANT_MEM_"],
 			size: BYTE,
 			io_type: Some(IoType::Output),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Kill,
@@ -175,6 +184,7 @@ impl Pin {
 			aliases: &["KILL"],
 			size: BIT,
 			io_type: Some(IoType::Output),
+			queen: false,
 		},
 		PinDefinition {
 			pin: Self::Event,
@@ -182,6 +192,7 @@ impl Pin {
 			aliases: &["EVENT_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Send,
@@ -189,6 +200,7 @@ impl Pin {
 			aliases: &["SEND_"],
 			size: BYTE,
 			io_type: Some(IoType::Output),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Die,
@@ -196,6 +208,7 @@ impl Pin {
 			aliases: &["DIE"],
 			size: BIT,
 			io_type: Some(IoType::Output),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::ExtIn,
@@ -203,6 +216,7 @@ impl Pin {
 			aliases: &["INPUT", "KEY"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
+			queen: true,
 		},
 		PinDefinition {
 			pin: Self::ExtOut,
@@ -210,27 +224,15 @@ impl Pin {
 			aliases: &["OUTPUT", "AUDIO"],
 			size: BYTE,
 			io_type: Some(IoType::Output),
+			queen: true,
 		},
 	];
 
-	fn definition(&self) -> &PinDefinition {
+	pub fn definition(&self) -> &PinDefinition {
 		Self::PIN_DEFINITIONS
 			.iter()
 			.find(|m| m.pin == *self)
 			.expect("pin without pin definition")
-	}
-
-	pub fn properties(&self) -> PinProperties {
-		let definition = self.definition();
-
-		let props = PinProperties {
-			size: definition.size,
-			io_type: definition.io_type,
-		};
-
-		debug_assert_ne!(props.size, 0);
-
-		props
 	}
 
 	pub fn from_ident(ident: &str) -> Option<Self> {
@@ -293,7 +295,7 @@ impl SubPin {
 	pub fn to_ident(&self) -> String {
 		let mut ident = self.pin.short_ident().to_owned();
 
-		if self.pin.properties().size > BIT {
+		if self.pin.definition().size > BIT {
 			ident.push_str(&format!("{:x}", self.line));
 		}
 
@@ -301,11 +303,11 @@ impl SubPin {
 	}
 
 	pub fn validate(&self, io_type: &IoType) -> Result<()> {
-		let properties = self.pin.properties();
+		let definition = self.pin.definition();
 
-		let bit_exceeding_size = self.line >= properties.size;
+		let bit_exceeding_size = self.line >= definition.size;
 
-		let wrong_io_type = match properties.io_type {
+		let wrong_io_type = match definition.io_type {
 			Some(req_io_type) => req_io_type != *io_type,
 			None => false,
 		};
@@ -337,7 +339,7 @@ impl SubPin {
 			.get(2)
 			.map(|m| u8::from_str_radix(m.as_str(), 16).unwrap());
 
-		let size = pin.properties().size;
+		let size = pin.definition().size;
 
 		if let Some(bit_index) = bit_index {
 			if size == 1 {
@@ -390,8 +392,10 @@ mod test {
 		println!();
 		println!();
 
+		println!("SHORT; ALIAS; SIZE; IO_TYPE; QUEEN;");
+
 		for entry in entries {
-			let PinDefinition { short, size, io_type, ..  } = entry;
+			let PinDefinition { short, aliases, size, io_type, queen, .. } = entry;
 
 			let io_type = match io_type {
 				None => "*",
@@ -399,7 +403,14 @@ mod test {
 				Some(Output) => "O",
 			};
 
-			println!("{short}; {size}; {io_type};")
+			let queen = match queen {
+				true => "Q",
+				false => "*",
+			};
+
+			let alias = aliases[0];
+
+			println!("{short}; {alias}; {size}; {io_type}; {queen};")
 		}
 	}
 }

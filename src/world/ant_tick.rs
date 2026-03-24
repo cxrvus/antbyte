@@ -7,8 +7,14 @@ fn zero_count_mask(x: u8) -> u8 {
 }
 
 impl World {
-	pub(super) fn ant_tick(&mut self, ant_index: usize) {
-		let ant = self.ants[ant_index];
+	pub(super) fn ant_tick(&mut self, ant_index: Option<usize>) {
+		let ant = if let Some(ant_index) = ant_index {
+			self.ants[ant_index]
+		} else if let Some(queen) = self.queen {
+			queen
+		} else {
+			return;
+		};
 
 		let Behavior {
 			inputs,
@@ -122,12 +128,16 @@ impl World {
 			};
 		}
 
-		if ant.is_alive() && !halted {
+		if ant.is_alive() && !halted && !ant.is_queen {
 			self.move_tick(&mut ant);
 		}
 
 		ant.age += 1;
 
-		self.ants[ant_index] = ant;
+		if let Some(ant_index) = ant_index {
+			self.ants[ant_index] = ant;
+		} else {
+			self.queen = Some(ant);
+		}
 	}
 }

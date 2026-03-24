@@ -108,7 +108,7 @@ impl CompFunc {
 
 			let pin = SubPin::from_ident(&original_target)?;
 
-			if let Some(req_io) = pin.pin.properties().io_type
+			if let Some(req_io) = pin.pin.definition().io_type
 				&& req_io != io_type
 			{
 				return Err(match req_io {
