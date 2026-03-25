@@ -40,10 +40,6 @@ pub struct Args {
 	#[arg(short = 'A', long)]
 	hide_ants: bool,
 
-	/// watch-mode, combine with -d / --debug for dry-runs
-	#[arg(short, long)]
-	pub watch: bool,
-
 	/// pass args to sub-process, e.g. a nodejs file
 	#[arg(short = 'a', long = "args")]
 	pub sub_args: Option<String>,
