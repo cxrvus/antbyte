@@ -54,7 +54,7 @@ pub fn compile_world(
 }
 
 fn use_stdin(path: &PathBuf) -> bool {
-	path == "-"
+	path == std::path::Path::new("-")
 }
 
 pub fn read_file(path: &PathBuf) -> Result<String> {
