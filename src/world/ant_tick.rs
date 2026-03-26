@@ -128,7 +128,7 @@ impl World {
 			};
 		}
 
-		if ant.is_alive() && !halted && !ant.is_queen {
+		if ant.is_alive() && !halted && !ant.is_queen() {
 			self.move_tick(&mut ant);
 		}
 
