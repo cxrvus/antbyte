@@ -6,30 +6,50 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+// enum variant order matters (at least for outputs),
+// as it represents execution order
 pub enum Pin {
 	// ## cell interaction
+	/// clear current cell (before writing)
 	Clear,
+	/// read or write selected bits of current cell
 	Cell,
+	/// read cell in front of current ant
 	NextCell,
 
 	// ## universal inputs:
+	/// clock value incrementing each tick
 	Time,
+	/// clock value with bits being true every `2^(n+1)`-th tick
 	Pulse,
+	/// read or write the current ant's persistemt memory
 	Mem,
+	/// 8 random bits
 	Random,
+	/// random bits, where each value has
+	/// a chance of `1 / 2^(n+1)` of being true
 	Chance,
 
 	// ## ant interaction inputs
+	/// true if cell in front current of ant contains an ant
 	See,
+	/// kill ant in front of current ant, if possible
 	Kill,
 
 	// ## ant interaction outputs
 	/// 3 bits indicating number of 45 degrees rotations
 	Dir,
+	/// current ant will not move this tick if true
 	Halt,
 
+	/// if ant is spawned by current ant,
+	/// set its direction to the current ants direction plus this
 	AntDir,
+	/// if ant is spawned by current ant,
+	/// set its memory to this
 	AntMem,
+	/// byte representing the ID of the ant, that will
+	/// be spawned behind current ant, if not 0
 	Ant,
 
 	Event,
@@ -39,7 +59,7 @@ pub enum Pin {
 	ExtIn,
 	ExtOut,
 
-    // ## Die
+	// ## Die
 	Die,
 }
 
