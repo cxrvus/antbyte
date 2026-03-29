@@ -121,7 +121,7 @@ impl World {
 						self.kill_at(&pos);
 					}
 				}
-				(Send, value) => self.event_out = value,
+				(Send, value) => self.event_out |= value,
 				(Die, 1) => self.die(&mut ant),
 				(ExtOut, value) => self.ext_output.push(value),
 				_ => {}
