@@ -35,11 +35,12 @@ pub enum Pin {
 	Event,
 	Send,
 
-	Die,
-
 	// ## external
 	ExtIn,
 	ExtOut,
+
+    // ## Die
+	Die,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
