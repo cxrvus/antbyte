@@ -104,12 +104,12 @@ impl World {
 		let starting_pos = match starting_pos {
 			StartingPos::TopLeft => Vec2u::ZERO,
 			StartingPos::Top => Vec2u {
-				x: height / 2,
+				x: height / 2 - 1,
 				y: 0,
 			},
 			StartingPos::Left => Vec2u {
 				x: 0,
-				y: height / 2,
+				y: height / 2 - 1,
 			},
 			StartingPos::Center => Vec2u {
 				x: width / 2 - 1,

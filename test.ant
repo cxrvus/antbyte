@@ -1,0 +1,5 @@
+set size = 8;
+
+ant queen { (AX, A0, AD0) = cpy(1); }
+
+ant main { C1 = 1; }
