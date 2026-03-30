@@ -1,4 +1,0 @@
-set size = 4;
-set start = top_left;
-
-ant main { DX = 1; }
