@@ -1,7 +1,0 @@
-set width = 4;
-set height = 8;
-set start = top_left;
-
-ant queen { (AX, A0) = cpy(1); }
-
-ant main { C1 = 1; }
