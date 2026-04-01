@@ -19,7 +19,6 @@ pub struct Behavior {
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-#[serde(rename_all = "camelCase")]
 struct BehaviorJSON {
 	name: String,
 	logic: Vec<u32>,

@@ -25,7 +25,6 @@ use crate::{
 #[cfg_attr(test, ts(export))]
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(deny_unknown_fields)]
-#[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct WorldProperties {
 	pub name: Option<String>,
