@@ -1,5 +1,5 @@
 use crate::{
-	ant::pin::{IoType, SubPin},
+	ant::{pin::IoType, sub_pin::SubPin},
 	truth_table::TruthTable,
 	util::find_dupe,
 };

@@ -1,4 +1,5 @@
 pub mod pin;
+pub mod sub_pin;
 
 use crate::util::vec2::{Vec2, Vec2u};
 

@@ -1,10 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-	ant::{
-		behavior::Behavior,
-		pin::{IoType, SubPin},
-	},
+	ant::{behavior::Behavior, pin::IoType, sub_pin::SubPin},
 	parser::{
 		ParamValue, Signature,
 		compiler::{CompFunc, LogConfig},
