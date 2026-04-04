@@ -60,7 +60,7 @@ impl Ant {
 	}
 
 	#[inline]
-	fn wrap_dir(dir: u8) -> u8 {
+	pub fn wrap_dir(dir: u8) -> u8 {
 		dir % 8
 	}
 }

@@ -78,7 +78,7 @@ impl World {
 		child_mem: u8,
 	) {
 		let original_dir = origin.dir;
-		let child_dir = child_dir + original_dir;
+		let child_dir = Ant::wrap_dir(child_dir + original_dir);
 
 		let mut ant = *origin;
 
