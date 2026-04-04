@@ -15,34 +15,16 @@ pub enum AntStatus {
 
 #[derive(Clone, Copy, Default)]
 pub struct Ant {
+	pub pos: Vec2u,
 	/// principle direction - number between 0 and 7
 	pub dir: u8,
 	pub behavior: u8,
-	pub status: AntStatus,
-	pub pos: Vec2u,
 	pub memory: u8,
+	pub status: AntStatus,
 	pub age: u32,
 }
 
 impl Ant {
-	pub fn new(pos: Vec2u, dir: u8, behavior: u8, memory: u8) -> Self {
-		Self {
-			pos,
-			behavior,
-			memory,
-			dir: Self::wrap_dir(dir),
-			..Default::default()
-		}
-	}
-
-	pub fn new_queen(pos: Vec2u) -> Self {
-		Self {
-			pos,
-			status: AntStatus::Alive,
-			..Default::default()
-		}
-	}
-
 	pub fn is_queen(&self) -> bool {
 		self.behavior == 0
 	}

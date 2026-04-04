@@ -18,7 +18,7 @@ use std::{
 };
 
 use crate::{
-	ant::{Ant, behavior::Behavior},
+	ant::{Ant, AntStatus, behavior::Behavior},
 	util::{matrix::Matrix, vec2::Vec2u},
 };
 
@@ -127,10 +127,19 @@ impl World {
 				bail!("forbidden pin for queen ant: {:?}", forbidden.pin);
 			}
 
-			world.queen = Some(Ant::new_queen(starting_pos));
+			world.queen = Some(Ant {
+				pos: starting_pos,
+				status: AntStatus::Alive,
+				..Default::default()
+			});
 		} else if world.properties.behaviors.contains_key(&1) {
-			let mut ant = Ant::new(starting_pos, 0, 1, 0);
-			ant.grow_up();
+			let ant = Ant {
+				pos: starting_pos,
+				behavior: 1,
+				status: AntStatus::Alive,
+				..Default::default()
+			};
+
 			world.spawn(ant);
 		} else {
 			bail!("no entry point: could not find `ant main` or other ant with ID = 0 or 1")

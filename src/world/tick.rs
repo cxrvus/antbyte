@@ -31,7 +31,7 @@ impl World {
 			}
 		}
 
-		// todo: optimize defragmentation
+		// idea: optimize defragmentation
 		self.ants.iter_mut().for_each(|ant| ant.grow_up());
 		self.ants.retain(|ant| ant.is_alive());
 

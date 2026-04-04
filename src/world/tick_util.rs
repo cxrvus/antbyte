@@ -89,7 +89,14 @@ impl World {
 		if let Some(pos) = self.next_pos(&ant)
 			&& self.get_behavior(behavior_id).is_some()
 		{
-			let new_ant = Ant::new(pos, child_dir, behavior_id, child_mem);
+			let new_ant = Ant {
+				pos,
+				behavior: behavior_id,
+				memory: child_mem,
+				dir: child_dir,
+				..Default::default()
+			};
+
 			self.spawn(new_ant);
 		}
 	}
