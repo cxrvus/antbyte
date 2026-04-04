@@ -22,12 +22,12 @@ impl World {
 		self.event_out = 0;
 
 		if self.queen.is_some() {
-			self.ant_tick(None);
+			self.tick_ant(None);
 		}
 
 		for i in 0..self.ants.len() {
 			if self.ants[i].is_alive() {
-				self.ant_tick(Some(i));
+				self.tick_ant(Some(i));
 			}
 		}
 

@@ -7,7 +7,7 @@ fn zero_count_mask(x: u8) -> u8 {
 }
 
 impl World {
-	pub(super) fn ant_tick(&mut self, ant_index: Option<usize>) {
+	pub(super) fn tick_ant(&mut self, ant_index: Option<usize>) {
 		let ant = if let Some(ant_index) = ant_index {
 			self.ants[ant_index]
 		} else if let Some(queen) = self.queen {
