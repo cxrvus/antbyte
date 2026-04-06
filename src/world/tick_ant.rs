@@ -84,6 +84,7 @@ impl World {
 				output_values.push(PinValue {
 					pin: output_sub_pin.pin,
 					value: new_value,
+					mask: output_cell_mask,
 				});
 			}
 
@@ -93,21 +94,25 @@ impl World {
 		output_values.sort();
 
 		let mut ant = ant;
-
-		// invert mask to only keep bits that are not targeted
-		output_cell_mask = !output_cell_mask;
-
 		let mut halted = false;
 		let mut child_dir = 0;
 		let mut child_mem = 0;
 
-		for PinValue { pin: output, value } in output_values.into_iter() {
+		for PinValue {
+			pin: output,
+			value,
+			mask,
+		} in output_values.into_iter()
+		{
 			match (output, value) {
 				(Dir, _) => ant.set_dir(ant.dir + value),
 				(Halt, _) => halted = value != 0,
 				(Cell, _) => {
 					let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
-					let value = value | (old_value & output_cell_mask);
+
+					// invert mask to only keep bits that are not targeted
+					let value = value | (old_value & !mask);
+
 					let adjusted = self.adjusted_color(value);
 					self.set_value(&ant.pos, adjusted);
 				}
