@@ -22,3 +22,6 @@ default = ["clap", "extras"]
 # default = ["clap"]
 clap = ["dep:clap"]
 extras = ["dep:gif"]
+
+[build]
+rustflags = ["--remap-path-prefix=/home/yourname=~"]
