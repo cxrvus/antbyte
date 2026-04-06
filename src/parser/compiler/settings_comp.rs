@@ -63,9 +63,9 @@ impl Parser {
 				config.border_mode = BorderMode::try_from(self.next_ident()?)?
 			}
 
-			"starting_pos" | "start" => {
-				config.starting_pos = StartingPos::try_from(self.next_ident()?)?
-			}
+			"start_pos" | "start" => config.start_pos = StartingPos::try_from(self.next_ident()?)?,
+
+			"start_dir" | "dir" => config.start_dir = self.next_number()?.unwrap_or_default() as u8,
 
 			"ant_limit" => config.ant_limit = self.next_number()?,
 

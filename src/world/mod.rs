@@ -86,7 +86,8 @@ impl World {
 		let WorldConfig {
 			width,
 			height,
-			starting_pos,
+			start_pos,
+			start_dir,
 			noise_seed,
 			..
 		} = properties.config.clone();
@@ -101,7 +102,7 @@ impl World {
 
 		let mut world = Self { properties, state };
 
-		let starting_pos = match starting_pos {
+		let start_pos = match start_pos {
 			StartingPos::TopLeft => Vec2u::ZERO,
 			StartingPos::Top => Vec2u {
 				x: height / 2 - 1,
@@ -128,13 +129,15 @@ impl World {
 			}
 
 			world.queen = Some(Ant {
-				pos: starting_pos,
+				pos: start_pos,
+				dir: start_dir,
 				status: AntStatus::Alive,
 				..Default::default()
 			});
 		} else if world.properties.behaviors.contains_key(&1) {
 			let ant = Ant {
-				pos: starting_pos,
+				pos: start_pos,
+				dir: start_dir,
 				behavior: 1,
 				status: AntStatus::Alive,
 				..Default::default()

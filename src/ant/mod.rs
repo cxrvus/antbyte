@@ -24,6 +24,8 @@ pub struct Ant {
 	pub age: u32,
 }
 
+pub const MAX_DIR: u8 = 8;
+
 impl Ant {
 	pub fn is_queen(&self) -> bool {
 		self.behavior == 0
@@ -61,6 +63,6 @@ impl Ant {
 
 	#[inline]
 	pub fn wrap_dir(dir: u8) -> u8 {
-		dir % 8
+		dir % MAX_DIR
 	}
 }

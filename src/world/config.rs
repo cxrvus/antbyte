@@ -1,6 +1,8 @@
 use anyhow::{Error, Result, anyhow, bail};
 use serde::{Deserialize, Serialize};
 
+use crate::ant::MAX_DIR;
+
 pub const FPS_CAP: u32 = 50;
 pub const SIZE_CAP: u32 = 0x400;
 pub const SPEED_CAP: u32 = 0x2000;
@@ -26,7 +28,8 @@ pub struct WorldConfig {
 	/// behavior if ants touch the worlds border
 	pub border_mode: BorderMode,
 	/// position of the first ant
-	pub starting_pos: StartingPos,
+	pub start_pos: StartingPos,
+	pub start_dir: u8,
 	/// max number of ants before additional spawning gets blocked
 	pub ant_limit: Option<u32>,
 	pub color_mode: ColorMode,
@@ -63,7 +66,8 @@ impl Default for WorldConfig {
 			decay: None,
 			looping: false,
 			border_mode: BorderMode::Wrap,
-			starting_pos: StartingPos::Center,
+			start_pos: StartingPos::Center,
+			start_dir: 0,
 			ant_limit: None,
 			color_mode: ColorMode::RGBI,
 			noise_seed: None,
@@ -144,6 +148,16 @@ impl WorldConfig {
 		Self::non_zero(self.width, "width")?;
 		Self::cap(self.height, "height", SIZE_CAP)?;
 		Self::cap(self.width, "width", SIZE_CAP)?;
+
+		if self.start_dir > MAX_DIR {
+			bail!("starting direction must not exceed {MAX_DIR}")
+		}
+
+		Self::cap(
+			self.start_dir as usize,
+			"start direction",
+			(MAX_DIR - 1) as u32,
+		)?;
 
 		Self::cap_opt(self.fps, "FPS", FPS_CAP)?;
 		Self::cap_opt(self.speed, "speed", SPEED_CAP)?;
