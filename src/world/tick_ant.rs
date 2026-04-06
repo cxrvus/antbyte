@@ -35,14 +35,14 @@ impl World {
 				Time => ant.age as u8,
 				Pulse => zero_count_mask(ant.age as u8),
 				Cell => self.cells.at(&ant.pos.sign()).unwrap().value,
-				NextCell => self
+				Next => self
 					.next_pos(&ant)
 					.map(|pos| self.cells.at(&pos.sign()).unwrap().value)
 					.unwrap_or(0u8),
 				Mem => ant.memory,
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
-				See => match self.next_pos(&ant) {
+				Collide => match self.next_pos(&ant) {
 					Some(pos) => self.is_occupied(&pos).into(),
 					None => 1,
 				},

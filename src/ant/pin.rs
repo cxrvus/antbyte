@@ -11,14 +11,14 @@ pub enum Pin {
 	/// read or write selected bits of current cell
 	Cell,
 	/// read cell in front of current ant
-	NextCell,
+	Next,
 
 	// ## universal inputs:
 	/// clock value incrementing each tick
 	Time,
 	/// clock value with bits being true every `2^(n+1)`-th tick
 	Pulse,
-	/// read or write the current ant's persistemt memory
+	/// read or write the current ant's persistent memory
 	Mem,
 	/// 8 random bits
 	Random,
@@ -28,7 +28,7 @@ pub enum Pin {
 
 	// ## ant interaction inputs
 	/// true if cell in front current of ant contains an ant
-	See,
+	Collide,
 	/// kill ant in front of current ant, if possible
 	Kill,
 
@@ -100,17 +100,17 @@ impl Pin {
 			queen: false,
 		},
 		PinDefinition {
-			pin: Self::NextCell,
+			pin: Self::Next,
 			short: "CN",
-			aliases: &["NEXT_CELL_"],
+			aliases: &["NEXT_"],
 			size: CELL,
 			io_type: Some(IoType::Input),
 			queen: false,
 		},
 		PinDefinition {
-			pin: Self::See,
+			pin: Self::Collide,
 			short: "AC",
-			aliases: &["ANT_SEE"],
+			aliases: &["COLLIDE"],
 			size: BIT,
 			io_type: Some(IoType::Input),
 			queen: true,
