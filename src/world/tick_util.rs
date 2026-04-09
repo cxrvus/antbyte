@@ -107,7 +107,9 @@ impl World {
 		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
 		if self.ants.len() < ant_limit && !self.is_occupied(&ant.pos) {
 			self.ants.push(ant);
-			self.occupy(&ant.pos, true);
+			if !ant.is_queen() {
+				self.occupy(&ant.pos, true);
+			}
 		}
 	}
 

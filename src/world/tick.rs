@@ -21,13 +21,9 @@ impl World {
 		self.event_in = self.event_out;
 		self.event_out = 0;
 
-		if self.queen.is_some() {
-			self.tick_ant(None);
-		}
-
 		for i in 0..self.ants.len() {
 			if self.ants[i].is_alive() {
-				self.tick_ant(Some(i));
+				self.tick_ant(i);
 			}
 		}
 
@@ -35,18 +31,12 @@ impl World {
 		self.ants.iter_mut().for_each(|ant| ant.grow_up());
 		self.ants.retain(|ant| ant.is_alive());
 
-		if let Some(queen) = self.queen
-			&& !queen.is_alive()
-		{
-			self.queen = None;
-		}
-
 		// idea: optimize decay
 		if self.config().decay.is_some() {
 			self.cell_decay();
 		}
 
-		let no_ants = self.ants.is_empty() && self.queen.is_none();
+		let no_ants = self.ants.is_empty();
 
 		let tick_overflow = self
 			.config()

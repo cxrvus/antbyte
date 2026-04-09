@@ -50,7 +50,6 @@ pub struct WorldState {
 	rng: StdRng,
 	tick_count: u32,
 	pub cells: Cells,
-	pub queen: Option<Ant>,
 	pub ants: Vec<Ant>,
 	pub event_in: u8,
 	pub event_out: u8,
@@ -64,7 +63,6 @@ impl WorldState {
 			rng,
 			tick_count: 0,
 			cells: Matrix::new(width, height),
-			queen: None,
 			ants: vec![],
 			event_in: 0,
 			event_out: 0,
@@ -118,8 +116,8 @@ impl World {
 			},
 		};
 
-		if world.properties.behaviors.contains_key(&0) {
-			// validate pins for queen
+		let ant = if world.properties.behaviors.contains_key(&0) {
+			// queen ant
 
 			let behavior = &world.properties.behaviors[&0];
 			let queen_pins = [behavior.inputs.clone(), behavior.outputs.clone()].concat();
@@ -128,25 +126,27 @@ impl World {
 				bail!("forbidden pin for queen ant: {:?}", forbidden.pin);
 			}
 
-			world.queen = Some(Ant {
+			Ant {
 				pos: start_pos,
 				dir: start_dir,
 				status: AntStatus::Alive,
 				..Default::default()
-			});
+			}
 		} else if world.properties.behaviors.contains_key(&1) {
-			let ant = Ant {
+			// regular ant
+
+			Ant {
 				pos: start_pos,
 				dir: start_dir,
 				behavior: 1,
 				status: AntStatus::Alive,
 				..Default::default()
-			};
-
-			world.spawn(ant);
+			}
 		} else {
 			bail!("no entry point: could not find `ant main` or other ant with ID = 0 or 1")
-		}
+		};
+
+		world.spawn(ant);
 
 		Ok(world)
 	}
