@@ -46,6 +46,7 @@ pub struct Cell {
 	pub expiration: Option<u16>,
 }
 
+#[derive(Clone)]
 pub struct WorldState {
 	rng: StdRng,
 	tick_count: u32,
@@ -212,6 +213,13 @@ impl World {
 	#[inline]
 	pub fn ants(&self) -> &Vec<Ant> {
 		&self.ants
+	}
+
+	/// remove dead ants
+	#[inline]
+	pub fn clean_up_ants(&mut self) {
+		self.ants.iter_mut().for_each(|ant| ant.grow_up());
+		self.ants.retain(|ant| ant.is_alive());
 	}
 
 	#[inline]

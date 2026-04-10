@@ -1,9 +1,5 @@
-use std::cmp::Ordering;
-
 #[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-// enum variant order matters (at least for outputs),
-// as it represents execution order
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Pin {
 	// ## cell interaction
 	/// clear current cell (before writing)
@@ -46,7 +42,7 @@ pub enum Pin {
 	AntMem,
 	/// byte representing the ID of the ant, that will
 	/// be spawned behind current ant, if not 0
-	Ant,
+	AntSpawn,
 
 	Event,
 	Send,
@@ -172,7 +168,7 @@ impl Pin {
 			queen: false,
 		},
 		PinDefinition {
-			pin: Self::Ant,
+			pin: Self::AntSpawn,
 			short: "A",
 			aliases: &["ANT_"],
 			size: ANT_ID,
@@ -269,18 +265,6 @@ pub struct PinValue {
 	pub pin: Pin,
 	pub value: u8,
 	pub mask: u8,
-}
-
-impl PartialOrd for PinValue {
-	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-		Some(self.cmp(other))
-	}
-}
-
-impl Ord for PinValue {
-	fn cmp(&self, other: &Self) -> Ordering {
-		self.pin.cmp(&other.pin).then(self.value.cmp(&other.value))
-	}
 }
 
 #[cfg(test)]

@@ -21,12 +21,13 @@ pub struct Ant {
 	pub behavior: u8,
 	pub memory: u8,
 	pub status: AntStatus,
-	pub age: u32,
+	pub birth_tick: u32,
 }
 
 pub const MAX_DIR: u8 = 8;
 
 impl Ant {
+	#[inline]
 	pub fn is_queen(&self) -> bool {
 		self.behavior == 0
 	}
@@ -36,19 +37,27 @@ impl Ant {
 		!matches!(self.status, AntStatus::Dead)
 	}
 
+	#[inline]
 	pub fn grow_up(&mut self) {
 		if matches!(self.status, AntStatus::Newborn) {
 			self.status = AntStatus::Alive
 		}
 	}
 
+	#[inline]
 	pub fn die(&mut self) {
 		self.status = AntStatus::Dead
 	}
 
+	#[inline]
 	pub fn dir_vec(&self) -> Vec2 {
 		debug_assert!(self.dir < 8);
 		Vec2::PRINCIPAL[self.dir as usize]
+	}
+
+	#[inline]
+	pub fn age(&self, current_tick: u32) -> u32 {
+		current_tick.wrapping_sub(self.birth_tick)
 	}
 
 	#[inline]

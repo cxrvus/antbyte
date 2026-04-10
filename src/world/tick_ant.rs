@@ -1,15 +1,26 @@
-use crate::ant::pin::{Pin, PinValue};
+use crate::ant::{
+	Ant,
+	pin::{Pin, PinValue},
+};
 
 use super::{Behavior, World};
+
+use Pin::*;
 
 fn zero_count_mask(x: u8) -> u8 {
 	0xff_u8.unbounded_shr(8 - x.trailing_zeros())
 }
 
-impl World {
-	pub(super) fn tick_ant(&mut self, ant_index: usize) {
-		let ant = self.ants[ant_index];
+type TickFunc = fn(&mut World, &mut Ant, &Vec<PinValue>);
 
+impl World {
+	pub(super) fn tick_ant(&mut self, ant_index: usize, outputs: &Vec<PinValue>, func: TickFunc) {
+		let mut ant = self.ants[ant_index];
+		func(self, &mut ant, outputs);
+		self.ants[ant_index] = ant;
+	}
+
+	pub(super) fn get_output(&mut self, ant: &Ant) -> Vec<PinValue> {
 		let Behavior {
 			inputs,
 			outputs,
@@ -22,21 +33,19 @@ impl World {
 
 		let mut input_bits = 0u8;
 
-		use Pin::*;
-
 		for input_sub_pin in inputs.iter() {
 			let input_value: u8 = match input_sub_pin.pin {
-				Time => ant.age as u8,
-				Pulse => zero_count_mask(ant.age as u8),
+				Time => ant.age(self.tick_count) as u8,
+				Pulse => zero_count_mask(ant.age(self.tick_count) as u8),
 				Cell => self.cells.at(&ant.pos.sign()).unwrap().value,
 				Next => self
-					.next_pos(&ant)
+					.next_pos(ant)
 					.map(|pos| self.cells.at(&pos.sign()).unwrap().value)
 					.unwrap_or(0u8),
 				Mem => ant.memory,
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
-				Collide => match self.next_pos(&ant) {
+				Collide => match self.next_pos(ant) {
 					Some(pos) => self.is_occupied(&pos).into(),
 					None => 1,
 				},
@@ -85,22 +94,19 @@ impl World {
 			output_bits >>= 1;
 		}
 
-		output_values.sort();
+		output_values
+	}
 
-		let mut ant = ant;
+	pub(super) fn sync_tick(&mut self, ant: &mut Ant, outputs: &Vec<PinValue>) {
+		// TODO: move tick
 		let mut halted = false;
+
+		// TODO: spawn tick
 		let mut child_dir = 0;
 		let mut child_mem = 0;
 
-		for PinValue {
-			pin: output,
-			value,
-			mask,
-		} in output_values.into_iter()
-		{
-			match (output, value) {
-				(Dir, _) => ant.set_dir(ant.dir + value),
-				(Halt, _) => halted = value != 0,
+		for PinValue { pin, value, mask } in outputs.into_iter() {
+			match (pin, value) {
 				(Cell, _) => {
 					let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
 
@@ -111,28 +117,49 @@ impl World {
 					self.set_value(&ant.pos, adjusted);
 				}
 				(Clear, 1) => self.set_value(&ant.pos, 0),
-				(Mem, value) => ant.memory = value,
-				(AntDir, value) => child_dir = value,
-				(AntMem, value) => child_mem = value,
-				(Ant, _) if value != 0 => self.reproduce(&ant, value, child_dir, child_mem),
-				(Kill, 1) => {
-					if let Some(pos) = self.next_pos(&ant) {
-						self.kill_at(&pos);
-					}
-				}
+				(Mem, value) => ant.memory = *value,
 				(Send, value) => self.event_out |= value,
-				(Die, 1) => self.die(&mut ant),
-				(ExtOut, value) => self.ext_output.push(value),
+				(ExtOut, value) => self.ext_output.push(*value),
+
+				// TODO: move tick
+				(Dir, _) => ant.set_dir(ant.dir + value),
+				(Halt, _) => halted = *value != 0,
+
+				// TODO: spawn tick
+				(AntSpawn, _) if *value != 0 => self.reproduce(&ant, *value, child_dir, child_mem),
+				(AntDir, value) => child_dir = *value,
+				(AntMem, value) => child_mem = *value,
+
+				// TODO: die tick
+				(Die, 1) => self.die(ant),
 				_ => {}
 			};
 		}
 
+		// TODO: move tick
 		if ant.is_alive() && !halted && !ant.is_queen() {
-			self.move_tick(&mut ant);
+			self.move_ant(ant);
 		}
+	}
 
-		ant.age += 1;
+	pub(super) fn kill_tick(&mut self, ant: &mut Ant, outputs: &Vec<PinValue>) {
+		for output in outputs.iter() {
+			if let PinValue {
+				pin: Pin::Kill,
+				value: 1,
+				..
+			} = output && let Some(pos) = self.next_pos(ant)
+			{
+				self.kill_at(&pos);
+			}
+		}
+	}
 
-		self.ants[ant_index] = ant;
+	pub(super) fn async_tick_template(&mut self, ant: &mut Ant, outputs: &Vec<PinValue>) {
+		for PinValue { pin, value, .. } in outputs.into_iter() {
+			match (pin, value) {
+				_ => {}
+			}
+		}
 	}
 }

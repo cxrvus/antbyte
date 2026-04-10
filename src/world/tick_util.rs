@@ -58,7 +58,7 @@ impl World {
 			.occupied
 	}
 
-	pub(super) fn move_tick(&mut self, ant: &mut Ant) {
+	pub(super) fn move_ant(&mut self, ant: &mut Ant) {
 		if let Some(new_pos) = self.next_pos(ant) {
 			if !self.is_occupied(&new_pos) {
 				self.occupy(&new_pos, true);

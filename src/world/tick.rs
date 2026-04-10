@@ -18,24 +18,39 @@ impl World {
 	pub fn tick(&mut self) -> bool {
 		self.tick_count += 1;
 
+		// events
 		self.event_in = self.event_out;
 		self.event_out = 0;
 
-		for i in 0..self.ants.len() {
-			if self.ants[i].is_alive() {
-				self.tick_ant(i);
-			}
+		// tick ants
+		let image = self.state.clone();
+		let all_outputs: Vec<_> = image.ants.iter().map(|ant| self.get_output(ant)).collect();
+
+		for (i, p) in all_outputs.iter().enumerate() {
+			// SYNC
+			self.tick_ant(i, p, Self::sync_tick);
+
+			// KILL
+			self.tick_ant(i, p, Self::kill_tick);
+			self.clean_up_ants();
+
+			//TODO: CONTINUE: the former approach doesn't work with stages that require conflict resolution
+			// TODO: move
+
+			// TODO: spawn
+
+			// TODO: die
+
+			self.clean_up_ants();
 		}
 
-		// idea: optimize defragmentation
-		self.ants.iter_mut().for_each(|ant| ant.grow_up());
-		self.ants.retain(|ant| ant.is_alive());
-
 		// idea: optimize decay
+		// cell decay
 		if self.config().decay.is_some() {
 			self.cell_decay();
 		}
 
+		// end world if conditions are met
 		let no_ants = self.ants.is_empty();
 
 		let tick_overflow = self
