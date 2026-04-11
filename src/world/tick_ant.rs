@@ -194,10 +194,18 @@ impl World {
 
 		for (target, indexes) in claims {
 			// idea: customize conflict resolution strategy in config
+
 			// conflict resolution
 			let index = indexes.iter().min().unwrap();
 			let mut ant = self.ants[*index];
-			// TODO: re-occupy cells of conflict resolution losers
+
+			// conflict losers return to their original positions
+			for other_index in &indexes {
+				if other_index != index {
+					let other_pos = &self.ants[*other_index].pos.clone();
+					self.occupy(other_pos, true);
+				}
+			}
 
 			if !self.is_occupied(&target) {
 				self.occupy(&target, true);
