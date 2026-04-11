@@ -28,21 +28,15 @@ impl World {
 
 		for (i, p) in all_outputs.iter().enumerate() {
 			// SYNC
-			self.tick_ant(i, p, Self::sync_tick);
+			self.sync_tick(i, p);
 
-			// KILL
-			self.tick_ant(i, p, Self::kill_tick);
-			self.clean_up_ants();
-
-			//TODO: CONTINUE: the former approach doesn't work with stages that require conflict resolution
-			// TODO: move
-
-			// TODO: spawn
-
-			// TODO: die
-
-			self.clean_up_ants();
+			// TODO: KILL
+			// TODO: MOVE
+			// TODO: SPAWN
+			// TODO: DIE
 		}
+
+		self.clean_up_ants();
 
 		// idea: optimize decay
 		// cell decay

@@ -11,15 +11,7 @@ fn zero_count_mask(x: u8) -> u8 {
 	0xff_u8.unbounded_shr(8 - x.trailing_zeros())
 }
 
-type TickFunc = fn(&mut World, &mut Ant, &Vec<PinValue>);
-
 impl World {
-	pub(super) fn tick_ant(&mut self, ant_index: usize, outputs: &Vec<PinValue>, func: TickFunc) {
-		let mut ant = self.ants[ant_index];
-		func(self, &mut ant, outputs);
-		self.ants[ant_index] = ant;
-	}
-
 	pub(super) fn get_output(&mut self, ant: &Ant) -> Vec<PinValue> {
 		let Behavior {
 			inputs,
@@ -97,7 +89,9 @@ impl World {
 		output_values
 	}
 
-	pub(super) fn sync_tick(&mut self, ant: &mut Ant, outputs: &Vec<PinValue>) {
+	pub(super) fn sync_tick(&mut self, ant_index: usize, outputs: &Vec<PinValue>) {
+		let mut ant = self.ants[ant_index];
+
 		// TODO: move tick
 		let mut halted = false;
 
@@ -105,7 +99,7 @@ impl World {
 		let mut child_dir = 0;
 		let mut child_mem = 0;
 
-		for PinValue { pin, value, mask } in outputs.into_iter() {
+		for PinValue { pin, value, mask } in outputs.iter() {
 			match (pin, value) {
 				(Cell, _) => {
 					let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
@@ -121,6 +115,13 @@ impl World {
 				(Send, value) => self.event_out |= value,
 				(ExtOut, value) => self.ext_output.push(*value),
 
+				// TODO: kill tick
+				(Kill, 1) => {
+					if let Some(pos) = self.next_pos(&ant) {
+						self.kill_at(&pos);
+					}
+				}
+
 				// TODO: move tick
 				(Dir, _) => ant.set_dir(ant.dir + value),
 				(Halt, _) => halted = *value != 0,
@@ -131,35 +132,15 @@ impl World {
 				(AntMem, value) => child_mem = *value,
 
 				// TODO: die tick
-				(Die, 1) => self.die(ant),
+				(Die, 1) => self.die(&mut ant),
 				_ => {}
 			};
 		}
 
-		// TODO: move tick
 		if ant.is_alive() && !halted && !ant.is_queen() {
-			self.move_ant(ant);
+			self.move_ant(&mut ant);
 		}
-	}
 
-	pub(super) fn kill_tick(&mut self, ant: &mut Ant, outputs: &Vec<PinValue>) {
-		for output in outputs.iter() {
-			if let PinValue {
-				pin: Pin::Kill,
-				value: 1,
-				..
-			} = output && let Some(pos) = self.next_pos(ant)
-			{
-				self.kill_at(&pos);
-			}
-		}
-	}
-
-	pub(super) fn async_tick_template(&mut self, ant: &mut Ant, outputs: &Vec<PinValue>) {
-		for PinValue { pin, value, .. } in outputs.into_iter() {
-			match (pin, value) {
-				_ => {}
-			}
-		}
+		self.ants[ant_index] = ant;
 	}
 }
