@@ -17,9 +17,11 @@ pub enum AntStatus {
 pub struct Ant {
 	pub pos: Vec2u,
 	/// principle direction - number between 0 and 7
-	pub dir: u8,
 	pub behavior: u8,
+	pub dir: u8,
+	pub child_dir: u8,
 	pub memory: u8,
+	pub child_memory: u8,
 	pub status: AntStatus,
 	pub birth_tick: u32,
 }

@@ -97,9 +97,6 @@ impl World {
 
 		let mut halted = false;
 
-		let mut child_dir = 0;
-		let mut child_mem = 0;
-
 		for PinValue { pin, value, mask } in outputs {
 			match (pin, value) {
 				(Cell, _) => {
@@ -108,7 +105,10 @@ impl World {
 				}
 				(Clear, 1) => clear = true,
 
+				(AntDir, value) => ant.child_dir = *value,
+				(AntMem, value) => ant.child_memory = *value,
 				(Mem, value) => ant.memory = *value,
+
 				(Send, value) => self.event_out |= value,
 				(ExtOut, value) => self.ext_output.push(*value),
 
@@ -124,9 +124,9 @@ impl World {
 				(Halt, _) => halted = *value != 0,
 
 				// TODO: spawn tick
-				(AntSpawn, _) if *value != 0 => self.reproduce(&ant, *value, child_dir, child_mem),
-				(AntDir, value) => child_dir = *value,
-				(AntMem, value) => child_mem = *value,
+				(AntSpawn, _) if *value != 0 => {
+					self.reproduce(&ant, *value, ant.child_dir, ant.child_memory)
+				}
 
 				// TODO: die tick
 				(Die, 1) => self.die(&mut ant),
