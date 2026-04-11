@@ -18,7 +18,7 @@ use std::{
 };
 
 use crate::{
-	ant::{Ant, AntStatus, behavior::Behavior},
+	ant::{Ant, behavior::Behavior},
 	util::{matrix::Matrix, vec2::Vec2u},
 };
 
@@ -46,10 +46,19 @@ pub struct Cell {
 	pub expiration: Option<u16>,
 }
 
+#[derive(Clone, Default)]
+struct AsyncActions {
+	kills: Vec<usize>,
+	moves: Vec<usize>,
+	spawns: Vec<usize>,
+	deaths: Vec<usize>,
+}
+
 #[derive(Clone)]
 pub struct WorldState {
 	rng: StdRng,
 	tick_count: u32,
+	async_actions: AsyncActions,
 	pub cells: Cells,
 	pub ants: Vec<Ant>,
 	pub event_in: u8,
@@ -63,6 +72,7 @@ impl WorldState {
 		Self {
 			rng,
 			tick_count: 0,
+			async_actions: Default::default(),
 			cells: Matrix::new(width, height),
 			ants: vec![],
 			event_in: 0,
@@ -130,7 +140,6 @@ impl World {
 			Ant {
 				pos: start_pos,
 				dir: start_dir,
-				status: AntStatus::Alive,
 				..Default::default()
 			}
 		} else if world.properties.behaviors.contains_key(&1) {
@@ -140,7 +149,6 @@ impl World {
 				pos: start_pos,
 				dir: start_dir,
 				behavior: 1,
-				status: AntStatus::Alive,
 				..Default::default()
 			}
 		} else {
@@ -213,13 +221,6 @@ impl World {
 	#[inline]
 	pub fn ants(&self) -> &Vec<Ant> {
 		&self.ants
-	}
-
-	/// remove dead ants
-	#[inline]
-	pub fn clean_up_ants(&mut self) {
-		self.ants.iter_mut().for_each(|ant| ant.grow_up());
-		self.ants.retain(|ant| ant.is_alive());
 	}
 
 	#[inline]

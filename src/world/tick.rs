@@ -27,16 +27,19 @@ impl World {
 		let all_outputs: Vec<_> = image.ants.iter().map(|ant| self.get_output(ant)).collect();
 
 		for (i, p) in all_outputs.iter().enumerate() {
-			// SYNC
 			self.sync_tick(i, p);
-
-			// TODO: KILL
-			// TODO: MOVE
-			// TODO: SPAWN
-			// TODO: DIE
 		}
 
-		self.clean_up_ants();
+		self.kill_tick();
+		self.move_tick();
+		self.spawn_tick();
+		self.die_tick();
+
+		// reset async actions
+		self.async_actions = Default::default();
+
+		// remove dead ants
+		self.ants.retain(|ant| ant.is_alive());
 
 		// idea: optimize decay
 		// cell decay

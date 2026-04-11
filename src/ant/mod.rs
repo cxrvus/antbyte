@@ -8,7 +8,6 @@ pub mod behavior;
 #[derive(Clone, Copy, Default)]
 pub enum AntStatus {
 	#[default]
-	Newborn,
 	Alive,
 	Dead,
 }
@@ -18,6 +17,7 @@ pub struct Ant {
 	pub pos: Vec2u,
 	/// principle direction - number between 0 and 7
 	pub behavior: u8,
+	pub child_behavior: u8,
 	pub dir: u8,
 	pub child_dir: u8,
 	pub memory: u8,
@@ -37,13 +37,6 @@ impl Ant {
 	#[inline]
 	pub fn is_alive(&self) -> bool {
 		!matches!(self.status, AntStatus::Dead)
-	}
-
-	#[inline]
-	pub fn grow_up(&mut self) {
-		if matches!(self.status, AntStatus::Newborn) {
-			self.status = AntStatus::Alive
-		}
 	}
 
 	#[inline]

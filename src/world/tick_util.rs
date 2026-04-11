@@ -1,5 +1,5 @@
 use crate::{
-	ant::{Ant, AntStatus},
+	ant::Ant,
 	util::vec2::Vec2u,
 	world::{
 		World,
@@ -50,6 +50,12 @@ impl World {
 		}
 	}
 
+	pub(super) fn flipped_next_pos(&self, ant: &Ant) -> Option<Vec2u> {
+		let mut ant = *ant;
+		ant.flip_dir();
+		self.next_pos(&ant)
+	}
+
 	pub(super) fn set_cell(&mut self, ant: &Ant, value: u8, mask: u8) {
 		let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
 		let new_value = value | (old_value & !mask);
@@ -65,61 +71,6 @@ impl World {
 			.occupied
 	}
 
-	pub(super) fn move_ant(&mut self, ant: &mut Ant) {
-		if let Some(new_pos) = self.next_pos(ant) {
-			if !self.is_occupied(&new_pos) {
-				self.occupy(&new_pos, true);
-				self.occupy(&ant.pos, false);
-				ant.pos = new_pos;
-			}
-		} else if let BorderMode::Despawn = self.config().border_mode {
-			self.die(ant);
-		}
-	}
-
-	pub(super) fn reproduce(
-		&mut self,
-		origin: &Ant,
-		behavior_id: u8,
-		child_dir: u8,
-		child_mem: u8,
-	) {
-		let original_dir = origin.dir;
-		let child_dir = Ant::wrap_dir(child_dir + original_dir);
-
-		let mut ant = *origin;
-
-		// direction gets flipped, so that the new ant
-		// spawns behind the old one and not in front of it
-		ant.flip_dir();
-
-		if let Some(pos) = self.next_pos(&ant)
-			&& self.get_behavior(behavior_id).is_some()
-		{
-			let new_ant = Ant {
-				pos,
-				behavior: behavior_id,
-				memory: child_mem,
-				dir: child_dir,
-				..Default::default()
-			};
-
-			self.spawn(new_ant);
-		}
-	}
-
-	pub(super) const ANT_LIMIT: u32 = 0x100;
-
-	pub(super) fn spawn(&mut self, ant: Ant) {
-		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
-		if self.ants.len() < ant_limit && !self.is_occupied(&ant.pos) {
-			self.ants.push(ant);
-			if !ant.is_queen() {
-				self.occupy(&ant.pos, true);
-			}
-		}
-	}
-
 	pub(super) fn get_ant_index(&self, pos: &Vec2u) -> Option<usize> {
 		if self.is_occupied(pos) {
 			Some(
@@ -133,17 +84,20 @@ impl World {
 		}
 	}
 
-	pub(super) fn kill_at(&mut self, pos: &Vec2u) {
-		if let Some(index) = self.get_ant_index(pos) {
-			let ant_pos = self.ants[index].pos;
-			self.ants[index].status = AntStatus::Dead;
-			self.occupy(&ant_pos, false);
+	pub(super) fn spawn(&mut self, ant: Ant) {
+		if !self.is_occupied(&ant.pos) {
+			self.ants.push(ant);
+
+			if !ant.is_queen() {
+				self.occupy(&ant.pos, true);
+			}
 		}
 	}
 
-	pub(super) fn die(&mut self, target: &mut Ant) {
-		target.status = AntStatus::Dead;
-		self.occupy(&target.pos, false);
+	pub(super) fn kill(&mut self, index: usize) {
+		let ant_pos = self.ants[index].pos;
+		self.ants[index].die();
+		self.occupy(&ant_pos, false);
 	}
 
 	pub(super) fn adjusted_color(&self, color: u8) -> u8 {

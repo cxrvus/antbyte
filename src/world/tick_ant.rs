@@ -1,6 +1,12 @@
-use crate::ant::{
-	Ant,
-	pin::{Pin, PinValue},
+use std::collections::BTreeMap;
+
+use crate::{
+	ant::{
+		Ant,
+		pin::{Pin, PinValue},
+	},
+	util::vec2::Vec2u,
+	world::config::BorderMode,
 };
 
 use super::{Behavior, World};
@@ -112,24 +118,28 @@ impl World {
 				(Send, value) => self.event_out |= value,
 				(ExtOut, value) => self.ext_output.push(*value),
 
-				// TODO: kill tick
+				// these are deferred to async ticks...
+				// kill_tick
 				(Kill, 1) => {
-					if let Some(pos) = self.next_pos(&ant) {
-						self.kill_at(&pos);
+					if let Some(pos) = self.next_pos(&ant)
+						&& let Some(index) = self.get_ant_index(&pos)
+					{
+						self.async_actions.kills.push(index);
 					}
 				}
 
-				// TODO: move tick
+				// move_tick
 				(Dir, _) => ant.set_dir(ant.dir + value),
 				(Halt, _) => halted = *value != 0,
 
-				// TODO: spawn tick
+				// spawn_tick
 				(AntSpawn, _) if *value != 0 => {
-					self.reproduce(&ant, *value, ant.child_dir, ant.child_memory)
+					ant.child_behavior = *value;
+					self.async_actions.spawns.push(ant_index);
 				}
 
-				// TODO: die tick
-				(Die, 1) => self.die(&mut ant),
+				// die_tick
+				(Die, 1) => self.async_actions.deaths.push(ant_index),
 				_ => {}
 			};
 		}
@@ -138,10 +148,106 @@ impl World {
 			self.set_cell(&ant, 0, !cell_mask);
 		}
 
-		if ant.is_alive() && !halted && !ant.is_queen() {
-			self.move_ant(&mut ant);
+		// move_tick
+		if !halted && !ant.is_queen() {
+			self.async_actions.moves.push(ant_index);
+			self.occupy(&ant.pos, false);
 		}
 
 		self.ants[ant_index] = ant;
+	}
+
+	pub(super) fn kill_tick(&mut self) {
+		for index in self.async_actions.clone().kills {
+			self.kill(index);
+		}
+	}
+
+	pub(super) fn die_tick(&mut self) {
+		for index in self.async_actions.clone().deaths {
+			self.kill(index);
+		}
+	}
+
+	pub(super) fn move_tick(&mut self) {
+		let mut claims = BTreeMap::<Vec2u, Vec<usize>>::new();
+		let mut despawns = vec![];
+
+		for index in &self.async_actions.moves {
+			let ant = self.ants[*index];
+
+			if !ant.is_alive() {
+				continue;
+			} else if let Some(target) = self.next_pos(&ant) {
+				claims.entry(target).or_default().push(*index);
+			} else if let BorderMode::Despawn = self.config().border_mode {
+				despawns.push(*index);
+			}
+		}
+
+		for index in despawns {
+			self.ants[index].die();
+		}
+
+		for (target, indexes) in claims {
+			// idea: customize conflict resolution strategy in config
+			// conflict resolution
+			let index = indexes.iter().min().unwrap();
+			let mut ant = self.ants[*index];
+			// TODO: re-occupy cells of conflict resolution losers
+
+			if !self.is_occupied(&target) {
+				self.occupy(&target, true);
+				ant.pos = target;
+				self.ants[*index] = ant;
+			}
+		}
+	}
+
+	const ANT_LIMIT: u32 = 0x100;
+
+	pub(super) fn spawn_tick(&mut self) {
+		let mut claims = BTreeMap::<Vec2u, Vec<usize>>::new();
+
+		// special conflict resolution to handle ant_limit
+		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
+		if self.async_actions.spawns.len() > ant_limit {
+			self.async_actions.spawns.truncate(ant_limit);
+		}
+
+		for index in &self.async_actions.spawns {
+			let ant = self.ants[*index];
+
+			if !ant.is_alive() {
+				continue;
+			} else if let Some(target) = self.flipped_next_pos(&ant)
+				&& self.get_behavior(ant.child_behavior).is_some()
+			{
+				// direction gets flipped, so that the new ant
+				// spawns behind the old one and not in front of it
+				claims.entry(target).or_default().push(*index);
+			}
+		}
+
+		for (target, indexes) in claims {
+			// idea: customize conflict resolution strategy in config
+			// conflict resolution
+			let index = indexes.iter().min().unwrap();
+			let ant = self.ants[*index];
+
+			if !self.is_occupied(&target) {
+				let child_dir = Ant::wrap_dir(ant.dir + ant.child_dir);
+
+				let new_ant = Ant {
+					pos: target,
+					behavior: ant.child_behavior,
+					memory: ant.child_memory,
+					dir: child_dir,
+					..Default::default()
+				};
+
+				self.spawn(new_ant);
+			}
+		}
 	}
 }

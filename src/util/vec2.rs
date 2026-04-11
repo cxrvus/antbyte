@@ -6,7 +6,7 @@ pub struct Vec2 {
 	pub y: i32,
 }
 
-#[derive(Debug, Default, Copy, Clone, PartialEq)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Vec2u {
 	pub x: usize,
 	pub y: usize,
