@@ -151,7 +151,6 @@ impl World {
 		// move_tick
 		if !halted && !ant.is_queen() {
 			self.async_actions.moves.push(ant_index);
-			self.occupy(&ant.pos, false);
 		}
 
 		self.ants[ant_index] = ant;
@@ -173,12 +172,16 @@ impl World {
 		let mut claims = BTreeMap::<Vec2u, Vec<usize>>::new();
 		let mut despawns = vec![];
 
-		for index in &self.async_actions.moves {
+		for index in &self.async_actions.moves.clone() {
 			let ant = self.ants[*index];
 
 			if !ant.is_alive() {
 				continue;
-			} else if let Some(target) = self.next_pos(&ant) {
+			}
+
+			self.occupy(&ant.pos, false);
+
+			if let Some(target) = self.next_pos(&ant) {
 				claims.entry(target).or_default().push(*index);
 			} else if let BorderMode::Despawn = self.config().border_mode {
 				despawns.push(*index);
