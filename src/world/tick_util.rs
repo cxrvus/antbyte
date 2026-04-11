@@ -50,6 +50,13 @@ impl World {
 		}
 	}
 
+	pub(super) fn set_cell(&mut self, ant: &Ant, value: u8, mask: u8) {
+		let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
+		let new_value = value | (old_value & !mask);
+		let adjusted = self.adjusted_color(new_value);
+		self.set_value(&ant.pos, adjusted);
+	}
+
 	#[inline]
 	pub(super) fn is_occupied(&self, pos: &Vec2u) -> bool {
 		self.cells

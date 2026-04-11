@@ -92,25 +92,22 @@ impl World {
 	pub(super) fn sync_tick(&mut self, ant_index: usize, outputs: &Vec<PinValue>) {
 		let mut ant = self.ants[ant_index];
 
-		// TODO: move tick
+		let mut cell_mask = 0;
+		let mut clear = false;
+
 		let mut halted = false;
 
-		// TODO: spawn tick
 		let mut child_dir = 0;
 		let mut child_mem = 0;
 
-		for PinValue { pin, value, mask } in outputs.iter() {
+		for PinValue { pin, value, mask } in outputs {
 			match (pin, value) {
 				(Cell, _) => {
-					let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
-
-					// invert mask to only keep bits that are not targeted
-					let value = value | (old_value & !mask);
-
-					let adjusted = self.adjusted_color(value);
-					self.set_value(&ant.pos, adjusted);
+					cell_mask = *mask;
+					self.set_cell(&ant, *value, cell_mask);
 				}
-				(Clear, 1) => self.set_value(&ant.pos, 0),
+				(Clear, 1) => clear = true,
+
 				(Mem, value) => ant.memory = *value,
 				(Send, value) => self.event_out |= value,
 				(ExtOut, value) => self.ext_output.push(*value),
@@ -135,6 +132,10 @@ impl World {
 				(Die, 1) => self.die(&mut ant),
 				_ => {}
 			};
+		}
+
+		if clear {
+			self.set_cell(&ant, 0, !cell_mask);
 		}
 
 		if ant.is_alive() && !halted && !ant.is_queen() {
