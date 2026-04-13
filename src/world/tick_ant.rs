@@ -215,12 +215,6 @@ impl World {
 	pub(super) fn spawn_tick(&mut self) {
 		let mut claims = BTreeMap::<Vec2u, Vec<usize>>::new();
 
-		// special conflict resolution to handle ant_limit
-		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
-		if self.async_actions.spawns.len() > ant_limit {
-			self.async_actions.spawns.truncate(ant_limit);
-		}
-
 		for index in &self.async_actions.spawns {
 			let ant = self.ants[*index];
 
@@ -235,7 +229,13 @@ impl World {
 			}
 		}
 
+		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
+
 		for (target, indexes) in claims {
+			if self.ants.len() >= ant_limit {
+				break;
+			}
+
 			// idea: customize conflict resolution strategy in config
 			// conflict resolution
 			let index = indexes.iter().min().unwrap();
