@@ -101,10 +101,8 @@ impl World {
 
 		for PinValue { pin, value } in outputs {
 			match (pin, value) {
-				(Cell, _) => {
-					self.set_cell(&ant, *value, cell_mask);
-				}
 				(Clear, 1) => clear = true,
+				(Cell, _) => self.set_cell(&ant, *value, cell_mask),
 
 				(AntDir, value) => ant.child_dir = *value,
 				(AntMem, value) => ant.child_memory = *value,
