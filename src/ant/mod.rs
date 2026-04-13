@@ -52,7 +52,7 @@ impl Ant {
 
 	#[inline]
 	pub fn age(&self, current_tick: u32) -> u32 {
-		current_tick.wrapping_sub(self.birth_tick)
+		current_tick.wrapping_sub(self.birth_tick + 1)
 	}
 
 	#[inline]

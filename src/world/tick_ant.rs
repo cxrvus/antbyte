@@ -254,6 +254,7 @@ impl World {
 					behavior: ant.child_behavior,
 					memory: ant.child_memory,
 					dir: child_dir,
+					birth_tick: self.tick_count,
 					..Default::default()
 				};
 
