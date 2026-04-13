@@ -172,9 +172,8 @@ impl World {
 				continue;
 			}
 
-			self.occupy(&ant.pos, false);
-
 			if let Some(target) = self.next_pos(&ant) {
+				self.occupy(&ant.pos, false);
 				claims.entry(target).or_default().push(*index);
 			} else if let BorderMode::Despawn = self.config().border_mode {
 				despawns.push(*index);
@@ -182,7 +181,7 @@ impl World {
 		}
 
 		for index in despawns {
-			self.ants[index].die();
+			self.kill(index);
 		}
 
 		for (target, indexes) in claims {
@@ -200,10 +199,14 @@ impl World {
 				}
 			}
 
+			// conflict winner moves to target position
 			if !self.is_occupied(&target) {
 				self.occupy(&target, true);
 				ant.pos = target;
 				self.ants[*index] = ant;
+			} else {
+				// conflict winner also returns to their original positions
+				self.occupy(&ant.pos, true);
 			}
 		}
 	}
@@ -232,6 +235,8 @@ impl World {
 		for (target, indexes) in claims {
 			if self.ants.len() >= ant_limit {
 				break;
+			} else if self.is_occupied(&target) {
+				continue;
 			}
 
 			// idea: customize conflict resolution strategy in config
@@ -239,20 +244,18 @@ impl World {
 			let index = indexes.iter().min().unwrap();
 			let ant = self.ants[*index];
 
-			if !self.is_occupied(&target) {
-				let child_dir = Ant::wrap_dir(ant.dir + ant.child_dir);
+			let child_dir = Ant::wrap_dir(ant.dir + ant.child_dir);
 
-				let new_ant = Ant {
-					pos: target,
-					behavior: ant.child_behavior,
-					memory: ant.child_memory,
-					dir: child_dir,
-					birth_tick: self.tick_count,
-					..Default::default()
-				};
+			let new_ant = Ant {
+				pos: target,
+				behavior: ant.child_behavior,
+				memory: ant.child_memory,
+				dir: child_dir,
+				birth_tick: self.tick_count,
+				..Default::default()
+			};
 
-				self.spawn(new_ant);
-			}
+			self.spawn(new_ant);
 		}
 	}
 }

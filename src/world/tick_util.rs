@@ -80,8 +80,9 @@ impl World {
 	#[rustfmt::skip]
 	#[inline]
 	pub(super) fn occupy(&mut self, pos: &Vec2u, occupied: bool) {
-		let old_cell = self.cells.at(&pos.sign()).unwrap();
-		let cell = Cell { occupied, ..*old_cell };
+		let mut cell = self.cells.at(&pos.sign()).unwrap().clone();
+		assert_ne!(cell.occupied, occupied);
+		cell.occupied = occupied;
 		self.cells.set_at(&pos.sign(), cell);
 	}
 
@@ -117,8 +118,13 @@ impl World {
 	}
 
 	pub(super) fn kill(&mut self, index: usize) {
-		let ant_pos = self.ants[index].pos;
-		self.ants[index].die();
-		self.occupy(&ant_pos, false);
+		let ant = self.ants[index];
+		if ant.is_alive() {
+			self.ants[index].die();
+
+			if !ant.is_queen() {
+				self.occupy(&ant.pos, false);
+			}
+		}
 	}
 }
