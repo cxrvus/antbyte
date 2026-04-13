@@ -264,7 +264,6 @@ impl Pin {
 pub struct PinValue {
 	pub pin: Pin,
 	pub value: u8,
-	pub mask: u8,
 }
 
 #[cfg(test)]

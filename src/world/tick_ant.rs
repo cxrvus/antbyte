@@ -64,17 +64,10 @@ impl World {
 		// condense output bits into bytes
 		let mut output_values: Vec<PinValue> = vec![];
 
-		let mut output_cell_mask = 0u8;
-
 		for output_sub_pin in outputs.iter().rev() {
 			let output_bit = (output_bits & 1) as u8;
 			let bit_index = output_sub_pin.line;
 			let new_value = output_bit << bit_index;
-
-			// only overwrite targeted cell bits
-			if let Pin::Cell = output_sub_pin.pin {
-				output_cell_mask |= 1 << output_sub_pin.line;
-			}
 
 			if let Some(output_value) = output_values
 				.iter_mut()
@@ -85,7 +78,6 @@ impl World {
 				output_values.push(PinValue {
 					pin: output_sub_pin.pin,
 					value: new_value,
-					mask: output_cell_mask,
 				});
 			}
 
@@ -98,15 +90,18 @@ impl World {
 	pub(super) fn sync_tick(&mut self, ant_index: usize, outputs: &Vec<PinValue>) {
 		let mut ant = self.ants[ant_index];
 
-		let mut cell_mask = 0;
-		let mut clear = false;
+		let cell_mask = self
+			.get_behavior(ant.behavior)
+			.cloned()
+			.expect("invalid Behavior ID")
+			.cell_mask();
 
+		let mut clear = false;
 		let mut halted = false;
 
-		for PinValue { pin, value, mask } in outputs {
+		for PinValue { pin, value } in outputs {
 			match (pin, value) {
 				(Cell, _) => {
-					cell_mask = *mask;
 					self.set_cell(&ant, *value, cell_mask);
 				}
 				(Clear, 1) => clear = true,

@@ -1,5 +1,8 @@
 use crate::{
-	ant::{pin::IoType, sub_pin::SubPin},
+	ant::{
+		pin::{IoType, Pin},
+		sub_pin::SubPin,
+	},
 	truth_table::TruthTable,
 	util::find_dupe,
 };
@@ -90,5 +93,17 @@ impl Behavior {
 
 			Ok(())
 		}
+	}
+
+	pub fn cell_mask(&self) -> u8 {
+		let mut mask = 0;
+
+		for sub_pin in &self.outputs {
+			if let Pin::Cell = sub_pin.pin {
+				mask |= 1 << sub_pin.line;
+			}
+		}
+
+		mask
 	}
 }
