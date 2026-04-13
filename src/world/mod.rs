@@ -112,19 +112,22 @@ impl World {
 
 		let mut world = Self { properties, state };
 
+		let half_width = (width - 1) / 2;
+		let half_height = (height - 1) / 2;
+
 		let start_pos = match start_pos {
 			StartingPos::TopLeft => Vec2u::ZERO,
 			StartingPos::Top => Vec2u {
-				x: height / 2 - 1,
+				x: half_height,
 				y: 0,
 			},
 			StartingPos::Left => Vec2u {
 				x: 0,
-				y: height / 2 - 1,
+				y: half_height,
 			},
 			StartingPos::Center => Vec2u {
-				x: width / 2 - 1,
-				y: height / 2 - 1,
+				x: half_width,
+				y: half_height,
 			},
 		};
 
