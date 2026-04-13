@@ -20,6 +20,7 @@ use std::{
 use crate::{
 	ant::{Ant, behavior::Behavior},
 	util::{matrix::Matrix, vec2::Vec2u},
+	world::config::ColorMode,
 };
 
 #[cfg_attr(test, derive(ts_rs::TS))]
@@ -196,6 +197,16 @@ impl World {
 				cell.value = 0;
 				cell.expiration = None;
 			});
+	}
+
+	pub fn adjusted_color(&self, color: u8) -> u8 {
+		match self.config().color_mode {
+			ColorMode::Binary => match color {
+				0 => 0x0,
+				_ => 0xf,
+			},
+			ColorMode::RGBI => color,
+		}
 	}
 
 	#[inline]

@@ -1,10 +1,7 @@
 use crate::{
 	ant::Ant,
 	util::vec2::Vec2u,
-	world::{
-		World,
-		config::{BorderMode, ColorMode},
-	},
+	world::{World, config::BorderMode},
 };
 
 impl World {
@@ -59,8 +56,7 @@ impl World {
 	pub(super) fn set_cell(&mut self, ant: &Ant, value: u8, mask: u8) {
 		let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
 		let new_value = value | (old_value & !mask);
-		let adjusted = self.adjusted_color(new_value);
-		self.set_value(&ant.pos, adjusted);
+		self.set_value(&ant.pos, new_value);
 	}
 
 	#[inline]
@@ -98,15 +94,5 @@ impl World {
 		let ant_pos = self.ants[index].pos;
 		self.ants[index].die();
 		self.occupy(&ant_pos, false);
-	}
-
-	pub(super) fn adjusted_color(&self, color: u8) -> u8 {
-		match self.config().color_mode {
-			ColorMode::Binary => match color {
-				0 => 0x0,
-				_ => 0xf,
-			},
-			ColorMode::RGBI => color,
-		}
 	}
 }

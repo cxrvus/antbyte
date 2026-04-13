@@ -147,14 +147,16 @@ impl TermRenderer {
 				.iter()
 				.find(|ant| !ant.is_queen() && ant.pos == pos);
 
+			let cell_value = world.adjusted_color(cell.value);
+
 			match (ant, world.config().hide_ants) {
 				(None, _) | (_, true) => {
-					string.push_str(&render_cell(cell.value, "  "));
+					string.push_str(&render_cell(cell_value, "  "));
 				}
 				(Some(ant), false) => {
 					let (char1, char2) = ant.dir_vec().principal_chars();
 					let ant_chars = format!("{char1}{char2}");
-					string.push_str(&render_cell(cell.value, &ant_chars));
+					string.push_str(&render_cell(cell_value, &ant_chars));
 				}
 			}
 		}

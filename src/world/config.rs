@@ -32,7 +32,6 @@ pub struct WorldConfig {
 	pub start_dir: u8,
 	/// max number of ants before additional spawning gets blocked
 	pub ant_limit: Option<u32>,
-	pub color_mode: ColorMode,
 	pub noise_seed: Option<u32>,
 	pub description: String,
 
@@ -48,8 +47,10 @@ pub struct WorldConfig {
 	/// amount of ms to sleep for after end of simulation, i.e. between loops
 	pub sleep: Option<u32>,
 	/// 16 ASCII characters to render cells, start is value = 0
-	/// can  also set to empty string to get a default ASCII palette
+	/// can also set to empty string to get a default ASCII palette
 	pub ascii: Option<String>,
+	/// changes how colors are rendered
+	pub color_mode: ColorMode,
 
 	// ### External Input
 	/// 1 to 8 characters as key bindings, representing K0-K7 in ascending order
