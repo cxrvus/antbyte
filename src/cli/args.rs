@@ -40,6 +40,10 @@ pub struct Args {
 	#[arg(short = 'A', long)]
 	hide_ants: bool,
 
+	/// output data in machine-readable format
+	#[arg(short, long)]
+	pub raw: bool,
+
 	/// pass args to sub-process, e.g. a nodejs file
 	#[arg(short = 'a', long = "args")]
 	pub sub_args: Option<String>,
