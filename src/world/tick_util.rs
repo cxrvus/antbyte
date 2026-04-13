@@ -1,7 +1,7 @@
 use crate::{
 	ant::Ant,
 	util::vec2::Vec2u,
-	world::{World, config::BorderMode},
+	world::{Cell, World, config::BorderMode},
 };
 
 impl World {
@@ -57,6 +57,32 @@ impl World {
 		let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
 		let new_value = value | (old_value & !mask);
 		self.set_value(&ant.pos, new_value);
+	}
+
+	#[rustfmt::skip]
+	fn set_value(&mut self, pos: &Vec2u, value: u8) {
+		let old_cell = self.cells.at(&pos.sign()).unwrap();
+
+		let expiration = match self.config().decay {
+			Some(decay) if value != 0 => {
+				let clock = self.tick_count as u16;
+				Some(clock.wrapping_add(decay))
+			}
+			_ => None
+		};
+
+		let cell = Cell { value, expiration, ..*old_cell };
+
+		self.cells.set_at(&pos.sign(), cell);
+	}
+
+
+	#[rustfmt::skip]
+	#[inline]
+	pub(super) fn occupy(&mut self, pos: &Vec2u, occupied: bool) {
+		let old_cell = self.cells.at(&pos.sign()).unwrap();
+		let cell = Cell { occupied, ..*old_cell };
+		self.cells.set_at(&pos.sign(), cell);
 	}
 
 	#[inline]
