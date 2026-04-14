@@ -1,4 +1,0 @@
-set size = 8;
-
-ant brain = 0 { A0 = 1; }
-ant grain = 1 { C0 = 1; }
