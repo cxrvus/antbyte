@@ -38,7 +38,8 @@ pub fn run() -> Result<()> {
 
 	if args.preview {
 		let WorldConfig { width, height, .. } = properties.config;
-		let preview_str = "\\/\n".repeat(height) + "|_" + &">>".repeat(width) + "\n\n";
+		let preview_str =
+			"\\/\n".repeat(height as usize) + "|_" + &">>".repeat(width as usize) + "\n\n";
 		print!("{preview_str}");
 	} else if args.debug {
 		// logging happens on compilation

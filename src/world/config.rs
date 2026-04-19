@@ -1,11 +1,11 @@
 use anyhow::{Error, Result, anyhow, bail};
 use serde::{Deserialize, Serialize};
 
-use crate::util::dir::MAX_DIR;
+use crate::util::{dir::MAX_DIR, vec2::Coord};
 
 pub const FPS_CAP: u32 = 50;
-pub const SIZE_CAP: u32 = 0x400;
 pub const SPEED_CAP: u32 = 0x2000;
+pub const SIZE_CAP: Coord = 0x400;
 
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -14,9 +14,9 @@ pub const SPEED_CAP: u32 = 0x2000;
 pub struct WorldConfig {
 	// ## Core
 	/// width in pixels
-	pub width: usize,
+	pub width: Coord,
 	/// height in pixels
-	pub height: usize,
+	pub height: Coord,
 	/// simulated ticks per frame (defaults to 1)
 	pub speed: Option<u32>,
 	/// simulation tick limit
@@ -142,17 +142,17 @@ impl TryFrom<String> for ColorMode {
 
 impl WorldConfig {
 	pub fn validate(&self) -> Result<()> {
-		Self::non_zero(self.height, "height")?;
-		Self::non_zero(self.width, "width")?;
-		Self::cap(self.height, "height", SIZE_CAP)?;
-		Self::cap(self.width, "width", SIZE_CAP)?;
+		Self::non_zero(self.height as u32, "height")?;
+		Self::non_zero(self.width as u32, "width")?;
+		Self::cap(self.height as u32, "height", SIZE_CAP as u32)?;
+		Self::cap(self.width as u32, "width", SIZE_CAP as u32)?;
 
 		if self.start_dir > MAX_DIR {
 			bail!("starting direction must not exceed {MAX_DIR}")
 		}
 
 		Self::cap(
-			self.start_dir as usize,
+			self.start_dir as u32,
 			"start direction",
 			(MAX_DIR - 1) as u32,
 		)?;
@@ -181,17 +181,17 @@ impl WorldConfig {
 
 	#[inline]
 	#[rustfmt::skip]
-	fn cap(number: usize, property: &str, max: u32) -> Result<()> {
-		if number > max as usize { bail!("[{property}] must not exceed {max}") } Ok(())
+	fn cap(number: u32, property: &str, max: u32) -> Result<()> {
+		if number > max { bail!("[{property}] must not exceed {max}") } Ok(())
 	}
 
 	fn cap_opt(number: Option<u32>, property: &str, max: u32) -> Result<()> {
-		Self::cap(number.unwrap_or_default() as usize, property, max)
+		Self::cap(number.unwrap_or_default(), property, max)
 	}
 
 	#[inline]
 	#[rustfmt::skip]
-	fn non_zero(number: usize, property: &str) -> Result<()> {
+	fn non_zero(number: u32, property: &str) -> Result<()> {
 		if number == 0 { bail!("[{property}] must be greater than 0"); } Ok(())
 	}
 }

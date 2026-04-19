@@ -2,14 +2,14 @@ use crate::util::vec2::*;
 
 #[derive(Debug, Clone)]
 pub struct Matrix<T> {
-	pub width: usize,
-	pub height: usize,
+	pub width: Coord,
+	pub height: Coord,
 	pub entries: Vec<T>,
 }
 
 impl<T> Matrix<T> {
-	pub fn with_values(width: usize, height: usize, values: Vec<T>) -> Self {
-		assert_eq!(values.len(), width * height);
+	pub fn with_values(width: Coord, height: Coord, values: Vec<T>) -> Self {
+		assert_eq!(values.len(), (width * height) as usize);
 
 		Self {
 			width,
@@ -27,7 +27,7 @@ impl<T> Matrix<T> {
 	pub fn at(&self, pos: &Vec2u) -> Option<&T> {
 		let Vec2u { x, y } = pos;
 		if self.in_bounds(&pos.sign()) {
-			Some(&self.entries[y * self.width + x])
+			Some(&self.entries[(y * self.width + x) as usize])
 		} else {
 			None
 		}
@@ -36,7 +36,7 @@ impl<T> Matrix<T> {
 	#[inline]
 	pub fn set_at(&mut self, pos: &Vec2u, value: T) {
 		if self.in_bounds(&pos.sign()) {
-			self.entries[pos.y * self.width + pos.x] = value;
+			self.entries[(pos.y * self.width + pos.x) as usize] = value;
 		} else {
 			panic!("map index is out of range: {pos:?}")
 		}
@@ -45,8 +45,8 @@ impl<T> Matrix<T> {
 	pub fn get_pos(&self, i: usize) -> Option<Vec2u> {
 		self.entries.get(i)?;
 		Some(Vec2u {
-			x: (i % self.width),
-			y: (i / self.width),
+			x: (i % self.width as usize) as Coord,
+			y: (i / self.width as usize) as Coord,
 		})
 	}
 
@@ -58,22 +58,26 @@ impl<T> Matrix<T> {
 	}
 
 	pub fn get_row(&self, i: usize) -> Option<Vec<&T>> {
-		if i >= self.height {
+		let (width, height) = (self.width as usize, self.height as usize);
+
+		if i >= height {
 			None
 		} else {
-			let start = i * self.width;
-			let end = (i + 1) * self.width;
+			let start = i * width;
+			let end = (i + 1) * width;
 			let row = self.entries[start..end].iter().collect::<Vec<&T>>();
 			Some(row)
 		}
 	}
 
 	pub fn get_col(&self, i: usize) -> Option<Vec<&T>> {
-		if i >= self.width {
+		let (width, height) = (self.width as usize, self.height as usize);
+
+		if i >= width {
 			None
 		} else {
-			let col = (0..self.height)
-				.map(|row| &self.entries[row * self.width + i])
+			let col = (0..height)
+				.map(|row| &self.entries[row * width + i])
 				.collect::<Vec<&T>>();
 			Some(col)
 		}
@@ -84,7 +88,7 @@ impl<T> Matrix<T>
 where
 	T: Default,
 {
-	pub fn new(width: usize, height: usize) -> Self {
+	pub fn new(width: Coord, height: Coord) -> Self {
 		Self {
 			width,
 			height,
@@ -149,34 +153,5 @@ mod tests {
 		assert_eq!(col2, vec![&3, &6, &9]);
 
 		assert!(m.get_col(3).is_none());
-	}
-}
-
-#[derive(Debug)]
-pub struct ProxyMatrix {
-	pub width: usize,
-	pub height: usize,
-	pub string: String,
-}
-
-impl ProxyMatrix {
-	pub fn convert<T>(self, parser: fn(String) -> Vec<T>) -> Matrix<T> {
-		Matrix {
-			width: self.width,
-			height: self.height,
-			entries: parser(self.string),
-		}
-	}
-}
-
-impl From<&str> for ProxyMatrix {
-	fn from(value: &str) -> Self {
-		let lines = value.trim().lines();
-
-		Self {
-			height: lines.clone().count(),
-			width: lines.clone().next().unwrap().len(),
-			string: lines.collect::<Vec<&str>>().join(""),
-		}
 	}
 }

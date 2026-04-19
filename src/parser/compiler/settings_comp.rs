@@ -2,6 +2,7 @@ use anyhow::{Context, Result, anyhow};
 
 use crate::{
 	parser::{Parser, token::Token},
+	util::vec2::Coord,
 	world::config::{BorderMode, ColorMode, StartingPos, WorldConfig},
 };
 
@@ -26,11 +27,11 @@ impl Parser {
 				))? as usize;
 
 				match key {
-					"width" => config.width = value,
-					"height" => config.height = value,
+					"width" => config.width = value as Coord,
+					"height" => config.height = value as Coord,
 					"size" => {
-						config.width = value;
-						config.height = value;
+						config.width = value as Coord;
+						config.height = value as Coord;
 					}
 					_ => unreachable!(),
 				}

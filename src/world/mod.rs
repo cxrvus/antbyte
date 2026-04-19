@@ -19,7 +19,11 @@ use std::{
 
 use crate::{
 	ant::{Ant, behavior::Behavior},
-	util::{dir::Direction, matrix::Matrix, vec2::Vec2u},
+	util::{
+		dir::Direction,
+		matrix::Matrix,
+		vec2::{Coord, Vec2u},
+	},
 	world::config::ColorMode,
 };
 
@@ -69,7 +73,7 @@ pub struct WorldState {
 }
 
 impl WorldState {
-	pub fn new(rng: StdRng, width: usize, height: usize) -> Self {
+	pub fn new(rng: StdRng, width: Coord, height: Coord) -> Self {
 		Self {
 			rng,
 			tick_count: 0,

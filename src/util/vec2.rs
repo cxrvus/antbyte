@@ -1,9 +1,11 @@
 use std::ops;
 
+pub type Coord = u16;
+
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Vec2u {
-	pub x: usize,
-	pub y: usize,
+	pub x: Coord,
+	pub y: Coord,
 }
 
 impl Vec2u {
@@ -51,8 +53,8 @@ impl Vec2 {
 		let Self { x, y } = self;
 		if x >= 0 && y >= 0 {
 			Some(Vec2u {
-				x: x as usize,
-				y: y as usize,
+				x: x as Coord,
+				y: y as Coord,
 			})
 		} else {
 			None

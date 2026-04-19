@@ -133,7 +133,7 @@ impl TermRenderer {
 		let mut string = String::new();
 
 		for (i, cell) in cells.entries.iter().enumerate() {
-			if i % cells.width == 0 {
+			if i % cells.width as usize == 0 {
 				string.push('\n');
 			}
 
