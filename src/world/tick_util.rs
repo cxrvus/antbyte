@@ -21,11 +21,8 @@ impl World {
 				Cycle | Wrap => {
 					let dimensions = self.cells.dimensions().sign();
 					let mut wrapped_pos = new_pos % dimensions;
-					let is_diagonal = dir.x != 0 && dir.y != 0;
 
-					if let Wrap = self.config().border_mode
-						&& !is_diagonal
-					{
+					if let Wrap = self.config().border_mode {
 						if new_pos.x < 0 {
 							wrapped_pos.x = dimensions.x - 1;
 							wrapped_pos.y = (wrapped_pos.y - 1).rem_euclid(dimensions.y);
