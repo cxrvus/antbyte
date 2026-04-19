@@ -82,6 +82,34 @@ impl WorldState {
 			ext_output: vec![],
 		}
 	}
+
+	#[inline]
+	pub fn tick_count(&self) -> u32 {
+		self.tick_count
+	}
+
+	#[inline]
+	pub fn ants(&self) -> &Vec<Ant> {
+		&self.ants
+	}
+
+	#[inline]
+	fn rng(&mut self) -> u8 {
+		self.rng.random()
+	}
+
+	fn cell_decay(&mut self) {
+		let clock = self.tick_count as u16;
+
+		self.cells
+			.entries
+			.iter_mut()
+			.filter(|cell| cell.expiration == Some(clock))
+			.for_each(|cell| {
+				cell.value = 0;
+				cell.expiration = None;
+			});
+	}
 }
 
 pub struct World {
@@ -147,19 +175,6 @@ impl World {
 		Ok(world)
 	}
 
-	fn cell_decay(&mut self) {
-		let clock = self.tick_count as u16;
-
-		self.cells
-			.entries
-			.iter_mut()
-			.filter(|cell| cell.expiration == Some(clock))
-			.for_each(|cell| {
-				cell.value = 0;
-				cell.expiration = None;
-			});
-	}
-
 	pub fn adjusted_color(&self, color: u8) -> u8 {
 		match self.config().color_mode {
 			ColorMode::Binary => match color {
@@ -176,11 +191,6 @@ impl World {
 	}
 
 	#[inline]
-	pub fn tick_count(&self) -> u32 {
-		self.tick_count
-	}
-
-	#[inline]
 	pub fn config(&self) -> &WorldConfig {
 		&self.properties.config
 	}
@@ -191,18 +201,8 @@ impl World {
 	}
 
 	#[inline]
-	pub fn ants(&self) -> &Vec<Ant> {
-		&self.ants
-	}
-
-	#[inline]
 	fn get_behavior(&self, id: u8) -> Option<&Behavior> {
 		self.properties.behaviors.get(&id)
-	}
-
-	#[inline]
-	fn rng(&mut self) -> u8 {
-		self.rng.random()
 	}
 }
 

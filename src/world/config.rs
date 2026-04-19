@@ -40,8 +40,6 @@ pub struct WorldConfig {
 	// ### Renderer
 	/// rendered frames per second
 	pub fps: Option<u32>,
-	/// don't render title banner
-	pub hide_title: bool, // TODO: move to renderer
 	/// don't render ants
 	pub hide_ants: bool,
 	/// amount of ms to sleep for after end of simulation, i.e. between loops
@@ -75,7 +73,6 @@ impl Default for WorldConfig {
 			description: "".into(),
 
 			fps: Some(FPS_CAP),
-			hide_title: false,
 			hide_ants: false,
 			sleep: Some(200),
 			ascii: None,

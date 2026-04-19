@@ -47,7 +47,7 @@ pub fn run() -> Result<()> {
 			.context("config-arg error!")?;
 		let mut world = World::new(properties.clone()).context("world error!")?;
 
-		let term_renderer = TermRenderer::new(&world);
+		let term_renderer = TermRenderer::new(&world, args.hide_title);
 		let term_input = TermInput;
 
 		let mut plugins = PluginSet {
