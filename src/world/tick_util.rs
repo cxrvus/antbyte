@@ -7,7 +7,9 @@ use crate::{
 impl World {
 	pub(super) fn next_pos(&self, ant: &Ant) -> Option<Vec2u> {
 		let (pos, dir) = (ant.pos.sign(), ant.dir_vec());
-		let new_pos = if ant.is_queen() { pos } else { pos + dir };
+
+		let _different_layer = false; // idea: spawning ants on different z-layers
+		let new_pos = if _different_layer { pos } else { pos + dir };
 
 		if self.cells.in_bounds(&new_pos) {
 			Some(new_pos.unsign().unwrap())
@@ -111,9 +113,7 @@ impl World {
 		if !self.is_occupied(&ant.pos) {
 			self.ants.push(ant);
 
-			if !ant.is_queen() {
-				self.occupy(&ant.pos, true);
-			}
+			self.occupy(&ant.pos, true);
 		}
 	}
 
@@ -122,9 +122,7 @@ impl World {
 		if ant.is_alive() {
 			self.ants[index].die();
 
-			if !ant.is_queen() {
-				self.occupy(&ant.pos, false);
-			}
+			self.occupy(&ant.pos, false);
 		}
 	}
 }

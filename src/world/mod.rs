@@ -131,32 +131,15 @@ impl World {
 			},
 		};
 
-		let ant = if world.properties.behaviors.contains_key(&0) {
-			// queen ant
-
-			let behavior = &world.properties.behaviors[&0];
-			let queen_pins = [behavior.inputs.clone(), behavior.outputs.clone()].concat();
-
-			if let Some(forbidden) = queen_pins.iter().find(|x| !x.pin.definition().queen) {
-				bail!("forbidden pin for queen ant: {:?}", forbidden.pin);
-			}
-
+		let ant = if let Some(root_id) = world.properties.behaviors.keys().min() {
 			Ant {
 				pos: start_pos,
 				dir: start_dir,
-				..Default::default()
-			}
-		} else if world.properties.behaviors.contains_key(&1) {
-			// regular ant
-
-			Ant {
-				pos: start_pos,
-				dir: start_dir,
-				behavior: 1,
+				behavior: *root_id,
 				..Default::default()
 			}
 		} else {
-			bail!("no entry point: could not find `ant main` or other ant with ID = 0 or 1")
+			bail!("can't run a world with no ants defined")
 		};
 
 		world.spawn(ant);

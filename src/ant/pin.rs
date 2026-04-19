@@ -74,7 +74,6 @@ pub struct PinDefinition {
 	pub aliases: &'static [&'static str],
 	pub size: u8,
 	pub io_type: Option<IoType>,
-	pub queen: bool,
 }
 
 impl Pin {
@@ -85,7 +84,6 @@ impl Pin {
 			aliases: &["CELL_"],
 			size: CELL,
 			io_type: None,
-			queen: false,
 		},
 		PinDefinition {
 			pin: Self::Clear,
@@ -93,7 +91,6 @@ impl Pin {
 			aliases: &["CLEAR"],
 			size: BIT,
 			io_type: Some(IoType::Output),
-			queen: false,
 		},
 		PinDefinition {
 			pin: Self::Next,
@@ -101,7 +98,6 @@ impl Pin {
 			aliases: &["NEXT_"],
 			size: CELL,
 			io_type: Some(IoType::Input),
-			queen: false,
 		},
 		PinDefinition {
 			pin: Self::Collide,
@@ -109,7 +105,6 @@ impl Pin {
 			aliases: &["COLLIDE"],
 			size: BIT,
 			io_type: Some(IoType::Input),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Time,
@@ -117,7 +112,6 @@ impl Pin {
 			aliases: &["TIME_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Pulse,
@@ -125,7 +119,6 @@ impl Pin {
 			aliases: &["PULSE_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Mem,
@@ -133,7 +126,6 @@ impl Pin {
 			aliases: &["MEM_"],
 			size: BYTE,
 			io_type: None,
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Random,
@@ -141,7 +133,6 @@ impl Pin {
 			aliases: &["RAND_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Chance,
@@ -149,7 +140,6 @@ impl Pin {
 			aliases: &["CHANCE_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Dir,
@@ -157,7 +147,6 @@ impl Pin {
 			aliases: &["DIR_"],
 			size: DIR,
 			io_type: Some(IoType::Output),
-			queen: false,
 		},
 		PinDefinition {
 			pin: Self::Halt,
@@ -165,7 +154,6 @@ impl Pin {
 			aliases: &["HALT"],
 			size: BIT,
 			io_type: Some(IoType::Output),
-			queen: false,
 		},
 		PinDefinition {
 			pin: Self::AntSpawn,
@@ -173,7 +161,6 @@ impl Pin {
 			aliases: &["ANT_"],
 			size: ANT_ID,
 			io_type: Some(IoType::Output),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::AntDir,
@@ -181,7 +168,6 @@ impl Pin {
 			aliases: &["ANT_DIR_"],
 			size: DIR,
 			io_type: Some(IoType::Output),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::AntMem,
@@ -189,7 +175,6 @@ impl Pin {
 			aliases: &["ANT_MEM_"],
 			size: BYTE,
 			io_type: Some(IoType::Output),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Kill,
@@ -197,7 +182,6 @@ impl Pin {
 			aliases: &["KILL"],
 			size: BIT,
 			io_type: Some(IoType::Output),
-			queen: false,
 		},
 		PinDefinition {
 			pin: Self::Event,
@@ -205,7 +189,6 @@ impl Pin {
 			aliases: &["EVENT_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Send,
@@ -213,7 +196,6 @@ impl Pin {
 			aliases: &["SEND_"],
 			size: BYTE,
 			io_type: Some(IoType::Output),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::Die,
@@ -221,7 +203,6 @@ impl Pin {
 			aliases: &["DIE"],
 			size: BIT,
 			io_type: Some(IoType::Output),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::ExtIn,
@@ -229,7 +210,6 @@ impl Pin {
 			aliases: &["INPUT", "KEY"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
-			queen: true,
 		},
 		PinDefinition {
 			pin: Self::ExtOut,
@@ -237,7 +217,6 @@ impl Pin {
 			aliases: &["OUTPUT", "AUDIO"],
 			size: BYTE,
 			io_type: Some(IoType::Output),
-			queen: true,
 		},
 	];
 
@@ -300,10 +279,10 @@ mod test {
 		println!();
 		println!();
 
-		println!("SHORT; ALIAS; SIZE; IO_TYPE; QUEEN;");
+		println!("SHORT; ALIAS; SIZE; IO_TYPE;");
 
 		for entry in entries {
-			let PinDefinition { short, aliases, size, io_type, queen, .. } = entry;
+			let PinDefinition { short, aliases, size, io_type, .. } = entry;
 
 			let io_type = match io_type {
 				None => "*",
@@ -311,14 +290,9 @@ mod test {
 				Some(Output) => "O",
 			};
 
-			let queen = match queen {
-				true => "Q",
-				false => "*",
-			};
-
 			let alias = aliases[0];
 
-			println!("{short}; {alias}; {size}; {io_type}; {queen};")
+			println!("{short}; {alias}; {size}; {io_type};")
 		}
 	}
 }

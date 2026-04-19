@@ -30,11 +30,6 @@ pub const MAX_DIR: u8 = 8;
 
 impl Ant {
 	#[inline]
-	pub fn is_queen(&self) -> bool {
-		self.behavior == 0
-	}
-
-	#[inline]
 	pub fn is_alive(&self) -> bool {
 		!matches!(self.status, AntStatus::Dead)
 	}

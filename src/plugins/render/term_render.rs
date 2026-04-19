@@ -142,10 +142,7 @@ impl TermRenderer {
 			}
 
 			let pos = cells.get_pos(i).unwrap();
-			let ant = world
-				.ants()
-				.iter()
-				.find(|ant| !ant.is_queen() && ant.pos == pos);
+			let ant = world.ants().iter().find(|ant| ant.pos == pos);
 
 			let cell_value = world.adjusted_color(cell.value);
 

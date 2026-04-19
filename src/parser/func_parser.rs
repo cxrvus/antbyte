@@ -7,9 +7,6 @@ use super::{Parser, Statement, Token};
 
 use anyhow::{Result, anyhow, bail};
 
-pub const MAIN: &str = "main";
-pub const QUEEN: &str = "queen";
-
 impl Parser {
 	pub(super) fn parse_ant(&mut self, name: String) -> Result<(Func, AntFunc)> {
 		let target_id = if self.assume_next(Token::Assign) {
@@ -19,9 +16,9 @@ impl Parser {
 			} else {
 				bail!("expected Ant target ID after '='");
 			}
-		} else if name == QUEEN {
+		} else if name == "queen" {
 			0
-		} else if name == MAIN {
+		} else if name == "main" {
 			1
 		} else {
 			bail!("specify Ant target ID using '='");

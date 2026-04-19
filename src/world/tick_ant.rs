@@ -142,7 +142,7 @@ impl World {
 		}
 
 		// move_tick
-		if !halted && !ant.is_queen() {
+		if !halted {
 			self.async_actions.moves.push(ant_index);
 		}
 
