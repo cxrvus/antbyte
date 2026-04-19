@@ -21,7 +21,7 @@ use crate::{
 	ant::{Ant, behavior::Behavior},
 	util::{
 		dir::Direction,
-		matrix::Matrix,
+		grid::Grid,
 		vec2::{Coord, Vec2u},
 	},
 	world::config::ColorMode,
@@ -40,7 +40,7 @@ pub struct WorldProperties {
 	pub config: WorldConfig,
 }
 
-pub type Cells = Matrix<Cell>;
+pub type Cells = Grid<Cell>;
 
 impl Cells {}
 
@@ -78,7 +78,7 @@ impl WorldState {
 			rng,
 			tick_count: 0,
 			async_actions: Default::default(),
-			cells: Matrix::new(width, height),
+			cells: Grid::new(width, height),
 			ants: vec![],
 			event_in: 0,
 			event_out: 0,

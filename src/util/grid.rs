@@ -1,13 +1,13 @@
 use crate::util::vec2::*;
 
 #[derive(Debug, Clone)]
-pub struct Matrix<T> {
+pub struct Grid<T> {
 	pub width: Coord,
 	pub height: Coord,
 	pub entries: Vec<T>,
 }
 
-impl<T> Matrix<T> {
+impl<T> Grid<T> {
 	pub fn with_values(width: Coord, height: Coord, values: Vec<T>) -> Self {
 		assert_eq!(values.len(), (width * height) as usize);
 
@@ -84,7 +84,7 @@ impl<T> Matrix<T> {
 	}
 }
 
-impl<T> Matrix<T>
+impl<T> Grid<T>
 where
 	T: Default,
 {
@@ -97,7 +97,7 @@ where
 	}
 }
 
-impl<T> Matrix<T>
+impl<T> Grid<T>
 where
 	T: Default + PartialEq,
 {
@@ -115,8 +115,8 @@ where
 mod tests {
 	use super::*;
 
-	fn create_test_matrix() -> Matrix<i32> {
-		Matrix {
+	fn create_test_grid() -> Grid<i32> {
+		Grid {
 			width: 3,
 			height: 3,
 			entries: vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -125,7 +125,7 @@ mod tests {
 
 	#[test]
 	fn test_get_row() {
-		let m = create_test_matrix();
+		let m = create_test_grid();
 
 		let row0 = m.get_row(0).unwrap();
 		assert_eq!(row0, vec![&1, &2, &3]);
@@ -141,7 +141,7 @@ mod tests {
 
 	#[test]
 	fn test_get_col() {
-		let m = create_test_matrix();
+		let m = create_test_grid();
 
 		let col0 = m.get_col(0).unwrap();
 		assert_eq!(col0, vec![&1, &4, &7]);

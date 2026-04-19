@@ -1,5 +1,5 @@
 pub mod dir;
-pub mod matrix;
+pub mod grid;
 pub mod vec2;
 
 #[inline]
