@@ -1,7 +1,7 @@
 use anyhow::{Error, Result, anyhow, bail};
 use serde::{Deserialize, Serialize};
 
-use crate::ant::MAX_DIR;
+use crate::util::dir::MAX_DIR;
 
 pub const FPS_CAP: u32 = 50;
 pub const SIZE_CAP: u32 = 0x400;

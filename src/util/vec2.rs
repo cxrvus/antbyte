@@ -1,81 +1,14 @@
 use std::ops;
 
-#[derive(Debug, Default, Copy, Clone, PartialEq)]
-pub struct Vec2 {
-	pub x: i32,
-	pub y: i32,
-}
-
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Vec2u {
 	pub x: usize,
 	pub y: usize,
 }
 
-impl Vec2 {
-	pub fn unsign(self) -> Option<Vec2u> {
-		let Self { x, y } = self;
-		if x >= 0 && y >= 0 {
-			Some(Vec2u {
-				x: x as usize,
-				y: y as usize,
-			})
-		} else {
-			None
-		}
-	}
-
-	pub const CARDINAL: [Vec2; 4] = [Vec2::X, Vec2::Y, Vec2::X_NEG, Vec2::Y_NEG];
-
-	pub const PRINCIPAL: [Vec2; 8] = [
-		Vec2::X,
-		Vec2 { x: 1, y: 1 },
-		Vec2::Y,
-		Vec2 { x: -1, y: 1 },
-		Vec2::X_NEG,
-		Vec2 { x: -1, y: -1 },
-		Vec2::Y_NEG,
-		Vec2 { x: 1, y: -1 },
-	];
-
-	pub fn cardinal_char(&self) -> char {
-		let Self { x, y } = self;
-		match (x, y) {
-			(0, 0) => 'o',
-
-			(1, 0) => '>',
-			(0, 1) => 'v',
-			(-1, 0) => '<',
-			(0, -1) => '^',
-
-			_ => '*',
-		}
-	}
-
-	pub fn principal_chars(&self) -> (char, char) {
-		let Self { x, y } = self;
-		match (x, y) {
-			(0, 0) => ('<', '>'),
-			(1, 0) => ('>', '>'),
-			(0, 1) => ('\\', '/'),
-			(-1, 0) => ('<', '<'),
-			(0, -1) => ('/', '\\'),
-			(1, 1) => ('\\', '|'),
-			(-1, 1) => ('|', '/'),
-			(-1, -1) => ('|', '\\'),
-			(1, -1) => ('/', '|'),
-			_ => ('*', '*'),
-		}
-	}
-
-	pub const X: Self = Self { x: 1, y: 0 };
-	pub const Y: Self = Self { x: 0, y: 1 };
-	pub const X_NEG: Self = Self { x: -1, y: 0 };
-	pub const Y_NEG: Self = Self { x: 0, y: -1 };
-	pub const ZERO: Self = Self { x: 0, y: 0 };
-}
-
 impl Vec2u {
+	pub const ZERO: Self = Self { x: 0, y: 0 };
+
 	pub fn sign(self) -> Vec2 {
 		let Self { x, y } = self;
 		Vec2 {
@@ -83,10 +16,6 @@ impl Vec2u {
 			y: y as i32,
 		}
 	}
-
-	pub const X: Self = Self { x: 1, y: 0 };
-	pub const Y: Self = Self { x: 0, y: 1 };
-	pub const ZERO: Self = Self { x: 0, y: 0 };
 }
 
 impl ops::Add<Vec2u> for Vec2u {
@@ -100,13 +29,33 @@ impl ops::Add<Vec2u> for Vec2u {
 	}
 }
 
-impl ops::Mul<usize> for Vec2u {
+impl ops::Rem<Vec2u> for Vec2u {
 	type Output = Self;
 
-	fn mul(self, scalar: usize) -> Self::Output {
+	fn rem(self, other: Vec2u) -> Self::Output {
 		Self {
-			x: self.x * scalar,
-			y: self.y * scalar,
+			x: self.x.rem_euclid(other.x),
+			y: self.y.rem_euclid(other.y),
+		}
+	}
+}
+
+#[derive(Debug, Default, Copy, Clone, PartialEq)]
+pub struct Vec2 {
+	pub x: i32,
+	pub y: i32,
+}
+
+impl Vec2 {
+	pub fn unsign(self) -> Option<Vec2u> {
+		let Self { x, y } = self;
+		if x >= 0 && y >= 0 {
+			Some(Vec2u {
+				x: x as usize,
+				y: y as usize,
+			})
+		} else {
+			None
 		}
 	}
 }
@@ -122,28 +71,6 @@ impl ops::Add<Vec2> for Vec2 {
 	}
 }
 
-impl ops::Sub<Vec2> for Vec2 {
-	type Output = Self;
-
-	fn sub(self, other: Vec2) -> Self::Output {
-		Self {
-			x: self.x - other.x,
-			y: self.y - other.y,
-		}
-	}
-}
-
-impl ops::Mul<i32> for Vec2 {
-	type Output = Self;
-
-	fn mul(self, scalar: i32) -> Self::Output {
-		Self {
-			x: self.x * scalar,
-			y: self.y * scalar,
-		}
-	}
-}
-
 impl ops::Rem<Vec2> for Vec2 {
 	type Output = Self;
 
@@ -151,17 +78,6 @@ impl ops::Rem<Vec2> for Vec2 {
 		Self {
 			x: self.x.rem_euclid(other.x),
 			y: self.y.rem_euclid(other.y),
-		}
-	}
-}
-
-impl ops::Neg for Vec2 {
-	type Output = Self;
-
-	fn neg(self) -> Self::Output {
-		Self {
-			x: -self.x,
-			y: -self.y,
 		}
 	}
 }

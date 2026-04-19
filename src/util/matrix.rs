@@ -24,9 +24,9 @@ impl<T> Matrix<T> {
 	}
 
 	#[inline]
-	pub fn at(&self, pos: &Vec2) -> Option<&T> {
-		let Vec2u { x, y } = pos.unsign()?;
-		if self.in_bounds(pos) {
+	pub fn at(&self, pos: &Vec2u) -> Option<&T> {
+		let Vec2u { x, y } = pos;
+		if self.in_bounds(&pos.sign()) {
 			Some(&self.entries[y * self.width + x])
 		} else {
 			None
@@ -34,10 +34,9 @@ impl<T> Matrix<T> {
 	}
 
 	#[inline]
-	pub fn set_at(&mut self, pos: &Vec2, value: T) {
-		if self.in_bounds(pos) {
-			let Vec2u { x, y } = pos.unsign().unwrap();
-			self.entries[y * self.width + x] = value;
+	pub fn set_at(&mut self, pos: &Vec2u, value: T) {
+		if self.in_bounds(&pos.sign()) {
+			self.entries[pos.y * self.width + pos.x] = value;
 		} else {
 			panic!("map index is out of range: {pos:?}")
 		}

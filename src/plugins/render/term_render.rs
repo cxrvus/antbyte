@@ -147,7 +147,7 @@ impl TermRenderer {
 					string.push_str(&render_cell(cell_value, "  "));
 				}
 				(Some(ant), false) => {
-					let (char1, char2) = ant.dir_vec().principal_chars();
+					let (char1, char2) = ant.dir.as_chars();
 					let ant_chars = format!("{char1}{char2}");
 					string.push_str(&render_cell(cell_value, &ant_chars));
 				}

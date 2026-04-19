@@ -19,7 +19,7 @@ use std::{
 
 use crate::{
 	ant::{Ant, behavior::Behavior},
-	util::{matrix::Matrix, vec2::Vec2u},
+	util::{dir::Direction, matrix::Matrix, vec2::Vec2u},
 	world::config::ColorMode,
 };
 
@@ -162,7 +162,7 @@ impl World {
 		let ant = if let Some(root_id) = world.properties.behaviors.keys().min() {
 			Ant {
 				pos: start_pos,
-				dir: start_dir,
+				dir: Direction::new(start_dir),
 				behavior: *root_id,
 				..Default::default()
 			}

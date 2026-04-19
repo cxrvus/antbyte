@@ -1,15 +1,19 @@
 use crate::{
 	ant::Ant,
-	util::vec2::Vec2u,
+	util::vec2::{Vec2, Vec2u},
 	world::{Cell, World, config::BorderMode},
 };
 
 impl World {
 	pub(super) fn next_pos(&self, ant: &Ant) -> Option<Vec2u> {
-		let (pos, dir) = (ant.pos.sign(), ant.dir_vec());
+		let (pos, dir) = (ant.pos.sign(), ant.dir);
 
 		let _different_layer = false; // idea: spawning ants on different z-layers
-		let new_pos = if _different_layer { pos } else { pos + dir };
+		let new_pos = if _different_layer {
+			pos
+		} else {
+			pos + dir.as_vec()
+		};
 
 		if self.cells.in_bounds(&new_pos) {
 			Some(new_pos.unsign().unwrap())
@@ -23,20 +27,29 @@ impl World {
 					let mut wrapped_pos = new_pos % dimensions;
 
 					if let Wrap = self.config().border_mode {
-						if new_pos.x < 0 {
-							wrapped_pos.x = dimensions.x - 1;
-							wrapped_pos.y = (wrapped_pos.y - 1).rem_euclid(dimensions.y);
-						} else if new_pos.x >= dimensions.x {
-							wrapped_pos.x = 0;
-							wrapped_pos.y = (wrapped_pos.y + 1).rem_euclid(dimensions.y);
+						let (size_x, size_y) = (dimensions.x, dimensions.y);
+						let (new_x, new_y) = (new_pos.x, new_pos.y);
+						let (mut wrapped_x, mut wrapped_y) = (wrapped_pos.x, wrapped_pos.y);
+
+						if new_x < 0 {
+							wrapped_x = size_x - 1;
+							wrapped_y = (wrapped_y - 1).rem_euclid(size_y);
+						} else if new_x >= size_x {
+							wrapped_x = 0;
+							wrapped_y = (wrapped_y + 1).rem_euclid(size_y);
 						}
 
-						if new_pos.y < 0 {
-							wrapped_pos.y = dimensions.y - 1;
-							wrapped_pos.x = (wrapped_pos.x - 1).rem_euclid(dimensions.x);
-						} else if new_pos.y >= dimensions.y {
-							wrapped_pos.y = 0;
-							wrapped_pos.x = (wrapped_pos.x + 1).rem_euclid(dimensions.x);
+						if new_y < 0 {
+							wrapped_y = size_y - 1;
+							wrapped_x = (wrapped_x - 1).rem_euclid(size_x);
+						} else if new_y >= size_y {
+							wrapped_y = 0;
+							wrapped_x = (wrapped_x + 1).rem_euclid(size_x);
+						}
+
+						wrapped_pos = Vec2 {
+							x: wrapped_x,
+							y: wrapped_y,
 						}
 					}
 
@@ -48,19 +61,19 @@ impl World {
 
 	pub(super) fn flipped_next_pos(&self, ant: &Ant) -> Option<Vec2u> {
 		let mut ant = *ant;
-		ant.flip_dir();
+		ant.dir = ant.dir.inverted();
 		self.next_pos(&ant)
 	}
 
-	pub(super) fn set_cell(&mut self, ant: &Ant, value: u8, mask: u8) {
-		let old_value = self.cells.at(&ant.pos.sign()).unwrap().value;
+	pub(super) fn set_cell(&mut self, pos: &Vec2u, value: u8, mask: u8) {
+		let old_value = self.cells.at(pos).unwrap().value;
 		let new_value = value | (old_value & !mask);
-		self.set_value(&ant.pos, new_value);
+		self.set_value(pos, new_value);
 	}
 
 	#[rustfmt::skip]
 	fn set_value(&mut self, pos: &Vec2u, value: u8) {
-		let old_cell = self.cells.at(&pos.sign()).unwrap();
+		let old_cell = self.cells.at(pos).unwrap();
 
 		let expiration = match self.config().decay {
 			Some(decay) if value != 0 => {
@@ -72,23 +85,23 @@ impl World {
 
 		let cell = Cell { value, expiration, ..*old_cell };
 
-		self.cells.set_at(&pos.sign(), cell);
+		self.cells.set_at(pos, cell);
 	}
 
 
 	#[rustfmt::skip]
 	#[inline]
 	pub(super) fn occupy(&mut self, pos: &Vec2u, occupied: bool) {
-		let mut cell = self.cells.at(&pos.sign()).unwrap().clone();
+		let mut cell = self.cells.at(pos).unwrap().clone();
 		assert_ne!(cell.occupied, occupied);
 		cell.occupied = occupied;
-		self.cells.set_at(&pos.sign(), cell);
+		self.cells.set_at(pos, cell);
 	}
 
 	#[inline]
 	pub(super) fn is_occupied(&self, pos: &Vec2u) -> bool {
 		self.cells
-			.at(&pos.sign())
+			.at(pos)
 			.expect("position out of bounds: {pos:?}")
 			.occupied
 	}

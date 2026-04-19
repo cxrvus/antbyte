@@ -5,7 +5,7 @@ use crate::{
 		Ant,
 		pin::{Pin, PinValue},
 	},
-	util::vec2::Vec2u,
+	util::{dir::Direction, vec2::Vec2u},
 	world::config::BorderMode,
 };
 
@@ -35,10 +35,10 @@ impl World {
 			let input_value: u8 = match input_sub_pin.pin {
 				Time => ant.age(self.tick_count) as u8,
 				Pulse => zero_count_mask(ant.age(self.tick_count) as u8),
-				Cell => self.cells.at(&ant.pos.sign()).unwrap().value,
+				Cell => self.cells.at(&ant.pos).unwrap().value,
 				Next => self
 					.next_pos(ant)
-					.map(|pos| self.cells.at(&pos.sign()).unwrap().value)
+					.map(|pos| self.cells.at(&pos).unwrap().value)
 					.unwrap_or(0u8),
 				Mem => ant.memory,
 				Random => self.rng(),
@@ -102,9 +102,9 @@ impl World {
 		for PinValue { pin, value } in outputs {
 			match (pin, value) {
 				(Clear, 1) => clear = true,
-				(Cell, _) => self.set_cell(&ant, *value, cell_mask),
+				(Cell, _) => self.set_cell(&ant.pos, *value, cell_mask),
 
-				(AntDir, value) => ant.child_dir = *value,
+				(AntDir, value) => ant.child_dir = Direction::new(*value),
 				(AntMem, value) => ant.child_memory = *value,
 				(Mem, value) => ant.memory = *value,
 
@@ -122,7 +122,7 @@ impl World {
 				}
 
 				// move_tick
-				(Dir, _) => ant.set_dir(ant.dir + value),
+				(Dir, _) => ant.dir += Direction::new(*value),
 				(Halt, _) => halted = *value != 0,
 
 				// spawn_tick
@@ -138,7 +138,7 @@ impl World {
 		}
 
 		if clear {
-			self.set_cell(&ant, 0, !cell_mask);
+			self.set_cell(&ant.pos, 0, !cell_mask);
 		}
 
 		// move_tick
@@ -244,7 +244,7 @@ impl World {
 			let index = indexes.iter().min().unwrap();
 			let ant = self.ants[*index];
 
-			let child_dir = Ant::wrap_dir(ant.dir + ant.child_dir);
+			let child_dir = ant.dir + ant.child_dir;
 
 			let new_ant = Ant {
 				pos: target,
