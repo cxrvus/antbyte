@@ -1,18 +1,19 @@
 use crate::{
 	ant::Ant,
-	util::vec2::{Vec2, Vec2u},
+	util::{
+		dir::{Direction, MAX_DIR},
+		vec2::{Vec2, Vec2u},
+	},
 	world::{Cell, World, config::BorderMode},
 };
 
 impl World {
-	pub(super) fn next_pos(&self, ant: &Ant) -> Option<Vec2u> {
-		let (pos, dir) = (ant.pos.sign(), ant.dir);
-
+	pub(super) fn next_pos(&self, pos: Vec2u, dir: Direction) -> Option<Vec2u> {
 		let _different_layer = false; // idea: spawning ants on different z-layers
 		let new_pos = if _different_layer {
-			pos
+			pos.sign()
 		} else {
-			pos + dir.as_vec()
+			pos.sign() + dir.as_vec()
 		};
 
 		if self.cells.in_bounds(&new_pos) {
@@ -59,22 +60,14 @@ impl World {
 		}
 	}
 
-	pub(super) fn flipped_next_pos(&self, ant: &Ant) -> Option<Vec2u> {
-		let mut ant = *ant;
-		ant.dir = ant.dir.inverted();
-		self.next_pos(&ant)
-	}
-
-	pub(super) fn set_cell(&mut self, pos: &Vec2u, value: u8, mask: u8) {
+	pub(super) fn set_cell(&mut self, pos: Vec2u, value: u8, mask: u8) {
 		let old_value = self.cells.at(pos).unwrap().value;
 		let new_value = value | (old_value & !mask);
 		self.set_value(pos, new_value);
 	}
 
 	#[rustfmt::skip]
-	fn set_value(&mut self, pos: &Vec2u, value: u8) {
-		let old_cell = self.cells.at(pos).unwrap();
-
+	fn set_value(&mut self, pos: Vec2u, value: u8) {
 		let expiration = match self.config().decay {
 			Some(decay) if value != 0 => {
 				let clock = self.tick_count as u16;
@@ -83,56 +76,38 @@ impl World {
 			_ => None
 		};
 
-		let cell = Cell { value, expiration, ..*old_cell };
+		let cell = Cell { value, expiration };
 
 		self.cells.set_at(pos, cell);
 	}
 
-
-	#[rustfmt::skip]
-	#[inline]
-	pub(super) fn occupy(&mut self, pos: &Vec2u, occupied: bool) {
-		let mut cell = self.cells.at(pos).unwrap().clone();
-		assert_ne!(cell.occupied, occupied);
-		cell.occupied = occupied;
-		self.cells.set_at(pos, cell);
-	}
-
-	#[inline]
-	pub(super) fn is_occupied(&self, pos: &Vec2u) -> bool {
-		self.cells
-			.at(pos)
-			.expect("position out of bounds: {pos:?}")
-			.occupied
-	}
-
-	pub(super) fn get_ant_index(&self, pos: &Vec2u) -> Option<usize> {
-		if self.is_occupied(pos) {
-			Some(
-				self.ants
-					.iter()
-					.position(|ant| ant.pos == *pos)
-					.expect("couldn't find cached ant at {pos:?}"),
-			)
+	pub(super) fn resolve_conflict(&self, ants: Vec<Ant>) -> Ant {
+		if ants.len() == 1 {
+			ants[0]
 		} else {
-			None
+			let mut max_luck = 0;
+			let mut winner = ants[0];
+
+			for ant in ants {
+				if self.luck(&ant) > max_luck {
+					winner = ant;
+					max_luck = self.luck(&ant);
+				}
+			}
+
+			winner
 		}
 	}
 
-	pub(super) fn spawn(&mut self, ant: Ant) {
-		if !self.is_occupied(&ant.pos) {
-			self.ants.push(ant);
-
-			self.occupy(&ant.pos, true);
-		}
+	fn luck(&self, ant: &Ant) -> u8 {
+		let hashed_tick = hash_u32(self.tick_count);
+		(hashed_tick ^ ant.dir.get()) % MAX_DIR
 	}
+}
 
-	pub(super) fn kill(&mut self, index: usize) {
-		let ant = self.ants[index];
-		if ant.is_alive() {
-			self.ants[index].die();
-
-			self.occupy(&ant.pos, false);
-		}
-	}
+fn hash_u32(x: u32) -> u8 {
+	let x = x ^ (x >> 16);
+	let x = x.wrapping_mul(0x45d9f3b);
+	let x = x ^ (x >> 16);
+	(x & 0xFF) as u8
 }

@@ -20,6 +20,11 @@ impl Direction {
 	}
 
 	#[inline]
+	pub fn get(&self) -> u8 {
+		self.0
+	}
+
+	#[inline]
 	pub fn inverted(&self) -> Self {
 		Self::new(self.0 + INV_DIR)
 	}

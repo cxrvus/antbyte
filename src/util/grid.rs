@@ -24,7 +24,7 @@ impl<T> Grid<T> {
 	}
 
 	#[inline]
-	pub fn at(&self, pos: &Vec2u) -> Option<&T> {
+	pub fn at(&self, pos: Vec2u) -> Option<&T> {
 		let Vec2u { x, y } = pos;
 		if self.in_bounds(&pos.sign()) {
 			Some(&self.entries[(y * self.width + x) as usize])
@@ -34,7 +34,7 @@ impl<T> Grid<T> {
 	}
 
 	#[inline]
-	pub fn set_at(&mut self, pos: &Vec2u, value: T) {
+	pub fn set_at(&mut self, pos: Vec2u, value: T) {
 		if self.in_bounds(&pos.sign()) {
 			self.entries[(pos.y * self.width + pos.x) as usize] = value;
 		} else {

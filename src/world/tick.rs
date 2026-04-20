@@ -22,26 +22,26 @@ impl World {
 		self.event_in = self.event_out;
 		self.event_out = 0;
 
-		// tick ants
+		// tick ants (sync)
 		let image = self.state.clone();
-		let all_outputs: Vec<_> = image.ants.iter().map(|ant| self.get_output(ant)).collect();
 
-		for (i, p) in all_outputs.iter().enumerate() {
-			self.sync_tick(i, p);
+		let all_outputs: Vec<_> = image
+			.ants
+			.iter()
+			.map(|(pos, ant)| (pos, self.get_output(ant, *pos)))
+			.collect();
+
+		for (pos, outputs) in all_outputs {
+			self.sync_tick(*pos, &outputs);
 		}
 
+		// tick ants (async)
 		self.kill_tick();
 		self.move_tick();
 		self.spawn_tick();
 		self.die_tick();
 
-		// reset async actions
-		self.async_actions = Default::default();
-
-		// remove dead ants
-		self.ants.retain(|ant| ant.is_alive());
-
-		// idea: optimize decay
+		// todo: optimize decay
 		// cell decay
 		if self.config().decay.is_some() {
 			self.cell_decay();

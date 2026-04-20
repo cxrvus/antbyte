@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::{
 	ant::{
@@ -18,7 +18,7 @@ fn zero_count_mask(x: u8) -> u8 {
 }
 
 impl World {
-	pub(super) fn get_output(&mut self, ant: &Ant) -> Vec<PinValue> {
+	pub(super) fn get_output(&mut self, ant: &Ant, pos: Vec2u) -> Vec<PinValue> {
 		let Behavior {
 			inputs,
 			outputs,
@@ -35,16 +35,16 @@ impl World {
 			let input_value: u8 = match input_sub_pin.pin {
 				Time => ant.age(self.tick_count) as u8,
 				Pulse => zero_count_mask(ant.age(self.tick_count) as u8),
-				Cell => self.cells.at(&ant.pos).unwrap().value,
+				Cell => self.cells.at(pos).unwrap().value,
 				Next => self
-					.next_pos(ant)
-					.map(|pos| self.cells.at(&pos).unwrap().value)
+					.next_pos(pos, ant.dir)
+					.map(|pos| self.cells.at(pos).unwrap().value)
 					.unwrap_or(0u8),
 				Mem => ant.memory,
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
-				Collide => match self.next_pos(ant) {
-					Some(pos) => self.is_occupied(&pos).into(),
+				Collide => match self.next_pos(pos, ant.dir) {
+					Some(pos) => self.ants.get(&pos).is_some().into(),
 					None => 1,
 				},
 				Event => self.event_in,
@@ -87,8 +87,8 @@ impl World {
 		output_values
 	}
 
-	pub(super) fn sync_tick(&mut self, ant_index: usize, outputs: &Vec<PinValue>) {
-		let mut ant = self.ants[ant_index];
+	pub(super) fn sync_tick(&mut self, pos: Vec2u, outputs: &Vec<PinValue>) {
+		let mut ant = self.ants[&pos];
 
 		let cell_mask = self
 			.get_behavior(ant.behavior)
@@ -97,12 +97,11 @@ impl World {
 			.cell_mask();
 
 		let mut clear = false;
-		let mut halted = false;
 
 		for PinValue { pin, value } in outputs {
 			match (pin, value) {
 				(Clear, 1) => clear = true,
-				(Cell, _) => self.set_cell(&ant.pos, *value, cell_mask),
+				(Cell, _) => self.set_cell(pos, *value, cell_mask),
 
 				(AntDir, value) => ant.child_dir = Direction::new(*value),
 				(AntMem, value) => ant.child_memory = *value,
@@ -111,54 +110,48 @@ impl World {
 				(Send, value) => self.event_out |= value,
 				(ExtOut, value) => self.ext_output.push(*value),
 
-				// these are deferred to async ticks...
+				// deferred to async ticks...
+
 				// kill_tick
-				(Kill, 1) => {
-					if let Some(pos) = self.next_pos(&ant)
-						&& let Some(index) = self.get_ant_index(&pos)
-					{
-						self.async_actions.kills.push(index);
-					}
-				}
+				(Kill, value) => ant.kill = *value != 0,
 
 				// move_tick
+				(Halt, _) => ant.halt = *value != 0,
 				(Dir, _) => ant.dir += Direction::new(*value),
-				(Halt, _) => halted = *value != 0,
 
 				// spawn_tick
-				(AntSpawn, _) if *value != 0 => {
-					ant.child_behavior = *value;
-					self.async_actions.spawns.push(ant_index);
-				}
+				(AntSpawn, _) => ant.child_behavior = *value,
 
 				// die_tick
-				(Die, 1) => self.async_actions.deaths.push(ant_index),
+				(Die, 1) => ant.die = true,
 				_ => {}
 			};
 		}
 
 		if clear {
-			self.set_cell(&ant.pos, 0, !cell_mask);
+			self.set_cell(pos, 0, !cell_mask);
 		}
 
-		// move_tick
-		if !halted {
-			self.async_actions.moves.push(ant_index);
-		}
-
-		self.ants[ant_index] = ant;
+		self.ants.insert(pos, ant);
 	}
 
 	pub(super) fn kill_tick(&mut self) {
-		for index in self.async_actions.clone().kills {
-			self.kill(index);
+		let mut kills = BTreeSet::new();
+
+		for (pos, ant) in &self.ants.clone() {
+			if ant.kill
+				&& let Some(next_pos) = self.next_pos(*pos, ant.dir)
+				&& self.ants.contains_key(&next_pos)
+			{
+				kills.insert(next_pos);
+			}
 		}
+
+		self.ants.retain(|pos, _| !kills.contains(pos));
 	}
 
 	pub(super) fn die_tick(&mut self) {
-		for index in self.async_actions.clone().deaths {
-			self.kill(index);
-		}
+		self.ants.retain(|_, ant| !ant.die);
 	}
 
 	pub(super) fn move_tick(&mut self) {
@@ -185,8 +178,6 @@ impl World {
 		}
 
 		for (target, indexes) in claims {
-			// idea: customize conflict resolution strategy in config
-
 			// conflict resolution
 			let index = indexes.iter().min().unwrap();
 			let mut ant = self.ants[*index];
@@ -214,40 +205,35 @@ impl World {
 	const ANT_LIMIT: u32 = 0x100;
 
 	pub(super) fn spawn_tick(&mut self) {
-		let mut claims = BTreeMap::<Vec2u, Vec<usize>>::new();
+		let mut claims = BTreeMap::<Vec2u, Vec<Ant>>::new();
 
-		for index in &self.async_actions.spawns {
-			let ant = self.ants[*index];
-
-			if !ant.is_alive() {
+		for (pos, ant) in &self.ants {
+			if ant.child_behavior == 0 {
 				continue;
-			} else if let Some(target) = self.flipped_next_pos(&ant)
+			} else if let Some(target) = self.next_pos(*pos, ant.dir.inverted())
 				&& self.get_behavior(ant.child_behavior).is_some()
 			{
 				// direction gets flipped, so that the new ant
 				// spawns behind the old one and not in front of it
-				claims.entry(target).or_default().push(*index);
+				claims.entry(target).or_default().push(*ant);
 			}
 		}
 
 		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
 
-		for (target, indexes) in claims {
+		for (target_pos, ants) in claims {
 			if self.ants.len() >= ant_limit {
 				break;
-			} else if self.is_occupied(&target) {
+			} else if self.ants.contains_key(&target_pos) {
 				continue;
 			}
 
-			// idea: customize conflict resolution strategy in config
 			// conflict resolution
-			let index = indexes.iter().min().unwrap();
-			let ant = self.ants[*index];
+			let ant = self.resolve_conflict(ants);
 
 			let child_dir = ant.dir + ant.child_dir;
 
 			let new_ant = Ant {
-				pos: target,
 				behavior: ant.child_behavior,
 				memory: ant.child_memory,
 				dir: child_dir,
@@ -255,7 +241,7 @@ impl World {
 				..Default::default()
 			};
 
-			self.spawn(new_ant);
+			self.ants.insert(target_pos, new_ant);
 		}
 	}
 }

@@ -47,25 +47,15 @@ impl Cells {}
 #[derive(Debug, Clone, Default)]
 pub struct Cell {
 	pub value: u8,
-	pub occupied: bool,
 	pub expiration: Option<u16>,
-}
-
-#[derive(Clone, Default)]
-struct AsyncActions {
-	kills: Vec<usize>,
-	moves: Vec<usize>,
-	spawns: Vec<usize>,
-	deaths: Vec<usize>,
 }
 
 #[derive(Clone)]
 pub struct WorldState {
 	rng: StdRng,
 	tick_count: u32,
-	async_actions: AsyncActions,
 	pub cells: Cells,
-	pub ants: Vec<Ant>,
+	pub ants: BTreeMap<Vec2u, Ant>,
 	pub event_in: u8,
 	pub event_out: u8,
 	pub ext_input: u8,
@@ -77,9 +67,8 @@ impl WorldState {
 		Self {
 			rng,
 			tick_count: 0,
-			async_actions: Default::default(),
 			cells: Grid::new(width, height),
-			ants: vec![],
+			ants: Default::default(),
 			event_in: 0,
 			event_out: 0,
 			ext_input: 0,
@@ -93,7 +82,7 @@ impl WorldState {
 	}
 
 	#[inline]
-	pub fn ants(&self) -> &Vec<Ant> {
+	pub fn ants(&self) -> &BTreeMap<Vec2u, Ant> {
 		&self.ants
 	}
 
@@ -165,7 +154,6 @@ impl World {
 
 		let ant = if let Some(root_id) = world.properties.behaviors.keys().min() {
 			Ant {
-				pos: start_pos,
 				dir: Direction::new(start_dir),
 				behavior: *root_id,
 				..Default::default()
@@ -174,7 +162,7 @@ impl World {
 			bail!("can't run a world with no ants defined")
 		};
 
-		world.spawn(ant);
+		world.ants.insert(start_pos, ant);
 
 		Ok(world)
 	}
