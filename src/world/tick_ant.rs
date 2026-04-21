@@ -155,67 +155,94 @@ impl World {
 	}
 
 	pub(super) fn move_tick(&mut self) {
-		let mut claims = BTreeMap::<Vec2u, Vec<usize>>::new();
-		let mut despawns = vec![];
+		let mut source: BTreeMap<Vec2u, Ant> = self
+			.ants
+			.iter()
+			.filter(|(_, ant)| !ant.halt)
+			.map(|(pos, ant)| (*pos, *ant))
+			.collect();
 
-		for index in &self.async_actions.moves.clone() {
-			let ant = self.ants[*index];
+		let mut result: BTreeMap<Vec2u, Ant> = self
+			.ants
+			.iter()
+			.filter(|(_, ant)| ant.halt)
+			.map(|(pos, ant)| (*pos, *ant))
+			.collect();
 
-			if !ant.is_alive() {
-				continue;
-			}
+		let queue: Vec<Vec2u> = source.keys().cloned().collect();
 
-			if let Some(target) = self.next_pos(&ant) {
-				self.occupy(&ant.pos, false);
-				claims.entry(target).or_default().push(*index);
-			} else if let BorderMode::Despawn = self.config().border_mode {
-				despawns.push(*index);
-			}
-		}
+		for pos in queue {
+			let mut ant = match source.get(&pos) {
+				Some(ant) => *ant,
+				None => continue,
+			};
 
-		for index in despawns {
-			self.kill(index);
-		}
+			let mut stack = vec![pos];
 
-		for (target, indexes) in claims {
-			// conflict resolution
-			let index = indexes.iter().min().unwrap();
-			let mut ant = self.ants[*index];
+			let mut cycle_pos: Option<Vec2u> = None;
 
-			// conflict losers return to their original positions
-			for other_index in &indexes {
-				if other_index != index {
-					let other_pos = &self.ants[*other_index].pos.clone();
-					self.occupy(other_pos, true);
+			while let Some(pos) = stack.pop() {
+				if let Some(cycle_pos_value) = cycle_pos {
+					if pos == cycle_pos_value {
+						cycle_pos = None;
+					}
+				} else if let Some(target_pos) = self.next_pos(pos, ant.dir) {
+					if result.contains_key(&target_pos) {
+						// target pos is occupied in result => can't move
+						source.remove(&pos);
+						result.insert(pos, ant);
+					}
+
+					if source.contains_key(&target_pos) {
+						// target pos is occupied in source
+						if stack.contains(&target_pos) {
+							// cycle => resolve all ants up to target pos
+							cycle_pos = Some(target_pos);
+						} else {
+							// chain => recurse
+							stack.push(target_pos);
+						}
+					} else {
+						// target pos is free in source
+						// resolve conflict if free pos is contested
+						let neighbors = self.get_contestants(source, target_pos);
+						let (winner, losers) = self.resolve_conflict(neighbors);
+						// TODO: CONTINUE: get positions instead of ants
+
+						for loser in losers {}
+
+						ant = winner;
+					}
+				} else {
+					// target pos is outside of grid => die
+					source.remove(&pos);
+					continue;
 				}
-			}
 
-			// conflict winner moves to target position
-			if !self.is_occupied(&target) {
-				self.occupy(&target, true);
-				ant.pos = target;
-				self.ants[*index] = ant;
-			} else {
-				// conflict winner also returns to their original positions
-				self.occupy(&ant.pos, true);
+				// move
+				let target_pos = self.next_pos(pos, ant.dir).unwrap();
+				source.remove(&pos);
+				result.insert(target_pos, ant);
 			}
 		}
+
+		self.ants = result;
 	}
 
 	const ANT_LIMIT: u32 = 0x100;
 
 	pub(super) fn spawn_tick(&mut self) {
-		let mut claims = BTreeMap::<Vec2u, Vec<Ant>>::new();
+		let mut claims = BTreeMap::<Vec2u, Vec<Vec2u>>::new();
 
 		for (pos, ant) in &self.ants {
 			if ant.child_behavior == 0 {
 				continue;
-			} else if let Some(target) = self.next_pos(*pos, ant.dir.inverted())
+			} else if let Some(target_pos) = self.next_pos(*pos, ant.dir.inverted())
 				&& self.get_behavior(ant.child_behavior).is_some()
 			{
 				// direction gets flipped, so that the new ant
 				// spawns behind the old one and not in front of it
-				claims.entry(target).or_default().push(*ant);
+				claims.entry(target_pos).or_default().push(target_pos);
 			}
 		}
 
@@ -229,7 +256,7 @@ impl World {
 			}
 
 			// conflict resolution
-			let ant = self.resolve_conflict(ants);
+			let (ant, _) = self.resolve_conflict(ants);
 
 			let child_dir = ant.dir + ant.child_dir;
 
