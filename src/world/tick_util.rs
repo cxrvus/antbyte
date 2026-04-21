@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use crate::{
 	ant::Ant,
 	util::{
-		dir::{Direction, MAX_DIR},
+		dir::Direction,
 		vec2::{Vec2, Vec2u},
 	},
 	world::{Cell, World, config::BorderMode},
@@ -91,34 +91,33 @@ impl World {
 	/// gets positions of neighboring ants, that target position
 	pub(super) fn get_contestants(
 		&self,
-		all_ants: BTreeMap<Vec2u, Ant>,
+		all_ants: &BTreeMap<Vec2u, Ant>,
 		target_pos: Vec2u,
 	) -> Vec<Vec2u> {
 		let mut positions = vec![];
 
-		for dir in 0..MAX_DIR {
-			if let Some(source_pos) =
-				(target_pos.sign() + Direction::new(dir).inverted().as_vec()).unsign()
+		for dir in 0..Direction::MAX {
+			if let Some(source_pos) = self.next_pos(target_pos, Direction::new(dir).inverted())
 				&& all_ants.contains_key(&source_pos)
 			{
-				positions.push(*&source_pos);
+				positions.push(source_pos);
 			}
 		}
 
 		positions
 	}
 
-	/// returns positions of conflict winning ant and of conflict losers
-	pub(super) fn resolve_conflict(&self, positions: Vec<Vec2u>) -> (Vec2u, Vec<Vec2u>) {
-		if positions.len() == 1 {
-			(positions[0], vec![])
+	/// returns index of conflict winning ant
+	pub(super) fn get_winner(&self, ants: &[Ant]) -> usize {
+		if ants.len() == 1 {
+			0
 		} else {
 			let mut max_luck = 0;
 			let mut winner_index = 0;
 
-			for (i, pos) in positions.iter().enumerate() {
+			for (i, ant) in ants.iter().enumerate() {
 				// CONTINUE
-				let luck = self.luck(pos);
+				let luck = ant.luck(self.tick_count);
 
 				if luck > max_luck {
 					max_luck = luck;
@@ -126,22 +125,7 @@ impl World {
 				}
 			}
 
-			let mut ants = positions;
-			let winner = ants.remove(winner_index);
-
-			(winner, ants)
+			winner_index
 		}
 	}
-
-	fn luck(&self, ant: &Ant) -> u8 {
-		let hashed_tick = hash_u32(self.tick_count);
-		(hashed_tick ^ ant.dir.get()) % MAX_DIR
-	}
-}
-
-fn hash_u32(x: u32) -> u8 {
-	let x = x ^ (x >> 16);
-	let x = x.wrapping_mul(0x45d9f3b);
-	let x = x ^ (x >> 16);
-	(x & 0xFF) as u8
 }

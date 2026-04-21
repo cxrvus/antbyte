@@ -44,7 +44,7 @@ impl World {
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
 				Collide => match self.next_pos(pos, ant.dir) {
-					Some(pos) => self.ants.get(&pos).is_some().into(),
+					Some(pos) => self.ants.contains_key(&pos).into(),
 					None => 1,
 				},
 				Event => self.event_in,
@@ -172,7 +172,7 @@ impl World {
 		let queue: Vec<Vec2u> = source.keys().cloned().collect();
 
 		for pos in queue {
-			let mut ant = match source.get(&pos) {
+			let ant = match source.get(&pos) {
 				Some(ant) => *ant,
 				None => continue,
 			};
@@ -183,6 +183,11 @@ impl World {
 
 			while let Some(pos) = stack.pop() {
 				if let Some(cycle_pos_value) = cycle_pos {
+					// pop stack until cycle is resolved
+					let target_pos = self.next_pos(pos, ant.dir).unwrap();
+					let ant = source.remove(&pos).unwrap();
+					result.insert(target_pos, ant);
+
 					if pos == cycle_pos_value {
 						cycle_pos = None;
 					}
@@ -200,29 +205,43 @@ impl World {
 							cycle_pos = Some(target_pos);
 						} else {
 							// chain => recurse
+							stack.push(pos);
 							stack.push(target_pos);
 						}
 					} else {
 						// target pos is free in source
 						// resolve conflict if free pos is contested
-						let neighbors = self.get_contestants(source, target_pos);
-						let (winner, losers) = self.resolve_conflict(neighbors);
-						// TODO: CONTINUE: get positions instead of ants
+						let contestant_positions = self.get_contestants(&source, target_pos);
 
-						for loser in losers {}
+						let contestants = contestant_positions
+							.iter()
+							.map(|pos| source[pos])
+							.collect::<Vec<_>>();
 
-						ant = winner;
+						let winner_index = self.get_winner(&contestants);
+
+						for (i, pos) in contestant_positions.iter().enumerate() {
+							if i == winner_index {
+								// winning ant can move
+								source.remove(pos);
+								result.insert(target_pos, contestants[i]);
+							} else {
+								// losing ants can't move
+								let loser = source.remove(pos).unwrap();
+								result.insert(*pos, loser);
+							}
+						}
 					}
 				} else {
-					// target pos is outside of grid => die
+					// target pos is outside of grid
 					source.remove(&pos);
-					continue;
-				}
 
-				// move
-				let target_pos = self.next_pos(pos, ant.dir).unwrap();
-				source.remove(&pos);
-				result.insert(target_pos, ant);
+					match self.config().border_mode {
+						BorderMode::Collide => _ = result.insert(pos, ant),
+						BorderMode::Despawn => {}
+						_ => panic!("no target position, despite border mode guaranteeing one"),
+					};
+				}
 			}
 		}
 
@@ -242,21 +261,27 @@ impl World {
 			{
 				// direction gets flipped, so that the new ant
 				// spawns behind the old one and not in front of it
-				claims.entry(target_pos).or_default().push(target_pos);
+				claims.entry(target_pos).or_default().push(*pos);
 			}
 		}
 
 		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
 
-		for (target_pos, ants) in claims {
+		for (target_pos, contestant_positions) in claims {
 			if self.ants.len() >= ant_limit {
 				break;
 			} else if self.ants.contains_key(&target_pos) {
 				continue;
 			}
 
+			let contestants = contestant_positions
+				.iter()
+				.map(|pos| self.ants[pos])
+				.collect::<Vec<_>>();
+
 			// conflict resolution
-			let (ant, _) = self.resolve_conflict(ants);
+			let winner_index = self.get_winner(&contestants);
+			let ant = contestants[winner_index];
 
 			let child_dir = ant.dir + ant.child_dir;
 

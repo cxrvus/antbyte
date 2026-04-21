@@ -2,21 +2,21 @@ use std::ops;
 
 use crate::util::vec2::Vec2;
 
-pub const MAX_DIR: u8 = 8;
-pub const INV_DIR: u8 = 4;
-
 #[derive(Clone, Copy, Default)]
 pub struct Direction(u8);
 
 impl Direction {
+	pub const MAX: u8 = 8;
+	pub const INV: u8 = 4;
+
 	#[inline]
 	pub fn new(value: u8) -> Self {
-		Self(value % MAX_DIR)
+		Self(value % Self::MAX)
 	}
 
 	#[inline]
 	pub fn set(&mut self, value: u8) {
-		self.0 = value % MAX_DIR;
+		self.0 = value % Self::MAX;
 	}
 
 	#[inline]
@@ -26,7 +26,7 @@ impl Direction {
 
 	#[inline]
 	pub fn inverted(&self) -> Self {
-		Self::new(self.0 + INV_DIR)
+		Self::new(self.0 + Self::INV)
 	}
 
 	pub fn as_vec(&self) -> Vec2 {

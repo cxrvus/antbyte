@@ -1,7 +1,7 @@
 use anyhow::{Error, Result, anyhow, bail};
 use serde::{Deserialize, Serialize};
 
-use crate::util::{dir::MAX_DIR, vec2::Coord};
+use crate::util::{dir::Direction, vec2::Coord};
 
 pub const FPS_CAP: u32 = 50;
 pub const SPEED_CAP: u32 = 0x2000;
@@ -146,6 +146,8 @@ impl WorldConfig {
 		Self::non_zero(self.width as u32, "width")?;
 		Self::cap(self.height as u32, "height", SIZE_CAP as u32)?;
 		Self::cap(self.width as u32, "width", SIZE_CAP as u32)?;
+
+		const MAX_DIR: u8 = Direction::MAX;
 
 		if self.start_dir > MAX_DIR {
 			bail!("starting direction must not exceed {MAX_DIR}")
