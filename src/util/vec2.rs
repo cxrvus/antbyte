@@ -1,5 +1,7 @@
 use std::ops;
 
+use crate::util::hash_u32;
+
 pub type Coord = u16;
 
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -17,6 +19,11 @@ impl Vec2u {
 			x: x as i32,
 			y: y as i32,
 		}
+	}
+
+	pub fn hash(self) -> u32 {
+		// idea: better interlacing
+		hash_u32((self.y as u32) << 16 & (self.x as u32))
 	}
 }
 

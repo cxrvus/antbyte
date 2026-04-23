@@ -162,7 +162,7 @@ impl World {
 
 	pub(super) fn move_tick(&mut self) {
 		let mut source = self.ants.clone();
-		let mut result = BTreeMap::<Vec2u, Ant>::new();
+		let mut result = BTreeMap::new();
 
 		while let Some((pos, ant)) = source.pop_first() {
 			let mut stack = vec![(pos, ant)];
@@ -257,27 +257,26 @@ impl World {
 	pub(super) fn spawn_tick(&mut self) {
 		let mut claims = BTreeMap::<Vec2u, Vec<Vec2u>>::new();
 
+		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
+
+		if self.ants.len() >= ant_limit {
+			return;
+		}
+
 		for (pos, ant) in &self.ants {
 			if ant.child_behavior == 0 {
 				continue;
 			} else if let Some(target_pos) = self.next_pos(*pos, ant.dir.inverted())
 				&& self.get_behavior(ant.child_behavior).is_some()
 			{
-				// direction gets flipped, so that the new ant
-				// spawns behind the old one and not in front of it
 				claims.entry(target_pos).or_default().push(*pos);
 			}
 		}
 
-		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
+		let mut new_ants = BTreeMap::new();
 
+		// resolve target position conflicts
 		for (target_pos, contestant_positions) in claims {
-			if self.ants.len() >= ant_limit {
-				break;
-			} else if self.ants.contains_key(&target_pos) {
-				continue;
-			}
-
 			let contestants = contestant_positions
 				.iter()
 				.map(|pos| self.ants[pos])
@@ -289,6 +288,7 @@ impl World {
 				.find(|ant| self.luck_check(&contestants, ant))
 				.unwrap();
 
+			// spawn
 			let child_dir = ant.dir + ant.child_dir;
 
 			let new_ant = Ant {
@@ -299,7 +299,9 @@ impl World {
 				..Default::default()
 			};
 
-			self.ants.insert(target_pos, new_ant);
+			new_ants.insert(target_pos, new_ant);
 		}
+
+		self.ants.extend(new_ants);
 	}
 }

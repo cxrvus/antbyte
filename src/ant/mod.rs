@@ -1,7 +1,7 @@
 pub mod pin;
 pub mod sub_pin;
 
-use crate::util::dir::Direction;
+use crate::util::{dir::Direction, hash_u32};
 
 pub mod behavior;
 
@@ -29,14 +29,7 @@ impl Ant {
 
 	#[inline]
 	pub fn luck(&self, current_tick: u32) -> u8 {
-		let hashed_tick = hash_u32(current_tick);
+		let hashed_tick = (hash_u32(current_tick) & 0xFF) as u8;
 		(hashed_tick ^ self.dir.get()) % Direction::MAX
 	}
-}
-
-fn hash_u32(x: u32) -> u8 {
-	let x = x ^ (x >> 16);
-	let x = x.wrapping_mul(0x45d9f3b);
-	let x = x ^ (x >> 16);
-	(x & 0xFF) as u8
 }
