@@ -12,6 +12,10 @@ pub struct Args {
 	/// Path to the .ant file to execute
 	pub path: PathBuf,
 
+	/// Hide Title Banner
+	#[arg(short = 'T', long)]
+	pub hide_title: bool,
+
 	/// Step through the simulation, waiting for input after each frame (FPS = 0)
 	#[arg(short = 'S', long)]
 	stepped: bool,
@@ -31,10 +35,6 @@ pub struct Args {
 	/// Configure settings
 	#[arg(short, long)]
 	cfg: Option<String>,
-
-	/// Hide Title Banner
-	#[arg(short = 'T', long)]
-	hide_title: bool,
 
 	/// Hide Ants
 	#[arg(short = 'A', long)]
@@ -80,7 +80,6 @@ impl Args {
 			}
 		}
 
-		if self.hide_title { config.hide_title = true; }
 		if self.hide_ants { config.hide_ants = true; }
 		if self.stepped { config.fps = None; }
 		if self.instant { config.speed = None; }

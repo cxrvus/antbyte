@@ -1,15 +1,15 @@
 use crate::util::vec2::*;
 
 #[derive(Debug, Clone)]
-pub struct Matrix<T> {
-	pub width: usize,
-	pub height: usize,
+pub struct Grid<T> {
+	pub width: Coord,
+	pub height: Coord,
 	pub entries: Vec<T>,
 }
 
-impl<T> Matrix<T> {
-	pub fn with_values(width: usize, height: usize, values: Vec<T>) -> Self {
-		assert_eq!(values.len(), width * height);
+impl<T> Grid<T> {
+	pub fn with_values(width: Coord, height: Coord, values: Vec<T>) -> Self {
+		assert_eq!(values.len(), (width * height) as usize);
 
 		Self {
 			width,
@@ -24,68 +24,71 @@ impl<T> Matrix<T> {
 	}
 
 	#[inline]
-	pub fn at(&self, pos: &Vec2) -> Option<&T> {
-		let Vec2u { x, y } = pos.unsign()?;
-		if self.in_bounds(pos) {
-			Some(&self.entries[y * self.width + x])
+	pub fn at(&self, pos: Position) -> Option<&T> {
+		let Position { x, y } = pos;
+		if self.in_bounds(&pos.sign()) {
+			Some(&self.entries[(y * self.width + x) as usize])
 		} else {
 			None
 		}
 	}
 
 	#[inline]
-	pub fn set_at(&mut self, pos: &Vec2, value: T) {
-		if self.in_bounds(pos) {
-			let Vec2u { x, y } = pos.unsign().unwrap();
-			self.entries[y * self.width + x] = value;
+	pub fn set_at(&mut self, pos: Position, value: T) {
+		if self.in_bounds(&pos.sign()) {
+			self.entries[(pos.y * self.width + pos.x) as usize] = value;
 		} else {
 			panic!("map index is out of range: {pos:?}")
 		}
 	}
 
-	pub fn get_pos(&self, i: usize) -> Option<Vec2u> {
+	pub fn get_pos(&self, i: usize) -> Option<Position> {
 		self.entries.get(i)?;
-		Some(Vec2u {
-			x: (i % self.width),
-			y: (i / self.width),
+		Some(Position {
+			x: (i % self.width as usize) as Coord,
+			y: (i / self.width as usize) as Coord,
 		})
 	}
 
-	pub fn dimensions(&self) -> Vec2u {
-		Vec2u {
+	pub fn dimensions(&self) -> Position {
+		Position {
 			x: self.width,
 			y: self.height,
 		}
 	}
 
 	pub fn get_row(&self, i: usize) -> Option<Vec<&T>> {
-		if i >= self.height {
+		let (width, height) = (self.width as usize, self.height as usize);
+
+		if i >= height {
 			None
 		} else {
-			let start = i * self.width;
-			let end = (i + 1) * self.width;
+			let start = i * width;
+			let end = (i + 1) * width;
 			let row = self.entries[start..end].iter().collect::<Vec<&T>>();
 			Some(row)
 		}
 	}
 
 	pub fn get_col(&self, i: usize) -> Option<Vec<&T>> {
-		if i >= self.width {
+		let (width, height) = (self.width as usize, self.height as usize);
+
+		if i >= width {
 			None
 		} else {
-			let col = (0..self.height)
-				.map(|row| &self.entries[row * self.width + i])
+			let col = (0..height)
+				.map(|row| &self.entries[row * width + i])
 				.collect::<Vec<&T>>();
 			Some(col)
 		}
 	}
 }
 
-impl<T> Matrix<T>
+impl<T> Grid<T>
 where
 	T: Default,
 {
-	pub fn new(width: usize, height: usize) -> Self {
+	pub fn new(width: Coord, height: Coord) -> Self {
 		Self {
 			width,
 			height,
@@ -94,11 +97,11 @@ where
 	}
 }
 
-impl<T> Matrix<T>
+impl<T> Grid<T>
 where
 	T: Default + PartialEq,
 {
-	pub fn find_all(&self, target: T) -> Vec<Vec2u> {
+	pub fn find_all(&self, target: T) -> Vec<Position> {
 		self.entries
 			.iter()
 			.enumerate()
@@ -112,8 +115,8 @@ where
 mod tests {
 	use super::*;
 
-	fn create_test_matrix() -> Matrix<i32> {
-		Matrix {
+	fn create_test_grid() -> Grid<i32> {
+		Grid {
 			width: 3,
 			height: 3,
 			entries: vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -122,7 +125,7 @@ mod tests {
 
 	#[test]
 	fn test_get_row() {
-		let m = create_test_matrix();
+		let m = create_test_grid();
 
 		let row0 = m.get_row(0).unwrap();
 		assert_eq!(row0, vec![&1, &2, &3]);
@@ -138,7 +141,7 @@ mod tests {
 
 	#[test]
 	fn test_get_col() {
-		let m = create_test_matrix();
+		let m = create_test_grid();
 
 		let col0 = m.get_col(0).unwrap();
 		assert_eq!(col0, vec![&1, &4, &7]);
@@ -150,34 +153,5 @@ mod tests {
 		assert_eq!(col2, vec![&3, &6, &9]);
 
 		assert!(m.get_col(3).is_none());
-	}
-}
-
-#[derive(Debug)]
-pub struct ProxyMatrix {
-	pub width: usize,
-	pub height: usize,
-	pub string: String,
-}
-
-impl ProxyMatrix {
-	pub fn convert<T>(self, parser: fn(String) -> Vec<T>) -> Matrix<T> {
-		Matrix {
-			width: self.width,
-			height: self.height,
-			entries: parser(self.string),
-		}
-	}
-}
-
-impl From<&str> for ProxyMatrix {
-	fn from(value: &str) -> Self {
-		let lines = value.trim().lines();
-
-		Self {
-			height: lines.clone().count(),
-			width: lines.clone().next().unwrap().len(),
-			string: lines.collect::<Vec<&str>>().join(""),
-		}
 	}
 }

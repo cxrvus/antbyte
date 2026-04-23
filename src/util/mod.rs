@@ -1,4 +1,5 @@
-pub mod matrix;
+pub mod dir;
+pub mod grid;
 pub mod vec2;
 
 #[inline]
@@ -15,4 +16,11 @@ pub fn find_dupe<T: PartialEq + Clone>(vec: &[T]) -> Option<T> {
 	}
 
 	None
+}
+
+pub fn hash_u32(x: u32) -> u32 {
+	let x = x ^ (x >> 16);
+	let x = x.wrapping_mul(0x45d9f3b);
+
+	x ^ (x >> 16)
 }

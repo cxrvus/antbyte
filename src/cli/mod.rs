@@ -42,7 +42,8 @@ pub fn run() -> Result<()> {
 
 	if args.preview {
 		let WorldConfig { width, height, .. } = properties.config;
-		let preview_str = "\\/\n".repeat(height) + "|_" + &">>".repeat(width) + "\n\n";
+		let preview_str =
+			"\\/\n".repeat(height as usize) + "|_" + &">>".repeat(width as usize) + "\n\n";
 		print!("{preview_str}");
 	} else if args.debug {
 		// logging happens on compilation
@@ -51,13 +52,8 @@ pub fn run() -> Result<()> {
 			.context("config-arg error!")?;
 		let mut world = World::new(properties.clone()).context("world error!")?;
 
-		let renderer: Box<dyn Renderer> = if args.raw {
-			Box::new(DefaultRenderer)
-		} else {
-			Box::new(TermRenderer::new(&world))
-		};
-
-		let ext_input = Box::new(TermInput);
+		let term_renderer = TermRenderer::new(&world, args.hide_title);
+		let term_input = TermInput;
 
 		let mut plugins = PluginSet {
 			renderer,

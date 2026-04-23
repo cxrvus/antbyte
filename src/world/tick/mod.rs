@@ -1,4 +1,7 @@
 use crate::world::World;
+mod tick_async;
+mod tick_sync;
+mod tick_util;
 
 impl World {
 	pub fn frame_tick(&mut self) -> bool {
@@ -18,24 +21,36 @@ impl World {
 	pub fn tick(&mut self) -> bool {
 		self.tick_count += 1;
 
+		// events
 		self.event_in = self.event_out;
 		self.event_out = 0;
 
-		for i in 0..self.ants.len() {
-			if self.ants[i].is_alive() {
-				self.tick_ant(i);
-			}
+		// tick ants (sync)
+		let image = self.state.clone();
+
+		let all_outputs: Vec<_> = image
+			.ants
+			.iter()
+			.map(|(pos, ant)| (pos, self.get_output(ant, *pos)))
+			.collect();
+
+		for (pos, outputs) in all_outputs {
+			self.sync_tick(*pos, &outputs);
 		}
 
-		// idea: optimize defragmentation
-		self.ants.iter_mut().for_each(|ant| ant.grow_up());
-		self.ants.retain(|ant| ant.is_alive());
+		// tick ants (async)
+		self.kill_tick();
+		self.move_tick();
+		self.spawn_tick();
+		self.die_tick();
 
-		// idea: optimize decay
+		// todo: optimize decay
+		// cell decay
 		if self.config().decay.is_some() {
 			self.cell_decay();
 		}
 
+		// end world if conditions are met
 		let no_ants = self.ants.is_empty();
 
 		let tick_overflow = self

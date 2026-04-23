@@ -26,7 +26,7 @@ impl World {
 		if self.config().looping {
 			let properties = self.properties.clone();
 			loop {
-				// todo: add break condition
+				// idea: add break condition
 				let mut world = World::new(properties.clone())?;
 				world.run_once(plugins);
 			}

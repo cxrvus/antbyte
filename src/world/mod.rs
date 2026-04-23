@@ -2,8 +2,6 @@ pub mod file_compiler;
 pub mod run;
 
 mod tick;
-mod tick_ant;
-mod tick_util;
 
 pub mod config;
 use config::{StartingPos, WorldConfig};
@@ -18,8 +16,13 @@ use std::{
 };
 
 use crate::{
-	ant::{Ant, AntStatus, behavior::Behavior},
-	util::{matrix::Matrix, vec2::Vec2u},
+	ant::{Ant, behavior::Behavior},
+	util::{
+		dir::Direction,
+		grid::Grid,
+		vec2::{Coord, Position},
+	},
+	world::config::ColorMode,
 };
 
 #[cfg_attr(test, derive(ts_rs::TS))]
@@ -35,22 +38,24 @@ pub struct WorldProperties {
 	pub config: WorldConfig,
 }
 
-pub type Cells = Matrix<Cell>;
+pub type Cells = Grid<Cell>;
 
 impl Cells {}
 
 #[derive(Debug, Clone, Default)]
 pub struct Cell {
 	pub value: u8,
-	pub occupied: bool,
 	pub expiration: Option<u16>,
 }
 
+pub type Ants = BTreeMap<Position, Ant>;
+
+#[derive(Clone)]
 pub struct WorldState {
 	rng: StdRng,
 	tick_count: u32,
 	pub cells: Cells,
-	pub ants: Vec<Ant>,
+	pub ants: Ants,
 	pub event_in: u8,
 	pub event_out: u8,
 	pub ext_input: u8,
@@ -58,17 +63,45 @@ pub struct WorldState {
 }
 
 impl WorldState {
-	pub fn new(rng: StdRng, width: usize, height: usize) -> Self {
+	pub fn new(rng: StdRng, width: Coord, height: Coord) -> Self {
 		Self {
 			rng,
 			tick_count: 0,
-			cells: Matrix::new(width, height),
-			ants: vec![],
+			cells: Grid::new(width, height),
+			ants: Default::default(),
 			event_in: 0,
 			event_out: 0,
 			ext_input: 0,
 			ext_output: vec![],
 		}
+	}
+
+	#[inline]
+	pub fn tick_count(&self) -> u32 {
+		self.tick_count
+	}
+
+	#[inline]
+	pub fn ants(&self) -> &Ants {
+		&self.ants
+	}
+
+	#[inline]
+	fn rng(&mut self) -> u8 {
+		self.rng.random()
+	}
+
+	fn cell_decay(&mut self) {
+		let clock = self.tick_count as u16;
+
+		self.cells
+			.entries
+			.iter_mut()
+			.filter(|cell| cell.expiration == Some(clock))
+			.for_each(|cell| {
+				cell.value = 0;
+				cell.expiration = None;
+			});
 	}
 }
 
@@ -100,103 +133,53 @@ impl World {
 
 		let mut world = Self { properties, state };
 
+		let half_width = (width - 1) / 2;
+		let half_height = (height - 1) / 2;
+
 		let start_pos = match start_pos {
-			StartingPos::TopLeft => Vec2u::ZERO,
-			StartingPos::Top => Vec2u {
-				x: height / 2 - 1,
+			StartingPos::TopLeft => Position::ZERO,
+			StartingPos::Top => Position {
+				x: half_height,
 				y: 0,
 			},
-			StartingPos::Left => Vec2u {
+			StartingPos::Left => Position {
 				x: 0,
-				y: height / 2 - 1,
+				y: half_height,
 			},
-			StartingPos::Center => Vec2u {
-				x: width / 2 - 1,
-				y: height / 2 - 1,
+			StartingPos::Center => Position {
+				x: half_width,
+				y: half_height,
 			},
 		};
 
-		let ant = if world.properties.behaviors.contains_key(&0) {
-			// queen ant
-
-			let behavior = &world.properties.behaviors[&0];
-			let queen_pins = [behavior.inputs.clone(), behavior.outputs.clone()].concat();
-
-			if let Some(forbidden) = queen_pins.iter().find(|x| !x.pin.definition().queen) {
-				bail!("forbidden pin for queen ant: {:?}", forbidden.pin);
-			}
-
+		let ant = if let Some(root_id) = world.properties.behaviors.keys().min() {
 			Ant {
-				pos: start_pos,
-				dir: start_dir,
-				status: AntStatus::Alive,
-				..Default::default()
-			}
-		} else if world.properties.behaviors.contains_key(&1) {
-			// regular ant
-
-			Ant {
-				pos: start_pos,
-				dir: start_dir,
-				behavior: 1,
-				status: AntStatus::Alive,
+				dir: Direction::new(start_dir),
+				behavior: *root_id,
 				..Default::default()
 			}
 		} else {
-			bail!("no entry point: could not find `ant main` or other ant with ID = 0 or 1")
+			bail!("can't run a world with no ants defined")
 		};
 
-		world.spawn(ant);
+		world.ants.insert(start_pos, ant);
 
 		Ok(world)
 	}
 
-	#[rustfmt::skip]
-	pub fn set_value(&mut self, pos: &Vec2u, value: u8) {
-		let old_cell = self.cells.at(&pos.sign()).unwrap();
-
-		let expiration = match self.config().decay {
-			Some(decay) if value != 0 => {
-				let clock = self.tick_count as u16;
-				Some(clock.wrapping_add(decay))
-			}
-			_ => None
-		};
-
-		let cell = Cell { value, expiration, ..*old_cell };
-
-		self.cells.set_at(&pos.sign(), cell);
-	}
-
-	#[rustfmt::skip]
-	#[inline]
-	pub(super) fn occupy(&mut self, pos: &Vec2u, occupied: bool) {
-		let old_cell = self.cells.at(&pos.sign()).unwrap();
-		let cell = Cell { occupied, ..*old_cell };
-		self.cells.set_at(&pos.sign(), cell);
-	}
-
-	fn cell_decay(&mut self) {
-		let clock = self.tick_count as u16;
-
-		self.cells
-			.entries
-			.iter_mut()
-			.filter(|cell| cell.expiration == Some(clock))
-			.for_each(|cell| {
-				cell.value = 0;
-				cell.expiration = None;
-			});
+	pub fn adjusted_color(&self, color: u8) -> u8 {
+		match self.config().color_mode {
+			ColorMode::Binary => match color {
+				0 => 0x0,
+				_ => 0xf,
+			},
+			ColorMode::RGBI => color,
+		}
 	}
 
 	#[inline]
 	pub fn name(&self) -> Option<String> {
 		self.properties.name.clone()
-	}
-
-	#[inline]
-	pub fn tick_count(&self) -> u32 {
-		self.tick_count
 	}
 
 	#[inline]
@@ -210,18 +193,8 @@ impl World {
 	}
 
 	#[inline]
-	pub fn ants(&self) -> &Vec<Ant> {
-		&self.ants
-	}
-
-	#[inline]
 	fn get_behavior(&self, id: u8) -> Option<&Behavior> {
 		self.properties.behaviors.get(&id)
-	}
-
-	#[inline]
-	fn rng(&mut self) -> u8 {
-		self.rng.random()
 	}
 }
 

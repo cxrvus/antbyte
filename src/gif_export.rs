@@ -13,7 +13,7 @@ use std::{
 };
 
 const MAX_FRAMES: u32 = 0x400;
-const MAX_PX: usize = 0x200;
+const MAX_PX: u16 = 0x200;
 
 impl World {
 	pub fn gif_export(self, source: &Path, target: Option<PathBuf>) -> Result<()> {
@@ -35,8 +35,8 @@ impl World {
 		let max_dim = (*width).max(*height);
 		#[rustfmt::skip]
 		let scale = if max_dim <= MAX_PX { MAX_PX / max_dim } else { 1 }.max(1);
-		let scaled_width = (width * scale) as u16;
-		let scaled_height = (height * scale) as u16;
+		let scaled_width = width * scale;
+		let scaled_height = height * scale;
 
 		let fps = fps.unwrap_or(30).clamp(1, 30);
 		let delay = (100.0 / fps as f32).round() as u16;
@@ -65,18 +65,18 @@ impl World {
 		Ok(())
 	}
 
-	fn gif_render(&mut self, encoder: &mut Encoder<&mut File>, scale: usize, delay: u16) {
+	fn gif_render(&mut self, encoder: &mut Encoder<&mut File>, scale: u16, delay: u16) {
 		let WorldConfig { width, height, .. } = self.config();
 
 		let scaled_width = width * scale;
 		let scaled_height = height * scale;
 
-		let mut scaled_pixels = Vec::with_capacity(scaled_width * scaled_height);
+		let mut scaled_pixels = Vec::with_capacity(scaled_width as usize * scaled_height as usize);
 
 		for y in 0..*height {
-			let mut scaled_row = Vec::with_capacity(scaled_width);
+			let mut scaled_row = Vec::with_capacity(scaled_width as usize);
 			for x in 0..*width {
-				let pixel = self.cells.entries[y * width + x].value;
+				let pixel = self.cells.entries[(y * width + x) as usize].value;
 				for _ in 0..scale {
 					scaled_row.push(pixel);
 				}
@@ -88,8 +88,8 @@ impl World {
 		}
 
 		let frame = Frame {
-			width: scaled_width as u16,
-			height: scaled_height as u16,
+			width: scaled_width,
+			height: scaled_height,
 			buffer: scaled_pixels.into(),
 			delay,
 			..Frame::default()

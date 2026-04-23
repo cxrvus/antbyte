@@ -2,7 +2,7 @@ use super::Renderer;
 use crate::{
 	plugins::Plugin,
 	util::sleep,
-	world::{World, config::WorldConfig},
+	world::{World, WorldState, config::WorldConfig},
 };
 
 use std::{
@@ -36,6 +36,7 @@ pub struct TermRenderer {
 	last_frame: Instant,
 	frame_ms: Option<u32>,
 	cfg_sleep: Option<u32>,
+	hide_title: bool,
 }
 
 impl Plugin for TermRenderer {
@@ -80,7 +81,7 @@ impl Renderer for TermRenderer {
 type CellRenderer = Box<dyn Fn(u8, &str) -> String + 'static>;
 
 impl TermRenderer {
-	pub fn new(world: &World) -> Self {
+	pub fn new(world: &World, hide_title: bool) -> Self {
 		let frame_ms = match world.config().fps {
 			Some(0) => panic!(),
 			Some(fps) => Some(1000 / fps),
@@ -91,6 +92,7 @@ impl TermRenderer {
 			last_frame: Instant::now(),
 			cfg_sleep: world.config().sleep,
 			frame_ms,
+			hide_title,
 		}
 	}
 
@@ -108,13 +110,11 @@ impl TermRenderer {
 		};
 
 		let world_str = self.render_cells(world, &cell_renderer);
-		let tick_str = world.tick_str();
-		let ext_out_str = world.ext_out_str();
 
 		// print
 		clear_screen();
 
-		if !world.config().hide_title {
+		if !self.hide_title {
 			print_title();
 		}
 
@@ -122,12 +122,8 @@ impl TermRenderer {
 			println!("{name}\n");
 		}
 
-		// TODO: move this to world fn metadata_str()
 		println!("\n\n{world_str}\n\n");
-		println!("{tick_str}");
-		println!("K: {:02x}", world.ext_input);
-		println!("X: {ext_out_str}");
-		println!("\n\n");
+		println!("{}", world.metadata_str());
 
 		io::stdout().flush().unwrap();
 	}
@@ -137,24 +133,23 @@ impl TermRenderer {
 		let mut string = String::new();
 
 		for (i, cell) in cells.entries.iter().enumerate() {
-			if i % cells.width == 0 {
+			if i % cells.width as usize == 0 {
 				string.push('\n');
 			}
 
 			let pos = cells.get_pos(i).unwrap();
-			let ant = world
-				.ants()
-				.iter()
-				.find(|ant| !ant.is_queen() && ant.pos == pos);
+			let ant = world.ants().get(&pos);
+
+			let cell_value = world.adjusted_color(cell.value);
 
 			match (ant, world.config().hide_ants) {
 				(None, _) | (_, true) => {
-					string.push_str(&render_cell(cell.value, "  "));
+					string.push_str(&render_cell(cell_value, "  "));
 				}
 				(Some(ant), false) => {
-					let (char1, char2) = ant.dir_vec().principal_chars();
+					let (char1, char2) = ant.dir.as_chars();
 					let ant_chars = format!("{char1}{char2}");
-					string.push_str(&render_cell(cell.value, &ant_chars));
+					string.push_str(&render_cell(cell_value, &ant_chars));
 				}
 			}
 		}
@@ -198,7 +193,7 @@ fn color_codes(value: u8) -> (u8, u8) {
 	(bg_color, fg_color)
 }
 
-impl World {
+impl WorldState {
 	#[inline]
 	pub fn tick_str(&self) -> String {
 		format!("T: {:0>8}", self.tick_count())
@@ -217,5 +212,12 @@ impl World {
 		} else {
 			ext_out_str
 		}
+	}
+
+	pub fn metadata_str(&self) -> String {
+		let tick_str = self.tick_str();
+		let ext_out_str = self.ext_out_str();
+
+		format!("{tick_str}\nK: {:02x}\nX: {ext_out_str}\n", self.ext_input)
 	}
 }

@@ -1,68 +1,35 @@
 pub mod pin;
 pub mod sub_pin;
 
-use crate::util::vec2::{Vec2, Vec2u};
+use crate::util::{dir::Direction, hash_u32};
 
 pub mod behavior;
 
-#[derive(Clone, Copy, Default)]
-pub enum AntStatus {
-	#[default]
-	Newborn,
-	Alive,
-	Dead,
-}
-
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Debug)]
 pub struct Ant {
-	pub pos: Vec2u,
-	/// principle direction - number between 0 and 7
-	pub dir: u8,
-	pub behavior: u8,
-	pub memory: u8,
-	pub status: AntStatus,
-	pub age: u32,
-}
+	pub birth_tick: u32,
 
-pub const MAX_DIR: u8 = 8;
+	pub behavior: u8,
+	pub child_behavior: u8,
+	pub dir: Direction,
+	pub child_dir: Direction,
+	pub memory: u8,
+	pub child_memory: u8,
+
+	pub halt: bool,
+	pub die: bool,
+	pub kill: bool,
+}
 
 impl Ant {
-	pub fn is_queen(&self) -> bool {
-		self.behavior == 0
+	#[inline]
+	pub fn age(&self, current_tick: u32) -> u32 {
+		current_tick.wrapping_sub(self.birth_tick + 1)
 	}
 
 	#[inline]
-	pub fn is_alive(&self) -> bool {
-		!matches!(self.status, AntStatus::Dead)
-	}
-
-	pub fn grow_up(&mut self) {
-		if matches!(self.status, AntStatus::Newborn) {
-			self.status = AntStatus::Alive
-		}
-	}
-
-	pub fn die(&mut self) {
-		self.status = AntStatus::Dead
-	}
-
-	pub fn dir_vec(&self) -> Vec2 {
-		debug_assert!(self.dir < 8);
-		Vec2::PRINCIPAL[self.dir as usize]
-	}
-
-	#[inline]
-	pub fn set_dir(&mut self, dir: u8) {
-		self.dir = Self::wrap_dir(dir);
-	}
-
-	#[inline]
-	pub fn flip_dir(&mut self) {
-		self.set_dir(self.dir + 4);
-	}
-
-	#[inline]
-	pub fn wrap_dir(dir: u8) -> u8 {
-		dir % MAX_DIR
+	pub fn luck(&self, current_tick: u32) -> u8 {
+		let hashed_tick = (hash_u32(current_tick) & 0xFF) as u8;
+		(hashed_tick ^ self.dir.get()) % Direction::MAX
 	}
 }

@@ -1,11 +1,11 @@
 use anyhow::{Error, Result, anyhow, bail};
 use serde::{Deserialize, Serialize};
 
-use crate::ant::MAX_DIR;
+use crate::util::{dir::Direction, vec2::Coord};
 
 pub const FPS_CAP: u32 = 50;
-pub const SIZE_CAP: u32 = 0x400;
 pub const SPEED_CAP: u32 = 0x2000;
+pub const SIZE_CAP: Coord = 0x400;
 
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -14,9 +14,9 @@ pub const SPEED_CAP: u32 = 0x2000;
 pub struct WorldConfig {
 	// ## Core
 	/// width in pixels
-	pub width: usize,
+	pub width: Coord,
 	/// height in pixels
-	pub height: usize,
+	pub height: Coord,
 	/// simulated ticks per frame (defaults to 1)
 	pub speed: Option<u32>,
 	/// simulation tick limit
@@ -32,7 +32,6 @@ pub struct WorldConfig {
 	pub start_dir: u8,
 	/// max number of ants before additional spawning gets blocked
 	pub ant_limit: Option<u32>,
-	pub color_mode: ColorMode,
 	pub noise_seed: Option<u32>,
 	pub description: String,
 
@@ -41,15 +40,15 @@ pub struct WorldConfig {
 	// ### Renderer
 	/// rendered frames per second
 	pub fps: Option<u32>,
-	/// don't render title banner
-	pub hide_title: bool, // TODO: move to renderer
 	/// don't render ants
 	pub hide_ants: bool,
 	/// amount of ms to sleep for after end of simulation, i.e. between loops
 	pub sleep: Option<u32>,
 	/// 16 ASCII characters to render cells, start is value = 0
-	/// can  also set to empty string to get a default ASCII palette
+	/// can also set to empty string to get a default ASCII palette
 	pub ascii: Option<String>,
+	/// changes how colors are rendered
+	pub color_mode: ColorMode,
 
 	// ### External Input
 	/// 1 to 8 characters as key bindings, representing K0-K7 in ascending order
@@ -74,7 +73,6 @@ impl Default for WorldConfig {
 			description: "".into(),
 
 			fps: Some(FPS_CAP),
-			hide_title: false,
 			hide_ants: false,
 			sleep: Some(200),
 			ascii: None,
@@ -144,17 +142,19 @@ impl TryFrom<String> for ColorMode {
 
 impl WorldConfig {
 	pub fn validate(&self) -> Result<()> {
-		Self::non_zero(self.height, "height")?;
-		Self::non_zero(self.width, "width")?;
-		Self::cap(self.height, "height", SIZE_CAP)?;
-		Self::cap(self.width, "width", SIZE_CAP)?;
+		Self::non_zero(self.height as u32, "height")?;
+		Self::non_zero(self.width as u32, "width")?;
+		Self::cap(self.height as u32, "height", SIZE_CAP as u32)?;
+		Self::cap(self.width as u32, "width", SIZE_CAP as u32)?;
+
+		const MAX_DIR: u8 = Direction::MAX;
 
 		if self.start_dir > MAX_DIR {
 			bail!("starting direction must not exceed {MAX_DIR}")
 		}
 
 		Self::cap(
-			self.start_dir as usize,
+			self.start_dir as u32,
 			"start direction",
 			(MAX_DIR - 1) as u32,
 		)?;
@@ -183,17 +183,17 @@ impl WorldConfig {
 
 	#[inline]
 	#[rustfmt::skip]
-	fn cap(number: usize, property: &str, max: u32) -> Result<()> {
-		if number > max as usize { bail!("[{property}] must not exceed {max}") } Ok(())
+	fn cap(number: u32, property: &str, max: u32) -> Result<()> {
+		if number > max { bail!("[{property}] must not exceed {max}") } Ok(())
 	}
 
 	fn cap_opt(number: Option<u32>, property: &str, max: u32) -> Result<()> {
-		Self::cap(number.unwrap_or_default() as usize, property, max)
+		Self::cap(number.unwrap_or_default(), property, max)
 	}
 
 	#[inline]
 	#[rustfmt::skip]
-	fn non_zero(number: usize, property: &str) -> Result<()> {
+	fn non_zero(number: u32, property: &str) -> Result<()> {
 		if number == 0 { bail!("[{property}] must be greater than 0"); } Ok(())
 	}
 }
