@@ -71,7 +71,7 @@ impl World {
 		let scaled_width = width * scale;
 		let scaled_height = height * scale;
 
-		let mut scaled_pixels = Vec::with_capacity((scaled_width * scaled_height) as usize);
+		let mut scaled_pixels = Vec::with_capacity(scaled_width as usize * scaled_height as usize);
 
 		for y in 0..*height {
 			let mut scaled_row = Vec::with_capacity(scaled_width as usize);
