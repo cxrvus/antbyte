@@ -2,13 +2,13 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::{
 	ant::Ant,
-	util::vec2::Vec2u,
+	util::vec2::Position,
 	world::{Ants, World, config::BorderMode},
 };
 
 enum MoveAction {
 	Stay,
-	Move(Vec2u),
+	Move(Position),
 	Nop,
 }
 
@@ -40,7 +40,7 @@ impl World {
 			let mut stack = vec![(pos, ant)];
 
 			// used to resolve cycles
-			let mut cycle_pos: Option<Vec2u> = None;
+			let mut cycle_pos: Option<Position> = None;
 
 			while let Some((pos, ant)) = stack.pop() {
 				let action = if ant.halt {
@@ -116,7 +116,7 @@ impl World {
 			// reached end of ant chain
 		}
 
-		fn commit(result: &mut Ants, pos: Vec2u, ant: Ant) {
+		fn commit(result: &mut Ants, pos: Position, ant: Ant) {
 			let prev = result.insert(pos, ant);
 			assert!(prev.is_none(), "tried to occupy occupied space")
 		}
@@ -127,7 +127,7 @@ impl World {
 	const ANT_LIMIT: u32 = 0x100;
 
 	pub(super) fn spawn_tick(&mut self) {
-		let mut claims = BTreeMap::<Vec2u, Vec<Vec2u>>::new();
+		let mut claims = BTreeMap::<Position, Vec<Position>>::new();
 
 		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
 

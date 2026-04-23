@@ -20,7 +20,7 @@ use crate::{
 	util::{
 		dir::Direction,
 		grid::Grid,
-		vec2::{Coord, Vec2u},
+		vec2::{Coord, Position},
 	},
 	world::config::ColorMode,
 };
@@ -48,7 +48,7 @@ pub struct Cell {
 	pub expiration: Option<u16>,
 }
 
-pub type Ants = BTreeMap<Vec2u, Ant>;
+pub type Ants = BTreeMap<Position, Ant>;
 
 #[derive(Clone)]
 pub struct WorldState {
@@ -137,16 +137,16 @@ impl World {
 		let half_height = (height - 1) / 2;
 
 		let start_pos = match start_pos {
-			StartingPos::TopLeft => Vec2u::ZERO,
-			StartingPos::Top => Vec2u {
+			StartingPos::TopLeft => Position::ZERO,
+			StartingPos::Top => Position {
 				x: half_height,
 				y: 0,
 			},
-			StartingPos::Left => Vec2u {
+			StartingPos::Left => Position {
 				x: 0,
 				y: half_height,
 			},
-			StartingPos::Center => Vec2u {
+			StartingPos::Center => Position {
 				x: half_width,
 				y: half_height,
 			},

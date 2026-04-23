@@ -2,13 +2,13 @@ use crate::{
 	ant::Ant,
 	util::{
 		dir::Direction,
-		vec2::{Vec2, Vec2u},
+		vec2::{Position, Vec2},
 	},
 	world::{Ants, Cell, World, config::BorderMode},
 };
 
 impl World {
-	pub(super) fn next_pos(&self, pos: Vec2u, dir: Direction) -> Option<Vec2u> {
+	pub(super) fn next_pos(&self, pos: Position, dir: Direction) -> Option<Position> {
 		let _different_layer = false; // idea: spawning ants on different z-layers
 		let new_pos = if _different_layer {
 			pos.sign()
@@ -24,7 +24,7 @@ impl World {
 			match self.config().border_mode {
 				Collide | Despawn => None,
 				Cycle | Wrap => {
-					let dimensions = Vec2u {
+					let dimensions = Position {
 						x: self.config().width,
 						y: self.config().height,
 					}
@@ -65,14 +65,14 @@ impl World {
 		}
 	}
 
-	pub(super) fn set_cell(&mut self, pos: Vec2u, value: u8, mask: u8) {
+	pub(super) fn set_cell(&mut self, pos: Position, value: u8, mask: u8) {
 		let old_value = self.cells.at(pos).unwrap().value;
 		let new_value = value | (old_value & !mask);
 		self.set_value(pos, new_value);
 	}
 
 	#[rustfmt::skip]
-	fn set_value(&mut self, pos: Vec2u, value: u8) {
+	fn set_value(&mut self, pos: Position, value: u8) {
 		let expiration = match self.config().decay {
 			Some(decay) if value != 0 => {
 				let clock = self.tick_count as u16;
@@ -87,7 +87,7 @@ impl World {
 	}
 
 	/// get positions of neighboring ants about to move to target
-	pub(super) fn get_contestants(&self, source: &Ants, target_pos: Vec2u) -> Vec<Vec2u> {
+	pub(super) fn get_contestants(&self, source: &Ants, target_pos: Position) -> Vec<Position> {
 		let mut positions = vec![];
 
 		for dir in 0..Direction::MAX {

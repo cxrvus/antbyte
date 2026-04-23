@@ -4,7 +4,7 @@ use crate::{
 		behavior::Behavior,
 		pin::{Pin, PinValue},
 	},
-	util::{dir::Direction, vec2::Vec2u},
+	util::{dir::Direction, vec2::Position},
 	world::World,
 };
 
@@ -14,7 +14,7 @@ fn zero_count_mask(x: u8) -> u8 {
 
 use Pin::*;
 impl World {
-	pub(super) fn get_output(&mut self, ant: &Ant, pos: Vec2u) -> Vec<PinValue> {
+	pub(super) fn get_output(&mut self, ant: &Ant, pos: Position) -> Vec<PinValue> {
 		let Behavior {
 			inputs,
 			outputs,
@@ -83,7 +83,7 @@ impl World {
 		output_values
 	}
 
-	pub(super) fn sync_tick(&mut self, pos: Vec2u, outputs: &Vec<PinValue>) {
+	pub(super) fn sync_tick(&mut self, pos: Position, outputs: &Vec<PinValue>) {
 		let mut ant = self.ants[&pos];
 
 		let cell_mask = self

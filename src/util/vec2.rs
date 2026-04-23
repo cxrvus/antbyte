@@ -5,12 +5,12 @@ use crate::util::hash_u32;
 pub type Coord = u16;
 
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Vec2u {
+pub struct Position {
 	pub x: Coord,
 	pub y: Coord,
 }
 
-impl Vec2u {
+impl Position {
 	pub const ZERO: Self = Self { x: 0, y: 0 };
 
 	pub fn sign(self) -> Vec2 {
@@ -27,10 +27,10 @@ impl Vec2u {
 	}
 }
 
-impl ops::Add<Vec2u> for Vec2u {
+impl ops::Add<Position> for Position {
 	type Output = Self;
 
-	fn add(self, other: Vec2u) -> Self::Output {
+	fn add(self, other: Position) -> Self::Output {
 		Self {
 			x: self.x + other.x,
 			y: self.y + other.y,
@@ -38,10 +38,10 @@ impl ops::Add<Vec2u> for Vec2u {
 	}
 }
 
-impl ops::Rem<Vec2u> for Vec2u {
+impl ops::Rem<Position> for Position {
 	type Output = Self;
 
-	fn rem(self, other: Vec2u) -> Self::Output {
+	fn rem(self, other: Position) -> Self::Output {
 		Self {
 			x: self.x.rem_euclid(other.x),
 			y: self.y.rem_euclid(other.y),
@@ -56,10 +56,10 @@ pub struct Vec2 {
 }
 
 impl Vec2 {
-	pub fn unsign(self) -> Option<Vec2u> {
+	pub fn unsign(self) -> Option<Position> {
 		let Self { x, y } = self;
 		if x >= 0 && y >= 0 {
-			Some(Vec2u {
+			Some(Position {
 				x: x as Coord,
 				y: y as Coord,
 			})

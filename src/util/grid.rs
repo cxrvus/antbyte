@@ -24,8 +24,8 @@ impl<T> Grid<T> {
 	}
 
 	#[inline]
-	pub fn at(&self, pos: Vec2u) -> Option<&T> {
-		let Vec2u { x, y } = pos;
+	pub fn at(&self, pos: Position) -> Option<&T> {
+		let Position { x, y } = pos;
 		if self.in_bounds(&pos.sign()) {
 			Some(&self.entries[(y * self.width + x) as usize])
 		} else {
@@ -34,7 +34,7 @@ impl<T> Grid<T> {
 	}
 
 	#[inline]
-	pub fn set_at(&mut self, pos: Vec2u, value: T) {
+	pub fn set_at(&mut self, pos: Position, value: T) {
 		if self.in_bounds(&pos.sign()) {
 			self.entries[(pos.y * self.width + pos.x) as usize] = value;
 		} else {
@@ -42,16 +42,16 @@ impl<T> Grid<T> {
 		}
 	}
 
-	pub fn get_pos(&self, i: usize) -> Option<Vec2u> {
+	pub fn get_pos(&self, i: usize) -> Option<Position> {
 		self.entries.get(i)?;
-		Some(Vec2u {
+		Some(Position {
 			x: (i % self.width as usize) as Coord,
 			y: (i / self.width as usize) as Coord,
 		})
 	}
 
-	pub fn dimensions(&self) -> Vec2u {
-		Vec2u {
+	pub fn dimensions(&self) -> Position {
+		Position {
 			x: self.width,
 			y: self.height,
 		}
@@ -101,7 +101,7 @@ impl<T> Grid<T>
 where
 	T: Default + PartialEq,
 {
-	pub fn find_all(&self, target: T) -> Vec<Vec2u> {
+	pub fn find_all(&self, target: T) -> Vec<Position> {
 		self.entries
 			.iter()
 			.enumerate()

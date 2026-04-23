@@ -1,6 +1,6 @@
 pub mod term_render;
 
-use crate::{plugins::Plugin, util::vec2::Vec2u, world::World};
+use crate::{plugins::Plugin, util::vec2::Position, world::World};
 
 pub trait Renderer: Plugin {
 	fn render(&mut self, world: &World);
@@ -15,7 +15,7 @@ impl Renderer for DefaultRenderer {
 
 		for y in 0..cells.height {
 			for x in 0..cells.width {
-				let cell_value = cells.at(Vec2u { x, y }).unwrap().value;
+				let cell_value = cells.at(Position { x, y }).unwrap().value;
 				let cell_value = world.adjusted_color(cell_value);
 				print!("{:02x}", cell_value);
 			}
