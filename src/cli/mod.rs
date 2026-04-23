@@ -10,7 +10,11 @@ use clap::{self, Parser};
 
 use crate::{
 	parser::compiler::LogConfig,
-	plugins::{PluginSet, ext::term_input::TermInput, render::term_render::TermRenderer},
+	plugins::{
+		PluginSet,
+		ext::term_input::TermInput,
+		render::{DefaultRenderer, Renderer, term_render::TermRenderer},
+	},
 	world::{World, config::WorldConfig, file_compiler::compile_world},
 };
 
@@ -52,8 +56,8 @@ pub fn run() -> Result<()> {
 		let term_input = TermInput;
 
 		let mut plugins = PluginSet {
-			renderer: Box::new(term_renderer),
-			ext_input: Box::new(term_input),
+			renderer,
+			ext_input,
 			..Default::default()
 		};
 

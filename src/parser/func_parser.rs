@@ -15,6 +15,8 @@ impl Parser {
 			let target_id = self.next_token();
 			if let Token::Number(target_id) = target_id {
 				target_id as u8
+			} else if let Token::Bit(target_id) = target_id {
+				target_id as u8
 			} else {
 				bail!("expected Ant target ID after '='");
 			}
