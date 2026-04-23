@@ -23,7 +23,7 @@ pub fn run() -> Result<()> {
 	{
 		use antbyte::{
 			parser::compiler::LogConfig,
-			plugins::render::term_render::TermRenderer,
+			plugins::{PluginSet, render::term_render::TermRenderer},
 			world::{World, file_compiler::compile_world},
 		};
 
@@ -40,7 +40,11 @@ pub fn run() -> Result<()> {
 		let properties = compile_world(&path, &LogConfig::default(), &None)?;
 		let mut world = World::new(properties.clone()).context("world error!")?;
 
-		let mut renderer = TermRenderer::new(&world);
-		world.run(&mut renderer).context("world error!")
+		let renderer = TermRenderer::new(&world, true);
+		let mut plugins = PluginSet {
+			renderer: Box::new(renderer),
+			..Default::default()
+		};
+		world.run(&mut plugins).context("world error!")
 	}
 }
