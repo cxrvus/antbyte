@@ -50,12 +50,14 @@ pub struct Cell {
 	pub expiration: Option<u16>,
 }
 
+pub type Ants = BTreeMap<Vec2u, Ant>;
+
 #[derive(Clone)]
 pub struct WorldState {
 	rng: StdRng,
 	tick_count: u32,
 	pub cells: Cells,
-	pub ants: BTreeMap<Vec2u, Ant>,
+	pub ants: Ants,
 	pub event_in: u8,
 	pub event_out: u8,
 	pub ext_input: u8,
@@ -82,7 +84,7 @@ impl WorldState {
 	}
 
 	#[inline]
-	pub fn ants(&self) -> &BTreeMap<Vec2u, Ant> {
+	pub fn ants(&self) -> &Ants {
 		&self.ants
 	}
 

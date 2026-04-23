@@ -1,12 +1,10 @@
-use std::collections::BTreeMap;
-
 use crate::{
 	ant::Ant,
 	util::{
 		dir::Direction,
 		vec2::{Vec2, Vec2u},
 	},
-	world::{Cell, World, config::BorderMode},
+	world::{Ants, Cell, World, config::BorderMode},
 };
 
 impl World {
@@ -89,11 +87,7 @@ impl World {
 	}
 
 	/// get positions of neighboring ants about to move to target
-	pub(super) fn get_contestants(
-		&self,
-		source: &BTreeMap<Vec2u, Ant>,
-		target_pos: Vec2u,
-	) -> Vec<Vec2u> {
+	pub(super) fn get_contestants(&self, source: &Ants, target_pos: Vec2u) -> Vec<Vec2u> {
 		let mut positions = vec![];
 
 		for dir in 0..Direction::MAX {

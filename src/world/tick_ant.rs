@@ -6,7 +6,7 @@ use crate::{
 		pin::{Pin, PinValue},
 	},
 	util::{dir::Direction, vec2::Vec2u},
-	world::config::BorderMode,
+	world::{Ants, config::BorderMode},
 };
 
 use super::{Behavior, World};
@@ -162,7 +162,7 @@ impl World {
 
 	pub(super) fn move_tick(&mut self) {
 		let mut source = self.ants.clone();
-		let mut result = BTreeMap::new();
+		let mut result = Ants::new();
 
 		while let Some((pos, ant)) = source.pop_first() {
 			let mut stack = vec![(pos, ant)];
@@ -244,7 +244,7 @@ impl World {
 			// reached end of ant chain
 		}
 
-		fn commit(result: &mut BTreeMap<Vec2u, Ant>, pos: Vec2u, ant: Ant) {
+		fn commit(result: &mut Ants, pos: Vec2u, ant: Ant) {
 			let prev = result.insert(pos, ant);
 			assert!(prev.is_none(), "tried to occupy occupied space")
 		}
