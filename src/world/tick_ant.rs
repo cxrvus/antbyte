@@ -167,7 +167,7 @@ impl World {
 		while let Some((pos, ant)) = source.pop_first() {
 			let mut stack = vec![(pos, ant)];
 
-			// used to resolve cycled
+			// used to resolve cycles
 			let mut cycle_pos: Option<Vec2u> = None;
 
 			while let Some((pos, ant)) = stack.pop() {
