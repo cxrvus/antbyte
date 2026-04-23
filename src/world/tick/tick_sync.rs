@@ -43,7 +43,7 @@ impl World {
 					Some(pos) => self.ants.contains_key(&pos).into(),
 					None => 1,
 				},
-				Event => self.event_in,
+				Signal => self.signal_in,
 				ExtIn => self.ext_input,
 				_ => panic!("unhandled input: {input_sub_pin:?}"),
 			};
@@ -103,7 +103,7 @@ impl World {
 				(AntMem, value) => ant.child_memory = *value,
 				(Mem, value) => ant.memory = *value,
 
-				(Send, value) => self.event_out |= value,
+				(Signal, value) => self.signal_out |= value,
 				(ExtOut, value) => self.ext_output.push(*value),
 
 				// deferred to async ticks...

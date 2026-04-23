@@ -56,8 +56,8 @@ pub struct WorldState {
 	tick_count: u32,
 	pub cells: Cells,
 	pub ants: Ants,
-	pub event_in: u8,
-	pub event_out: u8,
+	pub signal_in: u8,
+	pub signal_out: u8,
 	pub ext_input: u8,
 	pub ext_output: Vec<u8>,
 }
@@ -69,8 +69,8 @@ impl WorldState {
 			tick_count: 0,
 			cells: Grid::new(width, height),
 			ants: Default::default(),
-			event_in: 0,
-			event_out: 0,
+			signal_in: 0,
+			signal_out: 0,
 			ext_input: 0,
 			ext_output: vec![],
 		}

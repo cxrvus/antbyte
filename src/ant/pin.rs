@@ -44,8 +44,7 @@ pub enum Pin {
 	/// be spawned behind current ant, if not 0
 	AntSpawn,
 
-	Event,
-	Send,
+	Signal,
 
 	// ## external
 	ExtIn,
@@ -77,7 +76,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	const PIN_DEFINITIONS: [PinDefinition; 20] = [
+	const PIN_DEFINITIONS: [PinDefinition; 19] = [
 		PinDefinition {
 			pin: Self::Cell,
 			short: "C",
@@ -184,18 +183,11 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::Event,
-			short: "E",
-			aliases: &["EVENT_"],
+			pin: Self::Signal,
+			short: "S",
+			aliases: &["SIGNAL_"],
 			size: BYTE,
-			io_type: Some(IoType::Input),
-		},
-		PinDefinition {
-			pin: Self::Send,
-			short: "ES",
-			aliases: &["SEND_"],
-			size: BYTE,
-			io_type: Some(IoType::Output),
+			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Die,

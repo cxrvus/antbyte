@@ -21,9 +21,9 @@ impl World {
 	pub fn tick(&mut self) -> bool {
 		self.tick_count += 1;
 
-		// events
-		self.event_in = self.event_out;
-		self.event_out = 0;
+		// signals
+		self.signal_in = self.signal_out;
+		self.signal_out = 0;
 
 		// tick ants (sync)
 		let image = self.state.clone();
