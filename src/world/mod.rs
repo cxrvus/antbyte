@@ -2,8 +2,6 @@ pub mod file_compiler;
 pub mod run;
 
 mod tick;
-mod tick_ant;
-mod tick_util;
 
 pub mod config;
 use config::{StartingPos, WorldConfig};

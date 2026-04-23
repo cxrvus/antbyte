@@ -1,4 +1,7 @@
 use crate::world::World;
+mod tick_async;
+mod tick_sync;
+mod tick_util;
 
 impl World {
 	pub fn frame_tick(&mut self) -> bool {
