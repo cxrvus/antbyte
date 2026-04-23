@@ -17,6 +17,12 @@ fn zero_count_mask(x: u8) -> u8 {
 	0xff_u8.unbounded_shr(8 - x.trailing_zeros())
 }
 
+enum MoveAction {
+	Stay,
+	Move(Vec2u),
+	Nop,
+}
+
 impl World {
 	pub(super) fn get_output(&mut self, ant: &Ant, pos: Vec2u) -> Vec<PinValue> {
 		let Behavior {
@@ -155,94 +161,92 @@ impl World {
 	}
 
 	pub(super) fn move_tick(&mut self) {
-		let mut source: BTreeMap<Vec2u, Ant> = self
-			.ants
-			.iter()
-			.filter(|(_, ant)| !ant.halt)
-			.map(|(pos, ant)| (*pos, *ant))
-			.collect();
+		let mut source = self.ants.clone();
+		let mut result = BTreeMap::<Vec2u, Ant>::new();
 
-		let mut result: BTreeMap<Vec2u, Ant> = self
-			.ants
-			.iter()
-			.filter(|(_, ant)| ant.halt)
-			.map(|(pos, ant)| (*pos, *ant))
-			.collect();
+		while let Some((pos, ant)) = source.pop_first() {
+			let mut stack = vec![(pos, ant)];
 
-		let queue: Vec<Vec2u> = source.keys().cloned().collect();
-
-		for pos in queue {
-			let ant = match source.get(&pos) {
-				Some(ant) => *ant,
-				None => continue,
-			};
-
-			let mut stack = vec![pos];
-
+			// used to resolve cycled
 			let mut cycle_pos: Option<Vec2u> = None;
 
-			while let Some(pos) = stack.pop() {
-				if let Some(cycle_pos_value) = cycle_pos {
-					// pop stack until cycle is resolved
-					let target_pos = self.next_pos(pos, ant.dir).unwrap();
-					let ant = source.remove(&pos).unwrap();
-					result.insert(target_pos, ant);
-
+			while let Some((pos, ant)) = stack.pop() {
+				let action = if ant.halt {
+					MoveAction::Stay
+				} else if let Some(cycle_pos_value) = cycle_pos {
 					if pos == cycle_pos_value {
+						// reached last ant in cycle
 						cycle_pos = None;
 					}
+
+					let target_pos = self
+						.next_pos(pos, ant.dir)
+						.expect("no target position for ant in cycle");
+
+					// all ants in cycle can move
+					MoveAction::Move(target_pos)
 				} else if let Some(target_pos) = self.next_pos(pos, ant.dir) {
 					if result.contains_key(&target_pos) {
 						// target pos is occupied in result => can't move
-						source.remove(&pos);
-						result.insert(pos, ant);
-					}
-
-					if source.contains_key(&target_pos) {
+						MoveAction::Stay
+					} else if let Some(&target_ant) = source.get(&target_pos) {
 						// target pos is occupied in source
-						if stack.contains(&target_pos) {
-							// cycle => resolve all ants up to target pos
-							cycle_pos = Some(target_pos);
+						if target_ant.halt {
+							// dead end => stay
+							MoveAction::Stay
 						} else {
 							// chain => recurse
-							stack.push(pos);
-							stack.push(target_pos);
+							stack.push((pos, ant));
+							source.remove(&target_pos);
+							stack.push((target_pos, target_ant));
+							MoveAction::Nop
 						}
 					} else {
 						// target pos is free in source
-						// resolve conflict if free pos is contested
-						let contestant_positions = self.get_contestants(&source, target_pos);
 
-						let contestants = contestant_positions
-							.iter()
-							.map(|pos| source[pos])
-							.collect::<Vec<_>>();
+						if stack.iter().any(|(visited, _)| target_pos == *visited) {
+							// target is already part of the chain
+							// cycle => resolve
+							cycle_pos = Some(target_pos);
+							MoveAction::Move(target_pos)
+						} else {
+							let contestants = self
+								.get_contestants(&source, target_pos)
+								.iter()
+								.map(|pos| source[pos])
+								.collect::<Vec<_>>();
 
-						let winner_index = self.get_winner(&contestants);
-
-						for (i, pos) in contestant_positions.iter().enumerate() {
-							if i == winner_index {
-								// winning ant can move
-								source.remove(pos);
-								result.insert(target_pos, contestants[i]);
+							if contestants.is_empty() || self.luck_check(&contestants, &ant) {
+								// target is uncontested or conflict has been won => move
+								MoveAction::Move(target_pos)
 							} else {
-								// losing ants can't move
-								let loser = source.remove(pos).unwrap();
-								result.insert(*pos, loser);
+								// conflict has been lost => stay
+								MoveAction::Stay
 							}
 						}
 					}
 				} else {
 					// target pos is outside of grid
-					source.remove(&pos);
-
 					match self.config().border_mode {
-						BorderMode::Collide => _ = result.insert(pos, ant),
-						BorderMode::Despawn => {}
+						BorderMode::Collide => MoveAction::Stay,
+						BorderMode::Despawn => MoveAction::Nop,
 						_ => panic!("no target position, despite border mode guaranteeing one"),
-					};
+					}
+				};
+
+				match action {
+					MoveAction::Stay => commit(&mut result, pos, ant),
+					MoveAction::Move(target_pos) => commit(&mut result, target_pos, ant),
+					MoveAction::Nop => { /* ant will not be committed to result */ }
 				}
 			}
+
+			// reached end of ant chain
+		}
+
+		fn commit(result: &mut BTreeMap<Vec2u, Ant>, pos: Vec2u, ant: Ant) {
+			let prev = result.insert(pos, ant);
+			assert!(prev.is_none(), "tried to occupy occupied space")
 		}
 
 		self.ants = result;
@@ -280,8 +284,10 @@ impl World {
 				.collect::<Vec<_>>();
 
 			// conflict resolution
-			let winner_index = self.get_winner(&contestants);
-			let ant = contestants[winner_index];
+			let ant = contestants
+				.iter()
+				.find(|ant| self.luck_check(&contestants, ant))
+				.unwrap();
 
 			let child_dir = ant.dir + ant.child_dir;
 

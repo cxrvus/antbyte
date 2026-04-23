@@ -88,17 +88,18 @@ impl World {
 		self.cells.set_at(pos, cell);
 	}
 
-	/// gets positions of neighboring ants, that target position
+	/// get positions of neighboring ants about to move to target
 	pub(super) fn get_contestants(
 		&self,
-		all_ants: &BTreeMap<Vec2u, Ant>,
+		source: &BTreeMap<Vec2u, Ant>,
 		target_pos: Vec2u,
 	) -> Vec<Vec2u> {
 		let mut positions = vec![];
 
 		for dir in 0..Direction::MAX {
 			if let Some(source_pos) = self.next_pos(target_pos, Direction::new(dir).inverted())
-				&& all_ants.contains_key(&source_pos)
+				&& let Some(source_ant) = source.get(&source_pos)
+				&& !source_ant.halt
 			{
 				positions.push(source_pos);
 			}
@@ -107,25 +108,16 @@ impl World {
 		positions
 	}
 
-	/// returns index of conflict winning ant
-	pub(super) fn get_winner(&self, ants: &[Ant]) -> usize {
-		if ants.len() == 1 {
-			0
+	pub(super) fn luck_check(&self, contestants: &[Ant], challenger: &Ant) -> bool {
+		if contestants.len() == 1 {
+			true
 		} else {
-			let mut max_luck = 0;
-			let mut winner_index = 0;
-
-			for (i, ant) in ants.iter().enumerate() {
-				// CONTINUE
-				let luck = ant.luck(self.tick_count);
-
-				if luck > max_luck {
-					max_luck = luck;
-					winner_index = i;
-				}
-			}
-
-			winner_index
+			challenger.luck(self.tick_count)
+				== contestants
+					.iter()
+					.map(|ant| ant.luck(self.tick_count))
+					.max()
+					.expect("luck check with no contestants")
 		}
 	}
 }

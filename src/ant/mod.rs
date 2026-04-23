@@ -5,7 +5,7 @@ use crate::util::dir::Direction;
 
 pub mod behavior;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Debug)]
 pub struct Ant {
 	pub birth_tick: u32,
 

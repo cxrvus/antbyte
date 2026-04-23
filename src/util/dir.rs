@@ -2,7 +2,7 @@ use std::ops;
 
 use crate::util::vec2::Vec2;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Debug)]
 pub struct Direction(u8);
 
 impl Direction {
