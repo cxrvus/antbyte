@@ -28,21 +28,25 @@ impl World {
 		let mut input_bits = 0u8;
 
 		for input_sub_pin in inputs.iter() {
+			let next_pos = self.next_pos(pos, ant.dir);
+			let next_ant = next_pos.and_then(|pos| self.ants.get(&pos));
+
 			let input_value: u8 = match input_sub_pin.pin {
-				Time => ant.age(self.tick_count) as u8,
-				Pulse => zero_count_mask(ant.age(self.tick_count) as u8),
 				Cell => self.cells.at(pos).unwrap().value,
-				Next => self
-					.next_pos(pos, ant.dir)
+				Next => next_pos
 					.map(|pos| self.cells.at(pos).unwrap().value)
 					.unwrap_or(0u8),
+
+				Time => ant.age(self.tick_count) as u8,
+				Pulse => zero_count_mask(ant.age(self.tick_count) as u8),
 				Mem => ant.memory,
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
-				Collide => match self.next_pos(pos, ant.dir) {
-					Some(pos) => self.ants.contains_key(&pos).into(),
-					None => 1,
-				},
+
+				Collide => next_ant.is_some().into(),
+				AntSpawn => next_ant.map(|next| next.behavior).unwrap_or_default(),
+				AntMem => next_ant.map(|next| next.memory).unwrap_or_default(),
+
 				Signal => self.signal_in,
 				ExtIn => self.ext_input,
 				_ => panic!("unhandled input: {input_sub_pin:?}"),

@@ -30,6 +30,6 @@ impl Ant {
 	#[inline]
 	pub fn luck(&self, current_tick: u32) -> u8 {
 		let hashed_tick = (hash_u32(current_tick) & 0xFF) as u8;
-		(hashed_tick ^ self.dir.get()) % Direction::MAX
+		(hashed_tick ^ self.dir.value()) % Direction::MAX
 	}
 }

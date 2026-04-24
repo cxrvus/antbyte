@@ -159,7 +159,7 @@ impl Pin {
 			short: "A",
 			aliases: &["ANT_"],
 			size: ANT_ID,
-			io_type: Some(IoType::Output),
+			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::AntDir,
@@ -173,7 +173,7 @@ impl Pin {
 			short: "AM",
 			aliases: &["ANT_MEM_"],
 			size: BYTE,
-			io_type: Some(IoType::Output),
+			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Kill,
