@@ -17,18 +17,32 @@ pub fn compile_world(
 	log_cfg: &LogConfig,
 	sub_args: &Option<String>,
 ) -> Result<WorldProperties> {
-	let mut properties = if use_stdin(path) {
+	let file_name = path
+		.file_name()
+		.unwrap_or_default()
+		.to_string_lossy()
+		.to_string();
+
+	let mut properties = if file_name.starts_with(".") {
 		if stdin().is_terminal() {
-			bail!("path '-' requires piped stdin JSON");
+			bail!("path '.ant' / '.json' requires text being piped via stdin");
 		}
 
 		let code = read_to_string(stdin()).context("error reading from stdin!")?;
 
-		compile_json(&code)
+		match file_name.as_ref() {
+			".ant" => compile_dot_ant(&code, log_cfg, Some(path)).with_context(|| "compiler error"),
+			".json" => compile_json(&code),
+			_ => bail!("can only use .ant or .json files using pipes"),
+		}
 	} else {
 		let code = read_file(path)?;
 
-		let extension = path.extension().unwrap_or_default().to_string_lossy();
+		let extension = path
+			.extension()
+			.unwrap_or_default()
+			.to_string_lossy()
+			.to_string();
 
 		match extension.as_ref() {
 			"ant" => compile_dot_ant(&code, log_cfg, Some(path))
@@ -44,17 +58,11 @@ pub fn compile_world(
 		}
 	}?;
 
-	if properties.name.is_none()
-		&& let Some(name) = path.file_name()
-	{
-		properties.name = Some(name.to_string_lossy().to_string());
+	if properties.name.is_none() && !file_name.starts_with(".") {
+		properties.name = Some(file_name);
 	}
 
 	Ok(properties)
-}
-
-fn use_stdin(path: &PathBuf) -> bool {
-	path == std::path::Path::new("-")
 }
 
 pub fn read_file(path: &PathBuf) -> Result<String> {
