@@ -29,6 +29,9 @@ pub struct WorldConfig {
 	pub border_mode: BorderMode,
 	/// position of the first ant
 	pub start_pos: StartingPos,
+	/// first tick to render
+	pub start_tick: u32,
+	/// direction value (0-7) for start ant
 	pub start_dir: u8,
 	/// max number of ants before additional spawning gets blocked
 	pub ant_limit: Option<u32>,
@@ -73,6 +76,7 @@ impl Default for WorldConfig {
 			description: "".into(),
 
 			fps: Some(FPS_CAP),
+			start_tick: 0,
 			hide_ants: false,
 			sleep: Some(200),
 			ascii: None,
@@ -147,17 +151,20 @@ impl WorldConfig {
 		Self::cap(self.height as u32, "height", SIZE_CAP as u32)?;
 		Self::cap(self.width as u32, "width", SIZE_CAP as u32)?;
 
-		const MAX_DIR: u8 = Direction::MAX;
+		const MAX_DIR: u8 = Direction::MAX - 1;
 
 		if self.start_dir > MAX_DIR {
 			bail!("starting direction must not exceed {MAX_DIR}")
 		}
 
-		Self::cap(
-			self.start_dir as u32,
-			"start direction",
-			(MAX_DIR - 1) as u32,
-		)?;
+		if let Some(max_ticks) = self.ticks
+			&& self.start_tick > max_ticks
+		{
+			bail!(
+				"start tick ({}) must not exceed set tick limit ({max_ticks})",
+				self.start_tick
+			)
+		}
 
 		Self::cap_opt(self.fps, "FPS", FPS_CAP)?;
 		Self::cap_opt(self.speed, "speed", SPEED_CAP)?;

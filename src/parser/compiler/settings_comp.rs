@@ -68,6 +68,8 @@ impl Parser {
 
 			"start_dir" => config.start_dir = self.next_number()?.unwrap_or_default() as u8,
 
+			"start_tick" => config.start_tick = self.next_number()?.unwrap_or_default(),
+
 			"ant_limit" => config.ant_limit = self.next_number()?,
 
 			"color_mode" | "colors" => config.color_mode = ColorMode::try_from(self.next_ident()?)?,

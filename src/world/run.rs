@@ -43,6 +43,10 @@ impl World {
 		if self.config().speed.is_some() {
 			plugins.renderer.render(self);
 
+			for _ in 0..self.config().start_tick {
+				self.tick();
+			}
+
 			loop {
 				self.ext_input = plugins.ext_input.frame(self.config());
 
