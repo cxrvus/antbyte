@@ -71,17 +71,18 @@ impl World {
 		self.set_value(pos, new_value);
 	}
 
-	#[rustfmt::skip]
 	fn set_value(&mut self, pos: Position, value: u8) {
-		let expiration = match self.config().decay {
-			Some(decay) if value != 0 => {
+		if let Some(decay) = self.config().decay {
+			if value != 0 {
 				let clock = self.tick_count as u16;
-				Some(clock.wrapping_add(decay))
+				let expiration = clock.wrapping_add(decay);
+				self.cell_decays.insert(pos, expiration);
+			} else {
+				self.cell_decays.remove(&pos);
 			}
-			_ => None
-		};
+		}
 
-		let cell = Cell { value, expiration };
+		let cell = Cell { value };
 
 		self.cells.set_at(pos, cell);
 	}

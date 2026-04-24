@@ -45,7 +45,6 @@ impl Cells {}
 #[derive(Debug, Clone, Default)]
 pub struct Cell {
 	pub value: u8,
-	pub expiration: Option<u16>,
 }
 
 pub type Ants = BTreeMap<Position, Ant>;
@@ -55,6 +54,7 @@ pub struct WorldState {
 	rng: StdRng,
 	tick_count: u32,
 	pub cells: Cells,
+	pub cell_decays: BTreeMap<Position, u16>,
 	pub ants: Ants,
 	pub signal_in: u8,
 	pub signal_out: u8,
@@ -68,6 +68,7 @@ impl WorldState {
 			rng,
 			tick_count: 0,
 			cells: Grid::new(width, height),
+			cell_decays: Default::default(),
 			ants: Default::default(),
 			signal_in: 0,
 			signal_out: 0,
@@ -92,16 +93,14 @@ impl WorldState {
 	}
 
 	fn cell_decay(&mut self) {
-		let clock = self.tick_count as u16;
+		let current_tick = self.tick_count as u16;
 
-		self.cells
-			.entries
-			.iter_mut()
-			.filter(|cell| cell.expiration == Some(clock))
-			.for_each(|cell| {
-				cell.value = 0;
-				cell.expiration = None;
-			});
+		for (pos, expiration) in self.cell_decays.clone() {
+			if current_tick == expiration {
+				self.cells.set_at(pos, Cell { value: 0 });
+				self.cell_decays.remove(&pos);
+			}
+		}
 	}
 }
 
