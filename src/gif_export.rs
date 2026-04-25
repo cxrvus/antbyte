@@ -24,7 +24,7 @@ impl World {
 				let mut file_name = path.file_name().unwrap().to_string_lossy().to_string();
 				file_name.push_str(".gif");
 				path.set_file_name(file_name);
-				dbg!(path)
+				path
 			}
 		};
 
