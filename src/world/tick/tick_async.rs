@@ -139,6 +139,7 @@ impl World {
 			if ant.child_behavior == 0 {
 				continue;
 			} else if let Some(target_pos) = self.next_pos(*pos, ant.dir.inverted())
+				&& !self.ants.contains_key(&target_pos)
 				&& self.get_behavior(ant.child_behavior).is_some()
 			{
 				claims.entry(target_pos).or_default().push(*pos);
