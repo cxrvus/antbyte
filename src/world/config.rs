@@ -61,8 +61,8 @@ pub struct WorldConfig {
 impl Default for WorldConfig {
 	fn default() -> Self {
 		Self {
-			width: 32,
-			height: 32,
+			width: 16,
+			height: 16,
 			speed: Some(1),
 			ticks: None,
 			decay: None,
