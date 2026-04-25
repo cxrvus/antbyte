@@ -92,9 +92,11 @@ impl World {
 		let mut positions = vec![];
 
 		for dir in 0..Direction::MAX {
-			if let Some(source_pos) = self.next_pos(target_pos, Direction::new(dir).inverted())
+			let dir = Direction::new(dir);
+			if let Some(source_pos) = self.next_pos(target_pos, dir.inverted())
 				&& let Some(source_ant) = source.get(&source_pos)
 				&& !source_ant.halt
+				&& source_ant.dir == dir
 			{
 				positions.push(source_pos);
 			}
