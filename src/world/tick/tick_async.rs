@@ -124,7 +124,7 @@ impl World {
 		self.ants = result;
 	}
 
-	const ANT_LIMIT: u32 = 0x100;
+	const ANT_LIMIT: u32 = 0x400;
 
 	pub(super) fn spawn_tick(&mut self) {
 		let mut claims = BTreeMap::<Position, Vec<Position>>::new();
