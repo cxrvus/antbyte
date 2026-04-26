@@ -151,7 +151,7 @@ impl WorldConfig {
 		Self::cap(self.height as u32, "height", SIZE_CAP as u32)?;
 		Self::cap(self.width as u32, "width", SIZE_CAP as u32)?;
 
-		const MAX_DIR: u8 = Direction::MAX - 1;
+		const MAX_DIR: u8 = Direction::MAX;
 
 		if self.start_dir > MAX_DIR {
 			bail!("starting direction must not exceed {MAX_DIR}")

@@ -6,17 +6,18 @@ use crate::util::vec2::Vec2;
 pub struct Direction(u8);
 
 impl Direction {
-	pub const MAX: u8 = 8;
-	pub const INV: u8 = 4;
+	pub const MAX: u8 = 7;
+	pub const MOD: u8 = Self::MAX + 1;
+	pub const INV: u8 = Self::MOD / 2;
 
 	#[inline]
 	pub fn new(value: u8) -> Self {
-		Self(value % Self::MAX)
+		Self(value % Self::MOD)
 	}
 
 	#[inline]
 	pub fn set(&mut self, value: u8) {
-		self.0 = value % Self::MAX;
+		self.0 = value % Self::MOD;
 	}
 
 	#[inline]

@@ -91,7 +91,7 @@ impl World {
 	pub(super) fn get_contestants(&self, source: &Ants, target_pos: Position) -> Vec<Position> {
 		let mut positions = vec![];
 
-		for dir in 0..Direction::MAX {
+		for dir in 0..=Direction::MAX {
 			let dir = Direction::new(dir);
 			if let Some(source_pos) = self.next_pos(target_pos, dir.inverted())
 				&& let Some(source_ant) = source.get(&source_pos)
