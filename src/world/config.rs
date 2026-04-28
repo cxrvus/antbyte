@@ -88,7 +88,7 @@ impl Default for WorldConfig {
 
 #[rustfmt::skip]
 #[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum BorderMode { Collide, Despawn, Cycle, Wrap }
 

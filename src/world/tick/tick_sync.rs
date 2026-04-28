@@ -5,7 +5,7 @@ use crate::{
 		pin::{Pin, PinValue},
 	},
 	util::{dir::Direction, vec2::Position},
-	world::World,
+	world::{World, config::BorderMode},
 };
 
 fn zero_count_mask(x: u8) -> u8 {
@@ -43,7 +43,12 @@ impl World {
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
 
-				Collide => next_ant.is_some().into(),
+				Collide => {
+					(next_ant.is_some()
+						|| (self.config().border_mode == BorderMode::Collide && next_pos.is_none()))
+						as u8
+				}
+
 				AntSpawn => next_ant.map(|next| next.behavior).unwrap_or_default(),
 				AntMem => next_ant.map(|next| next.memory).unwrap_or_default(),
 
