@@ -62,8 +62,6 @@ pub enum IoType {
 
 const BIT: u8 = 1;
 const DIR: u8 = 3;
-const NIBBLE: u8 = 4;
-const CELL: u8 = NIBBLE;
 const ANT_ID: u8 = BYTE;
 const BYTE: u8 = 8;
 
@@ -81,7 +79,7 @@ impl Pin {
 			pin: Self::Cell,
 			short: "C",
 			aliases: &["CELL_"],
-			size: CELL,
+			size: BYTE,
 			io_type: None,
 		},
 		PinDefinition {
@@ -95,7 +93,7 @@ impl Pin {
 			pin: Self::Next,
 			short: "CN",
 			aliases: &["NEXT_"],
-			size: CELL,
+			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
