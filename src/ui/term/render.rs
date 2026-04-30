@@ -1,6 +1,4 @@
-use super::Renderer;
 use crate::{
-	plugins::Plugin,
 	util::sleep,
 	world::{World, WorldState, config::WorldConfig},
 };
@@ -53,7 +51,7 @@ impl Plugin for TermRenderer {
 	}
 }
 
-impl Renderer for TermRenderer {
+impl TermRenderer {
 	fn render(&mut self, world: &World) {
 		// wait before every frame (except frame 0)
 		if world.tick_count() > 0 {

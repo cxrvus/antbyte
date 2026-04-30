@@ -1,6 +1,7 @@
 pub mod file_compiler;
 pub mod run;
 
+mod frame;
 mod tick;
 
 pub mod config;

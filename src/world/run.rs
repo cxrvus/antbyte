@@ -1,45 +1,26 @@
 use super::World;
-use crate::plugins::{
-	PluginSet,
-	render::term_render::{clear_screen, print_title_short},
-};
+use crate::ui::render::term_render::{clear_screen, print_title_short};
 use anyhow::Result;
 
 const MAX_TICKS: u32 = 1 << 16;
 
 impl World {
-	fn init(&self, plugins: &mut PluginSet) {
-		plugins.renderer.open(self.config());
-		plugins.ext_input.open(self.config());
-		plugins.ext_output.open(self.config());
-	}
-
-	fn end(&self, plugins: &mut PluginSet) {
-		plugins.renderer.close();
-		plugins.ext_input.close();
-		plugins.ext_output.close();
-	}
-
-	pub fn run(&mut self, plugins: &mut PluginSet) -> Result<()> {
-		self.init(plugins);
-
+	pub fn run(&mut self) -> Result<()> {
 		if self.config().looping {
 			let properties = self.properties.clone();
 			loop {
 				// idea: add break condition
 				let mut world = World::new(properties.clone())?;
-				world.run_once(plugins);
+				world.run_once();
 			}
 		} else {
-			self.run_once(plugins);
+			self.run_once();
 		}
-
-		self.end(plugins);
 
 		Ok(())
 	}
 
-	fn run_once(&mut self, plugins: &mut PluginSet) {
+	fn run_once(&mut self) {
 		if self.config().speed.is_some() {
 			for _ in 0..self.config().start_tick {
 				self.tick();

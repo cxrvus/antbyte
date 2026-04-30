@@ -10,7 +10,7 @@ use clap::{self, Parser};
 
 use crate::{
 	parser::compiler::LogConfig,
-	plugins::{
+	ui::{
 		PluginSet,
 		ext::term_input::TermInput,
 		render::{DefaultRenderer, Renderer, term_render::TermRenderer},

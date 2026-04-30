@@ -1,7 +1,7 @@
 #![cfg(feature = "extras")]
 
 use crate::{
-	plugins::render::term_render::{clear_screen, print_title_short},
+	ui::render::term_render::{clear_screen, print_title_short},
 	world::{World, config::WorldConfig},
 };
 
