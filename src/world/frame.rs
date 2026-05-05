@@ -26,28 +26,21 @@ impl World {
 		self.ext_output.clear();
 		self.ext_input = input.ext_in;
 
-		let instant_sim = self.tick_count() == 0 && self.config().speed.is_none();
-
 		let mut frame_ms = match self.config().fps {
 			Some(0) => panic!(),
 			Some(fps) => Some(1000 / fps),
 			None => None,
 		};
 
-		if instant_sim {
-			self.tick_all();
-		} else if self.config().start_tick > 0 {
-			// ignore external input and tick until start_tick is reached
-			self.ext_input = 0;
+		let mut speed = self.config().speed.unwrap_or_default();
 
-			for _tick in 0..self.config().start_tick {
-				if !self.tick() {
-					break;
-				}
-			}
+		if self.tick_count() == 0 && self.config().start_tick > 0 {
+			// ignore external input and tick until start_tick is reached
+			speed = self.config().start_tick;
+			self.ext_input = 0;
 		}
 
-		for _tick in 0..self.config().speed.unwrap_or(1) {
+		for _tick in 0..speed {
 			let sim_active = self.tick();
 
 			if !sim_active {

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::util::{dir::Direction, vec2::Coord};
 
 pub const FPS_CAP: u32 = 50;
-pub const SPEED_CAP: u32 = 0x2000;
+pub const SPEED_CAP: u32 = 0x4000;
 pub const SIZE_CAP: Coord = 0x400;
 
 #[cfg_attr(test, derive(ts_rs::TS))]
@@ -164,6 +164,10 @@ impl WorldConfig {
 				"start tick ({}) must not exceed set tick limit ({max_ticks})",
 				self.start_tick
 			)
+		}
+
+		if self.speed.is_none() {
+			bail!("speed must be greater than 0")
 		}
 
 		Self::cap_opt(self.fps, "FPS", FPS_CAP)?;

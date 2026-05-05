@@ -1,12 +1,7 @@
-use crate::{
-	ui::term::render::{clear_screen, print_title_short},
-	world::World,
-};
+use crate::world::World;
 mod tick_async;
 mod tick_sync;
 mod tick_util;
-
-const MAX_TICKS: u32 = 1 << 16;
 
 impl World {
 	pub(super) fn tick(&mut self) -> bool {
@@ -55,22 +50,5 @@ impl World {
 		self.tick_count += 1;
 
 		true
-	}
-
-	pub(super) fn tick_all(&mut self) {
-		let max_ticks = self.config().max_ticks.unwrap_or(MAX_TICKS);
-		self.properties.config.max_ticks = Some(max_ticks);
-
-		while self.tick() {
-			if self.tick_count().is_multiple_of(0x100) {
-				clear_screen();
-				print_title_short();
-				eprintln!(
-					"processing tick {} out of {max_ticks:0>4}",
-					self.state.tick_str()
-				);
-				eprintln!();
-			}
-		}
 	}
 }
