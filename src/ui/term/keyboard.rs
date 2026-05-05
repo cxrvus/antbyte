@@ -1,4 +1,7 @@
-use std::{io::stdin, process::Command};
+use std::{
+	io::{Read, stdin},
+	process::Command,
+};
 
 use crate::world::config::WorldConfig;
 

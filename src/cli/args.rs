@@ -84,7 +84,7 @@ impl Args {
 		if self.stepped { config.fps = None; }
 		if self.instant { config.speed = None; }
 		if self.looping { config.looping = true; }
-		if self.ticks.is_some() { config.ticks = self.ticks; }
+		if self.ticks.is_some() { config.max_ticks = self.ticks; }
 
 		if self.gif.is_some() && (config.speed.is_none() | config.fps.is_none()) {
 			anyhow::bail!("need a speed and an FPS of at least 1 to export as GIF");

@@ -37,8 +37,8 @@ impl World {
 					.map(|pos| self.cells.at(pos).unwrap().value)
 					.unwrap_or(0u8),
 
-				Time => ant.age(self.tick_count) as u8,
-				Pulse => zero_count_mask(ant.age(self.tick_count) as u8),
+				Time => ant.age(self.tick_count()) as u8,
+				Pulse => zero_count_mask(ant.age(self.tick_count()) as u8),
 				Mem => ant.memory,
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),

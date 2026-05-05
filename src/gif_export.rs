@@ -1,7 +1,7 @@
 #![cfg(feature = "extras")]
 
 use crate::{
-	ui::render::term_render::{clear_screen, print_title_short},
+	ui::term::render::{clear_screen, print_title_short},
 	world::{World, config::WorldConfig},
 };
 
@@ -53,7 +53,8 @@ impl World {
 			println!("rendering frame {i} out of {MAX_FRAMES}...");
 			world.gif_render(&mut encoder, scale, delay);
 
-			if !world.frame_tick() {
+			// TODO
+			if world.next_frame_auto().is_none() {
 				break;
 			}
 		}

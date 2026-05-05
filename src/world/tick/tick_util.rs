@@ -4,7 +4,11 @@ use crate::{
 		dir::Direction,
 		vec2::{Position, Vec2},
 	},
-	world::{Ants, Cell, World, config::BorderMode},
+	world::{
+		World,
+		config::BorderMode,
+		state::{Ants, Cell},
+	},
 };
 
 impl World {

@@ -1,12 +1,5 @@
-use crate::{
-	util::sleep,
-	world::{World, WorldState, config::WorldConfig},
-};
-
-use std::{
-	io::{self, Write},
-	time::Instant,
-};
+use crate::world::World;
+use std::io::{self, Write};
 
 #[inline]
 pub fn print_title() {
@@ -31,70 +24,17 @@ pub fn clear_screen() { print!("\x1B[2J\x1B[1;1H"); }
 pub fn print_title_short() { println!("<<ANTBYTE>>"); }
 
 pub struct TermRenderer {
-	last_frame: Instant,
-	frame_ms: Option<u32>,
-	cfg_sleep: Option<u32>,
 	hide_title: bool,
-}
-
-impl Plugin for TermRenderer {
-	fn open(&mut self, _config: &WorldConfig) {
-		clear_screen();
-		println!();
-		sleep(100);
-	}
-
-	fn close(&self) {
-		if let Some(ms) = self.cfg_sleep {
-			sleep(ms);
-		}
-	}
-}
-
-impl TermRenderer {
-	fn render(&mut self, world: &World) {
-		// wait before every frame (except frame 0)
-		if world.tick_count() > 0 {
-			if let Some(frame_ms) = self.frame_ms {
-				// wait for frame interval to elapse
-				let elapsed = self.last_frame.elapsed().as_millis() as u32;
-				if elapsed < frame_ms {
-					// add a small buffer to prevent flickering
-					let sleep_ms = (frame_ms - elapsed).max(8);
-					sleep(sleep_ms);
-				}
-				self.last_frame = Instant::now();
-			} else {
-				// wait for key input to continue
-				eprintln!("<i> Press <Enter> to step to next frame");
-				let mut input = String::new();
-				io::stdin().read_line(&mut input).unwrap();
-			}
-		}
-
-		self.render_frame(world);
-	}
 }
 
 type CellRenderer = Box<dyn Fn(u8, &str) -> String + 'static>;
 
 impl TermRenderer {
-	pub fn new(world: &World, hide_title: bool) -> Self {
-		let frame_ms = match world.config().fps {
-			Some(0) => panic!(),
-			Some(fps) => Some(1000 / fps),
-			None => None,
-		};
-
-		Self {
-			last_frame: Instant::now(),
-			cfg_sleep: world.config().sleep,
-			frame_ms,
-			hide_title,
-		}
+	pub fn new(hide_title: bool) -> Self {
+		Self { hide_title }
 	}
 
-	fn render_frame(&self, world: &World) {
+	pub fn render_frame(&self, world: &World) {
 		// pre-render
 		let cell_renderer = if let Some(ascii) = &world.config().ascii {
 			let palette = if ascii.is_empty() {
@@ -189,33 +129,4 @@ fn color_codes(value: u8) -> (u8, u8) {
 	};
 
 	(bg_color, fg_color)
-}
-
-impl WorldState {
-	#[inline]
-	pub fn tick_str(&self) -> String {
-		format!("T: {:0>8}", self.tick_count())
-	}
-
-	pub fn ext_out_str(&self) -> String {
-		let ext_out_str = self
-			.ext_output
-			.iter()
-			.map(|x| format!("{x:02x}"))
-			.collect::<Vec<_>>()
-			.join(", ");
-
-		if ext_out_str.is_empty() {
-			"--".into()
-		} else {
-			ext_out_str
-		}
-	}
-
-	pub fn metadata_str(&self) -> String {
-		let tick_str = self.tick_str();
-		let ext_out_str = self.ext_out_str();
-
-		format!("{tick_str}\nK: {:02x}\nX: {ext_out_str}\n", self.ext_input)
-	}
 }

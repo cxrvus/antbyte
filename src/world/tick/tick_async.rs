@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use crate::{
 	ant::Ant,
 	util::vec2::Position,
-	world::{Ants, World, config::BorderMode},
+	world::{World, config::BorderMode, state::Ants},
 };
 
 enum MoveAction {

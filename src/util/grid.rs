@@ -7,6 +7,16 @@ pub struct Grid<T> {
 	pub entries: Vec<T>,
 }
 
+impl<T> Default for Grid<T> {
+	fn default() -> Self {
+		Self {
+			width: 2,
+			height: 2,
+			entries: Default::default(),
+		}
+	}
+}
+
 impl<T> Grid<T> {
 	pub fn with_values(width: Coord, height: Coord, values: Vec<T>) -> Self {
 		assert_eq!(values.len(), (width * height) as usize);

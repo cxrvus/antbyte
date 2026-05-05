@@ -41,7 +41,7 @@ impl Parser {
 			"speed" => config.speed = self.next_number()?,
 			"decay" => config.decay = self.next_number().map(|x| x.map(|v| v as u16))?,
 			"sleep" => config.sleep = self.next_number()?,
-			"ticks" => config.ticks = self.next_number()?,
+			"ticks" => config.max_ticks = self.next_number()?,
 			"noise_seed" | "seed" => config.noise_seed = self.next_number()?,
 
 			"dur" => {
@@ -54,7 +54,7 @@ impl Parser {
 						.ok_or(anyhow!("duration must be greater than 0"))?;
 
 					let ticks = duration.saturating_mul(speed).saturating_mul(fps);
-					config.ticks = Some(ticks);
+					config.max_ticks = Some(ticks);
 				}
 			}
 

@@ -1,25 +1,27 @@
-use crate::world::World;
+use crate::{
+	ui::term::render::{clear_screen, print_title_short},
+	world::World,
+};
 mod tick_async;
 mod tick_sync;
 mod tick_util;
 
+const MAX_TICKS: u32 = 1 << 16;
+
 impl World {
-	pub fn frame_tick(&mut self) -> bool {
-		for _ in 0..self
+	pub(super) fn tick(&mut self) -> bool {
+		// end world if conditions are met
+		let no_ants = self.ants.is_empty();
+
+		let tick_overflow = self
 			.config()
-			.speed
-			.expect("speed must be greater than 0 to use frame_tick")
-		{
-			if !self.tick() {
-				return false;
-			}
+			.max_ticks
+			.map(|max| self.tick_count >= max)
+			.unwrap_or_default();
+
+		if no_ants || tick_overflow {
+			return false;
 		}
-
-		true
-	}
-
-	pub fn tick(&mut self) -> bool {
-		self.tick_count += 1;
 
 		// signals
 		self.signal_in = self.signal_out;
@@ -50,15 +52,25 @@ impl World {
 			self.cell_decay();
 		}
 
-		// end world if conditions are met
-		let no_ants = self.ants.is_empty();
+		self.tick_count += 1;
 
-		let tick_overflow = self
-			.config()
-			.ticks
-			.map(|max| self.tick_count >= max)
-			.unwrap_or_default();
+		true
+	}
 
-		!(no_ants || tick_overflow)
+	pub(super) fn tick_all(&mut self) {
+		let max_ticks = self.config().max_ticks.unwrap_or(MAX_TICKS);
+		self.properties.config.max_ticks = Some(max_ticks);
+
+		while self.tick() {
+			if self.tick_count().is_multiple_of(0x100) {
+				clear_screen();
+				print_title_short();
+				eprintln!(
+					"processing tick {} out of {max_ticks:0>4}",
+					self.state.tick_str()
+				);
+				eprintln!();
+			}
+		}
 	}
 }

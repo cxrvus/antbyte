@@ -1,17 +1,24 @@
 use crate::{util::vec2::Position, world::World};
 
-fn render(world: &World) {
-	let cells = world.cells.clone();
+pub fn run(world: World) {
+	let mut world = world;
+	while let Some(frame) = world.next_frame_auto() {
+		for y in 0..world.config().height {
+			for x in 0..world.config().width {
+				let bg_value = frame
+					.bg
+					.get(&Position { x, y })
+					.copied()
+					.unwrap_or_default();
 
-	for y in 0..cells.height {
-		for x in 0..cells.width {
-			let cell_value = cells.at(Position { x, y }).unwrap().value;
-			let cell_value = world.adjusted_color(cell_value);
-			print!("{:02x}", cell_value);
+				let bg_value = world.adjusted_color(bg_value);
+
+				print!("{:02x}", bg_value);
+			}
+			println!();
 		}
-		println!();
-	}
 
-	println!("\n{}\n", world.tick_str());
-	print!("\n\n\n");
+		println!("\n{}\n", world.tick_str());
+		print!("\n\n\n");
+	}
 }

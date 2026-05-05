@@ -20,7 +20,7 @@ pub struct WorldConfig {
 	/// simulated ticks per frame (defaults to 1)
 	pub speed: Option<u32>,
 	/// simulation tick limit
-	pub ticks: Option<u32>,
+	pub max_ticks: Option<u32>,
 	/// amount of ticks after which a cell will automatically reset
 	pub decay: Option<u16>,
 	/// re-run simulation after it ends
@@ -64,7 +64,7 @@ impl Default for WorldConfig {
 			width: 16,
 			height: 16,
 			speed: Some(1),
-			ticks: None,
+			max_ticks: None,
 			decay: None,
 			looping: false,
 			border_mode: BorderMode::Wrap,
@@ -157,7 +157,7 @@ impl WorldConfig {
 			bail!("starting direction must not exceed {MAX_DIR}")
 		}
 
-		if let Some(max_ticks) = self.ticks
+		if let Some(max_ticks) = self.max_ticks
 			&& self.start_tick > max_ticks
 		{
 			bail!(
