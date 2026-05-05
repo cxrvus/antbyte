@@ -1,6 +1,9 @@
 use std::collections::BTreeMap;
 
-use crate::{util::vec2::Position, world::World};
+use crate::{
+	util::vec2::Position,
+	world::{World, state::WorldStatus},
+};
 
 #[derive(Debug, Default)]
 pub struct FrameInput {
@@ -23,33 +26,51 @@ impl World {
 	}
 
 	pub fn next_frame(&mut self, input: FrameInput) -> Option<FrameOutput> {
-		self.ext_output.clear();
-		self.ext_input = input.ext_in;
-
 		let mut frame_ms = match self.config().fps {
 			Some(0) => panic!(),
 			Some(fps) => Some(1000 / fps),
 			None => None,
 		};
 
-		let mut speed = self.config().speed.unwrap_or_default();
-
-		if self.tick_count() == 0 && self.config().start_tick > 0 {
-			// ignore external input and tick until start_tick is reached
-			speed = self.config().start_tick;
-			self.ext_input = 0;
-		}
-
-		for _tick in 0..speed {
-			let sim_active = self.tick();
-
-			if !sim_active {
+		match self.status {
+			WorldStatus::Init => {
+				self.status = WorldStatus::Active;
+			}
+			WorldStatus::Inactive => {
 				if self.config().looping {
-					self.state = Default::default();
-					frame_ms = self.config().sleep;
-					break;
+					// reset
+					self.reset();
 				} else {
+					// stop
 					return None;
+				}
+			}
+			WorldStatus::Active => {
+				self.ext_output.clear();
+				self.ext_input = input.ext_in;
+
+				let mut speed = self.config().speed.unwrap_or_default();
+
+				if self.tick_count() == 0 && self.config().start_tick > 0 {
+					// ignore external input and tick until start_tick is reached
+					speed = self.config().start_tick;
+					self.ext_input = 0;
+				}
+
+				for _tick in 0..speed {
+					let active = self.tick();
+
+					if !active {
+						// current tick is last tick to be simulated
+
+						if self.config().looping {
+							frame_ms = self.config().sleep;
+						}
+
+						self.status = WorldStatus::Inactive;
+
+						break;
+					}
 				}
 			}
 		}

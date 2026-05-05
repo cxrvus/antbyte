@@ -16,9 +16,18 @@ pub type Cells = Grid<Cell>;
 pub type Ants = BTreeMap<Position, Ant>;
 
 #[derive(Clone, Default)]
+pub enum WorldStatus {
+	#[default]
+	Init,
+	Active,
+	Inactive,
+}
+
+#[derive(Clone, Default)]
 pub struct WorldState {
 	rng: Option<StdRng>,
 	pub(super) tick_count: u32,
+	pub(super) status: WorldStatus,
 	pub cells: Cells,
 	pub cell_decays: BTreeMap<Position, u16>,
 	pub ants: Ants,
@@ -60,6 +69,7 @@ impl WorldState {
 		self.rng.as_mut().expect("rng must be Some").random()
 	}
 
+	// todo: optimize decay
 	pub(super) fn cell_decay(&mut self) {
 		let current_tick = self.tick_count as u16;
 

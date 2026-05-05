@@ -11,8 +11,6 @@ pub fn run(world: World, hide_title: bool) {
 
 	// TODO: get ext input
 
-	renderer.render_frame(&world);
-
 	let mut last_frame = Instant::now();
 
 	while let Some(frame) = world.next_frame_auto() {

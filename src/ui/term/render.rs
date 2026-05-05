@@ -34,6 +34,7 @@ impl TermRenderer {
 		Self { hide_title }
 	}
 
+	// TODO: implement using Frame instead of World
 	pub fn render_frame(&self, world: &World) {
 		// pre-render
 		let cell_renderer = if let Some(ascii) = &world.config().ascii {
