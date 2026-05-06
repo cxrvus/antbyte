@@ -89,7 +89,7 @@ impl World {
 				let value = cell.value;
 				let pos = Position {
 					x: (i % (self.config().width as usize)) as u16,
-					y: (i / (self.config().height as usize)) as u16,
+					y: (i / (self.config().width as usize)) as u16,
 				};
 				(pos, value)
 			})

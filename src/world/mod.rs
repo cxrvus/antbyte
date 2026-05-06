@@ -71,7 +71,7 @@ impl World {
 		let start_pos = match start_pos {
 			StartingPos::TopLeft => Position::ZERO,
 			StartingPos::Top => Position {
-				x: half_height,
+				x: half_width,
 				y: 0,
 			},
 			StartingPos::Left => Position {
