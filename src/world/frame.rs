@@ -40,6 +40,7 @@ impl World {
 				if self.config().looping {
 					// reset
 					self.reset();
+					self.status = WorldStatus::Active;
 				} else {
 					// stop
 					return None;
@@ -62,13 +63,8 @@ impl World {
 
 					if !active {
 						// current tick is last tick to be simulated
-
-						if self.config().looping {
-							frame_ms = self.config().sleep;
-						}
-
+						frame_ms = self.config().sleep;
 						self.status = WorldStatus::Inactive;
-
 						break;
 					}
 				}

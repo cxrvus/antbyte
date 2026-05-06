@@ -88,9 +88,8 @@ impl Args {
 		if self.ticks.is_some() { config.max_ticks = self.ticks; }
 
 		if self.instant {
-			config.speed = Some(SPEED_CAP);
+			config.start_tick = MAX_TICKS;
 			config.max_ticks = config.max_ticks.or(Some(MAX_TICKS));
-			config.start_tick = 0;
 		}
 
 		if self.gif.is_some() && (config.speed.is_none() | config.fps.is_none()) {

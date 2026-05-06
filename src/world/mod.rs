@@ -18,7 +18,10 @@ use std::{
 use crate::{
 	ant::{Ant, behavior::Behavior},
 	util::{dir::Direction, vec2::Position},
-	world::{config::ColorMode, state::WorldState},
+	world::{
+		config::ColorMode,
+		state::{WorldState, WorldStatus},
+	},
 };
 
 #[cfg_attr(test, derive(ts_rs::TS))]
@@ -45,7 +48,11 @@ impl World {
 
 		let config = properties.config.clone();
 
-		let state = WorldState::new(&config);
+		let mut state = WorldState::new(&config);
+
+		if config.start_tick > 0 {
+			state.status = WorldStatus::Active;
+		}
 
 		let WorldConfig {
 			width,
