@@ -18,10 +18,7 @@ use std::{
 use crate::{
 	ant::{Ant, behavior::Behavior},
 	util::{dir::Direction, vec2::Position},
-	world::{
-		config::ColorMode,
-		state::{WorldState, WorldStatus},
-	},
+	world::state::{WorldState, WorldStatus},
 };
 
 #[cfg_attr(test, derive(ts_rs::TS))]
@@ -102,17 +99,6 @@ impl World {
 	#[inline]
 	pub fn reset(&mut self) {
 		*self = Self::new(self.properties.clone()).unwrap();
-	}
-
-	// TODO: render modes
-	pub fn adjusted_color(&self, color: u8) -> u8 {
-		match self.config().color_mode {
-			ColorMode::Binary => match color {
-				0 => 0x0,
-				_ => 0xf,
-			},
-			ColorMode::RGBI => color,
-		}
 	}
 
 	#[inline]

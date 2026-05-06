@@ -11,8 +11,6 @@ pub fn run(world: World) {
 					.copied()
 					.unwrap_or_default();
 
-				let bg_value = world.adjusted_color(bg_value);
-
 				print!("{:02x}", bg_value);
 			}
 			println!();

@@ -11,14 +11,18 @@ pub mod render;
 
 pub fn run(world: World, hide_title: bool) {
 	let mut world = world;
-	let renderer = TermRenderer::new(hide_title);
+	let renderer = TermRenderer {
+		hide_title,
+		config: world.config().clone(),
+		name: world.name(),
+	};
 
 	let mut last_frame = Instant::now();
 
 	while let Some(frame) = world.next_frame(FrameInput {
 		ext_in: keyboard::get_keys(world.config()),
 	}) {
-		renderer.render_frame(&world);
+		renderer.render_frame(&frame);
 
 		if let Some(frame_ms) = frame.ms {
 			// wait for frame interval to elapse

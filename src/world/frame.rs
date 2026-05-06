@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use crate::{
 	util::vec2::Position,
-	world::{World, state::WorldStatus},
+	world::{World, config::ColorMode, state::WorldStatus},
 };
 
 #[derive(Debug, Default)]
@@ -15,6 +15,7 @@ pub struct FrameOutput {
 	pub fg: BTreeMap<Position, u8>,
 	pub bg: BTreeMap<Position, u8>,
 	pub ms: Option<u32>,
+	pub metadata: String, //todo: turn this into a map
 	pub ext_out: Vec<u8>,
 }
 
@@ -86,7 +87,7 @@ impl World {
 			.enumerate()
 			.filter(|(_i, cell)| cell.value != 0)
 			.map(|(i, cell)| {
-				let value = cell.value;
+				let value = self.adjusted_color(cell.value);
 				let pos = Position {
 					x: (i % (self.config().width as usize)) as u16,
 					y: (i / (self.config().width as usize)) as u16,
@@ -99,7 +100,19 @@ impl World {
 			fg,
 			bg,
 			ms: frame_ms,
+			metadata: self.metadata_str(),
 			ext_out: self.ext_output.clone(),
 		})
+	}
+
+	// TODO: render modes
+	fn adjusted_color(&self, color: u8) -> u8 {
+		match self.config().color_mode {
+			ColorMode::Binary => match color {
+				0 => 0x0,
+				_ => 0xf,
+			},
+			ColorMode::RGBI => color,
+		}
 	}
 }

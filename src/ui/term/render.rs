@@ -1,5 +1,11 @@
-use crate::world::World;
-use std::io::{self, Write};
+use crate::{
+	util::{dir::Direction, vec2::Position},
+	world::{config::WorldConfig, frame::FrameOutput},
+};
+use std::{
+	collections::BTreeMap,
+	io::{self, Write},
+};
 
 #[inline]
 pub fn print_title() {
@@ -23,21 +29,29 @@ pub fn clear_screen() { print!("\x1B[2J\x1B[1;1H"); }
 #[rustfmt::skip]
 pub fn print_title_short() { println!("<<ANTBYTE>>"); }
 
-pub struct TermRenderer {
-	hide_title: bool,
+pub(super) struct TermRenderer {
+	pub(super) hide_title: bool,
+	pub(super) config: WorldConfig,
+	pub(super) name: Option<String>,
 }
 
 type CellRenderer = Box<dyn Fn(u8, &str) -> String + 'static>;
 
-impl TermRenderer {
-	pub fn new(hide_title: bool) -> Self {
-		Self { hide_title }
+fn map_to_grid(map: &BTreeMap<Position, u8>, height: u16, width: u16) -> Vec<Option<u8>> {
+	let mut grid = vec![None; (height * width) as usize];
+
+	for (pos, &value) in map {
+		let i = pos.y * width + pos.x;
+		grid[i as usize] = Some(value);
 	}
 
-	// TODO: implement using Frame instead of World
-	pub fn render_frame(&self, world: &World) {
+	grid
+}
+
+impl TermRenderer {
+	pub fn render_frame(&self, frame: &FrameOutput) {
 		// pre-render
-		let cell_renderer = if let Some(ascii) = &world.config().ascii {
+		let cell_renderer = if let Some(ascii) = &self.config.ascii {
 			let palette = if ascii.is_empty() {
 				ASCII_DEFAULT
 			} else {
@@ -48,7 +62,7 @@ impl TermRenderer {
 			Box::new(color_cell)
 		};
 
-		let world_str = self.render_cells(world, &cell_renderer);
+		let world_str = self.render_cells(frame, &cell_renderer);
 
 		// print
 		clear_screen();
@@ -57,38 +71,43 @@ impl TermRenderer {
 			print_title();
 		}
 
-		if let Some(name) = &world.name() {
+		if let Some(name) = &self.name {
 			println!("{name}\n");
 		}
 
 		println!("\n\n{world_str}\n\n");
-		println!("{}", world.metadata_str());
+		println!("{}", frame.metadata);
 
 		io::stdout().flush().unwrap();
 	}
 
-	fn render_cells(&self, world: &World, render_cell: &CellRenderer) -> String {
-		let cells = &world.cells;
+	fn render_cells(&self, frame: &FrameOutput, render_cell: &CellRenderer) -> String {
+		let WorldConfig { height, width, .. } = &self.config;
+		let fg_grid = map_to_grid(&frame.fg, *height, *width);
+		let bg_grid = map_to_grid(&frame.bg, *height, *width)
+			.iter()
+			.map(|value| value.unwrap_or_default())
+			.collect::<Vec<_>>();
+
 		let mut string = String::new();
 
-		for (i, cell) in cells.entries.iter().enumerate() {
-			if i % cells.width as usize == 0 {
+		for (i, &bg_value) in bg_grid.iter().enumerate() {
+			if i % *width as usize == 0 {
 				string.push('\n');
 			}
 
-			let pos = cells.get_pos(i).unwrap();
-			let ant = world.ants().get(&pos);
+			let fg_value = fg_grid[i];
 
-			let cell_value = world.adjusted_color(cell.value);
-
-			match (ant, world.config().hide_ants) {
+			match (fg_value, self.config.hide_ants) {
 				(None, _) | (_, true) => {
-					string.push_str(&render_cell(cell_value, "  "));
+					string.push_str(&render_cell(bg_value, "  "));
 				}
-				(Some(ant), false) => {
-					let (char1, char2) = ant.dir.as_chars();
+				(Some(fg_value), false) => {
+					// TODO: render modes
+					let dir = Direction::new(fg_value);
+					let (char1, char2) = dir.as_chars();
 					let ant_chars = format!("{char1}{char2}");
-					string.push_str(&render_cell(cell_value, &ant_chars));
+					string.push_str(&render_cell(bg_value, &ant_chars));
 				}
 			}
 		}
