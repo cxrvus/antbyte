@@ -1,4 +1,8 @@
-use crate::{ui::term::render::TermRenderer, util::sleep, world::World};
+use crate::{
+	ui::term::render::TermRenderer,
+	util::sleep,
+	world::{World, frame::FrameInput},
+};
 use std::{io, time::Instant};
 
 pub mod keyboard;
@@ -9,11 +13,11 @@ pub fn run(world: World, hide_title: bool) {
 	let mut world = world;
 	let renderer = TermRenderer::new(hide_title);
 
-	// TODO: get ext input
-
 	let mut last_frame = Instant::now();
 
-	while let Some(frame) = world.next_frame_auto() {
+	while let Some(frame) = world.next_frame(FrameInput {
+		ext_in: keyboard::get_keys(world.config()),
+	}) {
 		renderer.render_frame(&world);
 
 		if let Some(frame_ms) = frame.ms {
