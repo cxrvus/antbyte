@@ -24,11 +24,7 @@ impl World {
 			match self.config().border_mode {
 				Collide | Despawn => None,
 				Cycle | Wrap => {
-					let dimensions = Position {
-						x: self.config().width,
-						y: self.config().height,
-					}
-					.sign();
+					let dimensions = self.cells.dimensions().sign();
 
 					let mut wrapped_pos = new_pos % dimensions;
 
