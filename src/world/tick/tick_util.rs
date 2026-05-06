@@ -4,11 +4,7 @@ use crate::{
 		dir::Direction,
 		vec2::{Position, Vec2},
 	},
-	world::{
-		World,
-		config::BorderMode,
-		state::{Ants, Cell},
-	},
+	world::{World, config::BorderMode, state::Ants},
 };
 
 impl World {
@@ -70,7 +66,7 @@ impl World {
 	}
 
 	pub(super) fn set_cell(&mut self, pos: Position, value: u8, mask: u8) {
-		let old_value = self.cells.at(pos).unwrap().value;
+		let old_value = self.cells.at(pos).unwrap();
 		let new_value = value | (old_value & !mask);
 		self.set_value(pos, new_value);
 	}
@@ -86,9 +82,7 @@ impl World {
 			}
 		}
 
-		let cell = Cell { value };
-
-		self.cells.set_at(pos, cell);
+		self.cells.set_at(pos, value);
 	}
 
 	/// get positions of neighboring ants about to move to target

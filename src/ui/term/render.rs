@@ -84,14 +84,10 @@ impl TermRenderer {
 	fn render_cells(&self, frame: &FrameOutput, render_cell: &CellRenderer) -> String {
 		let WorldConfig { height, width, .. } = &self.config;
 		let fg_grid = map_to_grid(&frame.fg, *height, *width);
-		let bg_grid = map_to_grid(&frame.bg, *height, *width)
-			.iter()
-			.map(|value| value.unwrap_or_default())
-			.collect::<Vec<_>>();
 
 		let mut string = String::new();
 
-		for (i, &bg_value) in bg_grid.iter().enumerate() {
+		for (i, &bg_value) in frame.bg.entries.iter().enumerate() {
 			if i % *width as usize == 0 {
 				string.push('\n');
 			}

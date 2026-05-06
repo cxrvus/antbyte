@@ -7,10 +7,7 @@ use crate::{
 };
 use rand::{Rng, SeedableRng, rngs::StdRng};
 
-#[derive(Debug, Clone, Default)]
-pub struct Cell {
-	pub value: u8,
-}
+pub type Cell = u8;
 
 pub type Cells = Grid<Cell>;
 pub type Ants = BTreeMap<Position, Ant>;
@@ -75,7 +72,7 @@ impl WorldState {
 
 		for (pos, expiration) in self.cell_decays.clone() {
 			if current_tick == expiration {
-				self.cells.set_at(pos, Cell { value: 0 });
+				self.cells.set_at(pos, 0);
 				self.cell_decays.remove(&pos);
 			}
 		}
