@@ -1,11 +1,8 @@
 use crate::{
-	util::{dir::Direction, vec2::Position},
+	util::dir::Direction,
 	world::{config::WorldConfig, frame::FrameOutput},
 };
-use std::{
-	collections::BTreeMap,
-	io::{self, Write},
-};
+use std::io::{self, Write};
 
 #[inline]
 pub fn print_title() {
@@ -36,17 +33,6 @@ pub(super) struct TermRenderer {
 }
 
 type CellRenderer = Box<dyn Fn(u8, &str) -> String + 'static>;
-
-fn map_to_grid(map: &BTreeMap<Position, u8>, height: u16, width: u16) -> Vec<Option<u8>> {
-	let mut grid = vec![None; (height * width) as usize];
-
-	for (pos, &value) in map {
-		let i = pos.y * width + pos.x;
-		grid[i as usize] = Some(value);
-	}
-
-	grid
-}
 
 impl TermRenderer {
 	pub fn render_frame(&self, frame: &FrameOutput) {
@@ -82,23 +68,20 @@ impl TermRenderer {
 	}
 
 	fn render_cells(&self, frame: &FrameOutput, render_cell: &CellRenderer) -> String {
-		let WorldConfig { height, width, .. } = &self.config;
-		let fg_grid = map_to_grid(&frame.fg, *height, *width);
-
 		let mut string = String::new();
 
 		for (i, &bg_value) in frame.bg.entries.iter().enumerate() {
-			if i % *width as usize == 0 {
+			if i % self.config.width as usize == 0 {
 				string.push('\n');
 			}
 
-			let fg_value = fg_grid[i];
+			let fg_value = frame.fg.get(&frame.bg.pos_from_index(i).unwrap());
 
 			match (fg_value, self.config.hide_ants) {
 				(None, _) | (_, true) => {
 					string.push_str(&render_cell(bg_value, "  "));
 				}
-				(Some(fg_value), false) => {
+				(Some(&fg_value), false) => {
 					// TODO: render modes
 					let dir = Direction::from(fg_value);
 					let (char1, char2) = dir.as_chars();
