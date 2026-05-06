@@ -2,7 +2,8 @@
 
 use crate::{
 	ui::term::render::{clear_screen, print_title_short},
-	world::{World, config::WorldConfig},
+	util::vec2::Position,
+	world::{World, config::WorldConfig, frame::FrameOutput},
 };
 
 use anyhow::Result;
@@ -15,89 +16,92 @@ use std::{
 const MAX_FRAMES: u32 = 0x400;
 const MAX_PX: u16 = 0x200;
 
-impl World {
-	pub fn gif_export(self, source: &Path, target: Option<PathBuf>) -> Result<()> {
-		let path = match target {
-			Some(path) => path,
-			None => {
-				let mut path = source.to_path_buf();
-				let mut file_name = path.file_name().unwrap().to_string_lossy().to_string();
-				file_name.push_str(".gif");
-				path.set_file_name(file_name);
-				path
-			}
-		};
-
-		let WorldConfig {
-			width, height, fps, ..
-		} = self.config();
-
-		let max_dim = (*width).max(*height);
-		#[rustfmt::skip]
-		let scale = if max_dim <= MAX_PX { MAX_PX / max_dim } else { 1 }.max(1);
-		let scaled_width = width * scale;
-		let scaled_height = height * scale;
-
-		let fps = fps.unwrap_or(30).clamp(1, 30);
-		let delay = (100.0 / fps as f32).round() as u16;
-
-		let mut image = File::create(&path)?;
-		let mut encoder = Encoder::new(&mut image, scaled_width, scaled_height, &PALETTE)?;
-		encoder.set_repeat(Repeat::Infinite)?;
-
-		let mut world = self;
-
-		for i in 0..MAX_FRAMES {
-			clear_screen();
-			print_title_short();
-			println!("rendering frame {i} out of {MAX_FRAMES}...");
-			world.gif_render(&mut encoder, scale, delay);
-
-			// TODO
-			if world.next_frame_auto().is_none() {
-				break;
-			}
+pub fn gif_export(world: &World, source: &Path, target: Option<PathBuf>) -> Result<()> {
+	let path = match target {
+		Some(path) => path,
+		None => {
+			let mut path = source.to_path_buf();
+			let mut file_name = path.file_name().unwrap().to_string_lossy().to_string();
+			file_name.push_str(".gif");
+			path.set_file_name(file_name);
+			path
 		}
+	};
 
-		println!("rendering final frame...");
-		world.gif_render(&mut encoder, scale, delay);
-		println!("done!\nGIF exported as '{}'", path.to_string_lossy());
+	let WorldConfig { width, height, .. } = world.config();
 
-		Ok(())
+	let max_dim = (*width).max(*height);
+
+	#[rustfmt::skip]
+	let scale = if max_dim <= MAX_PX { MAX_PX / max_dim } else { 1 }.max(1);
+
+	let scaled_width = width * scale;
+	let scaled_height = height * scale;
+
+	let mut image = File::create(&path)?;
+	let mut encoder = Encoder::new(&mut image, scaled_width, scaled_height, &PALETTE)?;
+	encoder.set_repeat(Repeat::Infinite)?;
+
+	let mut world = world.clone();
+
+	for i in 0..MAX_FRAMES {
+		clear_screen();
+		print_title_short();
+		println!("rendering frame {i} out of {MAX_FRAMES}...");
+		if let Some(frame) = world.next_frame_auto() {
+			render_frame(world.config(), &mut encoder, scale, &frame);
+		} else {
+			break;
+		}
 	}
 
-	fn gif_render(&mut self, encoder: &mut Encoder<&mut File>, scale: u16, delay: u16) {
-		let WorldConfig { width, height, .. } = self.config();
+	println!("done!\nGIF exported as '{}'", path.to_string_lossy());
 
-		let scaled_width = width * scale;
-		let scaled_height = height * scale;
+	Ok(())
+}
 
-		let mut scaled_pixels = Vec::with_capacity(scaled_width as usize * scaled_height as usize);
+fn render_frame(
+	config: &WorldConfig,
+	encoder: &mut Encoder<&mut File>,
+	scale: u16,
+	frame: &FrameOutput,
+) {
+	let WorldConfig {
+		width, height, fps, ..
+	} = config;
 
-		for y in 0..*height {
-			let mut scaled_row = Vec::with_capacity(scaled_width as usize);
-			for x in 0..*width {
-				let pixel = self.cells.entries[(y * width + x) as usize].value;
-				for _ in 0..scale {
-					scaled_row.push(pixel);
-				}
-			}
+	let fps = fps.unwrap_or(30).clamp(1, 30);
+	let delay = (100.0 / fps as f32).round() as u16;
 
+	let scaled_width = width * scale;
+	let scaled_height = height * scale;
+
+	let mut scaled_pixels = Vec::with_capacity(scaled_width as usize * scaled_height as usize);
+
+	for y in 0..*height {
+		let mut scaled_row = Vec::with_capacity(scaled_width as usize);
+		for x in 0..*width {
+			let pos = Position { x, y };
+			let pixel = *frame.bg.get(&pos).unwrap_or(&0);
 			for _ in 0..scale {
-				scaled_pixels.extend_from_slice(&scaled_row);
+				scaled_row.push(pixel);
 			}
 		}
 
-		let frame = Frame {
-			width: scaled_width,
-			height: scaled_height,
-			buffer: scaled_pixels.into(),
-			delay,
-			..Frame::default()
-		};
-
-		encoder.write_frame(&frame).unwrap();
+		for _ in 0..scale {
+			scaled_pixels.extend_from_slice(&scaled_row);
+		}
 	}
+
+	let frame = Frame {
+		width: scaled_width,
+		height: scaled_height,
+		buffer: scaled_pixels.into(),
+		delay,
+		..Frame::default()
+	};
+
+	encoder.write_frame(&frame).unwrap();
 }
 
 const PALETTE: [u8; 0x10 * 3] = [

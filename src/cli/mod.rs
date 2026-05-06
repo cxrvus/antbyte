@@ -62,6 +62,6 @@ pub fn run() -> Result<()> {
 
 #[rustfmt::skip]
 fn export_gif(world: World, source: &Path, target: Option<PathBuf>) -> Result<()> {
-	#[cfg(feature = "extras")] { world.gif_export(source, target) }
+	#[cfg(feature = "extras")] { crate::gif_export::gif_export(&world, source, target) }
 	#[cfg(not(feature = "extras"))] { _ = (world, source, target); anyhow::bail!("need to enable the `extras` feature-flag in the antbyte crate"); }
 }

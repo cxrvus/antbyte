@@ -37,6 +37,7 @@ pub struct WorldProperties {
 	pub config: WorldConfig,
 }
 
+#[derive(Clone)]
 pub struct World {
 	properties: WorldProperties,
 	pub state: WorldState,
