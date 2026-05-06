@@ -5,7 +5,7 @@ pub fn run(world: World) {
 	while let Some(frame) = world.next_frame_auto() {
 		for y in 0..world.config().height {
 			for x in 0..world.config().width {
-				let bg_value = frame.bg.at(Position { x, y }).copied().unwrap_or_default();
+				let bg_value = frame.bg.get(Position { x, y }).copied().unwrap_or_default();
 
 				print!("{:02x}", bg_value);
 			}

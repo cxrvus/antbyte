@@ -72,7 +72,7 @@ impl WorldState {
 
 		for (pos, expiration) in self.cell_decays.clone() {
 			if current_tick == expiration {
-				self.cells.set_at(pos, 0);
+				self.cells.set(pos, 0);
 				self.cell_decays.remove(&pos);
 			}
 		}

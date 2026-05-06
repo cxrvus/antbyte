@@ -66,7 +66,7 @@ impl World {
 	}
 
 	pub(super) fn set_cell(&mut self, pos: Position, value: u8, mask: u8) {
-		let old_value = self.cells.at(pos).unwrap();
+		let old_value = self.cells.get(pos).unwrap();
 		let new_value = value | (old_value & !mask);
 		self.set_value(pos, new_value);
 	}
@@ -82,7 +82,7 @@ impl World {
 			}
 		}
 
-		self.cells.set_at(pos, value);
+		self.cells.set(pos, value);
 	}
 
 	/// get positions of neighboring ants about to move to target

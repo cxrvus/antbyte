@@ -85,7 +85,7 @@ impl World {
 
 		let WorldConfig { width, height, .. } = self.config();
 
-		let bg = Grid::with_values(
+		let bg = Grid::with_entries(
 			*width,
 			*height,
 			self.cells

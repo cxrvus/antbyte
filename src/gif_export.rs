@@ -82,7 +82,7 @@ fn render_frame(
 		let mut scaled_row = Vec::with_capacity(scaled_width as usize);
 		for x in 0..*width {
 			let pos = Position { x, y };
-			let pixel = *frame.bg.at(pos).unwrap_or(&0);
+			let pixel = *frame.bg.get(pos).unwrap_or(&0);
 			for _ in 0..scale {
 				scaled_row.push(pixel);
 			}
