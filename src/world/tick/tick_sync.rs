@@ -108,7 +108,7 @@ impl World {
 				(Clear, 1) => clear = true,
 				(Cell, _) => self.set_cell(pos, *value, cell_mask),
 
-				(AntDir, value) => ant.child_dir = Direction::new(*value),
+				(AntDir, value) => ant.child_dir = Direction::from(*value),
 				(AntMem, value) => ant.child_memory = *value,
 				(Mem, value) => ant.memory = *value,
 
@@ -122,7 +122,7 @@ impl World {
 
 				// move_tick
 				(Halt, _) => ant.halt = *value != 0,
-				(Dir, _) => ant.dir += Direction::new(*value),
+				(Dir, _) => ant.dir += Direction::from(*value),
 
 				// spawn_tick
 				(AntSpawn, _) => ant.child_behavior = *value,

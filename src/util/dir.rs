@@ -11,7 +11,7 @@ impl Direction {
 	pub const INV: u8 = Self::MOD / 2;
 
 	#[inline]
-	pub fn new(value: u8) -> Self {
+	pub fn from(value: u8) -> Self {
 		Self(value % Self::MOD)
 	}
 
@@ -27,7 +27,7 @@ impl Direction {
 
 	#[inline]
 	pub fn inverted(&self) -> Self {
-		Self::new(self.0 + Self::INV)
+		Self::from(self.0 + Self::INV)
 	}
 
 	pub fn as_vec(&self) -> Vec2 {
@@ -67,7 +67,7 @@ impl ops::Add<Direction> for Direction {
 
 	#[inline]
 	fn add(self, rhs: Direction) -> Self::Output {
-		Self::new(self.0 + rhs.0)
+		Self::from(self.0 + rhs.0)
 	}
 }
 

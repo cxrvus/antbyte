@@ -83,7 +83,7 @@ impl World {
 
 		let ant = if let Some(root_id) = world.properties.behaviors.keys().min() {
 			Ant {
-				dir: Direction::new(start_dir),
+				dir: Direction::from(start_dir),
 				behavior: *root_id,
 				..Default::default()
 			}

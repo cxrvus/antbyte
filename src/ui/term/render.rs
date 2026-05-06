@@ -104,7 +104,7 @@ impl TermRenderer {
 				}
 				(Some(fg_value), false) => {
 					// TODO: render modes
-					let dir = Direction::new(fg_value);
+					let dir = Direction::from(fg_value);
 					let (char1, char2) = dir.as_chars();
 					let ant_chars = format!("{char1}{char2}");
 					string.push_str(&render_cell(bg_value, &ant_chars));
