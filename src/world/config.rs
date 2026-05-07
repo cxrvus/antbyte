@@ -110,7 +110,7 @@ impl TryFrom<String> for BorderMode {
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all="snake_case")]
-pub enum StartingPos { TopLeft, Top, Left, Center }
+pub enum StartingPos { TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight  }
 
 impl TryFrom<String> for StartingPos {
 	type Error = Error;
@@ -119,8 +119,14 @@ impl TryFrom<String> for StartingPos {
 		match value.as_str() {
 			"top_left" => Ok(Self::TopLeft),
 			"top" => Ok(Self::Top),
+			"top_right" => Ok(Self::TopRight),
 			"left" => Ok(Self::Left),
 			"center" => Ok(Self::Center),
+			"right" => Ok(Self::Right),
+			"bottom_left" => Ok(Self::BottomLeft),
+			"bottom" => Ok(Self::Bottom),
+			"bottom_right" => Ok(Self::BottomRight),
+
 			invalid => Err(anyhow!("invalid starting pos: '{invalid}'")),
 		}
 	}

@@ -79,6 +79,24 @@ impl World {
 				x: half_width,
 				y: half_height,
 			},
+
+			StartingPos::Right => Position {
+				x: width - 1,
+				y: half_height,
+			},
+			StartingPos::BottomLeft => Position {
+				x: 0,
+				y: height - 1,
+			},
+			StartingPos::Bottom => Position {
+				x: half_width,
+				y: height - 1,
+			},
+			StartingPos::BottomRight => Position {
+				x: width - 1,
+				y: height - 1,
+			},
+			StartingPos::TopRight => Position { x: width - 1, y: 0 },
 		};
 
 		let ant = if let Some(root_id) = world.properties.behaviors.keys().min() {
