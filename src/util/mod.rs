@@ -6,11 +6,11 @@ pub mod vec2;
 #[rustfmt::skip]
 pub fn sleep(ms: u32) { std::thread::sleep(std::time::Duration::from_millis(ms as u64)); }
 
-pub fn find_dupe<T: PartialEq + Clone>(vec: &[T]) -> Option<T> {
-	for i in 0..vec.len() {
+pub fn find_dupe<T: PartialEq>(vec: &[T]) -> Option<&T> {
+	for i in 1..vec.len() {
 		for j in 0..i {
 			if vec[i] == vec[j] {
-				return Some(vec[i].clone());
+				return Some(&vec[i]);
 			}
 		}
 	}
