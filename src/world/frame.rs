@@ -76,7 +76,7 @@ impl World {
 			}
 		}
 
-		// todo: implement render modes
+		// todo: implement using render settings
 		let fg = self
 			.ants
 			.iter()
@@ -104,7 +104,7 @@ impl World {
 		})
 	}
 
-	// TODO: render modes
+	// todo: implement using render settings
 	fn adjusted_color(&self, color: u8) -> u8 {
 		match self.config().color_mode {
 			ColorMode::Binary => match color {

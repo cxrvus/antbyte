@@ -57,7 +57,6 @@ impl Parser {
 
 				Token::ParenthesisRight => {
 					// if this panics, there might be an error in validate_exp_tokens()
-
 					let parameters = expression_sets.pop().unwrap();
 
 					if let Some(prev_set) = expression_sets.last_mut() {

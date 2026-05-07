@@ -66,7 +66,6 @@ impl WorldState {
 		self.rng.as_mut().expect("rng must be Some").random()
 	}
 
-	// todo: optimize decay
 	pub(super) fn cell_decay(&mut self) {
 		let current_tick = self.tick_count as u16;
 

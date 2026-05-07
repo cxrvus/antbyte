@@ -9,7 +9,7 @@ use crate::{
 
 impl World {
 	pub(super) fn next_pos(&self, pos: Position, dir: Direction) -> Option<Position> {
-		let _different_layer = false; // idea: spawning ants on different z-layers
+		let _different_layer = false; // planned: spawning ants on different z-layers
 		let new_pos = if _different_layer {
 			pos.sign()
 		} else {
