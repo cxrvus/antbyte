@@ -32,13 +32,13 @@ impl World {
 			let next_ant = next_pos.and_then(|pos| self.ants.get(&pos));
 
 			let input_value: u8 = match input_sub_pin.pin {
-				Cell => self.cells.at(pos).unwrap().value,
+				Cell => *self.cells.get(pos).unwrap(),
 				Next => next_pos
-					.map(|pos| self.cells.at(pos).unwrap().value)
+					.map(|pos| *self.cells.get(pos).unwrap())
 					.unwrap_or(0u8),
 
-				Time => ant.age(self.tick_count) as u8,
-				Pulse => zero_count_mask(ant.age(self.tick_count) as u8),
+				Time => ant.age(self.tick_count()) as u8,
+				Pulse => zero_count_mask(ant.age(self.tick_count()) as u8),
 				Mem => ant.memory,
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
@@ -108,7 +108,7 @@ impl World {
 				(Clear, 1) => clear = true,
 				(Cell, _) => self.set_cell(pos, *value, cell_mask),
 
-				(AntDir, value) => ant.child_dir = Direction::new(*value),
+				(AntDir, value) => ant.child_dir = Direction::from(*value),
 				(AntMem, value) => ant.child_memory = *value,
 				(Mem, value) => ant.memory = *value,
 
@@ -122,7 +122,7 @@ impl World {
 
 				// move_tick
 				(Halt, _) => ant.halt = *value != 0,
-				(Dir, _) => ant.dir += Direction::new(*value),
+				(Dir, _) => ant.dir += Direction::from(*value),
 
 				// spawn_tick
 				(AntSpawn, _) => ant.child_behavior = *value,

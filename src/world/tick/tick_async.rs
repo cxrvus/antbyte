@@ -1,9 +1,12 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::{
+	collections::{BTreeMap, BTreeSet},
+	mem::swap,
+};
 
 use crate::{
 	ant::Ant,
 	util::vec2::Position,
-	world::{Ants, World, config::BorderMode},
+	world::{World, config::BorderMode, state::Ants},
 };
 
 enum MoveAction {
@@ -33,8 +36,10 @@ impl World {
 	}
 
 	pub(super) fn move_tick(&mut self) {
-		let mut source = self.ants.clone();
+		let mut source = Ants::new();
 		let mut result = Ants::new();
+
+		swap(&mut self.ants, &mut source);
 
 		while let Some((pos, ant)) = source.pop_first() {
 			let mut stack = vec![(pos, ant)];
@@ -121,7 +126,7 @@ impl World {
 			assert!(prev.is_none(), "tried to occupy occupied space")
 		}
 
-		self.ants = result;
+		swap(&mut result, &mut self.ants);
 	}
 
 	const ANT_LIMIT: u32 = 0x400;

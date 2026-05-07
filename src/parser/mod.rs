@@ -183,7 +183,7 @@ impl Parser {
 		if actual == expected {
 			true
 		} else {
-			self.tokens.push(actual.clone());
+			self.tokens.push(actual);
 			false
 		}
 	}

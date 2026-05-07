@@ -66,6 +66,8 @@ pub struct Args {
 	pub preview: bool,
 }
 
+const MAX_TICKS: u32 = u16::MAX as u32;
+
 impl Args {
 	#[rustfmt::skip]
 	pub fn set_config(&self, config: &mut WorldConfig) -> anyhow::Result<()> {
@@ -82,9 +84,13 @@ impl Args {
 
 		if self.hide_ants { config.hide_ants = true; }
 		if self.stepped { config.fps = None; }
-		if self.instant { config.speed = None; }
 		if self.looping { config.looping = true; }
-		if self.ticks.is_some() { config.ticks = self.ticks; }
+		if self.ticks.is_some() { config.max_ticks = self.ticks; }
+
+		if self.instant {
+			config.start_tick = MAX_TICKS;
+			config.max_ticks = config.max_ticks.or(Some(MAX_TICKS));
+		}
 
 		if self.gif.is_some() && (config.speed.is_none() | config.fps.is_none()) {
 			anyhow::bail!("need a speed and an FPS of at least 1 to export as GIF");

@@ -41,7 +41,7 @@ impl Parser {
 			"speed" => config.speed = self.next_number()?,
 			"decay" => config.decay = self.next_number().map(|x| x.map(|v| v as u16))?,
 			"sleep" => config.sleep = self.next_number()?,
-			"ticks" => config.ticks = self.next_number()?,
+			"ticks" => config.max_ticks = self.next_number()?,
 			"noise_seed" | "seed" => config.noise_seed = self.next_number()?,
 
 			"dur" => {
@@ -54,7 +54,7 @@ impl Parser {
 						.ok_or(anyhow!("duration must be greater than 0"))?;
 
 					let ticks = duration.saturating_mul(speed).saturating_mul(fps);
-					config.ticks = Some(ticks);
+					config.max_ticks = Some(ticks);
 				}
 			}
 
@@ -65,19 +65,12 @@ impl Parser {
 			}
 
 			"start_pos" | "start" => config.start_pos = StartingPos::try_from(self.next_ident()?)?,
-
 			"start_dir" => config.start_dir = self.next_number()?.unwrap_or_default() as u8,
-
 			"start_tick" => config.start_tick = self.next_number()?.unwrap_or_default(),
-
 			"ant_limit" => config.ant_limit = self.next_number()?,
-
 			"color_mode" | "colors" => config.color_mode = ColorMode::try_from(self.next_ident()?)?,
-
 			"desc" | "description" => config.description = self.next_str()?,
-
 			"hide_ants" => config.hide_ants = self.next_bit()?,
-
 			"ascii" => config.ascii = Some(self.next_str()?),
 			"keys" => config.keys = Some(self.next_str()?),
 

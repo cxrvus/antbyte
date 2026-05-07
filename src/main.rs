@@ -23,7 +23,7 @@ pub fn run() -> Result<()> {
 	{
 		use antbyte::{
 			parser::compiler::LogConfig,
-			plugins::{PluginSet, render::term_render::TermRenderer},
+			ui::{PluginSet, render::term_render::TermRenderer},
 			world::{World, file_compiler::compile_world},
 		};
 

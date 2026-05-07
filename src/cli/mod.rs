@@ -10,11 +10,7 @@ use clap::{self, Parser};
 
 use crate::{
 	parser::compiler::LogConfig,
-	plugins::{
-		PluginSet,
-		ext::term_input::TermInput,
-		render::{DefaultRenderer, Renderer, term_render::TermRenderer},
-	},
+	ui::term,
 	world::{World, config::WorldConfig, file_compiler::compile_world},
 };
 
@@ -50,27 +46,14 @@ pub fn run() -> Result<()> {
 	} else {
 		args.set_config(&mut properties.config)
 			.context("config-arg error!")?;
-		let mut world = World::new(properties.clone()).context("world error!")?;
-
-		let term_renderer = TermRenderer::new(&world, args.hide_title);
-		let term_input = TermInput;
-
-		let renderer: Box<dyn Renderer> = if args.raw {
-			Box::new(DefaultRenderer)
-		} else {
-			Box::new(term_renderer)
-		};
-
-		let mut plugins = PluginSet {
-			renderer,
-			ext_input: Box::new(term_input),
-			..Default::default()
-		};
+		let world = World::new(properties.clone()).context("world error!")?;
 
 		if let Some(target) = args.gif {
 			export_gif(world, &args.path, target).context("GIF export error!")?;
+		} else if args.raw {
+			term::raw::run(world);
 		} else {
-			world.run(&mut plugins).context("world error!")?;
+			term::run(world, args.hide_title);
 		}
 	}
 
@@ -79,6 +62,6 @@ pub fn run() -> Result<()> {
 
 #[rustfmt::skip]
 fn export_gif(world: World, source: &Path, target: Option<PathBuf>) -> Result<()> {
-	#[cfg(feature = "extras")] { world.gif_export(source, target) }
+	#[cfg(feature = "extras")] { crate::gif_export::gif_export(&world, source, target) }
 	#[cfg(not(feature = "extras"))] { _ = (world, source, target); anyhow::bail!("need to enable the `extras` feature-flag in the antbyte crate"); }
 }

@@ -4,21 +4,12 @@ mod tick_sync;
 mod tick_util;
 
 impl World {
-	pub fn frame_tick(&mut self) -> bool {
-		for _ in 0..self
-			.config()
-			.speed
-			.expect("speed must be greater than 0 to use frame_tick")
-		{
-			if !self.tick() {
-				return false;
-			}
+	/// advances simulation by 1 tick and returns false if this is supposed to be the last tick
+	pub(super) fn tick(&mut self) -> bool {
+		if self.tick_count == u32::MAX {
+			return false;
 		}
 
-		true
-	}
-
-	pub fn tick(&mut self) -> bool {
 		self.tick_count += 1;
 
 		// signals
@@ -44,7 +35,6 @@ impl World {
 		self.spawn_tick();
 		self.die_tick();
 
-		// todo: optimize decay
 		// cell decay
 		if self.config().decay.is_some() {
 			self.cell_decay();
@@ -53,12 +43,14 @@ impl World {
 		// end world if conditions are met
 		let no_ants = self.ants.is_empty();
 
-		let tick_overflow = self
+		let tick_overflow = self.tick_count == u32::MAX;
+
+		let max_tick = self
 			.config()
-			.ticks
+			.max_ticks
 			.map(|max| self.tick_count >= max)
 			.unwrap_or_default();
 
-		!(no_ants || tick_overflow)
+		!(no_ants || tick_overflow || max_tick)
 	}
 }

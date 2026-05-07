@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::util::{dir::Direction, vec2::Coord};
 
 pub const FPS_CAP: u32 = 50;
-pub const SPEED_CAP: u32 = 0x2000;
+pub const SPEED_CAP: u32 = 0x4000;
 pub const SIZE_CAP: Coord = 0x400;
 
 #[cfg_attr(test, derive(ts_rs::TS))]
@@ -20,7 +20,7 @@ pub struct WorldConfig {
 	/// simulated ticks per frame (defaults to 1)
 	pub speed: Option<u32>,
 	/// simulation tick limit
-	pub ticks: Option<u32>,
+	pub max_ticks: Option<u32>,
 	/// amount of ticks after which a cell will automatically reset
 	pub decay: Option<u16>,
 	/// re-run simulation after it ends
@@ -64,7 +64,7 @@ impl Default for WorldConfig {
 			width: 16,
 			height: 16,
 			speed: Some(1),
-			ticks: None,
+			max_ticks: None,
 			decay: None,
 			looping: false,
 			border_mode: BorderMode::Wrap,
@@ -110,7 +110,7 @@ impl TryFrom<String> for BorderMode {
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all="snake_case")]
-pub enum StartingPos { TopLeft, Top, Left, Center }
+pub enum StartingPos { TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight  }
 
 impl TryFrom<String> for StartingPos {
 	type Error = Error;
@@ -119,8 +119,14 @@ impl TryFrom<String> for StartingPos {
 		match value.as_str() {
 			"top_left" => Ok(Self::TopLeft),
 			"top" => Ok(Self::Top),
+			"top_right" => Ok(Self::TopRight),
 			"left" => Ok(Self::Left),
 			"center" => Ok(Self::Center),
+			"right" => Ok(Self::Right),
+			"bottom_left" => Ok(Self::BottomLeft),
+			"bottom" => Ok(Self::Bottom),
+			"bottom_right" => Ok(Self::BottomRight),
+
 			invalid => Err(anyhow!("invalid starting pos: '{invalid}'")),
 		}
 	}
@@ -157,13 +163,17 @@ impl WorldConfig {
 			bail!("starting direction must not exceed {MAX_DIR}")
 		}
 
-		if let Some(max_ticks) = self.ticks
+		if let Some(max_ticks) = self.max_ticks
 			&& self.start_tick > max_ticks
 		{
 			bail!(
 				"start tick ({}) must not exceed set tick limit ({max_ticks})",
 				self.start_tick
 			)
+		}
+
+		if self.speed.is_none() {
+			bail!("speed must be greater than 0")
 		}
 
 		Self::cap_opt(self.fps, "FPS", FPS_CAP)?;

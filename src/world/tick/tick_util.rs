@@ -4,12 +4,12 @@ use crate::{
 		dir::Direction,
 		vec2::{Position, Vec2},
 	},
-	world::{Ants, Cell, World, config::BorderMode},
+	world::{World, config::BorderMode, state::Ants},
 };
 
 impl World {
 	pub(super) fn next_pos(&self, pos: Position, dir: Direction) -> Option<Position> {
-		let _different_layer = false; // idea: spawning ants on different z-layers
+		let _different_layer = false; // planned: spawning ants on different z-layers
 		let new_pos = if _different_layer {
 			pos.sign()
 		} else {
@@ -24,11 +24,7 @@ impl World {
 			match self.config().border_mode {
 				Collide | Despawn => None,
 				Cycle | Wrap => {
-					let dimensions = Position {
-						x: self.config().width,
-						y: self.config().height,
-					}
-					.sign();
+					let dimensions = self.cells.dimensions().sign();
 
 					let mut wrapped_pos = new_pos % dimensions;
 
@@ -66,7 +62,7 @@ impl World {
 	}
 
 	pub(super) fn set_cell(&mut self, pos: Position, value: u8, mask: u8) {
-		let old_value = self.cells.at(pos).unwrap().value;
+		let old_value = self.cells.get(pos).unwrap();
 		let new_value = value | (old_value & !mask);
 		self.set_value(pos, new_value);
 	}
@@ -82,9 +78,7 @@ impl World {
 			}
 		}
 
-		let cell = Cell { value };
-
-		self.cells.set_at(pos, cell);
+		self.cells.set(pos, value);
 	}
 
 	/// get positions of neighboring ants about to move to target
@@ -92,7 +86,7 @@ impl World {
 		let mut positions = vec![];
 
 		for dir in 0..=Direction::MAX {
-			let dir = Direction::new(dir);
+			let dir = Direction::from(dir);
 			if let Some(source_pos) = self.next_pos(target_pos, dir.inverted())
 				&& let Some(source_ant) = source.get(&source_pos)
 				&& !source_ant.halt
