@@ -79,9 +79,11 @@ impl From<FuncCall> for CompStatement {
 			"FuncCall must have exactly one left-hand-side value\nfound {assignees:?})",
 		);
 
+		let assignee = assignees.into_iter().next().unwrap();
+
 		Self {
-			assignee: assignees[0].clone(),
-			params: params.clone(),
+			assignee,
+			params,
 		}
 	}
 }
