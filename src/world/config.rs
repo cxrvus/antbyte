@@ -45,6 +45,10 @@ pub struct WorldConfig {
 	pub fps: Option<u32>,
 	/// don't render ants
 	pub hide_ants: bool,
+	/// background render mask
+	pub bg: RenderMask,
+	/// foreground render mask
+	pub fg: RenderMask,
 	/// amount of ms to sleep for after end of simulation, i.e. between loops
 	pub sleep: Option<u32>,
 	/// 16 ASCII characters to render cells, start is value = 0
@@ -78,6 +82,8 @@ impl Default for WorldConfig {
 			fps: Some(FPS_CAP),
 			start_tick: 0,
 			hide_ants: false,
+			bg: RenderMask::Cell,
+			fg: RenderMask::Dir,
 			sleep: Some(200),
 			ascii: None,
 
@@ -128,6 +134,36 @@ impl TryFrom<String> for StartingPos {
 			"bottom_right" => Ok(Self::BottomRight),
 
 			invalid => Err(anyhow!("invalid starting pos: '{invalid}'")),
+		}
+	}
+}
+
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum RenderMask {
+	Cell,
+
+	// ## Ant
+	Dir,
+	Id,
+	BirthTick,
+	InputPins,
+	Mem,
+}
+
+impl TryFrom<String> for RenderMask {
+	type Error = Error;
+
+	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
+		match value.as_str() {
+			"cell" => Ok(Self::Cell),
+			"dir" => Ok(Self::Dir),
+			"id" => Ok(Self::Id),
+			"birth_tick" => Ok(Self::BirthTick),
+			"input_pins" => Ok(Self::InputPins),
+			"mem" => Ok(Self::Mem),
+
+			invalid => Err(anyhow!("invalid render mask: '{invalid}'")),
 		}
 	}
 }

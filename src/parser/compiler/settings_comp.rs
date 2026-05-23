@@ -3,7 +3,7 @@ use anyhow::{Context, Result, anyhow};
 use crate::{
 	parser::{Parser, token::Token},
 	util::vec2::Coord,
-	world::config::{BorderMode, ColorMode, StartingPos, WorldConfig},
+	world::config::{BorderMode, ColorMode, RenderMask, StartingPos, WorldConfig},
 };
 
 impl WorldConfig {
@@ -68,6 +68,10 @@ impl Parser {
 			"start_dir" => config.start_dir = self.next_number()?.unwrap_or_default() as u8,
 			"start_tick" => config.start_tick = self.next_number()?.unwrap_or_default(),
 			"ant_limit" => config.ant_limit = self.next_number()?,
+
+			"bg" => config.bg = RenderMask::try_from(self.next_ident()?)?,
+			"fg" => config.fg = RenderMask::try_from(self.next_ident()?)?,
+
 			"color_mode" | "colors" => config.color_mode = ColorMode::try_from(self.next_ident()?)?,
 			"desc" | "description" => config.description = self.next_str()?,
 			"hide_ants" => config.hide_ants = self.next_bit()?,
