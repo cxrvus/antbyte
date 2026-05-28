@@ -74,7 +74,6 @@ impl Parser {
 
 			"color_mode" | "colors" => config.color_mode = ColorMode::try_from(self.next_ident()?)?,
 			"desc" | "description" => config.description = self.next_str()?,
-			"hide_ants" => config.hide_ants = self.next_bit()?,
 			"keys" => config.keys = Some(self.next_str()?),
 
 			other => return Err(anyhow!("unknown setting: '{other}'")),

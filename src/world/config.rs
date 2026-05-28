@@ -43,8 +43,6 @@ pub struct WorldConfig {
 	// ### Renderer
 	/// rendered frames per second
 	pub fps: Option<u32>,
-	/// don't render ants
-	pub hide_ants: bool,
 	/// background render mask
 	pub bg: RenderMask,
 	/// foreground render mask
@@ -78,7 +76,6 @@ impl Default for WorldConfig {
 
 			fps: Some(FPS_CAP),
 			start_tick: 0,
-			hide_ants: false,
 			bg: RenderMask::Cell,
 			fg: RenderMask::Dir,
 			sleep: Some(200),
@@ -137,6 +134,7 @@ impl TryFrom<String> for StartingPos {
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum RenderMask {
+	None,
 	Cell,
 
 	// ## Ant
@@ -152,6 +150,7 @@ impl TryFrom<String> for RenderMask {
 
 	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
 		match value.as_str() {
+			"none" => Ok(Self::None),
 			"cell" => Ok(Self::Cell),
 			"dir" => Ok(Self::Dir),
 			"id" => Ok(Self::Id),
@@ -211,6 +210,14 @@ impl WorldConfig {
 		Self::cap_opt(self.fps, "FPS", FPS_CAP)?;
 		Self::cap_opt(self.speed, "speed", SPEED_CAP)?;
 		Self::cap_opt(self.sleep, "sleep", 10000)?;
+
+		// either FG or BG must be something
+
+		if let RenderMask::None = self.bg
+			&& let RenderMask::None = self.fg
+		{
+			bail!("need to render either fg or bg or both. found both set to [none]")
+		}
 
 		if let Some(keys) = &self.keys
 			&& keys.len() > 8

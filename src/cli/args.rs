@@ -1,6 +1,6 @@
 use crate::{
 	parser::{Parser, token::Token},
-	world::config::WorldConfig,
+	world::config::{RenderMask, WorldConfig},
 };
 
 use clap::{self, Parser as ClapParser};
@@ -37,8 +37,8 @@ pub struct Args {
 	cfg: Option<String>,
 
 	/// Hide Ants
-	#[arg(short = 'A', long)]
-	hide_ants: bool,
+	#[arg(short = 'F', long)]
+	hide_fg: bool,
 
 	/// output data in machine-readable format
 	#[arg(short, long)]
@@ -82,7 +82,7 @@ impl Args {
 			}
 		}
 
-		if self.hide_ants { config.hide_ants = true; }
+		if self.hide_fg { config.fg = RenderMask::None; }
 		if self.stepped { config.fps = None; }
 		if self.looping { config.looping = true; }
 		if self.ticks.is_some() { config.max_ticks = self.ticks; }
