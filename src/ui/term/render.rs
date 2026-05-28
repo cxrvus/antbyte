@@ -36,21 +36,8 @@ type CellRenderer = Box<dyn Fn(u8, &str) -> String + 'static>;
 
 impl TermRenderer {
 	pub fn render_frame(&self, frame: &FrameOutput) {
-		// pre-render
-		let cell_renderer = if let Some(ascii) = &self.config.ascii {
-			let palette = if ascii.is_empty() {
-				ASCII_DEFAULT
-			} else {
-				ascii
-			};
-			ascii_cell(palette)
-		} else {
-			Box::new(color_cell)
-		};
-
 		let world_str = self.render_cells(frame, &cell_renderer);
 
-		// print
 		clear_screen();
 
 		if !self.hide_title {
@@ -93,21 +80,6 @@ impl TermRenderer {
 
 		string
 	}
-}
-
-const ASCII_DEFAULT: &str = ".,-=+:;cna!?$W#@";
-
-fn ascii_cell(palette: &str) -> CellRenderer {
-	let palette = palette.to_string();
-	Box::new(move |value: u8, content: &str| -> String {
-		if !content.trim().is_empty() {
-			content.into()
-		} else {
-			let value = value.clamp(0, 15) as usize;
-			let char = &palette[value..value + 1];
-			char.repeat(2)
-		}
-	})
 }
 
 fn color_cell(value: u8, content: &str) -> String {

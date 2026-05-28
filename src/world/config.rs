@@ -51,9 +51,6 @@ pub struct WorldConfig {
 	pub fg: RenderMask,
 	/// amount of ms to sleep for after end of simulation, i.e. between loops
 	pub sleep: Option<u32>,
-	/// 16 ASCII characters to render cells, start is value = 0
-	/// can also set to empty string to get a default ASCII palette
-	pub ascii: Option<String>,
 	/// changes how colors are rendered
 	pub color_mode: ColorMode,
 
@@ -85,7 +82,6 @@ impl Default for WorldConfig {
 			bg: RenderMask::Cell,
 			fg: RenderMask::Dir,
 			sleep: Some(200),
-			ascii: None,
 
 			keys: None,
 		}
@@ -215,15 +211,6 @@ impl WorldConfig {
 		Self::cap_opt(self.fps, "FPS", FPS_CAP)?;
 		Self::cap_opt(self.speed, "speed", SPEED_CAP)?;
 		Self::cap_opt(self.sleep, "sleep", 10000)?;
-
-		if let Some(ascii) = &self.ascii {
-			let ascii_len = ascii.len();
-			if !ascii.is_empty() && ascii_len != 16 {
-				bail!(
-					"the ascii setting must be None, an empty string, or 16 characters long. found {ascii_len}"
-				);
-			};
-		};
 
 		if let Some(keys) = &self.keys
 			&& keys.len() > 8
