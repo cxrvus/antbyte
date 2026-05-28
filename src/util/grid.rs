@@ -52,14 +52,6 @@ impl<T> Grid<T> {
 		}
 	}
 
-	pub fn pos_from_index(&self, i: usize) -> Option<Position> {
-		self.entries.get(i)?;
-		Some(Position {
-			x: (i % self.width as usize) as Coord,
-			y: (i / self.width as usize) as Coord,
-		})
-	}
-
 	pub fn dimensions(&self) -> Position {
 		Position {
 			x: self.width,
@@ -78,19 +70,5 @@ where
 			height,
 			entries: (0..width * height).map(|_| T::default()).collect(),
 		}
-	}
-}
-
-impl<T> Grid<T>
-where
-	T: Default + PartialEq,
-{
-	pub fn find_all(&self, target: T) -> Vec<Position> {
-		self.entries
-			.iter()
-			.enumerate()
-			.filter(|(_, value)| **value == target)
-			.map(|(i, _)| self.pos_from_index(i).unwrap())
-			.collect()
 	}
 }

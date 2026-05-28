@@ -1,12 +1,8 @@
 use std::collections::BTreeMap;
 
 use crate::{
-	util::{grid::Grid, vec2::Position},
-	world::{
-		World,
-		config::{ColorMode, WorldConfig},
-		state::{Cell, WorldStatus},
-	},
+	util::vec2::Position,
+	world::{World, config::ColorMode, state::WorldStatus},
 };
 
 #[derive(Debug, Default)]
@@ -17,7 +13,7 @@ pub struct FrameInput {
 #[derive(Debug)]
 pub struct FrameOutput {
 	pub fg: BTreeMap<Position, u8>,
-	pub bg: Grid<Cell>,
+	pub bg: BTreeMap<Position, u8>,
 	pub ms: Option<u32>,
 	pub metadata: String, //todo: turn this into a map
 	pub ext_out: Vec<u8>,
@@ -83,17 +79,18 @@ impl World {
 			.map(|(&pos, ant)| (pos, ant.dir.value()))
 			.collect();
 
-		let WorldConfig { width, height, .. } = self.config();
+		// TODO: cell mode
+		let width = self.config().width;
 
-		let bg = Grid::with_entries(
-			*width,
-			*height,
-			self.cells
-				.entries
-				.iter()
-				.map(|value| self.adjusted_color(*value))
-				.collect(),
-		);
+		let bg_entries = self
+			.cells
+			.entries
+			.iter()
+			.enumerate()
+			.filter(|&(_, &value)| value != 0)
+			.map(|(i, value)| (Position::from_index(i, width), self.adjusted_color(*value)));
+
+		let bg = BTreeMap::from_iter(bg_entries);
 
 		Some(FrameOutput {
 			fg,

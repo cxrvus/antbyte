@@ -13,6 +13,13 @@ pub struct Position {
 impl Position {
 	pub const ZERO: Self = Self { x: 0, y: 0 };
 
+	pub fn from_index(i: usize, width: Coord) -> Self {
+		Self {
+			x: (i % width as usize) as Coord,
+			y: (i / width as usize) as Coord,
+		}
+	}
+
 	pub fn sign(self) -> Vec2 {
 		let Self { x, y } = self;
 		Vec2 {

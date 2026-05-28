@@ -1,5 +1,5 @@
 use crate::{
-	util::dir::Direction,
+	util::{dir::Direction, vec2::Position},
 	world::{config::WorldConfig, frame::FrameOutput},
 };
 use std::io::{self, Write};
@@ -32,11 +32,9 @@ pub(super) struct TermRenderer {
 	pub(super) name: Option<String>,
 }
 
-type CellRenderer = Box<dyn Fn(u8, &str) -> String + 'static>;
-
 impl TermRenderer {
 	pub fn render_frame(&self, frame: &FrameOutput) {
-		let world_str = self.render_cells(frame, &cell_renderer);
+		let world_str = self.render_cells(frame);
 
 		clear_screen();
 
@@ -54,35 +52,38 @@ impl TermRenderer {
 		io::stdout().flush().unwrap();
 	}
 
-	fn render_cells(&self, frame: &FrameOutput, render_cell: &CellRenderer) -> String {
+	fn render_cells(&self, frame: &FrameOutput) -> String {
 		let mut string = String::new();
+		let max_index = self.config.height * self.config.width;
 
-		for (i, &bg_value) in frame.bg.entries.iter().enumerate() {
-			if i % self.config.width as usize == 0 {
+		for i in 0..max_index {
+			let pos = Position::from_index(i as usize, self.config.width);
+
+			if pos.x == 0 {
 				string.push('\n');
 			}
 
-			let fg_value = frame.fg.get(&frame.bg.pos_from_index(i).unwrap());
+			let cell_color = frame.bg.get(&pos).unwrap_or(&0);
+			let fg_value = frame.fg.get(&pos);
 
-			match (fg_value, self.config.hide_ants) {
-				(None, _) | (_, true) => {
-					string.push_str(&render_cell(bg_value, "  "));
-				}
-				(Some(&fg_value), false) => {
+			let cell_text = match fg_value {
+				None => "  ",
+				Some(&fg_value) => {
 					// todo: implement using render settings
 					let dir = Direction::from(fg_value);
 					let (char1, char2) = dir.as_chars();
-					let ant_chars = format!("{char1}{char2}");
-					string.push_str(&render_cell(bg_value, &ant_chars));
+					&format!("{char1}{char2}")
 				}
-			}
+			};
+
+			string.push_str(&render_cell(*cell_color, cell_text));
 		}
 
 		string
 	}
 }
 
-fn color_cell(value: u8, content: &str) -> String {
+fn render_cell(value: u8, content: &str) -> String {
 	let (bg, fg) = color_codes(value);
 	format!("\x1b[{fg};{bg}m{content}\x1b[0m")
 }
