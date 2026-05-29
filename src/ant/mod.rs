@@ -16,6 +16,8 @@ pub struct Ant {
 	pub memory: u8,
 	pub child_memory: u8,
 
+	pub last_input: u8,
+
 	pub halt: bool,
 	pub die: bool,
 	pub kill: bool,

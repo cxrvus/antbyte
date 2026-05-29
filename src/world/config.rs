@@ -141,7 +141,7 @@ pub enum RenderMask {
 	Dir,
 	Id,
 	BirthTick,
-	InputPins,
+	InputBits,
 	Mem,
 }
 
@@ -155,7 +155,7 @@ impl TryFrom<String> for RenderMask {
 			"dir" => Ok(Self::Dir),
 			"id" => Ok(Self::Id),
 			"birth_tick" => Ok(Self::BirthTick),
-			"input_pins" => Ok(Self::InputPins),
+			"input_bits" => Ok(Self::InputBits),
 			"mem" => Ok(Self::Mem),
 
 			invalid => Err(anyhow!("invalid render mask: '{invalid}'")),

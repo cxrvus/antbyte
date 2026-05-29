@@ -22,11 +22,15 @@ impl World {
 		let all_outputs: Vec<_> = image
 			.ants
 			.iter()
-			.map(|(pos, ant)| (pos, self.get_output(ant, *pos)))
+			.map(|(pos, ant)| {
+				let input = self.get_input(ant, *pos);
+				let output = self.get_output(ant, input);
+				(pos, input, output)
+			})
 			.collect();
 
-		for (pos, outputs) in all_outputs {
-			self.sync_tick(*pos, &outputs);
+		for (pos, input, output) in all_outputs {
+			self.sync_tick(*pos, input, &output);
 		}
 
 		// tick ants (async)

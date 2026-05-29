@@ -1,7 +1,6 @@
 use crate::{
 	ant::{
 		Ant,
-		behavior::Behavior,
 		pin::{Pin, PinValue},
 	},
 	util::{dir::Direction, vec2::Position},
@@ -14,20 +13,15 @@ fn zero_count_mask(x: u8) -> u8 {
 
 use Pin::*;
 impl World {
-	pub(super) fn get_output(&mut self, ant: &Ant, pos: Position) -> Vec<PinValue> {
-		let Behavior {
-			inputs,
-			outputs,
-			logic: truth_table,
-			..
-		} = self
+	pub(super) fn get_input(&mut self, ant: &Ant, pos: Position) -> u8 {
+		let behavior = self
 			.get_behavior(ant.behavior)
 			.cloned()
 			.expect("invalid Behavior ID");
 
 		let mut input_bits = 0u8;
 
-		for input_sub_pin in inputs.iter() {
+		for input_sub_pin in behavior.inputs.iter() {
 			let next_pos = self.next_pos(pos, ant.dir);
 			let next_ant = next_pos.and_then(|pos| self.ants.get(&pos));
 
@@ -63,13 +57,22 @@ impl World {
 			input_bits |= masked_input_value;
 		}
 
+		input_bits
+	}
+
+	pub(super) fn get_output(&mut self, ant: &Ant, input: u8) -> Vec<PinValue> {
+		let behavior = self
+			.get_behavior(ant.behavior)
+			.cloned()
+			.expect("invalid Behavior ID");
+
 		// calculating the output
-		let mut output_bits = truth_table.get(input_bits);
+		let mut output_bits = behavior.logic.get(input);
 
 		// condense output bits into bytes
 		let mut output_values: Vec<PinValue> = vec![];
 
-		for output_sub_pin in outputs.iter().rev() {
+		for output_sub_pin in behavior.outputs.iter().rev() {
 			let output_bit = (output_bits & 1) as u8;
 			let bit_index = output_sub_pin.line;
 			let new_value = output_bit << bit_index;
@@ -92,7 +95,7 @@ impl World {
 		output_values
 	}
 
-	pub(super) fn sync_tick(&mut self, pos: Position, outputs: &Vec<PinValue>) {
+	pub(super) fn sync_tick(&mut self, pos: Position, input: u8, output: &Vec<PinValue>) {
 		let mut ant = self.ants[&pos];
 
 		let cell_mask = self
@@ -103,7 +106,7 @@ impl World {
 
 		let mut clear = false;
 
-		for PinValue { pin, value } in outputs {
+		for PinValue { pin, value } in output {
 			match (pin, value) {
 				(Clear, 1) => clear = true,
 				(Cell, _) => self.set_cell(pos, *value, cell_mask),
@@ -132,6 +135,8 @@ impl World {
 				_ => {}
 			};
 		}
+
+		ant.last_input = input;
 
 		if clear {
 			self.set_cell(pos, 0, !cell_mask);
