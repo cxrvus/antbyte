@@ -1,8 +1,13 @@
 use std::collections::BTreeMap;
 
 use crate::{
+	ant::Ant,
 	util::vec2::Position,
-	world::{World, config::ColorMode, state::WorldStatus},
+	world::{
+		World,
+		config::{ColorMode, RenderMask},
+		state::WorldStatus,
+	},
 };
 
 #[derive(Debug, Default)]
@@ -72,25 +77,8 @@ impl World {
 			}
 		}
 
-		// todo: implement using render settings
-		let fg = self
-			.ants
-			.iter()
-			.map(|(&pos, ant)| (pos, ant.dir.value()))
-			.collect();
-
-		// TODO: cell mode
-		let width = self.config().width;
-
-		let bg_entries = self
-			.cells
-			.entries
-			.iter()
-			.enumerate()
-			.filter(|&(_, &value)| value != 0)
-			.map(|(i, value)| (Position::from_index(i, width), self.adjusted_color(*value)));
-
-		let bg = BTreeMap::from_iter(bg_entries);
+		let fg = self.get_render_values(&self.config().fg);
+		let bg = self.get_render_values(&self.config().bg);
 
 		Some(FrameOutput {
 			fg,
@@ -101,7 +89,40 @@ impl World {
 		})
 	}
 
-	// todo: implement using render settings
+	fn get_render_values(&self, mask: &RenderMask) -> BTreeMap<Position, u8> {
+		match mask {
+			RenderMask::None => Default::default(),
+			RenderMask::Cell => self.cells_to_map(),
+			RenderMask::Dir => self.map_ants(|ant| ant.dir.value()),
+			RenderMask::Id => self.map_ants(|ant| ant.behavior),
+			RenderMask::BirthTick => self.map_ants(|ant| ant.birth_tick as u8),
+			RenderMask::InputBits => self.map_ants(|ant| ant.last_input),
+			RenderMask::Mem => self.map_ants(|ant| ant.memory),
+		}
+	}
+
+	fn cells_to_map(&self) -> BTreeMap<Position, u8> {
+		let width = self.config().width;
+
+		let bg_entries = self
+			.cells
+			.entries
+			.iter()
+			.enumerate()
+			.filter(|&(_, &value)| value != 0)
+			.map(|(i, value)| (Position::from_index(i, width), self.adjusted_color(*value)));
+
+		BTreeMap::from_iter(bg_entries)
+	}
+
+	fn map_ants(&self, func: impl Fn(&Ant) -> u8) -> BTreeMap<Position, u8> {
+		self.ants
+			.iter()
+			.map(|(&pos, ant)| (pos, func(ant)))
+			.collect()
+	}
+
+	// todo: implement using bg_filter
 	fn adjusted_color(&self, color: u8) -> u8 {
 		match self.config().color_mode {
 			ColorMode::Binary => match color {
