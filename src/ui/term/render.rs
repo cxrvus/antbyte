@@ -89,9 +89,9 @@ impl TermRenderer {
 	}
 }
 
-fn render_cell(value: u8, content: &str) -> String {
-	let (bg, fg) = color_codes(value);
-	format!("\x1b[{fg};{bg}m{content}\x1b[0m")
+fn render_cell(color: u8, text: &str) -> String {
+	let (bg, fg) = color_codes(color);
+	format!("\x1b[{fg};{bg}m{text}\x1b[0m")
 }
 
 fn color_codes(value: u8) -> (u8, u8) {
