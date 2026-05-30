@@ -3,11 +3,7 @@ use std::collections::BTreeMap;
 use crate::{
 	ant::Ant,
 	util::vec2::Position,
-	world::{
-		World,
-		config::{ColorMode, RenderMask},
-		state::WorldStatus,
-	},
+	world::{World, config::RenderMask, state::WorldStatus},
 };
 
 #[derive(Debug, Default)]
@@ -110,7 +106,12 @@ impl World {
 			.iter()
 			.enumerate()
 			.filter(|&(_, &value)| value != 0)
-			.map(|(i, value)| (Position::from_index(i, width), self.adjusted_color(*value)));
+			.map(|(i, &value)| {
+				(
+					Position::from_index(i, width),
+					self.config().bg_filter.apply(value),
+				)
+			});
 
 		BTreeMap::from_iter(bg_entries)
 	}
@@ -120,16 +121,5 @@ impl World {
 			.iter()
 			.map(|(&pos, ant)| (pos, func(ant)))
 			.collect()
-	}
-
-	// todo: implement using bg_filter
-	fn adjusted_color(&self, color: u8) -> u8 {
-		match self.config().color_mode {
-			ColorMode::Binary => match color {
-				0 => 0x0,
-				_ => 0xf,
-			},
-			ColorMode::RGBI => color,
-		}
 	}
 }

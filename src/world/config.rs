@@ -43,14 +43,14 @@ pub struct WorldConfig {
 	// ### Renderer
 	/// rendered frames per second
 	pub fps: Option<u32>,
+	/// filter to get desired nibble (4 bits) out of BG byte
+	pub bg_filter: ByteFilter,
 	/// background render mask
 	pub bg: RenderMask,
 	/// foreground render mask
 	pub fg: RenderMask,
 	/// amount of ms to sleep for after end of simulation, i.e. between loops
 	pub sleep: Option<u32>,
-	/// changes how colors are rendered
-	pub color_mode: ColorMode,
 
 	// ### External Input
 	/// 1 to 8 characters as key bindings, representing K0-K7 in ascending order
@@ -70,12 +70,12 @@ impl Default for WorldConfig {
 			start_pos: StartingPos::Center,
 			start_dir: 0,
 			ant_limit: None,
-			color_mode: ColorMode::RGBI,
 			noise_seed: None,
 			description: "".into(),
 
 			fps: Some(FPS_CAP),
 			start_tick: 0,
+			bg_filter: ByteFilter::Lsb,
 			bg: RenderMask::Cell,
 			fg: RenderMask::Dir,
 			sleep: Some(200),
@@ -133,6 +133,45 @@ impl TryFrom<String> for StartingPos {
 
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
+/// filter specified nibble from a byte
+pub enum ByteFilter {
+	/// least significant
+	Lsb,
+	/// most significant
+	Msb,
+	/// 0 if input is 0, else 15
+	Bin,
+}
+
+impl TryFrom<String> for ByteFilter {
+	type Error = Error;
+
+	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
+		match value.as_str() {
+			"lsb" => Ok(Self::Lsb),
+			"msb" => Ok(Self::Msb),
+			"bin" => Ok(Self::Bin),
+
+			invalid => Err(anyhow!("invalid render mask: '{invalid}'")),
+		}
+	}
+}
+
+impl ByteFilter {
+	pub fn apply(&self, input: u8) -> u8 {
+		match self {
+			ByteFilter::Lsb => input & 0xf,
+			ByteFilter::Msb => (input & 0xf0) >> 4,
+			ByteFilter::Bin => match input {
+				0 => 0,
+				_ => 0xf,
+			},
+		}
+	}
+}
+
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum RenderMask {
 	None,
 	Cell,
@@ -159,24 +198,6 @@ impl TryFrom<String> for RenderMask {
 			"mem" => Ok(Self::Mem),
 
 			invalid => Err(anyhow!("invalid render mask: '{invalid}'")),
-		}
-	}
-}
-
-#[rustfmt::skip]
-#[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ColorMode { Binary, RGBI }
-
-impl TryFrom<String> for ColorMode {
-	type Error = Error;
-
-	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
-		match value.as_str() {
-			"rgb" | "rbgi" => Ok(Self::RGBI),
-			"bin" => Ok(Self::Binary),
-			invalid => Err(anyhow!("invalid starting pos: '{invalid}'")),
 		}
 	}
 }
