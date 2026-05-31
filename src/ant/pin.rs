@@ -7,7 +7,7 @@ pub enum Pin {
 	/// read or write selected bits of current cell
 	Cell,
 	/// read cell in front of current ant
-	Next,
+	NextCell,
 
 	// ## universal inputs:
 	/// clock value incrementing each tick
@@ -24,7 +24,7 @@ pub enum Pin {
 
 	// ## ant interaction inputs
 	/// true if cell in front current of ant contains an ant
-	Collide,
+	NextObstacle,
 	/// kill ant in front of current ant, if possible
 	Kill,
 
@@ -32,17 +32,17 @@ pub enum Pin {
 	/// 3 bits indicating number of 45 degrees rotations
 	Dir,
 	/// current ant will not move this tick if true
-	Halt,
+	Wait,
 
 	/// if ant is spawned by current ant,
 	/// set its direction to the current ants direction plus this
-	AntDir,
+	SpawnDir,
 	/// if ant is spawned by current ant,
 	/// set its memory to this
-	AntMem,
+	SpawnMem,
 	/// byte representing the ID of the ant, that will
 	/// be spawned behind current ant, if not 0
-	AntSpawn,
+	SpawnId,
 
 	Signal,
 
@@ -90,15 +90,15 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::Next,
-			short: "CN",
+			pin: Self::NextCell,
+			short: "VC",
 			aliases: &["NEXT_"],
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::Collide,
-			short: "AC",
+			pin: Self::NextObstacle,
+			short: "V",
 			aliases: &["COLLIDE"],
 			size: BIT,
 			io_type: Some(IoType::Input),
@@ -146,28 +146,28 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::Halt,
-			short: "DX",
+			pin: Self::Wait,
+			short: "W",
 			aliases: &["HALT"],
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::AntSpawn,
+			pin: Self::SpawnId,
 			short: "A",
 			aliases: &["ANT_"],
 			size: ANT_ID,
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::AntDir,
+			pin: Self::SpawnDir,
 			short: "AD",
 			aliases: &["ANT_DIR_"],
 			size: DIR,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::AntMem,
+			pin: Self::SpawnMem,
 			short: "AM",
 			aliases: &["ANT_MEM_"],
 			size: BYTE,
@@ -175,7 +175,7 @@ impl Pin {
 		},
 		PinDefinition {
 			pin: Self::Kill,
-			short: "AK",
+			short: "ZZ",
 			aliases: &["KILL"],
 			size: BIT,
 			io_type: Some(IoType::Output),
@@ -189,7 +189,7 @@ impl Pin {
 		},
 		PinDefinition {
 			pin: Self::Die,
-			short: "AX",
+			short: "Z",
 			aliases: &["DIE"],
 			size: BIT,
 			io_type: Some(IoType::Output),

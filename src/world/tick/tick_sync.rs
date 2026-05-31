@@ -27,7 +27,7 @@ impl World {
 
 			let input_value: u8 = match input_sub_pin.pin {
 				Cell => *self.cells.get(pos).unwrap(),
-				Next => next_pos
+				NextCell => next_pos
 					.map(|pos| *self.cells.get(pos).unwrap())
 					.unwrap_or(0u8),
 
@@ -37,14 +37,14 @@ impl World {
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
 
-				Collide => {
+				NextObstacle => {
 					(next_ant.is_some()
 						|| (self.config().border_mode == BorderMode::Collide && next_pos.is_none()))
 						as u8
 				}
 
-				AntSpawn => next_ant.map(|next| next.behavior).unwrap_or_default(),
-				AntMem => next_ant.map(|next| next.memory).unwrap_or_default(),
+				SpawnId => next_ant.map(|next| next.behavior).unwrap_or_default(),
+				SpawnMem => next_ant.map(|next| next.memory).unwrap_or_default(),
 
 				Signal => self.signal_in,
 				ExtIn => self.ext_input,
@@ -111,8 +111,8 @@ impl World {
 				(Clear, 1) => clear = true,
 				(Cell, _) => self.set_cell(pos, *value, cell_mask),
 
-				(AntDir, value) => ant.child_dir = Direction::from(*value),
-				(AntMem, value) => ant.child_memory = *value,
+				(SpawnDir, value) => ant.child_dir = Direction::from(*value),
+				(SpawnMem, value) => ant.child_memory = *value,
 				(Mem, value) => ant.memory = *value,
 
 				(Signal, value) => self.signal_out |= value,
@@ -124,11 +124,11 @@ impl World {
 				(Kill, value) => ant.kill = *value != 0,
 
 				// move_tick
-				(Halt, _) => ant.halt = *value != 0,
+				(Wait, _) => ant.halt = *value != 0,
 				(Dir, _) => ant.dir += Direction::from(*value),
 
 				// spawn_tick
-				(AntSpawn, _) => ant.child_behavior = *value,
+				(SpawnId, _) => ant.child_behavior = *value,
 
 				// die_tick
 				(Die, 1) => ant.die = true,
