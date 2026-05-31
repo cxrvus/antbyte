@@ -166,7 +166,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::NextId,
 			code: "VA",
-			size: BIT,
+			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
@@ -178,7 +178,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::NextMem,
 			code: "VM",
-			size: BIT,
+			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
