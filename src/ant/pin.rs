@@ -76,6 +76,24 @@ pub struct PinDefinition {
 impl Pin {
 	const PIN_DEFINITIONS: [PinDefinition; 19] = [
 		PinDefinition {
+			pin: Self::SpawnId,
+			code: "A",
+			size: ANT_ID,
+			io_type: None,
+		},
+		PinDefinition {
+			pin: Self::SpawnDir,
+			code: "AD",
+			size: DIR,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::SpawnMem,
+			code: "AM",
+			size: BYTE,
+			io_type: None,
+		},
+		PinDefinition {
 			pin: Self::Cell,
 			code: "C",
 			size: BYTE,
@@ -88,26 +106,14 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::NextCell,
-			code: "VC",
-			size: BYTE,
-			io_type: Some(IoType::Input),
+			pin: Self::Dir,
+			code: "D",
+			size: DIR,
+			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::NextObstacle,
-			code: "V",
-			size: BIT,
-			io_type: Some(IoType::Input),
-		},
-		PinDefinition {
-			pin: Self::Time,
-			code: "T",
-			size: BYTE,
-			io_type: Some(IoType::Input),
-		},
-		PinDefinition {
-			pin: Self::Pulse,
-			code: "TT",
+			pin: Self::ExtIn,
+			code: "K",
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
@@ -130,10 +136,34 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::Dir,
-			code: "D",
-			size: DIR,
-			io_type: Some(IoType::Output),
+			pin: Self::Signal,
+			code: "S",
+			size: BYTE,
+			io_type: None,
+		},
+		PinDefinition {
+			pin: Self::Time,
+			code: "T",
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
+			pin: Self::Pulse,
+			code: "TT",
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
+			pin: Self::NextObstacle,
+			code: "V",
+			size: BIT,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
+			pin: Self::NextCell,
+			code: "VC",
+			size: BYTE,
+			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::Wait,
@@ -142,34 +172,10 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::SpawnId,
-			code: "A",
-			size: ANT_ID,
-			io_type: None,
-		},
-		PinDefinition {
-			pin: Self::SpawnDir,
-			code: "AD",
-			size: DIR,
-			io_type: Some(IoType::Output),
-		},
-		PinDefinition {
-			pin: Self::SpawnMem,
-			code: "AM",
+			pin: Self::ExtOut,
+			code: "X",
 			size: BYTE,
-			io_type: None,
-		},
-		PinDefinition {
-			pin: Self::Kill,
-			code: "ZZ",
-			size: BIT,
 			io_type: Some(IoType::Output),
-		},
-		PinDefinition {
-			pin: Self::Signal,
-			code: "S",
-			size: BYTE,
-			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Die,
@@ -178,15 +184,9 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::ExtIn,
-			code: "K",
-			size: BYTE,
-			io_type: Some(IoType::Input),
-		},
-		PinDefinition {
-			pin: Self::ExtOut,
-			code: "X",
-			size: BYTE,
+			pin: Self::Kill,
+			code: "ZZ",
+			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 	];
