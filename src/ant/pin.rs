@@ -245,13 +245,13 @@ mod test {
 		let inputs = entries.iter().filter(|x| x.io_type == Some(Input)).collect::<Vec<_>>();
 		let outputs = entries.iter().filter(|x| x.io_type == Some(Output)).collect::<Vec<_>>();
 
-		// number literals accounting for special pins (C and M) and planned pins (none) ...
+		// number literals accounting for special pins (C, M, S) and planned pins (none) ...
 
-		let input_count = inputs.len() + 2;
-		let output_count = outputs.len() + 2;
+		let input_count = inputs.len() + 3;
+		let output_count = outputs.len() + 3;
 
-		let input_size = inputs.iter().map(|x| x.size).sum::<u8>() + (8 + 8) ;
-		let output_size = outputs.iter().map(|x| x.size).sum::<u8>() + (8 + 8);
+		let input_size = inputs.iter().map(|x| x.size).sum::<u8>() + (8 + 8 + 8) ;
+		let output_size = outputs.iter().map(|x| x.size).sum::<u8>() + (8 + 8 + 8);
 
 		println!("input count: {input_count}");
 		println!("output count: {output_count}");
