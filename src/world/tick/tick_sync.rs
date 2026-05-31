@@ -43,8 +43,8 @@ impl World {
 						as u8
 				}
 
-				SpawnId => next_ant.map(|next| next.behavior).unwrap_or_default(),
-				SpawnMem => next_ant.map(|next| next.memory).unwrap_or_default(),
+				NextId => next_ant.map(|next| next.behavior).unwrap_or_default(),
+				NextMem => next_ant.map(|next| next.memory).unwrap_or_default(),
 
 				Signal => self.signal_in,
 				ExtIn => self.ext_input,
