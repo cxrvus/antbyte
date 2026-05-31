@@ -1,15 +1,42 @@
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Pin {
-	// ## cell interaction
-	/// clear current cell (before writing)
-	Clear,
+	// ## creating ants
+	/// byte representing the ID of the ant, that will
+	/// be spawned behind current ant, if not 0
+	SpawnId,
+	/// if ant is spawned by current ant,
+	/// set its direction to the current ants direction plus this
+	SpawnDir,
+	/// if ant is spawned by current ant,
+	/// set its memory to this
+	SpawnMem,
+
+	// ## moving ants
+	/// 3 bits indicating number of 45 degrees rotations
+	Dir,
+	/// current ant will not move this tick if true
+	Wait,
+
+	// ## removing ants
+	/// kill current ant
+	Die,
+	/// kill ant in front of current ant, if possible
+	Kill,
+
+	// ## current cell
 	/// read or write selected bits of current cell
 	Cell,
-	/// read cell in front of current ant
-	NextCell,
+	/// clear current cell (before writing)
+	Clear,
 
-	// ## universal inputs:
+	// ## neighboring cells
+	/// read neighboring cell
+	NextCell,
+	/// true if neighboring cell contains an ant
+	NextObstacle,
+
+	// ## generic inputs
 	/// clock value incrementing each tick
 	Time,
 	/// clock value with bits being true every `2^(n+1)`-th tick
@@ -22,36 +49,10 @@ pub enum Pin {
 	/// a chance of `1 / 2^(n+1)` of being true
 	Chance,
 
-	// ## ant interaction inputs
-	/// true if cell in front current of ant contains an ant
-	NextObstacle,
-	/// kill ant in front of current ant, if possible
-	Kill,
-
-	// ## ant interaction outputs
-	/// 3 bits indicating number of 45 degrees rotations
-	Dir,
-	/// current ant will not move this tick if true
-	Wait,
-
-	/// if ant is spawned by current ant,
-	/// set its direction to the current ants direction plus this
-	SpawnDir,
-	/// if ant is spawned by current ant,
-	/// set its memory to this
-	SpawnMem,
-	/// byte representing the ID of the ant, that will
-	/// be spawned behind current ant, if not 0
-	SpawnId,
-
+	// ## global
 	Signal,
-
-	// ## external
 	ExtIn,
 	ExtOut,
-
-	// ## Die
-	Die,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
