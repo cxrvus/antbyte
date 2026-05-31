@@ -25,13 +25,13 @@ pub enum Pin {
 	Kill,
 
 	// ## current cell
-	/// read or write selected bits of current cell
+	/// current cell's value
 	Cell,
 	/// clear current cell (before writing)
 	Clear,
 
 	// ## neighboring cells
-	/// read neighboring cell
+	/// neighboring cell
 	NextCell,
 	/// true if neighboring cell contains an ant
 	NextObstacle,
@@ -45,7 +45,7 @@ pub enum Pin {
 	Time,
 	/// clock value with bits being true every `2^(n+1)`-th tick
 	Pulse,
-	/// read or write the current ant's persistent memory
+	/// current ant's persistent memory
 	Mem,
 	/// 8 random bits
 	Random,
