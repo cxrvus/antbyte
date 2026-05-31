@@ -67,7 +67,7 @@ const BYTE: u8 = 8;
 
 pub struct PinDefinition {
 	pub pin: Pin,
-	pub short: &'static str,
+	pub code: &'static str,
 	pub size: u8,
 	pub io_type: Option<IoType>,
 }
@@ -76,115 +76,115 @@ impl Pin {
 	const PIN_DEFINITIONS: [PinDefinition; 19] = [
 		PinDefinition {
 			pin: Self::Cell,
-			short: "C",
+			code: "C",
 			size: BYTE,
 			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Clear,
-			short: "CC",
+			code: "CC",
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
 			pin: Self::NextCell,
-			short: "VC",
+			code: "VC",
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::NextObstacle,
-			short: "V",
+			code: "V",
 			size: BIT,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::Time,
-			short: "T",
+			code: "T",
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::Pulse,
-			short: "TT",
+			code: "TT",
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::Mem,
-			short: "M",
+			code: "M",
 			size: BYTE,
 			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Random,
-			short: "R",
+			code: "R",
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::Chance,
-			short: "RR",
+			code: "RR",
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::Dir,
-			short: "D",
+			code: "D",
 			size: DIR,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
 			pin: Self::Wait,
-			short: "W",
+			code: "W",
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
 			pin: Self::SpawnId,
-			short: "A",
+			code: "A",
 			size: ANT_ID,
 			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::SpawnDir,
-			short: "AD",
+			code: "AD",
 			size: DIR,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
 			pin: Self::SpawnMem,
-			short: "AM",
+			code: "AM",
 			size: BYTE,
 			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Kill,
-			short: "ZZ",
+			code: "ZZ",
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
 			pin: Self::Signal,
-			short: "S",
+			code: "S",
 			size: BYTE,
 			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Die,
-			short: "Z",
+			code: "Z",
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
 			pin: Self::ExtIn,
-			short: "K",
+			code: "K",
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::ExtOut,
-			short: "X",
+			code: "X",
 			size: BYTE,
 			io_type: Some(IoType::Output),
 		},
@@ -200,12 +200,12 @@ impl Pin {
 	pub fn from_ident(ident: &str) -> Option<Self> {
 		Self::PIN_DEFINITIONS
 			.iter()
-			.find(|x| x.short == ident)
+			.find(|x| x.code == ident)
 			.map(|x| x.pin)
 	}
 
 	pub fn short_ident(&self) -> &'static str {
-		self.definition().short
+		self.definition().code
 	}
 }
 
@@ -252,7 +252,7 @@ mod test {
 		println!("SHORT; ALIAS; SIZE; IO_TYPE;");
 
 		for entry in entries {
-			let PinDefinition { short, size, io_type, .. } = entry;
+			let PinDefinition { code: short, size, io_type, .. } = entry;
 
 			let io_type = match io_type {
 				None => "*",
