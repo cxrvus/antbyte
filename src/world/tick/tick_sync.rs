@@ -98,11 +98,13 @@ impl World {
 	pub(super) fn sync_tick(&mut self, pos: Position, input: u8, output: &Vec<PinValue>) {
 		let mut ant = self.ants[&pos];
 
-		let cell_mask = self
+		let behavior = self
 			.get_behavior(ant.behavior)
 			.cloned()
-			.expect("invalid Behavior ID")
-			.cell_mask();
+			.expect("invalid Behavior ID");
+
+		let cell_mask = behavior.pin_mask(Pin::Cell);
+		let mem_mask = behavior.pin_mask(Pin::Mem);
 
 		let mut clear = false;
 
@@ -113,7 +115,7 @@ impl World {
 
 				(SpawnDir, value) => ant.child_dir = Direction::from(*value),
 				(SpawnMem, value) => ant.child_memory = *value,
-				(Mem, value) => ant.memory = *value,
+				(Mem, value) => ant.memory = *value | (ant.memory & !mem_mask),
 
 				(Signal, value) => self.signal_out |= value,
 				(ExtOut, value) => self.ext_output.push(*value),

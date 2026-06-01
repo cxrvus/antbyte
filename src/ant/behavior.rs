@@ -95,11 +95,11 @@ impl Behavior {
 		}
 	}
 
-	pub fn cell_mask(&self) -> u8 {
+	pub fn pin_mask(&self, pin: Pin) -> u8 {
 		let mut mask = 0;
 
 		for sub_pin in &self.outputs {
-			if let Pin::Cell = sub_pin.pin {
+			if pin == sub_pin.pin {
 				mask |= 1 << sub_pin.line;
 			}
 		}
