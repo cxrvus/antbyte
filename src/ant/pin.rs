@@ -19,6 +19,8 @@ pub enum Pin {
 	Dash,
 	/// current ant will not move this tick if true
 	Halt,
+	/// current ant will be skipped for this amount of ticks (remaining in its position)
+	Wait,
 
 	// ## removing ants
 	/// kill current ant
@@ -126,6 +128,12 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
+			pin: Self::Halt,
+			code: "H",
+			size: BIT,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
 			pin: Self::Init,
 			code: "J",
 			size: BIT,
@@ -198,9 +206,9 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::Halt,
-			code: "H",
-			size: BIT,
+			pin: Self::Wait,
+			code: "W",
+			size: BYTE,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
