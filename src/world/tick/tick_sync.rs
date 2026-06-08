@@ -119,7 +119,7 @@ impl World {
 				(Mem, value) => ant.memory = *value | (ant.memory & !mem_mask),
 
 				(Signal, value) => self.signal_out |= value,
-				(ExtOut, value) => self.ext_output.push(*value),
+				(ExtOut, value) if *value != 0 => self.ext_output.push(*value),
 
 				// deferred to async ticks...
 
