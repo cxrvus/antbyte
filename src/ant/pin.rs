@@ -36,13 +36,13 @@ pub enum Pin {
 
 	// ## neighboring cells
 	/// neighboring cell
-	NextCell,
-	/// true if neighboring cell contains an ant
-	NextObstacle,
+	NearbyCell,
+	/// true if neighboring cell contains an ant or other obstacle (i.e. border)
+	NearbyAnt,
 	/// neighboring ant's ID
-	NextId,
+	NearbyId,
 	/// neighboring ant's Memory
-	NextMem,
+	NearbyMem,
 
 	// ## generic inputs
 	/// is 1 on the birth tick (+1) of the ant, else 0
@@ -84,7 +84,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	const PIN_DEFINITIONS: [PinDefinition; 23] = [
+	const PIN_DEFINITIONS: [PinDefinition; 24] = [
 		PinDefinition {
 			pin: Self::SpawnId,
 			code: "A",
@@ -182,25 +182,25 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::NextObstacle,
+			pin: Self::NearbyAnt,
 			code: "V",
 			size: BIT,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::NextId,
+			pin: Self::NearbyId,
 			code: "VA",
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::NextCell,
+			pin: Self::NearbyCell,
 			code: "VC",
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::NextMem,
+			pin: Self::NearbyMem,
 			code: "VM",
 			size: BYTE,
 			io_type: Some(IoType::Input),

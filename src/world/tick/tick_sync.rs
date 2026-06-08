@@ -28,7 +28,7 @@ impl World {
 			let input_value: u8 = match input_sub_pin.pin {
 				Cell => *self.cells.get(pos).unwrap(),
 				Clear => (*self.cells.get(pos).unwrap() == 0) as u8,
-				NextCell => next_pos
+				NearbyCell => next_pos
 					.map(|pos| *self.cells.get(pos).unwrap())
 					.unwrap_or(0u8),
 
@@ -39,14 +39,14 @@ impl World {
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
 
-				NextObstacle => {
+				NearbyAnt => {
 					(next_ant.is_some()
 						|| (self.config().border == BorderMode::Collide && next_pos.is_none()))
 						as u8
 				}
 
-				NextId => next_ant.map(|next| next.behavior).unwrap_or_default(),
-				NextMem => next_ant.map(|next| next.memory).unwrap_or_default(),
+				NearbyId => next_ant.map(|next| next.behavior).unwrap_or_default(),
+				NearbyMem => next_ant.map(|next| next.memory).unwrap_or_default(),
 
 				Signal => self.signal_in,
 				ExtIn => self.ext_input,
