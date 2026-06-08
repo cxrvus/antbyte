@@ -21,14 +21,14 @@ impl World {
 		} else {
 			use BorderMode::*;
 
-			match self.config().border_mode {
+			match self.config().border {
 				Collide | Despawn => None,
 				Cycle | Wrap => {
 					let dimensions = self.cells.dimensions().sign();
 
 					let mut wrapped_pos = new_pos % dimensions;
 
-					if let Wrap = self.config().border_mode {
+					if let Wrap = self.config().border {
 						let (size_x, size_y) = (dimensions.x, dimensions.y);
 						let (new_x, new_y) = (new_pos.x, new_pos.y);
 						let (mut wrapped_x, mut wrapped_y) = (wrapped_pos.x, wrapped_pos.y);

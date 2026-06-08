@@ -40,7 +40,7 @@ impl World {
 
 				NextObstacle => {
 					(next_ant.is_some()
-						|| (self.config().border_mode == BorderMode::Collide && next_pos.is_none()))
+						|| (self.config().border == BorderMode::Collide && next_pos.is_none()))
 						as u8
 				}
 

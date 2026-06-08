@@ -104,7 +104,7 @@ impl World {
 					}
 				} else {
 					// target pos is outside of grid
-					match self.config().border_mode {
+					match self.config().border {
 						BorderMode::Collide => MoveAction::Stay,
 						BorderMode::Despawn => MoveAction::Nop,
 						_ => panic!("no target position, despite border mode guaranteeing one"),
