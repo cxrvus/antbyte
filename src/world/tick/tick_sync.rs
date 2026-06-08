@@ -127,7 +127,7 @@ impl World {
 				(Kill, value) => ant.kill = *value != 0,
 
 				// move_tick
-				(Wait, _) => ant.halt = *value != 0,
+				(Halt, _) => ant.halt = *value != 0,
 				(Dash, _) => ant.dash = *value != 0,
 				(Dir, _) => ant.dir += Direction::from(*value),
 

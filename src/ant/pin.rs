@@ -18,7 +18,7 @@ pub enum Pin {
 	/// ant is preferred in movement / spawning conflict resolution
 	Dash,
 	/// current ant will not move this tick if true
-	Wait,
+	Halt,
 
 	// ## removing ants
 	/// kill current ant
@@ -198,8 +198,8 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::Wait,
-			code: "W",
+			pin: Self::Halt,
+			code: "H",
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
