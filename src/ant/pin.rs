@@ -111,7 +111,7 @@ impl Pin {
 			pin: Self::Clear,
 			code: "CC",
 			size: BIT,
-			io_type: Some(IoType::Output),
+			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Dir,

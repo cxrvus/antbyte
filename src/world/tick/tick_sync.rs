@@ -27,6 +27,7 @@ impl World {
 
 			let input_value: u8 = match input_sub_pin.pin {
 				Cell => *self.cells.get(pos).unwrap(),
+				Clear => (*self.cells.get(pos).unwrap() == 0) as u8,
 				NextCell => next_pos
 					.map(|pos| *self.cells.get(pos).unwrap())
 					.unwrap_or(0u8),
