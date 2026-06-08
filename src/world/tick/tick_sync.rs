@@ -31,6 +31,7 @@ impl World {
 					.map(|pos| *self.cells.get(pos).unwrap())
 					.unwrap_or(0u8),
 
+				Init => (ant.birth_tick + 1 == self.tick_count()) as u8,
 				Time => ant.age(self.tick_count()) as u8,
 				Pulse => zero_count_mask(ant.age(self.tick_count()) as u8),
 				Mem => ant.memory,

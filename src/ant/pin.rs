@@ -41,6 +41,8 @@ pub enum Pin {
 	NextMem,
 
 	// ## generic inputs
+	/// is 1 on the birth tick (+1) of the ant, else 0
+	Init,
 	/// clock value incrementing each tick
 	Time,
 	/// clock value with bits being true every `2^(n+1)`-th tick
@@ -78,7 +80,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	const PIN_DEFINITIONS: [PinDefinition; 21] = [
+	const PIN_DEFINITIONS: [PinDefinition; 22] = [
 		PinDefinition {
 			pin: Self::SpawnId,
 			code: "A",
@@ -114,6 +116,12 @@ impl Pin {
 			code: "D",
 			size: DIR,
 			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::Init,
+			code: "J",
+			size: BIT,
+			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::ExtIn,
