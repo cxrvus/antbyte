@@ -7,8 +7,11 @@ pub mod behavior;
 
 #[derive(Clone, Copy, Default, Debug)]
 pub struct Ant {
-	pub birth_tick: u32,
 	pub behavior: u8,
+	pub birth_tick: u32,
+
+	pub last_input: u8,
+	pub clock: u8,
 
 	pub dir: Direction,
 	pub halt: bool,
@@ -22,16 +25,9 @@ pub struct Ant {
 	pub child_behavior: u8,
 	pub child_dir: Direction,
 	pub child_memory: u8,
-
-	pub last_input: u8,
 }
 
 impl Ant {
-	#[inline]
-	pub fn age(&self, current_tick: u32) -> u32 {
-		current_tick.wrapping_sub(self.birth_tick + 1)
-	}
-
 	#[inline]
 	pub fn luck(&self, current_tick: u32) -> u8 {
 		let hashed_tick = (hash_u32(current_tick) & 0xFF) as u8;

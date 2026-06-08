@@ -33,8 +33,8 @@ impl World {
 					.unwrap_or(0u8),
 
 				Init => (ant.birth_tick + 1 == self.tick_count()) as u8,
-				Time => ant.age(self.tick_count()) as u8,
-				Pulse => zero_count_mask(ant.age(self.tick_count()) as u8),
+				Time => ant.clock,
+				Pulse => zero_count_mask(ant.clock),
 				Mem => ant.memory,
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
@@ -142,6 +142,7 @@ impl World {
 		}
 
 		ant.last_input = input;
+		ant.clock = ant.clock.wrapping_add(1);
 
 		if clear {
 			self.set_cell(pos, 0, !cell_mask);
