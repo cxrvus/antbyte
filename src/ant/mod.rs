@@ -8,19 +8,21 @@ pub mod behavior;
 #[derive(Clone, Copy, Default, Debug)]
 pub struct Ant {
 	pub birth_tick: u32,
-
 	pub behavior: u8,
-	pub child_behavior: u8,
+
 	pub dir: Direction,
-	pub child_dir: Direction,
+	pub halt: bool,
+
+	pub die: bool,
+	pub kill: bool,
+
 	pub memory: u8,
+
+	pub child_behavior: u8,
+	pub child_dir: Direction,
 	pub child_memory: u8,
 
 	pub last_input: u8,
-
-	pub halt: bool,
-	pub die: bool,
-	pub kill: bool,
 }
 
 impl Ant {
