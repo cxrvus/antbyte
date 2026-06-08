@@ -38,7 +38,7 @@ impl WorldState {
 	pub(super) fn new(config: &WorldConfig) -> Self {
 		let cells = Grid::new(config.width, config.height);
 
-		let rng = if let Some(seed) = config.noise_seed {
+		let rng = if let Some(seed) = config.seed {
 			Some(StdRng::seed_from_u64(seed as u64))
 		} else {
 			Some(StdRng::from_seed(rand::random::<[u8; 32]>()))

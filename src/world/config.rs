@@ -35,7 +35,7 @@ pub struct WorldConfig {
 	pub start_dir: u8,
 	/// max number of ants before additional spawning gets blocked
 	pub ant_limit: Option<u32>,
-	pub noise_seed: Option<u32>,
+	pub seed: Option<u32>,
 	pub description: String,
 
 	// ## Plugins
@@ -70,7 +70,7 @@ impl Default for WorldConfig {
 			start_pos: StartingPos::Center,
 			start_dir: 0,
 			ant_limit: None,
-			noise_seed: None,
+			seed: None,
 			description: "".into(),
 
 			fps: Some(FPS_CAP),
