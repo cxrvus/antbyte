@@ -16,7 +16,7 @@ pub fn run(world: World) {
 			println!();
 		}
 
-		println!("\n{}\n", world.tick_str());
+		println!("\n{}\n", world.metadata_str());
 		print!("\n\n\n");
 	}
 }
