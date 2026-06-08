@@ -15,6 +15,8 @@ pub enum Pin {
 	// ## moving ants
 	/// 3 bits indicating number of 45 degrees rotations
 	Dir,
+	/// ant is preferred in movement / spawning conflict resolution
+	Dash,
 	/// current ant will not move this tick if true
 	Wait,
 
@@ -80,7 +82,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	const PIN_DEFINITIONS: [PinDefinition; 22] = [
+	const PIN_DEFINITIONS: [PinDefinition; 23] = [
 		PinDefinition {
 			pin: Self::SpawnId,
 			code: "A",
@@ -115,6 +117,12 @@ impl Pin {
 			pin: Self::Dir,
 			code: "D",
 			size: DIR,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::Dash,
+			code: "DD",
+			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {

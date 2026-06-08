@@ -6,8 +6,9 @@ use crate::util::vec2::Vec2;
 pub struct Direction(u8);
 
 impl Direction {
-	pub const MAX: u8 = 7;
-	pub const MOD: u8 = Self::MAX + 1;
+	pub const BITS: u8 = 3;
+	pub const MOD: u8 = 1 << Self::BITS;
+	pub const MAX: u8 = Self::MOD - 1;
 	pub const INV: u8 = Self::MOD / 2;
 
 	#[inline]

@@ -12,6 +12,7 @@ pub struct Ant {
 
 	pub dir: Direction,
 	pub halt: bool,
+	pub dash: bool,
 
 	pub die: bool,
 	pub kill: bool,
@@ -34,6 +35,8 @@ impl Ant {
 	#[inline]
 	pub fn luck(&self, current_tick: u32) -> u8 {
 		let hashed_tick = (hash_u32(current_tick) & 0xFF) as u8;
-		(hashed_tick ^ self.dir.value()) % Direction::MAX
+		let luck = (hashed_tick ^ self.dir.value()) % Direction::MOD;
+		let bonus = (self.dash as u8) << Direction::BITS;
+		bonus | luck
 	}
 }
