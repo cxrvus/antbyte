@@ -62,7 +62,7 @@ impl World {
 		input_bits
 	}
 
-	pub(super) fn get_output(&mut self, ant: &Ant, input: u8) -> Vec<PinValue> {
+	pub(super) fn get_output(&self, ant: &Ant, input: u8) -> Vec<PinValue> {
 		let behavior = self
 			.get_behavior(ant.behavior)
 			.cloned()
@@ -117,7 +117,13 @@ impl World {
 
 				(SpawnDir, value) => ant.child_dir = Direction::from(*value),
 				(SpawnMem, value) => ant.child_memory = *value,
+
 				(Mem, value) => ant.memory = *value | (ant.memory & !mem_mask),
+
+				(Wait, value) if *value != 0 => {
+					ant.will_wait = true;
+					ant.wait_ticks = *value
+				}
 
 				(Signal, value) => self.signal_out |= value,
 				(ExtOut, value) if *value != 0 => self.ext_output.push(*value),
@@ -125,18 +131,18 @@ impl World {
 				// deferred to async ticks...
 
 				// kill_tick
-				(Kill, value) => ant.kill = *value != 0,
+				(Kill, value) => ant.will_kill = *value != 0,
 
 				// move_tick
-				(Halt, _) => ant.halt = *value != 0,
-				(Dash, _) => ant.dash = *value != 0,
+				(Halt, _) => ant.will_halt = *value != 0,
+				(Dash, _) => ant.will_dash = *value != 0,
 				(Dir, _) => ant.dir += Direction::from(*value),
 
 				// spawn_tick
 				(SpawnId, _) => ant.child_behavior = *value,
 
 				// die_tick
-				(Die, 1) => ant.die = true,
+				(Die, 1) => ant.will_die = true,
 				_ => {}
 			};
 		}

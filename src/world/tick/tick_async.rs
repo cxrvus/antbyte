@@ -20,7 +20,8 @@ impl World {
 		let mut kills = BTreeSet::new();
 
 		for (pos, ant) in &self.ants.clone() {
-			if ant.kill
+			if ant.will_kill
+				&& !ant.waiting()
 				&& let Some(next_pos) = self.next_pos(*pos, ant.dir)
 				&& self.ants.contains_key(&next_pos)
 			{
@@ -31,8 +32,18 @@ impl World {
 		self.ants.retain(|pos, _| !kills.contains(pos));
 	}
 
-	pub(super) fn die_tick(&mut self) {
-		self.ants.retain(|_, ant| !ant.die);
+	pub(super) fn end_tick(&mut self) {
+		// die
+		self.ants.retain(|_, ant| !ant.will_die);
+
+		// wait
+		for ant in &mut self.ants.values_mut() {
+			if ant.will_wait {
+				ant.will_wait = false;
+			} else if ant.waiting() {
+				ant.wait_ticks -= 1;
+			}
+		}
 	}
 
 	pub(super) fn move_tick(&mut self) {
@@ -48,7 +59,7 @@ impl World {
 			let mut cycle_pos: Option<Position> = None;
 
 			while let Some((pos, ant)) = stack.pop() {
-				let action = if ant.halt {
+				let action = if ant.halted() {
 					MoveAction::Stay
 				} else if let Some(cycle_pos_value) = cycle_pos {
 					if pos == cycle_pos_value {
@@ -68,7 +79,7 @@ impl World {
 						MoveAction::Stay
 					} else if let Some(&target_ant) = source.get(&target_pos) {
 						// target pos is occupied in source
-						if target_ant.halt {
+						if target_ant.halted() {
 							// dead end => stay
 							MoveAction::Stay
 						} else {
@@ -141,7 +152,7 @@ impl World {
 		}
 
 		for (pos, ant) in &self.ants {
-			if ant.child_behavior == 0 {
+			if ant.child_behavior == 0 || ant.waiting() {
 				continue;
 			} else if let Some(target_pos) = self.next_pos(*pos, ant.dir.inverted())
 				&& !self.ants.contains_key(&target_pos)

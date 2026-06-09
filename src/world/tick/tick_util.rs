@@ -89,7 +89,7 @@ impl World {
 			let dir = Direction::from(dir);
 			if let Some(source_pos) = self.next_pos(target_pos, dir.inverted())
 				&& let Some(source_ant) = source.get(&source_pos)
-				&& !source_ant.halt
+				&& !source_ant.halted()
 				&& source_ant.dir == dir
 			{
 				positions.push(source_pos);

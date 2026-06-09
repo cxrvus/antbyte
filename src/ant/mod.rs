@@ -12,13 +12,15 @@ pub struct Ant {
 
 	pub last_input: u8,
 	pub clock: u8,
+	pub wait_ticks: u8,
 
 	pub dir: Direction,
-	pub halt: bool,
-	pub dash: bool,
 
-	pub die: bool,
-	pub kill: bool,
+	pub will_halt: bool,
+	pub will_dash: bool,
+	pub will_kill: bool,
+	pub will_die: bool,
+	pub will_wait: bool,
 
 	pub memory: u8,
 
@@ -29,10 +31,19 @@ pub struct Ant {
 
 impl Ant {
 	#[inline]
+	pub fn waiting(&self) -> bool {
+		!self.will_wait && self.wait_ticks > 0
+	}
+
+	#[inline]
+	pub fn halted(&self) -> bool {
+		self.will_halt || self.waiting()
+	}
+
 	pub fn luck(&self, current_tick: u32) -> u8 {
 		let hashed_tick = (hash_u32(current_tick) & 0xFF) as u8;
 		let luck = (hashed_tick ^ self.dir.value()) % Direction::MOD;
-		let bonus = (self.dash as u8) << Direction::BITS;
+		let bonus = (self.will_dash as u8) << Direction::BITS;
 		bonus | luck
 	}
 }

@@ -17,27 +17,25 @@ impl World {
 		self.signal_out = 0;
 
 		// tick ants (sync)
-		let image = self.state.clone();
+		let mut all_outputs = vec![];
 
-		let all_outputs: Vec<_> = image
-			.ants
-			.iter()
-			.map(|(pos, ant)| {
-				let input = self.get_input(ant, *pos);
-				let output = self.get_output(ant, input);
-				(pos, input, output)
-			})
-			.collect();
+		for (pos, ant) in self.ants.clone() {
+			if !ant.waiting() {
+				let input = self.get_input(&ant, pos);
+				let output = self.get_output(&ant, input);
+				all_outputs.push((pos, input, output));
+			}
+		}
 
 		for (pos, input, output) in all_outputs {
-			self.sync_tick(*pos, input, &output);
+			self.sync_tick(pos, input, &output);
 		}
 
 		// tick ants (async)
 		self.kill_tick();
 		self.move_tick();
 		self.spawn_tick();
-		self.die_tick();
+		self.end_tick();
 
 		// cell decay
 		if self.config().decay.is_some() {
