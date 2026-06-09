@@ -97,7 +97,7 @@ impl World {
 		output_values
 	}
 
-	pub(super) fn sync_tick(&mut self, pos: Position, input: u8, output: &Vec<PinValue>) {
+	pub(super) fn sync_tick(&mut self, pos: Position, input: u8, output: &[PinValue]) {
 		let mut ant = self.ants[&pos];
 
 		let behavior = self
@@ -110,39 +110,41 @@ impl World {
 
 		let mut clear = false;
 
-		for PinValue { pin, value } in output {
-			match (pin, value) {
-				(Clear, 1) => clear = true,
-				(Cell, _) => self.set_cell(pos, *value, cell_mask),
+		for pin_value in output.iter() {
+			let PinValue { pin, value } = *pin_value;
 
-				(SpawnDir, value) => ant.child_dir = Direction::from(*value),
-				(SpawnMem, value) => ant.child_memory = *value,
+			match pin {
+				Clear => clear = true,
+				Cell => self.set_cell(pos, value, cell_mask),
 
-				(Mem, value) => ant.memory = *value | (ant.memory & !mem_mask),
+				SpawnDir => ant.child_dir = Direction::from(value),
+				SpawnMem => ant.child_memory = value,
 
-				(Wait, value) if *value != 0 => {
+				Mem => ant.memory = value | (ant.memory & !mem_mask),
+
+				Wait if value != 0 => {
 					ant.will_wait = true;
-					ant.wait_ticks = *value
+					ant.wait_ticks = value
 				}
 
-				(Signal, value) => self.signal_out |= value,
-				(ExtOut, value) if *value != 0 => self.ext_output.push(*value),
+				Signal => self.signal_out |= value,
+				ExtOut if value != 0 => self.ext_output.push(value),
 
 				// deferred to async ticks...
 
 				// kill_tick
-				(Kill, value) => ant.will_kill = *value != 0,
+				Kill => ant.will_kill = value != 0,
 
 				// move_tick
-				(Halt, _) => ant.will_halt = *value != 0,
-				(Dash, _) => ant.will_dash = *value != 0,
-				(Dir, _) => ant.dir += Direction::from(*value),
+				Halt => ant.will_halt = value != 0,
+				Dash => ant.will_dash = value != 0,
+				Dir => ant.dir += Direction::from(value),
 
 				// spawn_tick
-				(SpawnId, _) => ant.child_behavior = *value,
+				SpawnId => ant.child_behavior = value,
 
 				// die_tick
-				(Die, 1) => ant.will_die = true,
+				Die => ant.will_die = true,
 				_ => {}
 			};
 		}
