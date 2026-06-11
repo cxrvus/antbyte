@@ -9,6 +9,7 @@ use crate::ant::pin::{IoType, Pin};
 pub struct SubPin {
 	pub pin: Pin,
 	pub line: u8,
+	pub channel: u8,
 }
 
 impl Serialize for SubPin {
@@ -60,9 +61,11 @@ impl SubPin {
 		}
 	}
 
-	const PIN_PTN: &str = r"^([A-Z_]+)([0-8])?$";
+	const PIN_PTN: &str = r"^([A-Z_]+)([0-7]{1,2})?$";
 
 	pub fn from_ident(ident: &str) -> Result<Self> {
+		// parsing...
+
 		let re = Regex::new(Self::PIN_PTN).unwrap();
 
 		let captures = re
@@ -71,28 +74,37 @@ impl SubPin {
 
 		let pin_ident = captures.get(1).unwrap().as_str();
 
-		let pin =
-			Pin::from_ident(pin_ident).ok_or(anyhow!("'{pin_ident}' is not a valid pin type"))?;
-
 		let bit_index = captures
 			.get(2)
-			.map(|m| u8::from_str_radix(m.as_str(), 16).unwrap());
+			.map(|m| u8::from_str_radix(m.as_str(), 8).unwrap());
 
+		// indexes...
+
+		let explicit_index = bit_index.is_some();
+		let bit_index = bit_index.unwrap_or_default();
+
+		let lsb3 = bit_index & 0b00000111;
+		let msb3 = bit_index & 0b00111000;
+
+		// pin type...
+
+		let pin = Pin::from_ident(pin_ident).ok_or(anyhow!("invalid pin type:'{pin_ident}'"))?;
 		let size = pin.definition().size;
 
-		if let Some(bit_index) = bit_index {
-			if size == 1 {
-				bail!("may not have a bit index in one-bit pins\n(in '{ident}')");
-			} else if bit_index >= size {
-				bail!(
-					"bit index may not exceed pin bit capacity:\n{bit_index} >= {size}\n(in '{ident}')"
-				);
-			}
+		let (line, channel) = if pin.prefers_channel() {
+			(0, lsb3)
+		} else {
+			(lsb3, msb3)
 		};
 
-		Ok(Self {
-			pin,
-			line: bit_index.unwrap_or_default(),
-		})
+		// validation ...
+
+		if explicit_index && size == 1 {
+			bail!("may not have an explicit bit index in one-bit pins\n(in '{ident}')");
+		} else if bit_index >= size {
+			bail!("bit index may not exceed pin bit cap:\n{bit_index} >= {size}\n(in '{ident}')");
+		}
+
+		Ok(Self { pin, line, channel })
 	}
 }

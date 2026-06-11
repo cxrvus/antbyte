@@ -248,6 +248,13 @@ impl Pin {
 	pub fn short_ident(&self) -> &'static str {
 		self.definition().code
 	}
+
+	#[inline]
+	/// specifies that a pin needs the line bits to be the channel bits
+	/// currently only used for special treatment of `NearbyAnt`
+	pub fn prefers_channel(&self) -> bool {
+		matches!(self, Self::NearbyAnt)
+	}
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
