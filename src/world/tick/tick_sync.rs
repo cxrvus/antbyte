@@ -2,6 +2,7 @@ use crate::{
 	ant::{
 		Ant,
 		pin::{Pin, PinValue},
+		sub_pin::SubPin,
 	},
 	util::{dir::Direction, vec2::Position},
 	world::{World, config::BorderMode},
@@ -22,13 +23,16 @@ impl World {
 		let mut input_bits = 0u8;
 
 		for input_sub_pin in behavior.inputs.iter() {
-			let next_pos = self.next_pos(pos, ant.dir);
-			let next_ant = next_pos.and_then(|pos| self.ants.get(&pos));
+			let SubPin { pin, line, channel } = *input_sub_pin;
 
-			let input_value: u8 = match input_sub_pin.pin {
+			let target_dir = Direction::from(channel) + ant.dir;
+			let target_pos = self.next_pos(pos, target_dir);
+			let target_ant = target_pos.and_then(|pos| self.ants.get(&pos));
+
+			let input_value: u8 = match pin {
 				Cell => *self.cells.get(pos).unwrap(),
 				Clear => (*self.cells.get(pos).unwrap() == 0) as u8,
-				NearbyCell => next_pos
+				NearbyCell => target_pos
 					.map(|pos| *self.cells.get(pos).unwrap())
 					.unwrap_or(0u8),
 
@@ -40,21 +44,20 @@ impl World {
 				Chance => zero_count_mask(self.rng()),
 
 				NearbyAnt => {
-					(next_ant.is_some()
-						|| (self.config().border == BorderMode::Collide && next_pos.is_none()))
+					(target_ant.is_some()
+						|| (self.config().border == BorderMode::Collide && target_pos.is_none()))
 						as u8
 				}
 
-				NearbyId => next_ant.map(|next| next.behavior).unwrap_or_default(),
-				NearbyMem => next_ant.map(|next| next.memory).unwrap_or_default(),
+				NearbyId => target_ant.map(|target| target.behavior).unwrap_or_default(),
+				NearbyMem => target_ant.map(|target| target.memory).unwrap_or_default(),
 
 				Signal => self.signal_in,
 				ExtIn => self.ext_input,
 				_ => panic!("unhandled input: {input_sub_pin:?}"),
 			};
 
-			let bit_index = input_sub_pin.line;
-			let masked_input_value = (input_value >> bit_index) & 1;
+			let masked_input_value = (input_value >> line) & 1;
 			input_bits <<= 1;
 			input_bits |= masked_input_value;
 		}

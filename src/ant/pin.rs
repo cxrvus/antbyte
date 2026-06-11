@@ -75,6 +75,7 @@ const BIT: u8 = 1;
 const DIR: u8 = 3;
 const ANT_ID: u8 = BYTE;
 const BYTE: u8 = 8;
+const DOUBLE: u8 = 64;
 
 pub struct PinDefinition {
 	pub pin: Pin,
@@ -184,25 +185,25 @@ impl Pin {
 		PinDefinition {
 			pin: Self::NearbyAnt,
 			code: "V",
-			size: BIT,
+			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::NearbyId,
 			code: "VA",
-			size: BYTE,
+			size: DOUBLE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::NearbyCell,
 			code: "VC",
-			size: BYTE,
+			size: DOUBLE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::NearbyMem,
 			code: "VM",
-			size: BYTE,
+			size: DOUBLE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
@@ -245,6 +246,7 @@ impl Pin {
 			.map(|x| x.pin)
 	}
 
+	#[inline]
 	pub fn short_ident(&self) -> &'static str {
 		self.definition().code
 	}
