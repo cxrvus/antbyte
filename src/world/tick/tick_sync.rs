@@ -112,39 +112,41 @@ impl World {
 
 		for pin_value in output.iter() {
 			let PinValue { pin, value } = *pin_value;
+			let value_bool = value != 0;
 
-			match pin {
-				Clear => clear = true,
-				Cell => self.set_cell(pos, value, cell_mask),
+			match (pin, value_bool) {
+				(Clear, true) => clear = true,
+				(Cell, _) => self.set_cell(pos, value, cell_mask),
 
-				SpawnDir => ant.child_dir = Direction::from(value),
-				SpawnMem => ant.child_memory = value,
+				(SpawnDir, _) => ant.child_dir = Direction::from(value),
+				(SpawnMem, _) => ant.child_memory = value,
 
-				Mem => ant.memory = value | (ant.memory & !mem_mask),
+				(Mem, _) => ant.memory = value | (ant.memory & !mem_mask),
 
-				Wait if value != 0 => {
+				(Wait, true) => {
 					ant.will_wait = true;
 					ant.wait_ticks = value
 				}
 
-				Signal => self.signal_out |= value,
-				ExtOut if value != 0 => self.ext_output.push(value),
+				(Signal, true) => self.signal_out |= value,
+				(ExtOut, true) => self.ext_output.push(value),
 
 				// deferred to async ticks...
 
 				// kill_tick
-				Kill => ant.will_kill = value != 0,
+				(Kill, _) => ant.will_kill = value_bool,
 
 				// move_tick
-				Halt => ant.will_halt = value != 0,
-				Dash => ant.will_dash = value != 0,
-				Dir => ant.dir += Direction::from(value),
+				(Halt, _) => ant.will_halt = value_bool,
+				(Dash, _) => ant.will_dash = value_bool,
+
+				(Dir, true) => ant.dir += Direction::from(value),
 
 				// spawn_tick
-				SpawnId => ant.child_behavior = value,
+				(SpawnId, _) => ant.child_behavior = value,
 
 				// die_tick
-				Die => ant.will_die = true,
+				(Die, _) => ant.will_die = value_bool,
 				_ => {}
 			};
 		}
