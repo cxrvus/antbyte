@@ -204,8 +204,10 @@ impl TryFrom<String> for RenderMask {
 
 impl WorldConfig {
 	pub fn validate(&self) -> Result<()> {
-		Self::non_zero(self.height as u32, "height")?;
-		Self::non_zero(self.width as u32, "width")?;
+		if self.height < 3 || self.width < 3 {
+			bail!("height / width must not be less than 3")
+		}
+
 		Self::cap(self.height as u32, "height", SIZE_CAP as u32)?;
 		Self::cap(self.width as u32, "width", SIZE_CAP as u32)?;
 
@@ -257,11 +259,5 @@ impl WorldConfig {
 
 	fn cap_opt(number: Option<u32>, property: &str, max: u32) -> Result<()> {
 		Self::cap(number.unwrap_or_default(), property, max)
-	}
-
-	#[inline]
-	#[rustfmt::skip]
-	fn non_zero(number: u32, property: &str) -> Result<()> {
-		if number == 0 { bail!("[{property}] must be greater than 0"); } Ok(())
 	}
 }
