@@ -1,4 +1,10 @@
-#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg(test)]
+use serde::Serialize;
+
+#[cfg(test)]
+use ts_rs::TS;
+
+#[cfg_attr(test, derive(TS, Serialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Pin {
 	// ## creating ants
@@ -65,6 +71,7 @@ pub enum Pin {
 	ExtOut,
 }
 
+#[cfg_attr(test, derive(TS, Serialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IoType {
 	Input,
@@ -77,6 +84,8 @@ const ANT_ID: u8 = BYTE;
 const BYTE: u8 = 8;
 const DOUBLE: u8 = 64;
 
+#[cfg_attr(test, derive(TS, Serialize))]
+#[cfg_attr(test, ts(export))]
 pub struct PinDefinition {
 	pub pin: Pin,
 	pub code: &'static str,
@@ -267,50 +276,12 @@ pub struct PinValue {
 
 #[cfg(test)]
 mod test {
-	use super::{IoType, Pin, PinDefinition};
-	use IoType::*;
+	use super::Pin;
 
 	#[test]
 	#[rustfmt::skip]
-	fn print_pin_definitions() {
-		let entries = Pin::PIN_DEFINITIONS;
+	fn export_pins() {
+		println!("{}", serde_json::to_string_pretty(&Pin::PIN_DEFINITIONS).unwrap());
 
-		let inputs = entries.iter().filter(|x| x.io_type == Some(Input)).collect::<Vec<_>>();
-		let outputs = entries.iter().filter(|x| x.io_type == Some(Output)).collect::<Vec<_>>();
-
-		// number literals accounting for special pins (C, M, S) and planned pins (none) ...
-
-		let input_count = inputs.len() + 3;
-		let output_count = outputs.len() + 3;
-
-		let input_size = inputs.iter().map(|x| x.size).sum::<u8>() + (8 + 8 + 8) ;
-		let output_size = outputs.iter().map(|x| x.size).sum::<u8>() + (8 + 8 + 8);
-
-		println!("input count: {input_count}");
-		println!("output count: {output_count}");
-		println!("total count: {}", input_count + output_count);
-
-		println!();
-
-		println!("input size: {input_size}");
-		println!("output size: {output_size}");
-		println!("total size: {}", input_size + output_size);
-
-		println!();
-		println!();
-
-		println!("SHORT; ALIAS; SIZE; IO_TYPE;");
-
-		for entry in entries {
-			let PinDefinition { code: short, size, io_type, .. } = entry;
-
-			let io_type = match io_type {
-				None => "*",
-				Some(Input) => "I",
-				Some(Output) => "O",
-			};
-
-			println!("{short}; {size}; {io_type};")
-		}
 	}
 }
