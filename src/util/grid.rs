@@ -68,7 +68,9 @@ where
 		Self {
 			width,
 			height,
-			entries: (0..width * height).map(|_| T::default()).collect(),
+			entries: (0..width as usize * height as usize)
+				.map(|_| T::default())
+				.collect(),
 		}
 	}
 }

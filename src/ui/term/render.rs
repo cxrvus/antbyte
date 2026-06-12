@@ -57,10 +57,10 @@ impl TermRenderer {
 
 	fn render_cells(&self, frame: &FrameOutput) -> String {
 		let mut string = String::new();
-		let max_index = self.config.height * self.config.width;
+		let max_index = self.config.height as usize * self.config.width as usize;
 
 		for i in 0..max_index {
-			let pos = Position::from_index(i as usize, self.config.width);
+			let pos = Position::from_index(i, self.config.width);
 
 			if pos.x == 0 {
 				string.push('\n');
