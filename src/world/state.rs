@@ -5,7 +5,7 @@ use crate::{
 	util::{grid::Grid, vec2::Position},
 	world::config::WorldConfig,
 };
-use rand::{Rng, SeedableRng, rngs::StdRng};
+use rand::{RngExt, SeedableRng, rngs::SmallRng};
 
 pub type Cell = u8;
 
@@ -22,7 +22,7 @@ pub enum WorldStatus {
 
 #[derive(Clone, Default)]
 pub struct WorldState {
-	rng: Option<StdRng>,
+	rng: Option<SmallRng>,
 	pub(super) tick_count: u32,
 	pub(super) status: WorldStatus,
 	pub cells: Cells,
@@ -39,9 +39,9 @@ impl WorldState {
 		let cells = Grid::new(config.width, config.height);
 
 		let rng = if let Some(seed) = config.seed {
-			Some(StdRng::seed_from_u64(seed as u64))
+			Some(SmallRng::seed_from_u64(seed as u64))
 		} else {
-			Some(StdRng::from_seed(rand::random::<[u8; 32]>()))
+			Some(SmallRng::from_seed(rand::random::<[u8; 32]>()))
 		};
 
 		Self {
