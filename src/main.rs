@@ -23,7 +23,7 @@ pub fn run() -> Result<()> {
 	{
 		use antbyte::{
 			parser::compiler::LogConfig,
-			ui::{PluginSet, render::term_render::TermRenderer},
+			ui::term,
 			world::{World, file_compiler::compile_world},
 		};
 
@@ -38,13 +38,10 @@ pub fn run() -> Result<()> {
 		let path = std::path::PathBuf::from(&args[1]);
 
 		let properties = compile_world(&path, &LogConfig::default(), &None)?;
-		let mut world = World::new(properties.clone()).context("world error!")?;
+		let world = World::new(properties.clone()).context("world error!")?;
 
-		let renderer = TermRenderer::new(&world, true);
-		let mut plugins = PluginSet {
-			renderer: Box::new(renderer),
-			..Default::default()
-		};
-		world.run(&mut plugins).context("world error!")
+		term::run(world, true);
+
+		Ok(())
 	}
 }
