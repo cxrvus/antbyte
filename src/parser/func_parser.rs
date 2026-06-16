@@ -11,7 +11,7 @@ pub const MAIN: &str = "main";
 
 impl Parser {
 	pub(super) fn parse_ant(&mut self, name: String) -> Result<(Func, AntFunc)> {
-		let target_id = if self.assume_next(Token::Assign) {
+		let target_id = if self.assume_next(Token::Assign).is_some() {
 			let target_id = self.next_number()?.unwrap_or_default();
 
 			if target_id > 0xff {
@@ -78,7 +78,7 @@ impl Parser {
 
 		let mut statements: Vec<Statement> = vec![];
 
-		while !self.assume_next(Token::BraceRight) {
+		while self.assume_next(Token::BraceRight).is_none() {
 			let assignees = self.next_assignee_list()?;
 
 			self.expect_next(Token::Assign)?;

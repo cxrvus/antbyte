@@ -27,8 +27,8 @@ impl Parser {
 					self.expect_next(Token::Semicolon)?;
 				}
 				Set => {
-					if self.assume_next(Token::BraceLeft) {
-						while !self.assume_next(Token::BraceRight) {
+					if self.assume_next(Token::BraceLeft).is_some() {
+						while self.assume_next(Token::BraceRight).is_none() {
 							let (key, value) = self.parse_setting()?;
 							world.settings.push((key, value));
 						}

@@ -178,13 +178,22 @@ impl Parser {
 		Self::expect(self.next_token(), expected)
 	}
 
-	pub fn assume_next(&mut self, expected: Token) -> bool {
+	pub fn assume_next(&mut self, expected: Token) -> Option<Token> {
 		let actual = self.next_token();
-		if actual == expected {
-			true
-		} else {
-			self.tokens.push(actual);
-			false
+
+		match (&actual, &expected) {
+			(Token::Number(_), Token::Number(_))
+			| (Token::Bit(_), Token::Bit(_))
+			| (Token::Ident(_), Token::Ident(_)) => Some(actual),
+
+			(actual, expected) => {
+				if *actual == *expected {
+					Some(actual.clone())
+				} else {
+					self.tokens.push(actual.clone());
+					None
+				}
+			}
 		}
 	}
 
@@ -220,7 +229,7 @@ impl Parser {
 
 	fn next_assignee(&mut self) -> Result<ParamValue> {
 		self.assume_next(Token::Invert(false));
-		let sign = self.assume_next(Token::Invert(true));
+		let sign = self.assume_next(Token::Invert(true)).is_some();
 
 		let target = self.next_ident()?;
 
@@ -232,8 +241,8 @@ impl Parser {
 	}
 
 	pub fn next_tuple<T>(&mut self, get_item: fn(&mut Self) -> Result<T>) -> Result<Vec<T>> {
-		let items = if self.assume_next(Token::ParenthesisLeft) {
-			if self.assume_next(Token::ParenthesisRight) {
+		let items = if self.assume_next(Token::ParenthesisLeft).is_some() {
+			if self.assume_next(Token::ParenthesisRight).is_some() {
 				vec![]
 			} else {
 				let mut items: Vec<T> = vec![];
@@ -242,7 +251,7 @@ impl Parser {
 				loop {
 					if expect_item {
 						items.push(get_item(self)?);
-					} else if !self.assume_next(Token::Comma) {
+					} else if self.assume_next(Token::Comma).is_none() {
 						break;
 					}
 
