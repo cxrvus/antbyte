@@ -82,19 +82,4 @@ impl Parser {
 
 		Ok(())
 	}
-
-
-	#[rustfmt::skip]
-	fn next_str(&mut self) -> Result<String> {
-		let token = self.next_token();
-		if let Token::String(value) = token { Ok(value) }
-		else { Err(Self::unexpected(token, "string")) }
-	}
-
-	#[rustfmt::skip]
-	fn next_bit(&mut self) -> Result<bool> {
-		let token = self.next_token();
-		if let Token::Bit(value) = token { Ok(value) }
-		else { Err(Self::unexpected(token, "bit")) }
-	}
 }

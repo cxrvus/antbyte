@@ -197,14 +197,28 @@ impl Parser {
 		}
 	}
 
-	pub fn next_ident(&mut self) -> Result<String> {
+	fn next_str(&mut self) -> Result<String> {
 		let token = self.next_token();
 
-		if let Token::Ident(ident) = token {
-			Ok(ident)
-		} else {
-			Err(Self::unexpected(token, "identifier"))
+		match token {
+			Token::String(value) | Token::Ident(value) => Ok(value),
+			_ => Err(Self::unexpected(token, "string or identifier")),
 		}
+	}
+
+
+	#[rustfmt::skip]
+	pub fn next_ident(&mut self) -> Result<String> {
+		let token = self.next_token();
+		if let Token::Ident(ident) = token { Ok(ident)
+		} else { Err(Self::unexpected(token, "identifier")) }
+	}
+
+	#[rustfmt::skip]
+	fn next_bit(&mut self) -> Result<bool> {
+		let token = self.next_token();
+		if let Token::Bit(value) = token { Ok(value) }
+		else { Err(Self::unexpected(token, "bit")) }
 	}
 
 	fn next_number(&mut self) -> Result<Option<u32>> {

@@ -16,14 +16,8 @@ impl Parser {
 
 			match keyword {
 				Use => {
-					let token = self.next_token();
-
-					if let Token::String(import) = token {
-						world.imports.push(import);
-					} else {
-						return Err(Self::unexpected(token, "path to import (string)"));
-					}
-
+					let path = self.next_str()?;
+					world.imports.push(path);
 					self.expect_next(Token::Semicolon)?;
 				}
 				Set => {
