@@ -27,8 +27,15 @@ impl Parser {
 					self.expect_next(Token::Semicolon)?;
 				}
 				Set => {
-					let (key, value) = self.parse_setting()?;
-					world.settings.push((key, value));
+					if self.assume_next(Token::BraceLeft) {
+						while !self.assume_next(Token::BraceRight) {
+							let (key, value) = self.parse_setting()?;
+							world.settings.push((key, value));
+						}
+					} else {
+						let (key, value) = self.parse_setting()?;
+						world.settings.push((key, value));
+					}
 				}
 				Fn => {
 					let name = self.next_ident()?;
