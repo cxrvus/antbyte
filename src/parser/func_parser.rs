@@ -12,14 +12,13 @@ pub const MAIN: &str = "main";
 impl Parser {
 	pub(super) fn parse_ant(&mut self, name: String) -> Result<(Func, AntFunc)> {
 		let target_id = if self.assume_next(Token::Assign) {
-			let target_id = self.next_token();
-			if let Token::Number(target_id) = target_id {
-				target_id as u8
-			} else if let Token::Bit(target_id) = target_id {
-				target_id as u8
-			} else {
-				bail!("expected Ant target ID after '='");
+			let target_id = self.next_number()?.unwrap_or_default();
+
+			if target_id > 0xff {
+				bail!("ant ID must not be greater than 255, found {target_id}");
 			}
+
+			target_id as u8
 		} else if name == "queen" {
 			0
 		} else if name == MAIN {
