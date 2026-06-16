@@ -76,7 +76,7 @@ impl Args {
 
 			let mut parser = Parser::new(cfg)?;
 
-			while !parser.assume_next(Token::EndOfFile) {
+			while parser.assume_next(Token::EndOfFile).is_none() {
 				let (key, value) = parser.parse_setting()?;
 				config.set_setting(key, value)?;
 			}

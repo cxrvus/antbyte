@@ -10,27 +10,14 @@ use anyhow::{Result, anyhow, bail};
 pub const MAIN: &str = "main";
 
 impl Parser {
-	pub(super) fn parse_ant(&mut self, name: String) -> Result<(Func, AntFunc)> {
-		let target_id = if self.assume_next(Token::Assign) {
-			let target_id = self.next_token();
-			if let Token::Number(target_id) = target_id {
-				target_id as u8
-			} else if let Token::Bit(target_id) = target_id {
-				target_id as u8
-			} else {
-				bail!("expected Ant target ID after '='");
-			}
-		} else if name == "queen" {
-			0
-		} else if name == MAIN {
-			1
-		} else {
-			bail!("specify Ant target ID using '='");
-		};
+	pub(super) fn parse_ant(&mut self, name: String, id: u32) -> Result<(Func, AntFunc)> {
+		if id > 0xff {
+			bail!("ant ID must not be greater than 255, found {id}");
+		}
 
 		let ant = AntFunc {
 			target_name: name.clone(),
-			target_id,
+			target_id: id as u8,
 		};
 
 		let statements = self.parse_statements()?;
@@ -79,7 +66,7 @@ impl Parser {
 
 		let mut statements: Vec<Statement> = vec![];
 
-		while !self.assume_next(Token::BraceRight) {
+		while self.assume_next(Token::BraceRight).is_none() {
 			let assignees = self.next_assignee_list()?;
 
 			self.expect_next(Token::Assign)?;

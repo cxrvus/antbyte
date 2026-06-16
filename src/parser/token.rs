@@ -47,7 +47,7 @@ pub enum Token {
 
 impl Token {
 	const COMMENT_PTN: &'static str = r"#.*(?:\r?\n|$)";
-	const NUMBER_PTN: &'static str = r"\d{1,8}";
+	const NUMBER_PTN: &'static str = r"(?:0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*)";
 	const STRING_PTN: &'static str = r#""(.*?)""#;
 	const IDENT_PTN: &'static str = r"[a-zA-Z_]\w*";
 	const LOWER_IDENT: &'static str = r"[a-z][a-z0-9_]*";
@@ -124,15 +124,25 @@ impl Token {
 				))
 			}
 		} else if regex_full(Self::NUMBER_PTN).is_match(token) {
-			token
-				.parse::<u32>()
-				.map(Token::Number)
-				.map_err(|e| anyhow!(e))
+			Self::parse_number(token).map(Token::Number)
 		} else if let Some(captures) = regex_full(Self::STRING_PTN).captures(token) {
 			let string = captures.get(1).unwrap().as_str().to_owned();
 			Ok(Token::String(string))
 		} else {
 			Ok(Token::Invalid(token.to_owned()))
+		}
+	}
+
+	fn parse_number(token: &str) -> Result<u32> {
+		fn parse_radix(digits: &str, radix: u32) -> Result<u32> {
+			u32::from_str_radix(digits, radix).map_err(|e| anyhow!(e))
+		}
+
+		match token.as_bytes() {
+			[b'0', b'b' | b'B', ..] => parse_radix(&token[2..], 2),
+			[b'0', b'o' | b'O', ..] => parse_radix(&token[2..], 8),
+			[b'0', b'x' | b'X', ..] => parse_radix(&token[2..], 16),
+			_ => token.parse::<u32>().map_err(|e| anyhow!(e)),
 		}
 	}
 

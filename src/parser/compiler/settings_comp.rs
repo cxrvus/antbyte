@@ -83,21 +83,6 @@ impl Parser {
 		Ok(())
 	}
 
-	fn next_number(&mut self) -> Result<Option<u32>> {
-		let token = self.next_token();
-
-		match token {
-			Token::Number(value) => {
-				// ensure number is non-zero
-				Ok(if value == 0 { None } else { Some(value) })
-			}
-			Token::Bit(value) => Ok(match value {
-				true => Some(1),
-				false => None,
-			}),
-			token => Err(Self::unexpected(token, "number")),
-		}
-	}
 
 	#[rustfmt::skip]
 	fn next_str(&mut self) -> Result<String> {

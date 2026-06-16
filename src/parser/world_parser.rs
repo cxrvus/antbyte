@@ -27,8 +27,15 @@ impl Parser {
 					self.expect_next(Token::Semicolon)?;
 				}
 				Set => {
-					let (key, value) = self.parse_setting()?;
-					world.settings.push((key, value));
+					if self.assume_next(Token::BraceLeft).is_some() {
+						while self.assume_next(Token::BraceRight).is_none() {
+							let (key, value) = self.parse_setting()?;
+							world.settings.push((key, value));
+						}
+					} else {
+						let (key, value) = self.parse_setting()?;
+						world.settings.push((key, value));
+					}
 				}
 				Fn => {
 					let name = self.next_ident()?;
@@ -38,9 +45,23 @@ impl Parser {
 					world.funcs.push(func);
 				}
 				Ant => {
-					let name = self.next_ident()?;
+					let (id, name) =
+						if let Some(Token::Number(id)) = self.assume_next(Token::Number(0)) {
+							let name = format!("ant_{id:03}");
+							(id, name)
+						} else if let Some(Token::Bit(id)) = self.assume_next(Token::Bit(false)) {
+							let id = id.into();
+							let name = format!("ant_{id:03}");
+							(id, name)
+						} else {
+							let name = self.next_ident()?;
+							self.expect_next(Token::Assign)?;
+							let id = self.next_number()?.unwrap_or_default();
+							(id, name)
+						};
+
 					let (func, ant) = self
-						.parse_ant(name.clone())
+						.parse_ant(name.clone(), id)
 						.with_context(|| format!("in ant '{name}'!"))?;
 					world.funcs.push(func);
 					world.ants.push(ant);

@@ -107,7 +107,7 @@ fn validate_exp_token(current: &Token, next: &Token) -> bool {
 				ParenthesisLeft,
 				Ident(_) | Bit(_) | Invert(_) | ParenthesisRight
 			) | (ParenthesisRight, ParenthesisRight | Comma | Semicolon)
-			| (Comma, Ident(_) | Bit(_) | Invert(_))
+			| (Comma, Ident(_) | Bit(_) | Invert(_) | ParenthesisRight)
 	)
 }
 
