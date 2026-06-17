@@ -7,8 +7,6 @@ use super::{Parser, Statement, Token};
 
 use anyhow::{Result, anyhow, bail};
 
-pub const MAIN: &str = "main";
-
 impl Parser {
 	pub(super) fn parse_ant(&mut self, name: String, id: u32) -> Result<(Func, AntFunc)> {
 		if id > 0xff {

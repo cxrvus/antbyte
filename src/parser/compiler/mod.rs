@@ -1,30 +1,25 @@
 mod assembler;
 mod call;
 mod func_comp;
+mod linker;
 pub mod settings_comp;
 mod statement;
 mod stdlib;
 mod test_std;
 
-use std::{
-	collections::{BTreeMap, HashSet},
-	fmt::Display,
-	mem::take,
-	path::{Path, PathBuf},
-};
+use std::{collections::BTreeMap, fmt::Display, mem::take, path::PathBuf};
 
 use crate::{
 	ant::behavior::Behavior,
 	parser::{
-		AntFunc, Expression, Func, ParamValue, Parser, Signature, SignatureSpec,
+		AntFunc, ParamValue, Parser, Signature, SignatureSpec,
 		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
-		func_parser::MAIN,
 	},
 	truth_table::TruthTable,
-	world::{WorldProperties, file_compiler::read_file},
+	world::WorldProperties,
 };
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Result, bail};
 
 #[derive(Debug, Clone)]
 struct CompFunc {
@@ -90,20 +85,9 @@ pub fn compile_world(
 		parsed_funcs.extend(std_funcs);
 	}
 
-	let mut imported = HashSet::new();
-
 	eprintln!("Linking...");
 
-	for import in &parsed_world.imports {
-		let path = if let Some(source_path) = source_path {
-			let base_dir = source_path.parent().unwrap_or_else(|| Path::new("."));
-			base_dir.join(format!("{import}.ant"))
-		} else {
-			bail!("cannot import other files in path-less compilations");
-		};
-
-		import_funcs(&path, &mut parsed_funcs, &mut imported)?;
-	}
+	linker::link(source_path, &parsed_world.imports, &mut parsed_funcs)?;
 
 	// add source file's functions after imports so imported functions are available
 	parsed_funcs.extend(take(&mut parsed_world.funcs));
@@ -149,76 +133,6 @@ pub fn compile_world(
 	properties.behaviors = behaviors;
 
 	Ok(properties)
-}
-
-fn import_funcs(
-	path: &PathBuf,
-	parsed_funcs: &mut Vec<Func>,
-	imported: &mut HashSet<PathBuf>,
-) -> Result<()> {
-	import_funcs_recursive(path, parsed_funcs, imported, &mut HashSet::new())
-		.with_context(|| format!("in file '{}'!", path.to_string_lossy()))
-}
-
-fn import_funcs_recursive(
-	path: &PathBuf,
-	parsed_funcs: &mut Vec<Func>,
-	imported: &mut HashSet<PathBuf>,
-	visiting: &mut HashSet<PathBuf>,
-) -> Result<()> {
-	if visiting.contains(path) {
-		bail!("circular import detected: '{}'", path.to_string_lossy());
-	}
-
-	if imported.contains(path) {
-		return Ok(());
-	}
-
-	visiting.insert(path.clone());
-	imported.insert(path.clone());
-
-	let code = read_file(path)?;
-	let parsed_world = Parser::new(&code)?.parse_world()?;
-
-	let base_dir = path.parent().unwrap_or_else(|| Path::new("."));
-
-	for import in &parsed_world.imports {
-		let import_path = base_dir.join(format!("{import}.ant"));
-		import_funcs_recursive(&import_path, parsed_funcs, imported, visiting)?
-	}
-
-	let mut new_parsed_funcs = parsed_world.funcs;
-	sanitize_main(&mut new_parsed_funcs, path);
-	parsed_funcs.extend(new_parsed_funcs);
-
-	visiting.remove(path);
-	Ok(())
-}
-
-fn sanitize_main(parsed_funcs: &mut [Func], path: &Path) {
-	for parsed_func in parsed_funcs.iter_mut() {
-		let file_name = path.file_stem().unwrap().to_string_lossy().to_string();
-
-		for stm in parsed_func.statements.iter_mut() {
-			sanitize_exp(&mut stm.expression, &file_name);
-		}
-
-		if parsed_func.signature.name == MAIN {
-			parsed_func.signature.name = file_name;
-		}
-	}
-
-	fn sanitize_exp(exp: &mut Expression, file_name: &str) {
-		if let Some(params) = &mut exp.params {
-			if exp.ident == MAIN {
-				exp.ident = file_name.to_owned();
-			}
-
-			for sub_exp in params.iter_mut() {
-				sanitize_exp(sub_exp, file_name);
-			}
-		}
-	}
 }
 
 pub fn compile_world_simple(code: &str) -> Result<WorldProperties> {
