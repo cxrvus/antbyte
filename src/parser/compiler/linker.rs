@@ -100,5 +100,7 @@ fn rename_exps(exp: &mut Expression, file_name: &str) {
 fn rename_ident(ident: &mut String, file_name: &str) {
 	if ident == MAIN {
 		*ident = file_name.to_owned();
+	} else if ident.starts_with('_') {
+		*ident = file_name.to_owned() + ident;
 	}
 }

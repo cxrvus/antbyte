@@ -50,7 +50,7 @@ impl Token {
 	const NUMBER_PTN: &'static str = r"(?:0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*)";
 	const STRING_PTN: &'static str = r#""(.*?)""#;
 	const IDENT_PTN: &'static str = r"[a-zA-Z_]\w*";
-	const LOWER_IDENT: &'static str = r"[a-z][a-z0-9_]*";
+	const LOWER_IDENT: &'static str = r"_?[a-z][a-z0-9_]*";
 	const UPPER_IDENT: &'static str = r"[A-Z][A-Z0-9_]*";
 	const SYMBOL_PTN: &'static str = r"=>|[#={}(),;01]|\+|-";
 
