@@ -11,6 +11,7 @@ pub type Cell = u8;
 
 pub type Cells = Grid<Cell>;
 pub type Ants = BTreeMap<Position, Ant>;
+pub type Layers = BTreeMap<u8, Ants>;
 
 #[derive(Clone, Default)]
 pub enum WorldStatus {
@@ -27,7 +28,7 @@ pub struct WorldState {
 	pub(super) status: WorldStatus,
 	pub cells: Cells,
 	pub cell_decays: BTreeMap<Position, u16>,
-	pub ants: Ants,
+	pub ants: Layers,
 	pub signal_in: u8,
 	pub signal_out: u8,
 	pub ext_input: u8,
@@ -57,7 +58,7 @@ impl WorldState {
 	}
 
 	#[inline]
-	pub fn ants(&self) -> &Ants {
+	pub fn ants(&self) -> &Layers {
 		&self.ants
 	}
 

@@ -109,7 +109,7 @@ impl World {
 			bail!("can't run a world with no ants defined")
 		};
 
-		world.ants.insert(start_pos, ant);
+		world.ants.entry(0).or_default().insert(start_pos, ant);
 
 		Ok(world)
 	}

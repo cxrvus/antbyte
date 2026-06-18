@@ -3,7 +3,11 @@ use std::collections::BTreeMap;
 use crate::{
 	ant::Ant,
 	util::vec2::Position,
-	world::{World, config::RenderMask, state::WorldStatus},
+	world::{
+		World,
+		config::RenderMask,
+		state::{Ants, WorldStatus},
+	},
 };
 
 #[derive(Debug, Default)]
@@ -118,6 +122,8 @@ impl World {
 
 	fn map_ants(&self, func: impl Fn(&Ant) -> u8) -> BTreeMap<Position, u8> {
 		self.ants
+			.get(&self.config().main_layer)
+			.unwrap_or(&Ants::new())
 			.iter()
 			.map(|(&pos, ant)| (pos, func(ant)))
 			.collect()
