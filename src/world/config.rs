@@ -6,6 +6,7 @@ use crate::util::{dir::Direction, vec2::Coord};
 pub const FPS_CAP: u32 = 50;
 pub const SPEED_CAP: u32 = 0x4000;
 pub const SIZE_CAP: Coord = 0x200;
+pub const LAYER_CAP: u8 = 8;
 
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -18,6 +19,8 @@ pub struct WorldConfig {
 	/// height in pixels
 	pub height: Coord,
 	/// simulated ticks per frame (defaults to 1)
+	/// number of ant layers
+	pub layers: u8,
 	pub speed: Option<u32>,
 	/// simulation tick limit
 	pub max_ticks: Option<u32>,
@@ -62,6 +65,7 @@ impl Default for WorldConfig {
 		Self {
 			width: 16,
 			height: 16,
+			layers: 1,
 			speed: Some(1),
 			max_ticks: None,
 			decay: None,
@@ -210,6 +214,12 @@ impl WorldConfig {
 
 		Self::cap(self.height as u32, "height", SIZE_CAP as u32)?;
 		Self::cap(self.width as u32, "width", SIZE_CAP as u32)?;
+
+		Self::cap(self.layers as u32, "layers", LAYER_CAP as u32)?;
+
+		if self.layers == 0 {
+			bail!("specified layer count must be greater than 0")
+		}
 
 		const MAX_DIR: u8 = Direction::MAX;
 
