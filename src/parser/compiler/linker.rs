@@ -68,35 +68,37 @@ fn import_funcs_recursive(
 	}
 
 	let mut new_parsed_funcs = parsed_world.funcs;
-	sanitize_main(&mut new_parsed_funcs, path);
+	rename_funcs(&mut new_parsed_funcs, path);
 	parsed_funcs.extend(new_parsed_funcs);
 
 	visiting.remove(path);
 	Ok(())
 }
 
-fn sanitize_main(parsed_funcs: &mut [Func], path: &Path) {
-	for parsed_func in parsed_funcs.iter_mut() {
-		let file_name = path.file_stem().unwrap().to_string_lossy().to_string();
+fn rename_funcs(parsed_funcs: &mut [Func], path: &Path) {
+	let file_name = path.file_stem().unwrap().to_string_lossy().to_string();
 
+	for parsed_func in parsed_funcs.iter_mut() {
 		for stm in parsed_func.statements.iter_mut() {
-			sanitize_exp(&mut stm.expression, &file_name);
+			rename_exps(&mut stm.expression, &file_name);
 		}
 
-		if parsed_func.signature.name == MAIN {
-			parsed_func.signature.name = file_name;
+		rename_ident(&mut parsed_func.signature.name, &file_name);
+	}
+}
+
+fn rename_exps(exp: &mut Expression, file_name: &str) {
+	if let Some(params) = &mut exp.params {
+		rename_ident(&mut exp.ident, file_name);
+
+		for sub_exp in params.iter_mut() {
+			rename_exps(sub_exp, file_name);
 		}
 	}
+}
 
-	fn sanitize_exp(exp: &mut Expression, file_name: &str) {
-		if let Some(params) = &mut exp.params {
-			if exp.ident == MAIN {
-				exp.ident = file_name.to_owned();
-			}
-
-			for sub_exp in params.iter_mut() {
-				sanitize_exp(sub_exp, file_name);
-			}
-		}
+fn rename_ident(ident: &mut String, file_name: &str) {
+	if ident == MAIN {
+		*ident = file_name.to_owned();
 	}
 }
