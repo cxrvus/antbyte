@@ -9,12 +9,7 @@ use crate::{
 
 impl World {
 	pub(super) fn next_pos(&self, pos: Position, dir: Direction) -> Option<Position> {
-		let _different_layer = false; // planned: spawning ants on different z-layers
-		let new_pos = if _different_layer {
-			pos.sign()
-		} else {
-			pos.sign() + dir.as_vec()
-		};
+		let new_pos = pos.sign() + dir.as_vec();
 
 		if self.cells.in_bounds(&new_pos) {
 			Some(new_pos.unsign().unwrap())
