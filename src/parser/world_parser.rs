@@ -41,11 +41,11 @@ impl Parser {
 				Ant => {
 					let (id, name) =
 						if let Some(Token::Number(id)) = self.assume_next(Token::Number(0)) {
-							let name = format!("ant_{id:03}");
+							let name = format!("_ant_0x{id:02x}");
 							(id, name)
 						} else if let Some(Token::Bit(id)) = self.assume_next(Token::Bit(false)) {
 							let id = id.into();
-							let name = format!("ant_{id:03}");
+							let name = format!("_ant_0x{id:02x}");
 							(id, name)
 						} else {
 							let name = self.next_ident()?;
