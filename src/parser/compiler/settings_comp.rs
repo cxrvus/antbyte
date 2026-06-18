@@ -38,6 +38,7 @@ impl Parser {
 			}
 
 			"layers" => config.layers = self.next_number()?.unwrap_or_default() as u8,
+			"main_layer" => config.main_layer = self.next_number()?.unwrap_or_default() as u8,
 
 			"fps" => config.fps = self.next_number()?,
 			"speed" => config.speed = self.next_number()?,

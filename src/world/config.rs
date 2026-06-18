@@ -18,9 +18,11 @@ pub struct WorldConfig {
 	pub width: Coord,
 	/// height in pixels
 	pub height: Coord,
-	/// simulated ticks per frame (defaults to 1)
 	/// number of ant layers
 	pub layers: u8,
+	/// layer that will be rendered
+	pub main_layer: u8,
+	/// simulated ticks per frame (defaults to 1)
 	pub speed: Option<u32>,
 	/// simulation tick limit
 	pub max_ticks: Option<u32>,
@@ -66,6 +68,7 @@ impl Default for WorldConfig {
 			width: 16,
 			height: 16,
 			layers: 1,
+			main_layer: 0,
 			speed: Some(1),
 			max_ticks: None,
 			decay: None,
@@ -219,6 +222,8 @@ impl WorldConfig {
 
 		if self.layers == 0 {
 			bail!("specified layer count must be greater than 0")
+		} else if self.main_layer > self.layers {
+			bail!("main_layer must not exceed layer count")
 		}
 
 		const MAX_DIR: u8 = Direction::MAX;
