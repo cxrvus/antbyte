@@ -17,6 +17,8 @@ pub enum Pin {
 	/// if ant is spawned by current ant,
 	/// set its memory to this
 	SpawnMem,
+	/// this plus the current layer's index will be the target layer index
+	SpawnLayer,
 
 	// ## moving ants
 	/// 3 bits indicating number of 45 degrees rotations
@@ -79,7 +81,7 @@ pub enum IoType {
 }
 
 const BIT: u8 = 1;
-const DIR: u8 = 3;
+const TRIPLET: u8 = 3;
 const ANT_ID: u8 = BYTE;
 const BYTE: u8 = 8;
 const DOUBLE: u8 = 64;
@@ -94,7 +96,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	const PIN_DEFINITIONS: [PinDefinition; 24] = [
+	const PIN_DEFINITIONS: [PinDefinition; 25] = [
 		PinDefinition {
 			pin: Self::SpawnId,
 			code: "A",
@@ -102,9 +104,15 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
+			pin: Self::SpawnLayer,
+			code: "AA",
+			size: TRIPLET,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
 			pin: Self::SpawnDir,
 			code: "AD",
-			size: DIR,
+			size: TRIPLET,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
@@ -128,7 +136,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Dir,
 			code: "D",
-			size: DIR,
+			size: TRIPLET,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
