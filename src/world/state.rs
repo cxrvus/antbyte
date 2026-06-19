@@ -1,4 +1,7 @@
-use std::collections::BTreeMap;
+use std::{
+	collections::BTreeMap,
+	ops::{Deref, DerefMut},
+};
 
 use crate::{
 	ant::Ant,
@@ -11,7 +14,6 @@ pub type Cell = u8;
 
 pub type Cells = Grid<Cell>;
 pub type Ants = BTreeMap<Position, Ant>;
-pub type Layers = BTreeMap<u8, Ants>;
 
 #[derive(Clone, Default)]
 pub enum WorldStatus {
@@ -58,11 +60,6 @@ impl WorldState {
 	}
 
 	#[inline]
-	pub fn ants(&self) -> &Layers {
-		&self.ants
-	}
-
-	#[inline]
 	pub(super) fn rng(&mut self) -> u8 {
 		self.rng.as_mut().expect("rng must be Some").random()
 	}
@@ -105,5 +102,33 @@ impl WorldState {
 		let ext_out_str = self.ext_out_str();
 
 		format!("{tick_str}\nK: {:02x}\nX: {ext_out_str}\n", self.ext_input)
+	}
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct Layers(LayerContainer);
+type LayerContainer = BTreeMap<u8, Ants>;
+
+impl Layers {
+	pub fn layer_mut(&mut self, layer: u8) -> &mut Ants {
+		self.get_mut(&layer).unwrap()
+	}
+
+	pub fn ant_count(&self) -> usize {
+		self.values().map(|layer| layer.len()).sum()
+	}
+}
+
+impl Deref for Layers {
+	type Target = LayerContainer;
+
+	fn deref(&self) -> &Self::Target {
+		&self.0
+	}
+}
+
+impl DerefMut for Layers {
+	fn deref_mut(&mut self) -> &mut Self::Target {
+		&mut self.0
 	}
 }

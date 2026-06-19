@@ -14,7 +14,7 @@ fn zero_count_mask(x: u8) -> u8 {
 
 use Pin::*;
 impl World {
-	pub(super) fn get_input(&mut self, ant: &Ant, pos: Position) -> u8 {
+	pub(super) fn get_input(&mut self, ant: &Ant, pos: Position, layer: u8) -> u8 {
 		let behavior = self
 			.get_behavior(ant.behavior)
 			.cloned()
@@ -26,8 +26,8 @@ impl World {
 			let SubPin { pin, line, channel } = *input_sub_pin;
 
 			let target_dir = Direction::from(channel) + ant.dir;
-			let target_pos = self.next_pos(pos, target_dir);
-			let target_ant = target_pos.and_then(|pos| self.ants.get(&pos));
+			let target_pos = self.next_pos(pos, layer, target_dir);
+			let target_ant = target_pos.and_then(|pos| self.ants[&layer].get(&pos));
 
 			let input_value: u8 = match pin {
 				Cell => *self.cells.get(pos).unwrap(),
@@ -39,7 +39,6 @@ impl World {
 				Init => (ant.birth_tick + 1 == self.tick_count()) as u8,
 				Time => ant.clock,
 				Pulse => zero_count_mask(ant.clock),
-				Mem => ant.memory,
 				Random => self.rng(),
 				Chance => zero_count_mask(self.rng()),
 
@@ -52,8 +51,10 @@ impl World {
 				NearbyId => target_ant.map(|target| target.behavior).unwrap_or_default(),
 				NearbyMem => target_ant.map(|target| target.memory).unwrap_or_default(),
 
+				Mem => ant.memory,
 				Signal => self.signal_in,
 				ExtIn => self.ext_input,
+
 				_ => panic!("unhandled input: {input_sub_pin:?}"),
 			};
 
@@ -100,8 +101,8 @@ impl World {
 		output_values
 	}
 
-	pub(super) fn sync_tick(&mut self, pos: Position, input: u8, output: &[PinValue]) {
-		let mut ant = self.ants[&pos];
+	pub(super) fn sync_tick(&mut self, pos: Position, layer: u8, input: u8, output: &[PinValue]) {
+		let mut ant = self.ants[&layer][&pos];
 
 		let behavior = self
 			.get_behavior(ant.behavior)
@@ -118,21 +119,13 @@ impl World {
 			let value_bool = value != 0;
 
 			match (pin, value_bool) {
-				(Clear, true) => clear = true,
-				(Cell, _) => self.set_cell(pos, value, cell_mask),
-
-				(SpawnDir, _) => ant.child_dir = Direction::from(value),
-				(SpawnMem, _) => ant.child_memory = value,
-
 				(Mem, _) => ant.memory = value | (ant.memory & !mem_mask),
-
-				(Wait, true) => {
-					ant.will_wait = true;
-					ant.wait_ticks = value
-				}
-
 				(Signal, true) => self.signal_out |= value,
 				(ExtOut, true) => self.ext_output.push(value),
+
+				// cells
+				(Clear, true) => clear = true,
+				(Cell, _) => self.set_cell(pos, value, cell_mask),
 
 				// deferred to async ticks...
 
@@ -147,9 +140,19 @@ impl World {
 
 				// spawn_tick
 				(SpawnId, _) => ant.child_behavior = value,
+				(SpawnLayer, _) => ant.child_layer = value,
+				(SpawnDir, _) => ant.child_dir = Direction::from(value),
+				(SpawnMem, _) => ant.child_memory = value,
 
-				// die_tick
+				// end_tick
 				(Die, _) => ant.will_die = value_bool,
+
+				(Wait, true) => {
+					ant.will_wait = true;
+					ant.wait_ticks = value
+				}
+
+				// ignored
 				_ => {}
 			};
 		}
@@ -161,6 +164,6 @@ impl World {
 			self.set_cell(pos, 0, !cell_mask);
 		}
 
-		self.ants.insert(pos, ant);
+		self.ants.get_mut(&layer).unwrap().insert(pos, ant);
 	}
 }

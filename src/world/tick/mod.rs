@@ -16,30 +16,16 @@ impl World {
 		self.signal_in = self.signal_out;
 		self.signal_out = 0;
 
-		// tick ants (sync)
-		let mut all_outputs = vec![];
-
-		for (pos, ant) in self.ants.clone() {
-			if !ant.waiting() {
-				let input = self.get_input(&ant, pos);
-				let output = self.get_output(&ant, input);
-				all_outputs.push((pos, input, output));
-			}
-		}
-
-		for (pos, input, output) in all_outputs {
-			self.sync_tick(pos, input, &output);
-		}
-
-		// tick ants (async)
-		self.kill_tick();
-		self.move_tick();
-		self.spawn_tick();
-		self.end_tick();
-
 		// cell decay
 		if self.config().decay.is_some() {
 			self.cell_decay();
+		}
+
+		// ants
+		for layer in 0..self.config().layers {
+			if self.ants.get(&layer).is_some() {
+				self.tick_layer(layer);
+			}
 		}
 
 		// end world if conditions are met
@@ -54,5 +40,28 @@ impl World {
 			.unwrap_or_default();
 
 		!(no_ants || tick_overflow || max_tick)
+	}
+
+	fn tick_layer(&mut self, layer: u8) {
+		// tick ants (sync)
+		let mut all_outputs = vec![];
+
+		for (pos, ant) in self.ants[&layer].clone() {
+			if !ant.waiting() {
+				let input = self.get_input(&ant, pos, layer);
+				let output = self.get_output(&ant, input);
+				all_outputs.push((pos, input, output));
+			}
+		}
+
+		for (pos, input, output) in all_outputs {
+			self.sync_tick(pos, layer, input, &output);
+		}
+
+		// tick ants (async)
+		self.kill_tick(layer);
+		self.move_tick(layer);
+		self.spawn_tick(layer);
+		self.end_tick(layer);
 	}
 }

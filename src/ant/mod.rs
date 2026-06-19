@@ -25,6 +25,7 @@ pub struct Ant {
 	pub memory: u8,
 
 	pub child_behavior: u8,
+	pub child_layer: u8,
 	pub child_dir: Direction,
 	pub child_memory: u8,
 }

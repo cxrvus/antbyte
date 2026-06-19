@@ -16,28 +16,30 @@ enum MoveAction {
 }
 
 impl World {
-	pub(super) fn kill_tick(&mut self) {
+	pub(super) fn kill_tick(&mut self, layer: u8) {
 		let mut kills = BTreeSet::new();
 
-		for (pos, ant) in &self.ants.clone() {
+		for (pos, ant) in &self.ants[&layer].clone() {
 			if ant.will_kill
 				&& !ant.waiting()
-				&& let Some(next_pos) = self.next_pos(*pos, ant.dir)
-				&& self.ants.contains_key(&next_pos)
+				&& let Some(next_pos) = self.next_pos(*pos, layer, ant.dir)
+				&& self.ants[&layer].contains_key(&next_pos)
 			{
 				kills.insert(next_pos);
 			}
 		}
 
-		self.ants.retain(|pos, _| !kills.contains(pos));
+		self.ants
+			.layer_mut(layer)
+			.retain(|pos, _| !kills.contains(pos));
 	}
 
-	pub(super) fn end_tick(&mut self) {
+	pub(super) fn end_tick(&mut self, layer: u8) {
 		// die
-		self.ants.retain(|_, ant| !ant.will_die);
+		self.ants.layer_mut(layer).retain(|_, ant| !ant.will_die);
 
 		// wait
-		for ant in &mut self.ants.values_mut() {
+		for ant in &mut self.ants.layer_mut(layer).values_mut() {
 			if ant.will_wait {
 				ant.will_wait = false;
 			} else if ant.waiting() {
@@ -46,11 +48,11 @@ impl World {
 		}
 	}
 
-	pub(super) fn move_tick(&mut self) {
+	pub(super) fn move_tick(&mut self, layer: u8) {
 		let mut source = Ants::new();
 		let mut result = Ants::new();
 
-		swap(&mut self.ants, &mut source);
+		swap(self.ants.layer_mut(layer), &mut source);
 
 		while let Some((pos, ant)) = source.pop_first() {
 			let mut stack = vec![(pos, ant)];
@@ -68,12 +70,12 @@ impl World {
 					}
 
 					let target_pos = self
-						.next_pos(pos, ant.dir)
+						.next_pos(pos, layer, ant.dir)
 						.expect("no target position for ant in cycle");
 
 					// all ants in cycle can move
 					MoveAction::Move(target_pos)
-				} else if let Some(target_pos) = self.next_pos(pos, ant.dir) {
+				} else if let Some(target_pos) = self.next_pos(pos, layer, ant.dir) {
 					if result.contains_key(&target_pos) {
 						// target pos is occupied in result => can't move
 						MoveAction::Stay
@@ -99,7 +101,7 @@ impl World {
 							MoveAction::Move(target_pos)
 						} else {
 							let contestants = self
-								.get_contestants(&source, target_pos)
+								.get_contestants(&source, target_pos, layer)
 								.iter()
 								.map(|pos| source[pos])
 								.collect::<Vec<_>>();
@@ -137,38 +139,52 @@ impl World {
 			assert!(prev.is_none(), "tried to occupy occupied space")
 		}
 
-		swap(&mut result, &mut self.ants);
+		swap(&mut result, self.ants.layer_mut(layer));
 	}
 
 	const ANT_LIMIT: u32 = 0x400;
 
-	pub(super) fn spawn_tick(&mut self) {
-		let mut claims = BTreeMap::<Position, Vec<Position>>::new();
+	pub(super) fn spawn_tick(&mut self, source_layer: u8) {
+		let mut claims = BTreeMap::<(Position, u8), Vec<Position>>::new();
 
 		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
+		let ant_count = self.ants.ant_count();
 
-		if self.ants.len() >= ant_limit {
+		if ant_count >= ant_limit {
 			return;
 		}
 
-		for (pos, ant) in &self.ants {
-			if ant.child_behavior == 0 || ant.waiting() {
-				continue;
-			} else if let Some(target_pos) = self.next_pos(*pos, ant.dir.inverted())
-				&& !self.ants.contains_key(&target_pos)
+		for (pos, ant) in &self.ants[&source_layer] {
+			if let Some(target_pos) = self.next_pos(*pos, source_layer, ant.dir.inverted())
+				&& ant.child_behavior != 0
+				&& !ant.waiting()
 				&& self.get_behavior(ant.child_behavior).is_some()
 			{
-				claims.entry(target_pos).or_default().push(*pos);
+				let target_layer = source_layer + ant.child_layer;
+
+				let target_layer_in_bounds = target_layer < self.config().layers;
+
+				let target_pos_occupied = self
+					.ants
+					.get(&target_layer)
+					.is_some_and(|ants| ants.contains_key(&target_pos));
+
+				if target_layer_in_bounds && !target_pos_occupied {
+					claims
+						.entry((target_pos, target_layer))
+						.or_default()
+						.push(*pos);
+				}
 			}
 		}
 
-		let mut new_ants = BTreeMap::new();
+		let mut new_ants: Vec<(Position, u8, Ant)> = vec![];
 
 		// resolve target position conflicts
-		for (target_pos, contestant_positions) in claims {
+		for ((target_pos, target_layer), contestant_positions) in claims {
 			let contestants = contestant_positions
 				.iter()
-				.map(|pos| self.ants[pos])
+				.map(|pos| self.ants[&source_layer][pos])
 				.collect::<Vec<_>>();
 
 			// conflict resolution
@@ -188,9 +204,11 @@ impl World {
 				..Default::default()
 			};
 
-			new_ants.insert(target_pos, new_ant);
+			new_ants.push((target_pos, target_layer, new_ant));
 		}
 
-		self.ants.extend(new_ants);
+		for (pos, layer, ants) in new_ants.into_iter() {
+			self.ants.entry(layer).or_default().insert(pos, ants);
+		}
 	}
 }

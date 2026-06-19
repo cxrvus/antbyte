@@ -8,7 +8,7 @@ use crate::{
 };
 
 impl World {
-	pub(super) fn next_pos(&self, pos: Position, dir: Direction) -> Option<Position> {
+	pub(super) fn next_pos(&self, pos: Position, _layer: u8, dir: Direction) -> Option<Position> {
 		let new_pos = pos.sign() + dir.as_vec();
 
 		if self.cells.in_bounds(&new_pos) {
@@ -77,12 +77,18 @@ impl World {
 	}
 
 	/// get positions of neighboring ants about to move to target
-	pub(super) fn get_contestants(&self, source: &Ants, target_pos: Position) -> Vec<Position> {
+	pub(super) fn get_contestants(
+		&self,
+		source: &Ants,
+		target_pos: Position,
+		layer: u8,
+	) -> Vec<Position> {
 		let mut positions = vec![];
 
 		for dir in 0..=Direction::MAX {
 			let dir = Direction::from(dir);
-			if let Some(source_pos) = self.next_pos(target_pos, dir.inverted())
+
+			if let Some(source_pos) = self.next_pos(target_pos, layer, dir.inverted())
 				&& let Some(source_ant) = source.get(&source_pos)
 				&& !source_ant.halted()
 				&& source_ant.dir == dir
