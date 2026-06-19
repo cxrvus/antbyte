@@ -20,7 +20,17 @@ impl WorldConfig {
 
 impl Parser {
 	fn set_setting(&mut self, config: &mut WorldConfig, key: &str) -> Result<()> {
-		match key {
+		let key_parts = key.rsplit_once('_');
+
+		let (key, sub_index) = match key_parts {
+			Some((key, suffix)) => match u8::from_str_radix(suffix, 8) {
+				Ok(index) => (key.to_owned(), index),
+				Err(_) => (format!("{key}_{suffix}"), 0),
+			},
+			None => (key.to_owned(), 0),
+		};
+
+		match key.as_str() {
 			key @ ("height" | "width" | "size") => {
 				let value = self.next_number()?.ok_or(anyhow!(
 					"size settings must be greater than zero.\nfound in: {key}"
