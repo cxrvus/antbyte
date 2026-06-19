@@ -80,6 +80,11 @@ impl World {
 		let fg = self.get_render_values(&self.config().fg);
 		let bg = self.get_render_values(&self.config().bg);
 
+		let bg = bg
+			.iter()
+			.map(|(&pos, &value)| (pos, self.config().bg_filter.apply(value)))
+			.collect();
+
 		Some(FrameOutput {
 			fg,
 			bg,
@@ -110,12 +115,7 @@ impl World {
 			.iter()
 			.enumerate()
 			.filter(|&(_, &value)| value != 0)
-			.map(|(i, &value)| {
-				(
-					Position::from_index(i, width),
-					self.config().bg_filter.apply(value),
-				)
-			});
+			.map(|(i, &value)| (Position::from_index(i, width), value));
 
 		BTreeMap::from_iter(bg_entries)
 	}
