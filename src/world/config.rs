@@ -227,8 +227,8 @@ impl WorldConfig {
 
 		if self.layers == 0 {
 			bail!("specified layer count must be greater than 0")
-		} else if self.main_layer > self.layers {
-			bail!("main_layer must not exceed layer count")
+		} else if self.main_layer >= self.layers {
+			bail!("main_layer must not exceed specified max layer")
 		}
 
 		Self::cap(self.ant_limit, "ant_limit", ANT_LIMIT)?;
