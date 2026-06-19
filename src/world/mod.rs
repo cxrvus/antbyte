@@ -63,8 +63,6 @@ impl World {
 			..
 		} = config;
 
-		let mut world = Self { properties, state };
-
 		let half_width = (width - 1) / 2;
 		let half_height = (height - 1) / 2;
 
@@ -102,7 +100,15 @@ impl World {
 			StartingPos::TopRight => Position { x: width - 1, y: 0 },
 		};
 
-		let ant = if let Some(root_id) = world.properties.behaviors.keys().min() {
+		let behaviors = &properties.behaviors;
+
+		for (&id, behavior) in behaviors {
+			if behavior.name.is_empty() {
+				bail!("ant name must not be an empty string (found in ant with id = {id}")
+			}
+		}
+
+		let ant = if let Some(root_id) = behaviors.keys().min() {
 			Ant {
 				dir: Direction::from(start_dir),
 				behavior: *root_id,
@@ -112,9 +118,9 @@ impl World {
 			bail!("can't run a world with no ants defined")
 		};
 
-		world.ants.entry(0).or_default().insert(start_pos, ant);
+		state.ants.entry(0).or_default().insert(start_pos, ant);
 
-		Ok(world)
+		Ok(Self { properties, state })
 	}
 
 	#[inline]
