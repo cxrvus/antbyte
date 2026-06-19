@@ -98,6 +98,7 @@ impl World {
 		match mask {
 			RenderMask::None => Default::default(),
 			RenderMask::Cell => self.cells_to_map(),
+			RenderMask::Layers => self.layer_occupations(),
 			RenderMask::Dir => self.map_ants(|ant| ant.dir.value()),
 			RenderMask::Id => self.map_ants(|ant| ant.behavior),
 			RenderMask::BirthTick => self.map_ants(|ant| ant.birth_tick as u8),
@@ -118,6 +119,23 @@ impl World {
 			.map(|(i, &value)| (Position::from_index(i, width), value));
 
 		BTreeMap::from_iter(bg_entries)
+	}
+
+	fn layer_occupations(&self) -> BTreeMap<Position, u8> {
+		let mut occupations = BTreeMap::new();
+
+		for (layer, ants) in self.ants.iter() {
+			let new_value = 1u8 << layer;
+
+			for (&pos, _) in ants.iter() {
+				occupations
+					.entry(pos)
+					.and_modify(|old_value| *old_value |= new_value)
+					.or_insert(new_value);
+			}
+		}
+
+		occupations
 	}
 
 	fn map_ants(&self, func: impl Fn(&Ant) -> u8) -> BTreeMap<Position, u8> {

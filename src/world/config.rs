@@ -185,6 +185,7 @@ impl ByteFilter {
 pub enum RenderMask {
 	None,
 	Cell,
+	Layers,
 
 	// ## Ant
 	Dir,
@@ -201,6 +202,7 @@ impl TryFrom<String> for RenderMask {
 		match value.as_str() {
 			"none" => Ok(Self::None),
 			"cell" => Ok(Self::Cell),
+			"layers" => Ok(Self::Layers),
 			"dir" => Ok(Self::Dir),
 			"id" => Ok(Self::Id),
 			"birth_tick" => Ok(Self::BirthTick),
