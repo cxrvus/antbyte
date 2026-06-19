@@ -28,6 +28,8 @@ impl World {
 			}
 		}
 
+		self.ants.retain(|_, ants| !ants.is_empty());
+
 		// end world if conditions are met
 		let no_ants = self.ants.is_empty();
 
