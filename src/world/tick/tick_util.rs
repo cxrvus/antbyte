@@ -11,7 +11,7 @@ impl World {
 	pub(super) fn next_pos(&self, pos: Pos, layer: u8, dir: Direction) -> Option<Pos> {
 		let new_pos = pos.sign() + dir.as_vec();
 
-		if self.cells.in_bounds(&new_pos) {
+		if self.tiles.in_bounds(&new_pos) {
 			Some(new_pos.unsign().unwrap())
 		} else {
 			use BorderMode::*;
@@ -21,7 +21,7 @@ impl World {
 			match border_mode {
 				Collide | Despawn => None,
 				Cycle | Wrap => {
-					let dimensions = self.cells.dimensions().sign();
+					let dimensions = self.tiles.dimensions().sign();
 
 					let mut wrapped_pos = new_pos % dimensions;
 
@@ -58,8 +58,8 @@ impl World {
 		}
 	}
 
-	pub(super) fn set_cell(&mut self, pos: Pos, value: u8, mask: u8) {
-		let old_value = self.cells.get(pos).unwrap();
+	pub(super) fn set_tile(&mut self, pos: Pos, value: u8, mask: u8) {
+		let old_value = self.tiles.get(pos).unwrap();
 		let new_value = value | (old_value & !mask);
 		self.set_value(pos, new_value);
 	}
@@ -69,13 +69,13 @@ impl World {
 			if value != 0 {
 				let clock = self.tick_count as u16;
 				let expiration = clock.wrapping_add(decay);
-				self.cell_decays.insert(pos, expiration);
+				self.tile_decays.insert(pos, expiration);
 			} else {
-				self.cell_decays.remove(&pos);
+				self.tile_decays.remove(&pos);
 			}
 		}
 
-		self.cells.set(pos, value);
+		self.tiles.set(pos, value);
 	}
 
 	/// get positions of neighboring ants about to move to target

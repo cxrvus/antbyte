@@ -30,10 +30,10 @@ impl World {
 			let target_ant = target_pos.and_then(|pos| self.ants[&layer].get(&pos));
 
 			let input_value: u8 = match pin {
-				Cell => *self.cells.get(pos).unwrap(),
-				Clear => (*self.cells.get(pos).unwrap() == 0) as u8,
-				NearbyCell => target_pos
-					.map(|pos| *self.cells.get(pos).unwrap())
+				Tile => *self.tiles.get(pos).unwrap(),
+				Clear => (*self.tiles.get(pos).unwrap() == 0) as u8,
+				NearbyTile => target_pos
+					.map(|pos| *self.tiles.get(pos).unwrap())
 					.unwrap_or(0u8),
 
 				Init => (ant.birth_tick + 1 == self.tick_count()) as u8,
@@ -109,7 +109,7 @@ impl World {
 			.cloned()
 			.expect("invalid Behavior ID");
 
-		let cell_mask = behavior.pin_mask(Pin::Cell);
+		let tile_mask = behavior.pin_mask(Pin::Tile);
 		let mem_mask = behavior.pin_mask(Pin::Mem);
 
 		let mut clear = false;
@@ -123,9 +123,9 @@ impl World {
 				(Signal, true) => self.signal_out |= value,
 				(ExtOut, true) => self.ext_output.push(value),
 
-				// cells
+				// tiles
 				(Clear, true) => clear = true,
-				(Cell, _) => self.set_cell(pos, value, cell_mask),
+				(Tile, _) => self.set_tile(pos, value, tile_mask),
 
 				// deferred to async ticks...
 
@@ -161,7 +161,7 @@ impl World {
 		ant.clock = ant.clock.wrapping_add(1);
 
 		if clear {
-			self.set_cell(pos, 0, !cell_mask);
+			self.set_tile(pos, 0, !tile_mask);
 		}
 
 		self.ants.get_mut(&layer).unwrap().insert(pos, ant);

@@ -36,16 +36,16 @@ pub enum Pin {
 	/// kill ant in front of current ant, if possible
 	Kill,
 
-	// ## current cell
-	/// current cell's value
-	Cell,
-	/// clear current cell (before writing)
+	// ## current tile
+	/// current tile's value
+	Tile,
+	/// clear current tile (before writing)
 	Clear,
 
-	// ## neighboring cells
-	/// neighboring cell
-	NearbyCell,
-	/// true if neighboring cell contains an ant or other obstacle (i.e. border)
+	// ## neighboring tiles
+	/// neighboring tile
+	NearbyTile,
+	/// true if neighboring tile contains an ant or other obstacle (i.e. border)
 	NearbyAnt,
 	/// neighboring ant's ID
 	NearbyId,
@@ -122,7 +122,7 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::Cell,
+			pin: Self::Tile,
 			code: "C",
 			size: BYTE,
 			io_type: None,
@@ -212,7 +212,7 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::NearbyCell,
+			pin: Self::NearbyTile,
 			code: "VC",
 			size: DOUBLE,
 			io_type: Some(IoType::Input),

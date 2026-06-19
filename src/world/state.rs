@@ -10,9 +10,9 @@ use crate::{
 };
 use rand::{RngExt, SeedableRng, rngs::SmallRng};
 
-pub type Cell = u8;
+pub type Tile = u8;
 
-pub type Cells = Grid<Cell>;
+pub type Tiles = Grid<Tile>;
 pub type Ants = BTreeMap<Pos, Ant>;
 
 #[derive(Clone, Default)]
@@ -28,8 +28,8 @@ pub struct WorldState {
 	rng: Option<SmallRng>,
 	pub(super) tick_count: u32,
 	pub(super) status: WorldStatus,
-	pub cells: Cells,
-	pub cell_decays: BTreeMap<Pos, u16>,
+	pub tiles: Tiles,
+	pub tile_decays: BTreeMap<Pos, u16>,
 	pub ants: Layers,
 	pub signal_in: u8,
 	pub signal_out: u8,
@@ -39,7 +39,7 @@ pub struct WorldState {
 
 impl WorldState {
 	pub(super) fn new(config: &WorldConfig) -> Self {
-		let cells = Grid::new(config.width, config.height);
+		let tiles = Grid::new(config.width, config.height);
 
 		let rng = if let Some(seed) = config.seed {
 			Some(SmallRng::seed_from_u64(seed as u64))
@@ -48,7 +48,7 @@ impl WorldState {
 		};
 
 		Self {
-			cells,
+			tiles,
 			rng,
 			..Default::default()
 		}
@@ -64,13 +64,13 @@ impl WorldState {
 		self.rng.as_mut().expect("rng must be Some").random()
 	}
 
-	pub(super) fn cell_decay(&mut self) {
+	pub(super) fn tile_decay(&mut self) {
 		let current_tick = self.tick_count as u16;
 
-		for (pos, expiration) in self.cell_decays.clone() {
+		for (pos, expiration) in self.tile_decays.clone() {
 			if current_tick == expiration {
-				self.cells.set(pos, 0);
-				self.cell_decays.remove(&pos);
+				self.tiles.set(pos, 0);
+				self.tile_decays.remove(&pos);
 			}
 		}
 	}

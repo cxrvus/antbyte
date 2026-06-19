@@ -32,7 +32,7 @@ pub struct WorldConfig {
 	pub speed: Option<u32>,
 	/// simulation tick limit
 	pub max_ticks: Option<u32>,
-	/// amount of ticks after which a cell will automatically reset
+	/// amount of ticks after which a tile will automatically reset
 	pub decay: Option<u16>,
 	/// re-run simulation after it ends
 	pub looping: bool,
@@ -89,7 +89,7 @@ impl Default for WorldConfig {
 			fps: Some(FPS_CAP),
 			start_tick: 0,
 			bg_filter: ByteFilter::Lsb,
-			bg: RenderMask::Cell,
+			bg: RenderMask::Tile,
 			fg: RenderMask::Dir,
 			sleep: Some(200),
 
@@ -233,7 +233,7 @@ impl ByteFilter {
 #[serde(rename_all = "snake_case")]
 pub enum RenderMask {
 	None,
-	Cell,
+	Tile,
 	Layers,
 
 	// ## Ant
@@ -250,7 +250,7 @@ impl TryFrom<String> for RenderMask {
 	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
 		match value.as_str() {
 			"none" => Ok(Self::None),
-			"cell" => Ok(Self::Cell),
+			"tile" => Ok(Self::Tile),
 			"layers" => Ok(Self::Layers),
 			"dir" => Ok(Self::Dir),
 			"id" => Ok(Self::Id),

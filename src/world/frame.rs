@@ -97,7 +97,7 @@ impl World {
 	fn get_render_values(&self, mask: &RenderMask) -> BTreeMap<Pos, u8> {
 		match mask {
 			RenderMask::None => Default::default(),
-			RenderMask::Cell => self.cells_to_map(),
+			RenderMask::Tile => self.tiles_to_map(),
 			RenderMask::Layers => self.layer_occupations(),
 			RenderMask::Dir => self.map_ants(|ant| ant.dir.value()),
 			RenderMask::Id => self.map_ants(|ant| ant.behavior),
@@ -107,11 +107,11 @@ impl World {
 		}
 	}
 
-	fn cells_to_map(&self) -> BTreeMap<Pos, u8> {
+	fn tiles_to_map(&self) -> BTreeMap<Pos, u8> {
 		let width = self.config().width;
 
 		let bg_entries = self
-			.cells
+			.tiles
 			.entries
 			.iter()
 			.enumerate()

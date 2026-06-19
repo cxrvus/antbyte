@@ -16,9 +16,9 @@ impl World {
 		self.signal_in = self.signal_out;
 		self.signal_out = 0;
 
-		// cell decay
+		// tile decay
 		if self.config().decay.is_some() {
-			self.cell_decay();
+			self.tile_decay();
 		}
 
 		// ants

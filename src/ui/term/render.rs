@@ -37,7 +37,7 @@ pub(super) struct TermRenderer {
 
 impl TermRenderer {
 	pub fn render_frame(&self, frame: &FrameOutput) {
-		let world_str = self.render_cells(frame);
+		let world_str = self.render_tiles(frame);
 
 		clear_screen();
 
@@ -55,7 +55,7 @@ impl TermRenderer {
 		io::stdout().flush().unwrap();
 	}
 
-	fn render_cells(&self, frame: &FrameOutput) -> String {
+	fn render_tiles(&self, frame: &FrameOutput) -> String {
 		let mut string = String::new();
 		let max_index = self.config.height as usize * self.config.width as usize;
 
@@ -66,10 +66,10 @@ impl TermRenderer {
 				string.push('\n');
 			}
 
-			let cell_color = frame.bg.get(&pos).unwrap_or(&0);
+			let tile_color = frame.bg.get(&pos).unwrap_or(&0);
 			let fg_value = frame.fg.get(&pos);
 
-			let cell_text = match fg_value {
+			let tile_text = match fg_value {
 				None => "  ",
 				Some(&fg_value) => match self.config.fg {
 					RenderMask::Dir => {
@@ -82,14 +82,14 @@ impl TermRenderer {
 				},
 			};
 
-			string.push_str(&render_cell(*cell_color, cell_text));
+			string.push_str(&render_tile(*tile_color, tile_text));
 		}
 
 		string
 	}
 }
 
-fn render_cell(color: u8, text: &str) -> String {
+fn render_tile(color: u8, text: &str) -> String {
 	let (bg, fg) = color_codes(color);
 	format!("\x1b[{fg};{bg}m{text}\x1b[0m")
 }
