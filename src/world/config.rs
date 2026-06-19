@@ -3,7 +3,10 @@ use std::collections::BTreeMap;
 use anyhow::{Error, Result, anyhow, bail};
 use serde::{Deserialize, Serialize};
 
-use crate::util::{dir::Direction, vec2::Coord};
+use crate::util::{
+	dir::Direction,
+	vec2::{Coord, Position},
+};
 
 pub const FPS_CAP: u32 = 50;
 pub const SPEED_CAP: u32 = 0x4000;
@@ -137,6 +140,50 @@ impl TryFrom<String> for StartingPos {
 			"bottom_right" => Ok(Self::BottomRight),
 
 			invalid => Err(anyhow!("invalid starting pos: '{invalid}'")),
+		}
+	}
+}
+
+impl StartingPos {
+	pub fn get(&self, height: Coord, width: Coord) -> Position {
+		let half_width = (width - 1) / 2;
+		let half_height = (height - 1) / 2;
+
+		match self {
+			StartingPos::TopLeft => Position::ZERO,
+
+			StartingPos::Top => Position {
+				x: half_width,
+				y: 0,
+			},
+			StartingPos::Left => Position {
+				x: 0,
+				y: half_height,
+			},
+
+			StartingPos::Center => Position {
+				x: half_width,
+				y: half_height,
+			},
+
+			StartingPos::Right => Position {
+				x: width - 1,
+				y: half_height,
+			},
+			StartingPos::BottomLeft => Position {
+				x: 0,
+				y: height - 1,
+			},
+			StartingPos::Bottom => Position {
+				x: half_width,
+				y: height - 1,
+			},
+			StartingPos::BottomRight => Position {
+				x: width - 1,
+				y: height - 1,
+			},
+
+			StartingPos::TopRight => Position { x: width - 1, y: 0 },
 		}
 	}
 }

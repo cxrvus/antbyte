@@ -5,7 +5,7 @@ mod state;
 mod tick;
 
 pub mod config;
-use config::{StartingPos, WorldConfig};
+use config::WorldConfig;
 
 use anyhow::{Result, bail};
 use serde::{Deserialize, Serialize};
@@ -17,7 +17,7 @@ use std::{
 
 use crate::{
 	ant::{Ant, behavior::Behavior},
-	util::{dir::Direction, vec2::Position},
+	util::dir::Direction,
 	world::{
 		config::BorderMode,
 		state::{WorldState, WorldStatus},
@@ -63,42 +63,7 @@ impl World {
 			..
 		} = config;
 
-		let half_width = (width - 1) / 2;
-		let half_height = (height - 1) / 2;
-
-		let start_pos = match start_pos {
-			StartingPos::TopLeft => Position::ZERO,
-			StartingPos::Top => Position {
-				x: half_width,
-				y: 0,
-			},
-			StartingPos::Left => Position {
-				x: 0,
-				y: half_height,
-			},
-			StartingPos::Center => Position {
-				x: half_width,
-				y: half_height,
-			},
-
-			StartingPos::Right => Position {
-				x: width - 1,
-				y: half_height,
-			},
-			StartingPos::BottomLeft => Position {
-				x: 0,
-				y: height - 1,
-			},
-			StartingPos::Bottom => Position {
-				x: half_width,
-				y: height - 1,
-			},
-			StartingPos::BottomRight => Position {
-				x: width - 1,
-				y: height - 1,
-			},
-			StartingPos::TopRight => Position { x: width - 1, y: 0 },
-		};
+		let start_pos = start_pos.get(height, width);
 
 		let behaviors = &properties.behaviors;
 
