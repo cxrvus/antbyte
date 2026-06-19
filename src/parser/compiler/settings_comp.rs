@@ -73,7 +73,10 @@ impl Parser {
 
 			"looping" | "loop" => config.looping = self.next_bit()?,
 
-			"border" => config.border = BorderMode::try_from(self.next_ident()?)?,
+			"border" => {
+				let border_mode = BorderMode::try_from(self.next_ident()?)?;
+				config.border.insert(sub_index, border_mode);
+			}
 
 			"start_pos" | "start" => config.start_pos = StartingPos::try_from(self.next_ident()?)?,
 			"start_dir" => config.start_dir = self.next_number()?.unwrap_or_default() as u8,

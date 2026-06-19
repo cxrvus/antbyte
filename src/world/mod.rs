@@ -18,7 +18,10 @@ use std::{
 use crate::{
 	ant::{Ant, behavior::Behavior},
 	util::{dir::Direction, vec2::Position},
-	world::state::{WorldState, WorldStatus},
+	world::{
+		config::BorderMode,
+		state::{WorldState, WorldStatus},
+	},
 };
 
 #[cfg_attr(test, derive(ts_rs::TS))]
@@ -137,6 +140,14 @@ impl World {
 	#[inline]
 	fn get_behavior(&self, id: u8) -> Option<&Behavior> {
 		self.properties.behaviors.get(&id)
+	}
+
+	fn border_mode(&self, layer: u8) -> BorderMode {
+		self.config()
+			.border
+			.get(&layer)
+			.unwrap_or(&self.config().border[&0])
+			.clone()
 	}
 }
 

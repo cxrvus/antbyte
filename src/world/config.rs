@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use anyhow::{Error, Result, anyhow, bail};
 use serde::{Deserialize, Serialize};
 
@@ -32,7 +34,7 @@ pub struct WorldConfig {
 	/// re-run simulation after it ends
 	pub looping: bool,
 	/// behavior if ants touch the worlds border
-	pub border: BorderMode,
+	pub border: BTreeMap<u8, BorderMode>,
 	/// position of the first ant
 	pub start_pos: StartingPos,
 	/// first tick to render
@@ -74,7 +76,7 @@ impl Default for WorldConfig {
 			max_ticks: None,
 			decay: None,
 			looping: false,
-			border: BorderMode::Wrap,
+			border: BTreeMap::from([(0, BorderMode::Wrap)]),
 			start_pos: StartingPos::Center,
 			start_dir: 0,
 			ant_limit: ANT_LIMIT,
