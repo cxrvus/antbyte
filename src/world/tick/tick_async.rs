@@ -142,15 +142,10 @@ impl World {
 		swap(&mut result, self.ants.layer_mut(layer));
 	}
 
-	const ANT_LIMIT: u32 = 0x400;
-
 	pub(super) fn spawn_tick(&mut self, source_layer: u8) {
 		let mut claims = BTreeMap::<(Position, u8), Vec<Position>>::new();
 
-		let ant_limit = self.config().ant_limit.unwrap_or(Self::ANT_LIMIT) as usize;
-		let ant_count = self.ants.ant_count();
-
-		if ant_count >= ant_limit {
+		if self.ants.ant_count() >= self.config().ant_limit as usize {
 			return;
 		}
 

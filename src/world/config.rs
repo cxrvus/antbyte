@@ -7,6 +7,7 @@ pub const FPS_CAP: u32 = 50;
 pub const SPEED_CAP: u32 = 0x4000;
 pub const SIZE_CAP: Coord = 0x200;
 pub const LAYER_CAP: u8 = 8;
+const ANT_LIMIT: u32 = 0x400;
 
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -39,7 +40,7 @@ pub struct WorldConfig {
 	/// direction value (0-7) for start ant
 	pub start_dir: u8,
 	/// max number of ants before additional spawning gets blocked
-	pub ant_limit: Option<u32>,
+	pub ant_limit: u32,
 	pub seed: Option<u32>,
 	pub description: String,
 
@@ -76,7 +77,7 @@ impl Default for WorldConfig {
 			border: BorderMode::Wrap,
 			start_pos: StartingPos::Center,
 			start_dir: 0,
-			ant_limit: None,
+			ant_limit: ANT_LIMIT,
 			seed: None,
 			description: "".into(),
 
@@ -226,11 +227,13 @@ impl WorldConfig {
 			bail!("main_layer must not exceed layer count")
 		}
 
-		const MAX_DIR: u8 = Direction::MAX;
+		Self::cap(self.ant_limit, "ant_limit", ANT_LIMIT)?;
 
-		if self.start_dir > MAX_DIR {
-			bail!("starting direction must not exceed {MAX_DIR}")
+		if self.ant_limit < self.layers.into() {
+			bail!("ant_limit must not be less than specified layers")
 		}
+
+		Self::cap(self.start_dir as u32, "start_dir", Direction::MAX as u32)?;
 
 		if let Some(max_ticks) = self.max_ticks
 			&& self.start_tick > max_ticks
