@@ -233,6 +233,10 @@ impl WorldConfig {
 			bail!("main_layer must not exceed specified max layer")
 		}
 
+		if !self.border.contains_key(&0) {
+			bail!("border_0 needs to be specified")
+		}
+
 		Self::cap(self.ant_limit, "ant_limit", ANT_LIMIT)?;
 
 		if self.ant_limit < self.layers.into() {
