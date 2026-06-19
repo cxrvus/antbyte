@@ -102,14 +102,14 @@ impl World {
 		positions
 	}
 
-	pub(super) fn luck_check(&self, contestants: &[Ant], challenger: &Ant) -> bool {
+	pub(super) fn luck_check(&self, layer: u8, contestants: &[Ant], challenger: &Ant) -> bool {
 		if contestants.len() == 1 {
 			true
 		} else {
-			challenger.luck(self.tick_count)
+			challenger.luck(self.tick_count, layer)
 				== contestants
 					.iter()
-					.map(|ant| ant.luck(self.tick_count))
+					.map(|ant| ant.luck(self.tick_count, layer))
 					.max()
 					.expect("luck check with no contestants")
 		}

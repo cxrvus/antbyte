@@ -106,7 +106,8 @@ impl World {
 								.map(|pos| source[pos])
 								.collect::<Vec<_>>();
 
-							if contestants.is_empty() || self.luck_check(&contestants, &ant) {
+							if contestants.is_empty() || self.luck_check(layer, &contestants, &ant)
+							{
 								// target is uncontested or conflict has been won => move
 								MoveAction::Move(target_pos)
 							} else {
@@ -185,7 +186,7 @@ impl World {
 			// conflict resolution
 			let ant = contestants
 				.iter()
-				.find(|ant| self.luck_check(&contestants, ant))
+				.find(|ant| self.luck_check(target_layer, &contestants, ant))
 				.unwrap();
 
 			// spawn

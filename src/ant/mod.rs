@@ -41,9 +41,10 @@ impl Ant {
 		self.will_halt || self.waiting()
 	}
 
-	pub fn luck(&self, current_tick: u32) -> u8 {
+	pub fn luck(&self, current_tick: u32, layer: u8) -> u8 {
 		let hashed_tick = (hash_u32(current_tick) & 0xFF) as u8;
-		let luck = (hashed_tick ^ self.dir.value()) % Direction::MOD;
+		let state = (self.dir.value() ^ layer) & Direction::MAX;
+		let luck = (hashed_tick ^ state) % Direction::MOD;
 		let bonus = (self.will_dash as u8) << Direction::BITS;
 		bonus | luck
 	}
