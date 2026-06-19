@@ -1,5 +1,6 @@
 [package]
 name = "antbyte"
+authors = ["cxrvus"]
 version = "0.3.2"
 edition = "2024"
 
