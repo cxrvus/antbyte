@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::util::{
 	dir::Direction,
-	vec2::{Coord, Position},
+	vec2::{Coord, Pos},
 };
 
 pub const FPS_CAP: u32 = 50;
@@ -145,45 +145,45 @@ impl TryFrom<String> for StartingPos {
 }
 
 impl StartingPos {
-	pub fn get(&self, height: Coord, width: Coord) -> Position {
+	pub fn get(&self, height: Coord, width: Coord) -> Pos {
 		let half_width = (width - 1) / 2;
 		let half_height = (height - 1) / 2;
 
 		match self {
-			StartingPos::TopLeft => Position::ZERO,
+			StartingPos::TopLeft => Pos::ZERO,
 
-			StartingPos::Top => Position {
+			StartingPos::Top => Pos {
 				x: half_width,
 				y: 0,
 			},
-			StartingPos::Left => Position {
+			StartingPos::Left => Pos {
 				x: 0,
 				y: half_height,
 			},
 
-			StartingPos::Center => Position {
+			StartingPos::Center => Pos {
 				x: half_width,
 				y: half_height,
 			},
 
-			StartingPos::Right => Position {
+			StartingPos::Right => Pos {
 				x: width - 1,
 				y: half_height,
 			},
-			StartingPos::BottomLeft => Position {
+			StartingPos::BottomLeft => Pos {
 				x: 0,
 				y: height - 1,
 			},
-			StartingPos::Bottom => Position {
+			StartingPos::Bottom => Pos {
 				x: half_width,
 				y: height - 1,
 			},
-			StartingPos::BottomRight => Position {
+			StartingPos::BottomRight => Pos {
 				x: width - 1,
 				y: height - 1,
 			},
 
-			StartingPos::TopRight => Position { x: width - 1, y: 0 },
+			StartingPos::TopRight => Pos { x: width - 1, y: 0 },
 		}
 	}
 }

@@ -5,13 +5,13 @@ use std::{
 
 use crate::{
 	ant::Ant,
-	util::vec2::Position,
+	util::vec2::Pos,
 	world::{World, config::BorderMode, state::Ants},
 };
 
 enum MoveAction {
 	Stay,
-	Move(Position),
+	Move(Pos),
 	Nop,
 }
 
@@ -58,7 +58,7 @@ impl World {
 			let mut stack = vec![(pos, ant)];
 
 			// used to resolve cycles
-			let mut cycle_pos: Option<Position> = None;
+			let mut cycle_pos: Option<Pos> = None;
 
 			while let Some((pos, ant)) = stack.pop() {
 				let action = if ant.halted() {
@@ -135,7 +135,7 @@ impl World {
 			// reached end of ant chain
 		}
 
-		fn commit(result: &mut Ants, pos: Position, ant: Ant) {
+		fn commit(result: &mut Ants, pos: Pos, ant: Ant) {
 			let prev = result.insert(pos, ant);
 			assert!(prev.is_none(), "tried to occupy occupied space")
 		}
@@ -144,7 +144,7 @@ impl World {
 	}
 
 	pub(super) fn spawn_tick(&mut self, source_layer: u8) {
-		let mut claims = BTreeMap::<(Position, u8), Vec<Position>>::new();
+		let mut claims = BTreeMap::<(Pos, u8), Vec<Pos>>::new();
 
 		if self.ants.ant_count() >= self.config().ant_limit as usize {
 			return;
@@ -174,7 +174,7 @@ impl World {
 			}
 		}
 
-		let mut new_ants: Vec<(Position, u8, Ant)> = vec![];
+		let mut new_ants: Vec<(Pos, u8, Ant)> = vec![];
 
 		// resolve target position conflicts
 		for ((target_pos, target_layer), contestant_positions) in claims {

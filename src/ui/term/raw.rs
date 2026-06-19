@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::{
-	util::vec2::Position,
+	util::vec2::Pos,
 	world::{
 		World,
 		config::{RenderMask, WorldConfig},
@@ -35,10 +35,10 @@ pub fn run(world: World) {
 	}
 }
 
-fn print_grid(config: &WorldConfig, grid: &BTreeMap<Position, u8>) {
+fn print_grid(config: &WorldConfig, grid: &BTreeMap<Pos, u8>) {
 	for y in 0..config.height {
 		for x in 0..config.width {
-			let value = grid.get(&Position { x, y });
+			let value = grid.get(&Pos { x, y });
 
 			if let Some(value) = value {
 				print!("{value:02x}",);

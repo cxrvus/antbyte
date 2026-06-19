@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use crate::{
 	ant::Ant,
-	util::vec2::Position,
+	util::vec2::Pos,
 	world::{
 		World,
 		config::RenderMask,
@@ -17,8 +17,8 @@ pub struct FrameInput {
 
 #[derive(Debug)]
 pub struct FrameOutput {
-	pub fg: BTreeMap<Position, u8>,
-	pub bg: BTreeMap<Position, u8>,
+	pub fg: BTreeMap<Pos, u8>,
+	pub bg: BTreeMap<Pos, u8>,
 	pub ms: Option<u32>,
 	pub metadata: String, //todo: turn this into a map
 	pub ext_out: Vec<u8>,
@@ -94,7 +94,7 @@ impl World {
 		})
 	}
 
-	fn get_render_values(&self, mask: &RenderMask) -> BTreeMap<Position, u8> {
+	fn get_render_values(&self, mask: &RenderMask) -> BTreeMap<Pos, u8> {
 		match mask {
 			RenderMask::None => Default::default(),
 			RenderMask::Cell => self.cells_to_map(),
@@ -107,7 +107,7 @@ impl World {
 		}
 	}
 
-	fn cells_to_map(&self) -> BTreeMap<Position, u8> {
+	fn cells_to_map(&self) -> BTreeMap<Pos, u8> {
 		let width = self.config().width;
 
 		let bg_entries = self
@@ -116,12 +116,12 @@ impl World {
 			.iter()
 			.enumerate()
 			.filter(|&(_, &value)| value != 0)
-			.map(|(i, &value)| (Position::from_index(i, width), value));
+			.map(|(i, &value)| (Pos::from_index(i, width), value));
 
 		BTreeMap::from_iter(bg_entries)
 	}
 
-	fn layer_occupations(&self) -> BTreeMap<Position, u8> {
+	fn layer_occupations(&self) -> BTreeMap<Pos, u8> {
 		let mut occupations = BTreeMap::new();
 
 		for (layer, ants) in self.ants.iter() {
@@ -138,7 +138,7 @@ impl World {
 		occupations
 	}
 
-	fn map_ants(&self, func: impl Fn(&Ant) -> u8) -> BTreeMap<Position, u8> {
+	fn map_ants(&self, func: impl Fn(&Ant) -> u8) -> BTreeMap<Pos, u8> {
 		self.ants
 			.get(&self.config().main_layer)
 			.unwrap_or(&Ants::new())

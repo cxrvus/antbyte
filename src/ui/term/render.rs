@@ -1,5 +1,5 @@
 use crate::{
-	util::{dir::Direction, vec2::Position},
+	util::{dir::Direction, vec2::Pos},
 	world::{
 		config::{RenderMask, WorldConfig},
 		frame::FrameOutput,
@@ -60,7 +60,7 @@ impl TermRenderer {
 		let max_index = self.config.height as usize * self.config.width as usize;
 
 		for i in 0..max_index {
-			let pos = Position::from_index(i, self.config.width);
+			let pos = Pos::from_index(i, self.config.width);
 
 			if pos.x == 0 {
 				string.push('\n');

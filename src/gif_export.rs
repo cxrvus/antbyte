@@ -2,7 +2,7 @@
 
 use crate::{
 	ui::term::render::{clear_screen, print_title_short},
-	util::vec2::Position,
+	util::vec2::Pos,
 	world::{World, config::WorldConfig, frame::FrameOutput},
 };
 
@@ -82,7 +82,7 @@ fn render_frame(
 		let mut scaled_row = Vec::with_capacity(scaled_width as usize);
 
 		for x in 0..*width {
-			let pos = Position { x, y };
+			let pos = Pos { x, y };
 			let pixel = *frame.bg.get(&pos).unwrap_or(&0);
 			let pixel = pixel & 0xf; // only take LSB half
 

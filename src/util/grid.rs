@@ -34,8 +34,8 @@ impl<T> Grid<T> {
 	}
 
 	#[inline]
-	pub fn get(&self, pos: Position) -> Option<&T> {
-		let Position { x, y } = pos;
+	pub fn get(&self, pos: Pos) -> Option<&T> {
+		let Pos { x, y } = pos;
 		if self.in_bounds(&pos.sign()) {
 			Some(&self.entries[(y * self.width + x) as usize])
 		} else {
@@ -44,7 +44,7 @@ impl<T> Grid<T> {
 	}
 
 	#[inline]
-	pub fn set(&mut self, pos: Position, value: T) {
+	pub fn set(&mut self, pos: Pos, value: T) {
 		if self.in_bounds(&pos.sign()) {
 			self.entries[(pos.y * self.width + pos.x) as usize] = value;
 		} else {
@@ -52,8 +52,8 @@ impl<T> Grid<T> {
 		}
 	}
 
-	pub fn dimensions(&self) -> Position {
-		Position {
+	pub fn dimensions(&self) -> Pos {
+		Pos {
 			x: self.width,
 			y: self.height,
 		}

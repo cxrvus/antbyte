@@ -5,7 +5,7 @@ use std::{
 
 use crate::{
 	ant::Ant,
-	util::{grid::Grid, vec2::Position},
+	util::{grid::Grid, vec2::Pos},
 	world::config::WorldConfig,
 };
 use rand::{RngExt, SeedableRng, rngs::SmallRng};
@@ -13,7 +13,7 @@ use rand::{RngExt, SeedableRng, rngs::SmallRng};
 pub type Cell = u8;
 
 pub type Cells = Grid<Cell>;
-pub type Ants = BTreeMap<Position, Ant>;
+pub type Ants = BTreeMap<Pos, Ant>;
 
 #[derive(Clone, Default)]
 pub enum WorldStatus {
@@ -29,7 +29,7 @@ pub struct WorldState {
 	pub(super) tick_count: u32,
 	pub(super) status: WorldStatus,
 	pub cells: Cells,
-	pub cell_decays: BTreeMap<Position, u16>,
+	pub cell_decays: BTreeMap<Pos, u16>,
 	pub ants: Layers,
 	pub signal_in: u8,
 	pub signal_out: u8,

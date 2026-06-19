@@ -2,13 +2,13 @@ use crate::{
 	ant::Ant,
 	util::{
 		dir::Direction,
-		vec2::{Position, Vec2},
+		vec2::{Pos, Vec2},
 	},
 	world::{World, config::BorderMode, state::Ants},
 };
 
 impl World {
-	pub(super) fn next_pos(&self, pos: Position, layer: u8, dir: Direction) -> Option<Position> {
+	pub(super) fn next_pos(&self, pos: Pos, layer: u8, dir: Direction) -> Option<Pos> {
 		let new_pos = pos.sign() + dir.as_vec();
 
 		if self.cells.in_bounds(&new_pos) {
@@ -58,13 +58,13 @@ impl World {
 		}
 	}
 
-	pub(super) fn set_cell(&mut self, pos: Position, value: u8, mask: u8) {
+	pub(super) fn set_cell(&mut self, pos: Pos, value: u8, mask: u8) {
 		let old_value = self.cells.get(pos).unwrap();
 		let new_value = value | (old_value & !mask);
 		self.set_value(pos, new_value);
 	}
 
-	fn set_value(&mut self, pos: Position, value: u8) {
+	fn set_value(&mut self, pos: Pos, value: u8) {
 		if let Some(decay) = self.config().decay {
 			if value != 0 {
 				let clock = self.tick_count as u16;
@@ -79,12 +79,7 @@ impl World {
 	}
 
 	/// get positions of neighboring ants about to move to target
-	pub(super) fn get_contestants(
-		&self,
-		source: &Ants,
-		target_pos: Position,
-		layer: u8,
-	) -> Vec<Position> {
+	pub(super) fn get_contestants(&self, source: &Ants, target_pos: Pos, layer: u8) -> Vec<Pos> {
 		let mut positions = vec![];
 
 		for dir in 0..=Direction::MAX {
