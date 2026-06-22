@@ -19,7 +19,7 @@ pub fn run(world: World, hide_title: bool) {
 
 	let mut last_frame = Instant::now();
 
-	while let Some(frame) = world.next_frame(FrameInput {
+	while let Some(frame) = world.next_frame(&FrameInput {
 		ext_in: keyboard::get_keys(world.config()),
 	}) {
 		renderer.render_frame(&frame);

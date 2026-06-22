@@ -317,10 +317,12 @@ impl WorldConfig {
 			bail!("need to render either fg or bg or both. found both set to [none]")
 		}
 
-		if let Some(keys) = &self.keys
-			&& keys.len() > 8
-		{
-			bail!("can only specify up to 8 keys. found {}", keys.len())
+		if let Some(keys) = &self.keys {
+			if keys.is_empty() {
+				bail!("[keys] must not be an empty string.)")
+			} else if keys.len() > 8 {
+				bail!("can only specify up to 8 keys. found {}", keys.len())
+			}
 		}
 
 		Ok(())

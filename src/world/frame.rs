@@ -28,10 +28,10 @@ impl World {
 	#[inline]
 	/// like next_frame, but without input (defaulted to 0)
 	pub fn next_frame_auto(&mut self) -> Option<FrameOutput> {
-		self.next_frame(Default::default())
+		self.next_frame(&Default::default())
 	}
 
-	pub fn next_frame(&mut self, input: FrameInput) -> Option<FrameOutput> {
+	pub fn next_frame(&mut self, input: &FrameInput) -> Option<FrameOutput> {
 		let mut frame_ms = match self.config().fps {
 			Some(0) => panic!(),
 			Some(fps) => Some(1000 / fps),

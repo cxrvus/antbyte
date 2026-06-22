@@ -1,10 +1,12 @@
 use std::collections::BTreeMap;
 
 use crate::{
+	ui::chars_to_input,
 	util::vec2::Pos,
 	world::{
 		World,
 		config::{RenderMask, WorldConfig},
+		frame::FrameInput,
 	},
 };
 
@@ -13,7 +15,10 @@ pub fn run(world: World) {
 
 	print!("\n\n");
 
-	while let Some(frame) = world.next_frame_auto() {
+	let mut input_str = String::new();
+	let mut input = FrameInput::default();
+
+	while let Some(frame) = world.next_frame(&input) {
 		// ## FG
 		if let RenderMask::None = world.config().fg {
 			println!("--");
@@ -32,6 +37,11 @@ pub fn run(world: World) {
 
 		// ## Metadata
 		println!("\n{}\n", world.metadata_str());
+
+		// ## External Input
+		input_str.clear();
+		std::io::stdin().read_line(&mut input_str).unwrap();
+		input.ext_in = chars_to_input(&world.config().keys, &input_str);
 	}
 }
 
