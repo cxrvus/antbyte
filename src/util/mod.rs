@@ -3,6 +3,12 @@ pub mod grid;
 pub mod vec2;
 
 #[inline]
+/// need to conventionally make all anyhow context messages end in a '!'
+pub fn print_error(e: anyhow::Error) {
+	eprintln!("{}", format!("<!> {e:#}").replace("!: ", ":\n    "));
+}
+
+#[inline]
 #[rustfmt::skip]
 pub fn sleep(ms: u32) { std::thread::sleep(std::time::Duration::from_millis(ms as u64)); }
 

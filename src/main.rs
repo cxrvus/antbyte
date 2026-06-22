@@ -1,10 +1,5 @@
+use antbyte::util::print_error;
 use anyhow::Result;
-
-#[inline]
-/// need to conventionally make all anyhow context messages end in a '!'
-fn print_error(e: anyhow::Error) {
-	eprintln!("{}", format!("<!> {e:#}").replace("!: ", ":\n    "));
-}
 
 fn main() {
 	run().unwrap_or_else(|e| {
@@ -16,7 +11,13 @@ fn main() {
 pub fn run() -> Result<()> {
 	#[cfg(feature = "clap")]
 	{
-		antbyte::cli::run()
+		use antbyte::ui::term;
+
+		if let Some((world, args)) = antbyte::cli::create_world()? {
+			term::run(world, args.hide_title);
+		}
+
+		Ok(())
 	}
 
 	#[cfg(not(feature = "clap"))]

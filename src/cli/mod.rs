@@ -1,9 +1,6 @@
 #![cfg(feature = "clap")]
 
-use std::{
-	fs,
-	path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Ok, Result};
 use clap::{self, Parser};
@@ -18,7 +15,7 @@ mod args;
 
 use args::Args;
 
-pub fn run() -> Result<()> {
+pub fn create_world() -> Result<Option<(World, Args)>> {
 	let args = Args::parse();
 
 	let log_config = LogConfig { all: args.debug };
@@ -47,11 +44,11 @@ pub fn run() -> Result<()> {
 		} else if args.raw {
 			term::raw::run(world);
 		} else {
-			term::run(world, args.hide_title);
+			return Ok(Some((world, args)));
 		}
 	}
 
-	Ok(())
+	Ok(None)
 }
 
 #[rustfmt::skip]
