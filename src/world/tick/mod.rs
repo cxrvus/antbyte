@@ -22,7 +22,7 @@ impl World {
 		}
 
 		// ants
-		for layer in 0..self.config().layers {
+		for layer in (0..self.config().layers).rev() {
 			if self.ants.get(&layer).is_some() {
 				self.tick_layer(layer);
 			}
