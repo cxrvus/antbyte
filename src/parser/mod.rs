@@ -264,15 +264,19 @@ impl Parser {
 
 				loop {
 					if expect_item {
-						items.push(get_item(self)?);
+						if self.assume_next(Token::ParenthesisRight).is_none() {
+							items.push(get_item(self)?);
+						} else {
+							break;
+						}
 					} else if self.assume_next(Token::Comma).is_none() {
+						self.expect_next(Token::ParenthesisRight)?;
 						break;
 					}
 
 					expect_item = !expect_item;
 				}
 
-				self.expect_next(Token::ParenthesisRight)?;
 				items
 			}
 		} else {
