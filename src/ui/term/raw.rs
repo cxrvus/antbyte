@@ -35,8 +35,15 @@ pub fn run(world: World) {
 			print_grid(world.config(), &frame.bg);
 		}
 
+		println!();
+
 		// ## Metadata
-		println!("\n{}\n", world.metadata_str());
+		let ms = frame.ms.map(|ms| ms.to_string()).unwrap_or("--".into());
+		println!("t: {ms}");
+
+		let metadata = world.metadata_str();
+		println!("{metadata}");
+		println!();
 
 		// ## External Input
 		input_str.clear();
