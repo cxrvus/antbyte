@@ -54,7 +54,7 @@ fn add = (a1, a0, b1, b0, cin) => (cout, sum1, sum0) {
 fn cpy = in => (o0) { o0 = in; }
 fn cpy = in => (o0, o1) { o0 = in; o1 = in; }
 fn cpy = in => (o0, o1, o2) { o0 = in; o1 = in; o2 = in; }
-fn cpy = in => (o0, o1, o2, o3) { o0 = in; o1 = in; o2 = in; o2 = in; }
+fn cpy = in => (o0, o1, o2, o3) { o0 = in; o1 = in; o2 = in; o3 = in; }
 
 
 ## Buffer: passes multiple parameters to multiple assignees
