@@ -25,15 +25,9 @@ pub fn run() -> Result<()> {
 	let mut properties = compile_world(&args.path, &log_config, &args.sub_args)?;
 
 	if args.json {
-		let mut json_path = args.path.clone();
-		json_path.set_extension("ant.json");
-
 		// idea: remove properties with default values
-		let json = serde_json::to_string(&properties)?;
-
-		fs::write(&json_path, json).with_context(|| {
-			format!("failed to write JSON world file to {}", json_path.display())
-		})?;
+		let json = serde_json::to_string_pretty(&properties)?;
+		println!("{json}");
 	}
 
 	if args.preview {
@@ -41,7 +35,7 @@ pub fn run() -> Result<()> {
 		let preview_str =
 			"\\/\n".repeat(height as usize) + "|_" + &">>".repeat(width as usize) + "\n\n";
 		print!("{preview_str}");
-	} else if args.debug {
+	} else if args.debug || args.json {
 		// logging happens on compilation
 	} else {
 		args.set_config(&mut properties.config)
