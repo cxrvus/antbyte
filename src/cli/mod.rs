@@ -1,6 +1,9 @@
 #![cfg(feature = "clap")]
 
-use std::path::{Path, PathBuf};
+use std::{
+	fs::canonicalize,
+	path::{Path, PathBuf},
+};
 
 use anyhow::{Context, Ok, Result};
 use clap::{self, Parser};
@@ -16,9 +19,14 @@ mod args;
 use args::Args;
 
 pub fn create_world() -> Result<Option<(World, Args)>> {
-	let args = Args::parse();
+	let mut args = Args::parse();
+
+	args.path = canonicalize(&args.path).unwrap_or(args.path);
+
+	let args = args;
 
 	let log_config = LogConfig { all: args.debug };
+
 	let mut properties = compile_world(&args.path, &log_config, &args.sub_args)?;
 
 	if args.json {
