@@ -15,7 +15,7 @@ pub type Tile = u8;
 pub type Tiles = Grid<Tile>;
 pub type Ants = BTreeMap<Pos, Ant>;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub enum WorldStatus {
 	#[default]
 	Init,
@@ -23,7 +23,7 @@ pub enum WorldStatus {
 	Inactive,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct WorldState {
 	rng: Option<SmallRng>,
 	pub(super) tick_count: u32,
