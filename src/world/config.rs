@@ -120,7 +120,7 @@ impl TryFrom<String> for BorderMode {
 
 #[rustfmt::skip]
 #[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum StartingPos { TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight  }
 
@@ -189,7 +189,7 @@ impl StartingPos {
 }
 
 #[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "snake_case")]
 /// filter specified nibble from a byte
 pub enum ByteFilter {
@@ -229,7 +229,7 @@ impl ByteFilter {
 }
 
 #[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum RenderMask {
 	None,
