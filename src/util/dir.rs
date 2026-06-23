@@ -61,6 +61,11 @@ impl Direction {
 			_ => panic!("dir overflow"),
 		}
 	}
+
+	pub fn as_string(&self) -> String {
+		let (char1, char2) = self.as_chars();
+		format!("{char1}{char2}")
+	}
 }
 
 impl ops::Add<Direction> for Direction {
