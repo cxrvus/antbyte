@@ -126,37 +126,25 @@ fn dec = (i1, i0) => (o0, o1, o2, o3) {
 }
 
 fn dec = (i2, i1, i0) => (o0, o1, o2, o3, o4, o5, o6, o7) {
-	o0 = pair_eq(i2, i1, i0, 0, 0, 0);
-	o1 = pair_eq(i2, i1, i0, 0, 0, 1);
-	o2 = pair_eq(i2, i1, i0, 0, 1, 0);
-	o3 = pair_eq(i2, i1, i0, 0, 1, 1);
+	o0 = pair_eq(i2, i1, i0, 0, 0, 0); o1 = pair_eq(i2, i1, i0, 0, 0, 1);
+	o2 = pair_eq(i2, i1, i0, 0, 1, 0); o3 = pair_eq(i2, i1, i0, 0, 1, 1);
 
-	o4 = pair_eq(i2, i1, i0, 1, 0, 0);
-	o5 = pair_eq(i2, i1, i0, 1, 0, 1);
-	o6 = pair_eq(i2, i1, i0, 1, 1, 0);
-	o7 = pair_eq(i2, i1, i0, 1, 1, 1);
+	o4 = pair_eq(i2, i1, i0, 1, 0, 0); o5 = pair_eq(i2, i1, i0, 1, 0, 1);
+	o6 = pair_eq(i2, i1, i0, 1, 1, 0); o7 = pair_eq(i2, i1, i0, 1, 1, 1);
 }
 
 fn dec = (i3, i2, i1, i0) => (o00, o01, o02, o03, o04, o05, o06, o07, o08, o09, o10, o11, o12, o13, o14, o15) {
-	o00 = pair_eq(i3, i2, i1, i0, 0, 0, 0, 0);
-	o01 = pair_eq(i3, i2, i1, i0, 0, 0, 0, 1);
-	o02 = pair_eq(i3, i2, i1, i0, 0, 0, 1, 0);
-	o03 = pair_eq(i3, i2, i1, i0, 0, 0, 1, 1);
+	o00 = pair_eq(i3, i2, i1, i0, 0, 0, 0, 0); o01 = pair_eq(i3, i2, i1, i0, 0, 0, 0, 1);
+	o02 = pair_eq(i3, i2, i1, i0, 0, 0, 1, 0); o03 = pair_eq(i3, i2, i1, i0, 0, 0, 1, 1);
 
-	o04 = pair_eq(i3, i2, i1, i0, 0, 1, 0, 0);
-	o05 = pair_eq(i3, i2, i1, i0, 0, 1, 0, 1);
-	o06 = pair_eq(i3, i2, i1, i0, 0, 1, 1, 0);
-	o07 = pair_eq(i3, i2, i1, i0, 0, 1, 1, 1);
+	o04 = pair_eq(i3, i2, i1, i0, 0, 1, 0, 0); o05 = pair_eq(i3, i2, i1, i0, 0, 1, 0, 1);
+	o06 = pair_eq(i3, i2, i1, i0, 0, 1, 1, 0); o07 = pair_eq(i3, i2, i1, i0, 0, 1, 1, 1);
 
-	o08 = pair_eq(i3, i2, i1, i0, 1, 0, 0, 0);
-	o09 = pair_eq(i3, i2, i1, i0, 1, 0, 0, 1);
-	o10 = pair_eq(i3, i2, i1, i0, 1, 0, 1, 0);
-	o11 = pair_eq(i3, i2, i1, i0, 1, 0, 1, 1);
+	o08 = pair_eq(i3, i2, i1, i0, 1, 0, 0, 0); o09 = pair_eq(i3, i2, i1, i0, 1, 0, 0, 1);
+	o10 = pair_eq(i3, i2, i1, i0, 1, 0, 1, 0); o11 = pair_eq(i3, i2, i1, i0, 1, 0, 1, 1);
 
-	o12 = pair_eq(i3, i2, i1, i0, 1, 1, 0, 0);
-	o13 = pair_eq(i3, i2, i1, i0, 1, 1, 0, 1);
-	o14 = pair_eq(i3, i2, i1, i0, 1, 1, 1, 0);
-	o15 = pair_eq(i3, i2, i1, i0, 1, 1, 1, 1);
+	o12 = pair_eq(i3, i2, i1, i0, 1, 1, 0, 0); o13 = pair_eq(i3, i2, i1, i0, 1, 1, 0, 1);
+	o14 = pair_eq(i3, i2, i1, i0, 1, 1, 1, 0); o15 = pair_eq(i3, i2, i1, i0, 1, 1, 1, 1);
 }
 
 
@@ -208,5 +196,4 @@ fn one = (a, b, c, d) => out {
 		and(-a, -b, -c, +d),
 	);
 }
-
 "#;
