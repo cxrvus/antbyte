@@ -14,9 +14,13 @@ fn and = (i0, i1, i2, i3) => out { out = -or(-i0, -i1, -i2, -i3); }
 
 ## Other Logic Gates
 
-fn xor = (a, b) => c { c = or(-or(-a, b), -or(a, -b)); }
+fn xor = (a, b) => c { c = or(and(-a, +b), and(+a, -b)); }
 
-fn eq = (a, b) => c { c = -or(-or(-a, b), -or(a, -b)); }
+fn eq  = (a, b) => out { out = or(and(a, b), -or(a, b)); }
+fn eq  = (a, b, c) => out { out = or(and(a, b, c), -or(a, b, c)); }
+fn eq  = (a, b, c, d) => out { out = or(and(a, b, c, d), -or(a, b, c, d)); }
+
+fn imply = (a, b) => c { c = or(-a, b); }
 
 fn mux = (s, a, b) => out { out = or(and(-s, a), and(s, b)); }
 
@@ -67,16 +71,6 @@ fn buf = (i0, i1, i2, i3) => (o0, o1, o2, o3) {
 }
 
 
-## Invert: same as `buf()`, but with inverted parameter values
-
-fn inv = (i0) => (o0) { o0 = -i0; }
-fn inv = (i0, i1) => (o0, o1) { o0 = -i0; o1 = -i1; }
-fn inv = (i0, i1, i2) => (o0, o1, o2) { o0 = -i0; o1 = -i1; o2 = -i2; }
-fn inv = (i0, i1, i2, i3) => (o0, o1, o2, o3) {
-	o0 = -i0; o1 = -i1; o2 = -i2; o3 = -i3;
-}
-
-
 ## And (5-8 parameters)
 
 fn and = (i0, i1, i2, i3, i4) => out {
@@ -93,5 +87,113 @@ fn and = (i0, i1, i2, i3, i4, i5, i6) => out {
 
 fn and = (i0, i1, i2, i3, i4, i5, i6, i7) => out {
 	out = -or(-i0, -i1, -i2, -i3, -i4, -i5, -i6, -i7);
+}
+
+
+## Pairwise Equals
+fn pair_eq = (a1, a0, b1, b0) => out { out = and(eq(a1, b1), eq(a0, b0),); }
+
+fn pair_eq = (a2, a1, a0, b2, b1, b0) => out {
+	out = and(eq(a2, b2), eq(a1, b1), eq(a0, b0),);
+}
+
+fn pair_eq = (a3, a2, a1, a0, b3, b2, b1, b0) => out {
+	out = and(eq(a3, b3), eq(a2, b2), eq(a1, b1), eq(a0, b0),);
+}
+
+fn pair_eq = (a4, a3, a2, a1, a0, b4, b3, b2, b1, b0) => out {
+	out = and(
+		eq(a4, b4), eq(a3, b3), eq(a2, b2),
+		eq(a1, b1), eq(a0, b0),
+	);
+}
+
+fn pair_eq = (a5, a4, a3, a2, a1, a0, b5, b4, b3, b2, b1, b0) => out {
+	out = and(
+		eq(a5, b5), eq(a4, b4), eq(a3, b3),
+		eq(a2, b2), eq(a1, b1), eq(a0, b0),
+	);
+}
+
+
+## Decoder
+
+fn dec = (i1, i0) => (o0, o1, o2, o3) {
+	o0 = pair_eq(i1, i0, 0, 0);
+	o1 = pair_eq(i1, i0, 0, 1);
+	o2 = pair_eq(i1, i0, 1, 0);
+	o3 = pair_eq(i1, i0, 1, 1);
+}
+
+fn dec = (i2, i1, i0) => (o0, o1, o2, o3, o4, o5, o6, o7) {
+	o0 = pair_eq(i2, i1, i0, 0, 0, 0); o1 = pair_eq(i2, i1, i0, 0, 0, 1);
+	o2 = pair_eq(i2, i1, i0, 0, 1, 0); o3 = pair_eq(i2, i1, i0, 0, 1, 1);
+
+	o4 = pair_eq(i2, i1, i0, 1, 0, 0); o5 = pair_eq(i2, i1, i0, 1, 0, 1);
+	o6 = pair_eq(i2, i1, i0, 1, 1, 0); o7 = pair_eq(i2, i1, i0, 1, 1, 1);
+}
+
+fn dec = (i3, i2, i1, i0) => (o00, o01, o02, o03, o04, o05, o06, o07, o08, o09, o10, o11, o12, o13, o14, o15) {
+	o00 = pair_eq(i3, i2, i1, i0, 0, 0, 0, 0); o01 = pair_eq(i3, i2, i1, i0, 0, 0, 0, 1);
+	o02 = pair_eq(i3, i2, i1, i0, 0, 0, 1, 0); o03 = pair_eq(i3, i2, i1, i0, 0, 0, 1, 1);
+
+	o04 = pair_eq(i3, i2, i1, i0, 0, 1, 0, 0); o05 = pair_eq(i3, i2, i1, i0, 0, 1, 0, 1);
+	o06 = pair_eq(i3, i2, i1, i0, 0, 1, 1, 0); o07 = pair_eq(i3, i2, i1, i0, 0, 1, 1, 1);
+
+	o08 = pair_eq(i3, i2, i1, i0, 1, 0, 0, 0); o09 = pair_eq(i3, i2, i1, i0, 1, 0, 0, 1);
+	o10 = pair_eq(i3, i2, i1, i0, 1, 0, 1, 0); o11 = pair_eq(i3, i2, i1, i0, 1, 0, 1, 1);
+
+	o12 = pair_eq(i3, i2, i1, i0, 1, 1, 0, 0); o13 = pair_eq(i3, i2, i1, i0, 1, 1, 0, 1);
+	o14 = pair_eq(i3, i2, i1, i0, 1, 1, 1, 0); o15 = pair_eq(i3, i2, i1, i0, 1, 1, 1, 1);
+}
+
+
+## Encoder
+
+fn enc = (i0, i1, i2, i3) => (o1, o0) {
+	u0 = i0;
+	u1 = and(i1, -i0);
+	u2 = and(i2, -i1, -i0);
+	u3 = and(i3, -i2, -i1, -i0);
+
+	o0 = or(u1, u3);
+	o1 = or(u2, u3);
+}
+
+fn enc = (i0, i1, i2, i3, i4, i5, i6, i7) => (o2, o1, o0) {
+	u0 = i0;
+	u1 = and(i1, -i0);
+	u2 = and(i2, -i1, -i0);
+	u3 = and(i3, -i2, -i1, -i0);
+	u4 = and(i4, -i3, -i2, -i1, -i0);
+	u5 = and(i5, -i4, -i3, -i2, -i1, -i0);
+	u6 = and(i6, -i5, -i4, -i3, -i2, -i1, -i0);
+	u7 = and(i7, -i6, -i5, -i4, -i3, -i2, -i1, -i0);
+
+	o0 = or(u1, u3, u5, u7);
+	o1 = or(u2, u3, u6, u7);
+	o2 = or(u4, u5, u6, u7);
+}
+
+
+## HW = 1
+
+fn one = (a, b) => out { out = xor(a,b); }
+
+fn one = (a, b, c) => out {
+	out = or(
+		and(+a, -b, -c),
+		and(-a, +b, -c),
+		and(-a, -b, +c),
+	);
+}
+
+fn one = (a, b, c, d) => out {
+	out = or(
+		and(+a, -b, -c, -d),
+		and(-a, +b, -c, -d),
+		and(-a, -b, +c, -d),
+		and(-a, -b, -c, +d),
+	);
 }
 "#;
