@@ -119,17 +119,3 @@ fn buf3() {
 	let entries = vec![0, 1, 2, 3, 4, 5, 6, 7];
 	test_func(signature, entries);
 }
-
-#[test]
-fn inv2() {
-	let signature = SignatureSpec::new("inv", 2, 2);
-	let entries = vec![3, 2, 1, 0];
-	test_func(signature, entries);
-}
-
-#[test]
-fn inv3() {
-	let signature = SignatureSpec::new("inv", 3, 3);
-	let entries = vec![7, 6, 5, 4, 3, 2, 1, 0];
-	test_func(signature, entries);
-}

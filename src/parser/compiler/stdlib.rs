@@ -67,16 +67,6 @@ fn buf = (i0, i1, i2, i3) => (o0, o1, o2, o3) {
 }
 
 
-## Invert: same as `buf()`, but with inverted parameter values
-
-fn inv = (i0) => (o0) { o0 = -i0; }
-fn inv = (i0, i1) => (o0, o1) { o0 = -i0; o1 = -i1; }
-fn inv = (i0, i1, i2) => (o0, o1, o2) { o0 = -i0; o1 = -i1; o2 = -i2; }
-fn inv = (i0, i1, i2, i3) => (o0, o1, o2, o3) {
-	o0 = -i0; o1 = -i1; o2 = -i2; o3 = -i3;
-}
-
-
 ## And (5-8 parameters)
 
 fn and = (i0, i1, i2, i3, i4) => out {
