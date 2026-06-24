@@ -140,3 +140,32 @@ fn buf3() {
 	let entries = vec![0, 1, 2, 3, 4, 5, 6, 7];
 	test_func(signature, entries);
 }
+
+#[test]
+fn pair_eq4() {
+	let signature = SignatureSpec::new("pair_eq", 4, 1);
+	let entries = (0..(2u32.pow(4)))
+		.map(|x| (x & 0b11 == ((x & 0b1100) >> 2)) as u32)
+		.rev()
+		.collect::<Vec<_>>();
+	test_func(signature, entries);
+}
+
+#[test]
+fn pair_eq6() {
+	let signature = SignatureSpec::new("pair_eq", 6, 1);
+	let entries = (0..(2u32.pow(6)))
+		.map(|x| (x & 0b111 == ((x & 0b111000) >> 3)) as u32)
+		.rev()
+		.collect::<Vec<_>>();
+	test_func(signature, entries);
+}
+
+#[test]
+fn pair_eq8() {
+	let signature = SignatureSpec::new("pair_eq", 8, 1);
+	let entries = (0..(2u32.pow(8)))
+		.map(|x| (x & 0b1111 == ((x & 0b11110000) >> 4)) as u32)
+		.collect();
+	test_func(signature, entries);
+}

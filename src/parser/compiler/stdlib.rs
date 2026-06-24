@@ -90,4 +90,28 @@ fn and = (i0, i1, i2, i3, i4, i5, i6, i7) => out {
 }
 
 
+## Pairwise Equals
+fn pair_eq = (a1, a0, b1, b0) => out { out = and(eq(a1, b1), eq(a0, b0),); }
+
+fn pair_eq = (a2, a1, a0, b2, b1, b0) => out {
+	out = and(eq(a2, b2), eq(a1, b1), eq(a0, b0),);
+}
+
+fn pair_eq = (a3, a2, a1, a0, b3, b2, b1, b0) => out {
+	out = and(eq(a3, b3), eq(a2, b2), eq(a1, b1), eq(a0, b0),);
+}
+
+fn pair_eq = (a4, a3, a2, a1, a0, b4, b3, b2, b1, b0) => out {
+	out = and(
+		eq(a4, b4), eq(a3, b3), eq(a2, b2),
+		eq(a1, b1), eq(a0, b0),
+	);
+}
+
+fn pair_eq = (a5, a4, a3, a2, a1, a0, b5, b4, b3, b2, b1, b0) => out {
+	out = and(
+		eq(a5, b5), eq(a4, b4), eq(a3, b3),
+		eq(a2, b2), eq(a1, b1), eq(a0, b0),
+	);
+}
 "#;
