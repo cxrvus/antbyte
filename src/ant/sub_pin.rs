@@ -84,7 +84,7 @@ impl SubPin {
 		let bit_index = bit_index.unwrap_or_default();
 
 		let lsb3 = bit_index & 0b00000111;
-		let msb3 = bit_index & 0b00111000;
+		let msb3 = (bit_index & 0b00111000) >> 3;
 
 		// pin type...
 
