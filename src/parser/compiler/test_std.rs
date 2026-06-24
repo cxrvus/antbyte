@@ -169,3 +169,24 @@ fn pair_eq8() {
 		.collect();
 	test_func(signature, entries);
 }
+
+#[test]
+fn dec2() {
+	let signature = SignatureSpec::new("dec", 2, 4);
+	let entries = (0..(2u32.pow(2))).rev().map(|x| 1 << x).collect();
+	test_func(signature, entries);
+}
+
+#[test]
+fn dec3() {
+	let signature = SignatureSpec::new("dec", 3, 8);
+	let entries = (0..(2u32.pow(3))).rev().map(|x| 1 << x).collect();
+	test_func(signature, entries);
+}
+
+#[test]
+fn dec4() {
+	let signature = SignatureSpec::new("dec", 4, 16);
+	let entries = (0..(2u32.pow(4))).rev().map(|x| 1 << x).collect();
+	test_func(signature, entries);
+}
