@@ -14,9 +14,13 @@ fn and = (i0, i1, i2, i3) => out { out = -or(-i0, -i1, -i2, -i3); }
 
 ## Other Logic Gates
 
-fn xor = (a, b) => c { c = or(-or(-a, b), -or(a, -b)); }
+fn xor = (a, b) => c { c = or(and(-a, +b), and(+a, -b)); }
 
-fn eq = (a, b) => c { c = -or(-or(-a, b), -or(a, -b)); }
+fn eq  = (a, b) => out { out = or(and(a, b), -or(a, b)); }
+fn eq  = (a, b, c) => out { out = or(and(a, b, c), -or(a, b, c)); }
+fn eq  = (a, b, c, d) => out { out = or(and(a, b, c, d), -or(a, b, c, d)); }
+
+fn imply = (a, b) => c { c = or(-a, b); }
 
 fn mux = (s, a, b) => out { out = or(and(-s, a), and(s, b)); }
 
@@ -84,4 +88,6 @@ fn and = (i0, i1, i2, i3, i4, i5, i6) => out {
 fn and = (i0, i1, i2, i3, i4, i5, i6, i7) => out {
 	out = -or(-i0, -i1, -i2, -i3, -i4, -i5, -i6, -i7);
 }
+
+
 "#;

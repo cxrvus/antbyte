@@ -44,9 +44,30 @@ fn xor() {
 }
 
 #[test]
-fn eq() {
+fn eq2() {
 	let signature = SignatureSpec::new("eq", 2, 1);
 	let entries = vec![1, 0, 0, 1];
+	test_func(signature, entries);
+}
+
+#[test]
+fn eq3() {
+	let signature = SignatureSpec::new("eq", 3, 1);
+	let entries = vec![1, 0, 0, 0, 0, 0, 0, 1];
+	test_func(signature, entries);
+}
+
+#[test]
+fn eq4() {
+	let signature = SignatureSpec::new("eq", 4, 1);
+	let entries = vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+	test_func(signature, entries);
+}
+
+#[test]
+fn imply() {
+	let signature = SignatureSpec::new("imply", 2, 1);
+	let entries = vec![1, 1, 0, 1];
 	test_func(signature, entries);
 }
 
