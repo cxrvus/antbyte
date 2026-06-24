@@ -216,3 +216,17 @@ fn enc3() {
 		.collect();
 	test_func(signature, entries);
 }
+
+#[test]
+fn one3() {
+	let signature = SignatureSpec::new("one", 3, 1);
+	let entries = (0u32..8).map(|x| (x.count_ones() == 1) as u32).collect();
+	test_func(signature, entries);
+}
+
+#[test]
+fn one4() {
+	let signature = SignatureSpec::new("one", 4, 1);
+	let entries = (0u32..16).map(|x| (x.count_ones() == 1) as u32).collect();
+	test_func(signature, entries);
+}

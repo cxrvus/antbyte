@@ -187,4 +187,26 @@ fn enc = (i0, i1, i2, i3, i4, i5, i6, i7) => (o2, o1, o0) {
 	o2 = or(u4, u5, u6, u7);
 }
 
+
+## HW = 1
+
+fn one = (a, b) => out { out = xor(a,b); }
+
+fn one = (a, b, c) => out {
+	out = or(
+		and(+a, -b, -c),
+		and(-a, +b, -c),
+		and(-a, -b, +c),
+	);
+}
+
+fn one = (a, b, c, d) => out {
+	out = or(
+		and(+a, -b, -c, -d),
+		and(-a, +b, -c, -d),
+		and(-a, -b, +c, -d),
+		and(-a, -b, -c, +d),
+	);
+}
+
 "#;
