@@ -8,7 +8,7 @@ use crate::world::config::WorldConfig;
 pub fn get_keys(config: &WorldConfig) -> u8 {
 	if let Some(bindings) = &config.keys {
 		// temporary convention: begin key binding string with a SPACE to select synchronous input mode
-		let input_str = if !bindings.starts_with(" ") {
+		let input_str = if config.fps.is_none() {
 			// cross platform mode...
 
 			eprintln!("<i> Press <Enter> to send input");
