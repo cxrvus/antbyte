@@ -158,4 +158,33 @@ fn dec = (i3, i2, i1, i0) => (o00, o01, o02, o03, o04, o05, o06, o07, o08, o09, 
 	o14 = pair_eq(i3, i2, i1, i0, 1, 1, 1, 0);
 	o15 = pair_eq(i3, i2, i1, i0, 1, 1, 1, 1);
 }
+
+
+## Encoder
+
+fn enc = (i0, i1, i2, i3) => (o1, o0) {
+	u0 = i0;
+	u1 = and(i1, -i0);
+	u2 = and(i2, -i1, -i0);
+	u3 = and(i3, -i2, -i1, -i0);
+
+	o0 = or(u1, u3);
+	o1 = or(u2, u3);
+}
+
+fn enc = (i0, i1, i2, i3, i4, i5, i6, i7) => (o2, o1, o0) {
+	u0 = i0;
+	u1 = and(i1, -i0);
+	u2 = and(i2, -i1, -i0);
+	u3 = and(i3, -i2, -i1, -i0);
+	u4 = and(i4, -i3, -i2, -i1, -i0);
+	u5 = and(i5, -i4, -i3, -i2, -i1, -i0);
+	u6 = and(i6, -i5, -i4, -i3, -i2, -i1, -i0);
+	u7 = and(i7, -i6, -i5, -i4, -i3, -i2, -i1, -i0);
+
+	o0 = or(u1, u3, u5, u7);
+	o1 = or(u2, u3, u6, u7);
+	o2 = or(u4, u5, u6, u7);
+}
+
 "#;

@@ -190,3 +190,29 @@ fn dec4() {
 	let entries = (0..(2u32.pow(4))).rev().map(|x| 1 << x).collect();
 	test_func(signature, entries);
 }
+
+#[test]
+fn enc2() {
+	let signature = SignatureSpec::new("enc", 4, 2);
+	let entries = vec![0, 3, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0];
+	test_func(signature, entries);
+}
+
+#[test]
+fn enc3() {
+	let signature = SignatureSpec::new("enc", 8, 3);
+	let entries = (0u32..0x100)
+		.map(|x| match x {
+			0 => 0,
+			1 => 7,
+			2..=3 => 6,
+			4..=7 => 5,
+			8..=15 => 4,
+			16..=31 => 3,
+			32..=63 => 2,
+			64..=127 => 1,
+			_ => 0,
+		})
+		.collect();
+	test_func(signature, entries);
+}
