@@ -218,6 +218,13 @@ fn enc3() {
 }
 
 #[test]
+fn hw() {
+	let signature = SignatureSpec::new("hw", 8, 4);
+	let entries = (0u32..0x100).map(|x| x.count_ones()).collect();
+	test_func(signature, entries);
+}
+
+#[test]
 fn one3() {
 	let signature = SignatureSpec::new("one", 3, 1);
 	let entries = (0u32..8).map(|x| (x.count_ones() == 1) as u32).collect();
