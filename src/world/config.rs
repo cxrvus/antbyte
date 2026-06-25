@@ -199,6 +199,8 @@ pub enum ByteFilter {
 	Msb,
 	/// 0 if input is 0, else 15
 	Bin,
+	/// 15 if input is 1, else 0
+	One,
 }
 
 impl TryFrom<String> for ByteFilter {
@@ -209,6 +211,7 @@ impl TryFrom<String> for ByteFilter {
 			"lsb" => Ok(Self::Lsb),
 			"msb" => Ok(Self::Msb),
 			"bin" => Ok(Self::Bin),
+			"one" => Ok(Self::One),
 
 			invalid => Err(anyhow!("invalid render mask: '{invalid}'")),
 		}
@@ -223,6 +226,10 @@ impl ByteFilter {
 			ByteFilter::Bin => match input {
 				0 => 0,
 				_ => 0xf,
+			},
+			ByteFilter::One => match input & 1 {
+				1 => 0xf,
+				_ => 0,
 			},
 		}
 	}
