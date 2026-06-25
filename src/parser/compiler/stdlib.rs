@@ -176,7 +176,24 @@ fn enc = (i0, i1, i2, i3, i4, i5, i6, i7) => (o2, o1, o0) {
 }
 
 
-## HW = 1
+## Hamming weight
+
+fn hw = (i7, i6, i5, i4, i3, i2, i1, i0) => (hw3, hw2, hw1, hw0) {
+	(cout_a0, a0) = add(i1, i0);
+	(cout_a1, a1) = add(i3, i2);
+	(cout_a2, a2) = add(i5, i4);
+	(cout_a3, a3) = add(i7, i6);
+
+	(cout_b, b1, b0) = add(cout_a0, a0, cout_a1, a1);
+	(cout_c, c1, c0) = add(cout_a2, a2, cout_a3, a3);
+	
+	(cout, hw0) = add(b0, c0);
+	(cout, hw1) = add(cout, b1, c1);
+	(hw3, hw2) = add(cout, cout_b, cout_c);
+}
+
+
+## Hamming weight = 1
 
 fn one = (a, b) => out { out = xor(a,b); }
 
