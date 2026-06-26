@@ -220,7 +220,14 @@ fn enc3() {
 }
 
 #[test]
-fn hw() {
+fn hw4() {
+	let signature = SignatureSpec::new("hw", 4, 3);
+	let entries = (0u32..0x10).map(|x| x.count_ones()).collect();
+	test_func(signature, entries);
+}
+
+#[test]
+fn hw8() {
 	let signature = SignatureSpec::new("hw", 8, 4);
 	let entries = (0u32..0x100).map(|x| x.count_ones()).collect();
 	test_func(signature, entries);
