@@ -123,13 +123,22 @@ fn enb = (e, i1, i0) => (o1, o0) {
 }
 
 fn enb = (e, i2, i1, i0) => (o2, o1, o0) {
-	o2 = and(e, i2); o1 = and(e, i1);
-	o0 = and(e, i0);
+	o2 = and(e, i2); o1 = and(e, i1); o0 = and(e, i0);
 }
 
 fn enb = (e, i3, i2, i1, i0) => (o3, o2, o1, o0) {
-	o3 = and(e, i3); o2 = and(e, i2);
+	o3 = and(e, i3); o2 = and(e, i2); o1 = and(e, i1);
+	o0 = and(e, i0);
+}
+
+fn enb = (e, i4, i3, i2, i1, i0) => (o4, o3, o2, o1, o0) {
+	o4 = and(e, i4); o3 = and(e, i3); o2 = and(e, i2);
 	o1 = and(e, i1); o0 = and(e, i0);
+}
+
+fn enb = (e, i5, i4, i3, i2, i1, i0) => (o5, o4, o3, o2, o1, o0) {
+	o5 = and(e, i5); o4 = and(e, i4); o3 = and(e, i3);
+	o2 = and(e, i2); o1 = and(e, i1); o0 = and(e, i0);
 }
 
 
