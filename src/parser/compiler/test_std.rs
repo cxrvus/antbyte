@@ -142,8 +142,8 @@ fn buf3() {
 }
 
 #[test]
-fn pair_eq4() {
-	let signature = SignatureSpec::new("pair_eq", 4, 1);
+fn p_eq4() {
+	let signature = SignatureSpec::new("p_eq", 4, 1);
 	let entries = (0..(2u32.pow(4)))
 		.map(|x| (x & 0b11 == ((x & 0b1100) >> 2)) as u32)
 		.rev()
@@ -152,8 +152,8 @@ fn pair_eq4() {
 }
 
 #[test]
-fn pair_eq6() {
-	let signature = SignatureSpec::new("pair_eq", 6, 1);
+fn p_eq6() {
+	let signature = SignatureSpec::new("p_eq", 6, 1);
 	let entries = (0..(2u32.pow(6)))
 		.map(|x| (x & 0b111 == ((x & 0b111000) >> 3)) as u32)
 		.rev()
@@ -162,8 +162,8 @@ fn pair_eq6() {
 }
 
 #[test]
-fn pair_eq8() {
-	let signature = SignatureSpec::new("pair_eq", 8, 1);
+fn p_eq8() {
+	let signature = SignatureSpec::new("p_eq", 8, 1);
 	let entries = (0..(2u32.pow(8)))
 		.map(|x| (x & 0b1111 == ((x & 0b11110000) >> 4)) as u32)
 		.collect();
