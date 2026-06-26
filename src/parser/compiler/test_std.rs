@@ -170,6 +170,8 @@ fn pair_eq8() {
 	test_func(signature, entries);
 }
 
+// todo: test for enb()
+
 #[test]
 fn dec2() {
 	let signature = SignatureSpec::new("dec", 2, 4);

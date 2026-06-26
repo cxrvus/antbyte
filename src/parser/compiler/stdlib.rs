@@ -116,6 +116,23 @@ fn pair_eq = (a5, a4, a3, a2, a1, a0, b5, b4, b3, b2, b1, b0) => out {
 }
 
 
+## Enabler
+
+fn enb = (e, i1, i0) => (o1, o0) {
+	o1 = and(e, i1); o0 = and(e, i0);
+}
+
+fn enb = (e, i2, i1, i0) => (o2, o1, o0) {
+	o2 = and(e, i2); o1 = and(e, i1);
+	o0 = and(e, i0);
+}
+
+fn enb = (e, i3, i2, i1, i0) => (o3, o2, o1, o0) {
+	o3 = and(e, i3); o2 = and(e, i2);
+	o1 = and(e, i1); o0 = and(e, i0);
+}
+
+
 ## Decoder
 
 fn dec = (i1, i0) => (o0, o1, o2, o3) {
@@ -212,5 +229,25 @@ fn one = (a, b, c, d) => out {
 		and(-a, -b, +c, -d),
 		and(-a, -b, -c, +d),
 	);
+}
+
+
+## Clock
+
+fn on = (t1, t0) => out {
+	out = pair_eq(T1, T0, t1, t0);
+}
+
+fn on = (t2, t1, t0) => out {
+	out = pair_eq(T2, T1, T0, t2, t1, t0);
+}
+
+fn on = (t3, t2, t1, t0) => out {
+	out = pair_eq(T3, T2, T1, T0, t3, t2, t1, t0);
+}
+
+fn on = (t5, t4, t3, t2, t1, t0) => out {
+	out = pair_eq(	T5, T4, T3, T2, T1, T0, 
+					t5, t4, t3, t2, t1, t0);
 }
 "#;
