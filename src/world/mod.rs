@@ -69,7 +69,7 @@ impl World {
 
 		for (&id, behavior) in behaviors {
 			if behavior.name.is_empty() {
-				bail!("ant name must not be an empty string (found in ant with id = {id}")
+				bail!("ant name must not be an empty string (found in ant with id = {id})")
 			}
 		}
 

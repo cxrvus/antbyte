@@ -326,7 +326,7 @@ impl WorldConfig {
 
 		if let Some(keys) = &self.keys {
 			if keys.is_empty() {
-				bail!("[keys] must not be an empty string.)")
+				bail!("[keys] must not be an empty string")
 			} else if keys.len() > 8 {
 				bail!("can only specify up to 8 keys. found {}", keys.len())
 			}
