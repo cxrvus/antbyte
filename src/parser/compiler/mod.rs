@@ -1,13 +1,18 @@
 mod assembler;
 mod call;
 mod func_comp;
-mod linker;
+pub mod linker;
 pub mod settings_comp;
 mod statement;
 mod stdlib;
 mod test_std;
 
-use std::{collections::BTreeMap, fmt::Display, mem::take, path::PathBuf};
+use std::{
+	collections::BTreeMap,
+	fmt::Display,
+	mem::{self, take},
+	path::PathBuf,
+};
 
 use crate::{
 	ant::behavior::Behavior,
@@ -79,6 +84,7 @@ pub fn compile_world(
 	let mut parsed_world = Parser::new(code)?.parse_world()?;
 
 	let mut parsed_funcs = vec![];
+	let mut imported_settings = vec![];
 
 	if !parsed_world.no_std {
 		let std_funcs = Parser::new(STDLIB)?.parse_world().unwrap().funcs;
@@ -87,10 +93,19 @@ pub fn compile_world(
 
 	eprintln!("Linking...");
 
-	linker::link(source_path, &parsed_world.imports, &mut parsed_funcs)?;
+	linker::link(
+		source_path,
+		&parsed_world.imports,
+		&mut parsed_funcs,
+		&mut imported_settings,
+	)?;
 
 	// add source file's functions after imports so imported functions are available
 	parsed_funcs.extend(take(&mut parsed_world.funcs));
+
+	// apply imported settings before local settings
+	imported_settings.extend(mem::take(&mut parsed_world.settings));
+	parsed_world.settings = imported_settings;
 
 	let mut properties = WorldProperties::default();
 

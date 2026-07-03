@@ -4,14 +4,15 @@ mod func_parser;
 pub mod token;
 mod world_parser;
 
-use std::fmt::Display;
+use compiler::linker::WorldImport;
 
 use self::token::Token;
 use anyhow::{Error, Ok, Result, anyhow};
+use std::fmt::Display;
 
 #[rustfmt::skip]
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Keyword { Set, Fn, Ant, Use, NoStd }
+pub enum Keyword { Set, Fn, Ant, Use, UseCfg, NoStd }
 
 impl Keyword {
 	pub(super) fn from_ident(ident: &str) -> Option<Self> {
@@ -20,6 +21,7 @@ impl Keyword {
 			"fn" => Some(Self::Fn),
 			"ant" => Some(Self::Ant),
 			"use" => Some(Self::Use),
+			"use_cfg" => Some(Self::UseCfg),
 			"no_std" => Some(Self::NoStd),
 			_ => None,
 		}
@@ -31,12 +33,12 @@ struct ParsedWorld {
 	settings: Vec<(String, Token)>,
 	funcs: Vec<Func>,
 	ants: Vec<AntFunc>,
-	imports: Vec<String>,
+	imports: Vec<WorldImport>,
 	no_std: bool,
 }
 
 #[derive(Debug)]
-struct Func {
+pub struct Func {
 	signature: Signature,
 	statements: Vec<Statement>,
 }

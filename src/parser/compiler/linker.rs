@@ -6,28 +6,52 @@ use std::{
 use anyhow::{Context, Result, bail};
 
 use crate::{
-	parser::{Expression, Func, Parser},
+	parser::{Expression, Func, Parser, token::Token},
 	world::file_compiler::read_file,
 };
 
 const MAIN: &str = "main";
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum WorldImportMode {
+	Functions,
+	Config,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WorldImport {
+	pub path: String,
+	pub mode: WorldImportMode,
+}
+
 pub fn link(
 	source_path: Option<&PathBuf>,
-	imports: &Vec<String>,
+	imports: &Vec<WorldImport>,
 	parsed_funcs: &mut Vec<Func>,
+	settings: &mut Vec<(String, Token)>,
 ) -> Result<()> {
 	let mut imported = HashSet::new();
-	for import in imports {
+	for WorldImport { path, mode } in imports {
 		let path = if let Some(source_path) = source_path {
 			let base_dir = source_path.parent().unwrap_or_else(|| Path::new("."));
-			base_dir.join(format!("{import}.ant"))
+			base_dir.join(format!("{path}.ant"))
 		} else {
 			bail!("cannot import other files in path-less compilations");
 		};
-		import_funcs(&path, parsed_funcs, &mut imported)?;
+
+		match mode {
+			WorldImportMode::Functions => import_funcs(&path, parsed_funcs, &mut imported)?,
+			WorldImportMode::Config => import_settings(&path, settings)?,
+		};
 	}
 
+	Ok(())
+}
+
+fn import_settings(path: &PathBuf, settings: &mut Vec<(String, Token)>) -> Result<()> {
+	let code = read_file(path)?;
+	let parsed_world = Parser::new(&code)?.parse_world()?;
+	settings.extend(parsed_world.settings);
 	Ok(())
 }
 
@@ -63,8 +87,9 @@ fn import_funcs_recursive(
 	let base_dir = path.parent().unwrap_or_else(|| Path::new("."));
 
 	for import in &parsed_world.imports {
-		let import_path = base_dir.join(format!("{import}.ant"));
-		import_funcs_recursive(&import_path, parsed_funcs, imported, visiting)?
+		let path = &import.path;
+		let full_path = base_dir.join(format!("{path}.ant"));
+		import_funcs_recursive(&full_path, parsed_funcs, imported, visiting)?
 	}
 
 	let mut new_parsed_funcs = parsed_world.funcs;

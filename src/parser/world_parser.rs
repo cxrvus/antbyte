@@ -1,3 +1,5 @@
+use crate::parser::compiler::linker::{WorldImport, WorldImportMode};
+
 use super::{Keyword, ParsedWorld, Parser, Token};
 use anyhow::{Context, Result};
 
@@ -17,7 +19,20 @@ impl Parser {
 			match keyword {
 				Use => {
 					let path = self.next_str()?;
-					world.imports.push(path);
+					let import = WorldImport {
+						path,
+						mode: WorldImportMode::Functions,
+					};
+					world.imports.push(import);
+					self.expect_next(Token::Semicolon)?;
+				}
+				UseCfg => {
+					let path = self.next_str()?;
+					let import = WorldImport {
+						path,
+						mode: WorldImportMode::Config,
+					};
+					world.imports.push(import);
 					self.expect_next(Token::Semicolon)?;
 				}
 				Set => {
