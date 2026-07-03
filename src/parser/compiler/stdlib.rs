@@ -24,7 +24,7 @@ fn imply = (a, b) => c { c = or(-a, b); }
 
 fn mux = (s, a, b) => out { out = or(and(-s, a), and(s, b)); }
 
-fn mux = (s0, s1, a, b, c, d) => out {
+fn mux = (s1, s0, a, b, c, d) => out {
 	out = mux(s1, mux(s0, a, b), mux(s0, c, d));
 }
 
