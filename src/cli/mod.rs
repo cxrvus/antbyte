@@ -61,6 +61,6 @@ pub fn create_world() -> Result<Option<(World, Args)>> {
 
 #[rustfmt::skip]
 fn export_gif(world: World, source: &Path, target: Option<PathBuf>) -> Result<()> {
-	#[cfg(feature = "extras")] { crate::gif_export::gif_export(&world, source, target) }
-	#[cfg(not(feature = "extras"))] { _ = (world, source, target); anyhow::bail!("need to enable the `extras` feature-flag in the antbyte crate"); }
+	#[cfg(feature = "gif")] { crate::gif_export::gif_export(&world, source, target) }
+	#[cfg(not(feature = "gif"))] { _ = (world, source, target); anyhow::bail!("need to enable the `gif` feature-flag in the antbyte crate"); }
 }

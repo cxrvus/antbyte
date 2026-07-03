@@ -19,7 +19,7 @@ gif = { version = "0.14.1", optional = true }
 ts-rs = { version = "12.0.1", features = ["no-serde-warnings"] }
 
 [features]
-default = ["clap", "extras"]
+default = ["clap", "gif"]
 # default = ["clap"]
 clap = ["dep:clap"]
-extras = ["dep:gif"]
+gif = ["dep:gif"]

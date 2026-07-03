@@ -1,4 +1,4 @@
-#![cfg(feature = "extras")]
+#![cfg(feature = "gif")]
 
 use crate::{
 	ui::term::render::{clear_screen, print_title_short},
