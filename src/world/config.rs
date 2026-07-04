@@ -49,9 +49,7 @@ pub struct WorldConfig {
 	pub seed: Option<u32>,
 	pub description: String,
 
-	// ## Plugins
-
-	// ### Renderer
+	// ## Renderer
 	/// rendered frames per second
 	pub fps: Option<u32>,
 	/// filter to get desired nibble (4 bits) out of BG byte
@@ -63,7 +61,7 @@ pub struct WorldConfig {
 	/// amount of ms to sleep for after end of simulation, i.e. between loops
 	pub sleep: Option<u32>,
 
-	// ### External Input
+	// ## External I/O
 	/// 1 to 8 characters as key bindings, representing K0-K7 in ascending order
 	pub keys: Option<String>,
 }
