@@ -1,11 +1,11 @@
+pub mod config;
 pub mod file_compiler;
 pub mod frame;
 
+use config::WorldConfig;
+
 mod state;
 mod tick;
-
-pub mod config;
-use config::WorldConfig;
 
 use anyhow::{Result, bail};
 use serde::{Deserialize, Serialize};

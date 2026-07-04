@@ -1,3 +1,8 @@
+#[cfg(feature = "midi")]
+use anyhow::Context;
+
+use anyhow::Result;
+
 use crate::{
 	ui::term::render::TermRenderer,
 	util::sleep,
@@ -9,13 +14,18 @@ pub mod keyboard;
 pub mod raw;
 pub mod render;
 
-pub fn run(world: World, hide_title: bool) {
+pub fn run(world: World, hide_title: bool) -> Result<()> {
 	let mut world = world;
+
 	let renderer = TermRenderer {
 		hide_title,
 		config: world.config().clone(),
 		name: world.name(),
 	};
+
+	#[cfg(feature = "midi")]
+	let mut player =
+		crate::midi::MidiPlayer::new(world.config().midi.clone()).context("MIDI error!")?;
 
 	let mut last_frame = Instant::now();
 
@@ -23,6 +33,9 @@ pub fn run(world: World, hide_title: bool) {
 		ext_in: keyboard::get_keys(world.config()),
 	}) {
 		renderer.render_frame(&frame);
+
+		#[cfg(feature = "midi")]
+		player.transmit(&frame.ext_out);
 
 		if let Some(frame_ms) = frame.ms {
 			// wait for frame interval to elapse
@@ -40,4 +53,6 @@ pub fn run(world: World, hide_title: bool) {
 			io::stdin().read_line(&mut input).unwrap();
 		}
 	}
+
+	Ok(())
 }

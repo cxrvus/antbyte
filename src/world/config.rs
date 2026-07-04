@@ -8,6 +8,9 @@ use crate::util::{
 	vec2::{Coord, Pos},
 };
 
+#[cfg(feature = "midi")]
+use crate::midi::MidiConfig;
+
 pub const FPS_CAP: u32 = 50;
 pub const SPEED_CAP: u32 = 0x4000;
 pub const SIZE_CAP: Coord = 0x200;
@@ -64,6 +67,9 @@ pub struct WorldConfig {
 	// ## External I/O
 	/// 1 to 8 characters as key bindings, representing K0-K7 in ascending order
 	pub keys: Option<String>,
+
+	#[cfg(feature = "midi")]
+	pub midi: MidiConfig,
 }
 
 impl Default for WorldConfig {
@@ -92,6 +98,9 @@ impl Default for WorldConfig {
 			sleep: Some(200),
 
 			keys: None,
+
+			#[cfg(feature = "midi")]
+			midi: Default::default(),
 		}
 	}
 }
@@ -328,6 +337,11 @@ impl WorldConfig {
 			} else if keys.len() > 8 {
 				bail!("can only specify up to 8 keys. found {}", keys.len())
 			}
+		}
+
+		#[cfg(feature = "midi")]
+		{
+			Self::cap(self.midi.midi_out_ch.into(), "MIDI Output Channel", 16)?;
 		}
 
 		Ok(())
