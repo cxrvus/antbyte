@@ -88,7 +88,11 @@ impl Parser {
 			"fg" => config.fg = RenderMask::try_from(self.next_ident()?)?,
 
 			"desc" | "description" => config.description = self.next_str()?,
-			"keys" => config.keys = Some(self.next_str()?),
+
+			"keys" => {
+				let keys = self.next_str()?;
+				config.keys = if keys.is_empty() { None } else { Some(keys) };
+			}
 
 			other => return Err(anyhow!("unknown setting: '{other}'")),
 		}
