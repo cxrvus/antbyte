@@ -7,30 +7,12 @@ use std::{
 
 use anyhow::{Result, anyhow, bail};
 use midir::{MidiOutput, MidiOutputConnection, MidiOutputPort};
-use serde::{Deserialize, Serialize};
+
+use crate::world::config::MidiConfig;
 
 const NOTE_ON: u8 = 0x90;
 const NOTE_OFF: u8 = 0x80;
 const VELOCITY: u8 = 0x64;
-
-#[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(deny_unknown_fields)]
-#[serde(default)]
-pub struct MidiConfig {
-	/// set channel to 1-16 or set to 0 to ignore
-	pub midi_out_ch: u8,
-	pub midi_out_offset: u8,
-}
-
-impl Default for MidiConfig {
-	fn default() -> Self {
-		Self {
-			midi_out_ch: 0,
-			midi_out_offset: 48,
-		}
-	}
-}
 
 pub struct MidiPlayer {
 	config: MidiConfig,
@@ -46,7 +28,7 @@ impl MidiPlayer {
 			held_notes: BTreeSet::new(),
 		};
 
-		if config.midi_out_ch != 0 {
+		if config.out_ch != 0 {
 			player.conn_out = Some(connect_out()?);
 		}
 
@@ -56,9 +38,9 @@ impl MidiPlayer {
 	pub fn transmit(&mut self, new_notes: &[u8]) {
 		if let Some(conn_out) = self.conn_out.as_mut() {
 			let held_notes = self.held_notes.clone();
-			let offset = self.config.midi_out_offset;
+			let offset = self.config.offset;
 
-			let channel = match self.config.midi_out_ch {
+			let channel = match self.config.out_ch {
 				ch @ 1..16 => ch - 1,
 				_ => panic!("channel is out of range"),
 			};

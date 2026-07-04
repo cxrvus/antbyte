@@ -8,9 +8,6 @@ use crate::util::{
 	vec2::{Coord, Pos},
 };
 
-#[cfg(feature = "midi")]
-use crate::midi::MidiConfig;
-
 pub const FPS_CAP: u32 = 50;
 pub const SPEED_CAP: u32 = 0x4000;
 pub const SIZE_CAP: Coord = 0x200;
@@ -68,7 +65,6 @@ pub struct WorldConfig {
 	/// 1 to 8 characters as key bindings, representing K0-K7 in ascending order
 	pub keys: Option<String>,
 
-	#[cfg(feature = "midi")]
 	pub midi: MidiConfig,
 }
 
@@ -99,7 +95,6 @@ impl Default for WorldConfig {
 
 			keys: None,
 
-			#[cfg(feature = "midi")]
 			midi: Default::default(),
 		}
 	}
@@ -277,6 +272,25 @@ impl TryFrom<String> for RenderMask {
 	}
 }
 
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(deny_unknown_fields)]
+#[serde(default)]
+pub struct MidiConfig {
+	/// set channel to 1-16 or set to 0 to ignore
+	pub out_ch: u8,
+	pub offset: u8,
+}
+
+impl Default for MidiConfig {
+	fn default() -> Self {
+		Self {
+			out_ch: 0,
+			offset: 48,
+		}
+	}
+}
+
 impl WorldConfig {
 	pub fn validate(&self) -> Result<()> {
 		if self.height < 3 || self.width < 3 {
@@ -339,11 +353,8 @@ impl WorldConfig {
 			}
 		}
 
-		#[cfg(feature = "midi")]
-		{
-			Self::cap(self.midi.midi_out_ch.into(), "MIDI Output Channel", 16)?;
-			Self::cap(self.midi.midi_out_offset.into(), "MIDI Output Offset", 60)?;
-		}
+		Self::cap(self.midi.out_ch.into(), "MIDI Output Channel", 16)?;
+		Self::cap(self.midi.offset.into(), "MIDI Output Offset", 60)?;
 
 		Ok(())
 	}
