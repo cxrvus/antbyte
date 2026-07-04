@@ -50,7 +50,7 @@ impl MidiPlayer {
 
 				if !held_notes.contains(&note) {
 					let status = NOTE_ON | channel;
-					conn_out.send(&[status, note, VELOCITY]).unwrap();
+					let _ = conn_out.send(&[status, note, VELOCITY]);
 					self.held_notes.insert(note);
 				}
 			}
@@ -58,7 +58,7 @@ impl MidiPlayer {
 			for held_note in held_notes {
 				if !new_notes.contains(&held_note) {
 					let status = NOTE_OFF | channel;
-					conn_out.send(&[status, held_note, VELOCITY]).unwrap();
+					let _ = conn_out.send(&[status, held_note, VELOCITY]);
 					self.held_notes.remove(&held_note);
 				}
 			}
