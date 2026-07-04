@@ -14,12 +14,22 @@ const NOTE_OFF: u8 = 0x80;
 const VELOCITY: u8 = 0x64;
 
 #[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Serialize, Deserialize, Default, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct MidiConfig {
 	/// set channel to 1-16 or set to 0 to ignore
 	pub midi_out_ch: u8,
+	pub midi_out_offset: u8,
+}
+
+impl Default for MidiConfig {
+	fn default() -> Self {
+		Self {
+			midi_out_ch: 0,
+			midi_out_offset: 48,
+		}
+	}
 }
 
 pub struct MidiPlayer {
@@ -46,6 +56,7 @@ impl MidiPlayer {
 	pub fn transmit(&mut self, new_notes: &[u8]) {
 		if let Some(conn_out) = self.conn_out.as_mut() {
 			let held_notes = self.held_notes.clone();
+			let offset = self.config.midi_out_offset;
 
 			let channel = match self.config.midi_out_ch {
 				ch @ 1..16 => ch - 1,
@@ -53,7 +64,7 @@ impl MidiPlayer {
 			};
 
 			for note in new_notes {
-				let note = *note & 0x7f;
+				let note = (note & 0x7f).saturating_add(offset).min(127);
 
 				if !held_notes.contains(&note) {
 					let status = NOTE_ON | channel;

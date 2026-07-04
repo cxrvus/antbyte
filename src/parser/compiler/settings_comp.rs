@@ -97,6 +97,9 @@ impl Parser {
 			#[cfg(feature = "midi")]
 			"midi_out_ch" => config.midi.midi_out_ch = self.next_number()?.unwrap_or_default() as u8,
 
+			#[cfg(feature = "midi")]
+			"midi_out_offset" => config.midi.midi_out_offset = self.next_number()?.unwrap_or_default() as u8,
+
 			other => return Err(anyhow!("unknown setting: '{other}'")),
 		}
 

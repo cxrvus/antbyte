@@ -342,6 +342,7 @@ impl WorldConfig {
 		#[cfg(feature = "midi")]
 		{
 			Self::cap(self.midi.midi_out_ch.into(), "MIDI Output Channel", 16)?;
+			Self::cap(self.midi.midi_out_offset.into(), "MIDI Output Offset", 60)?;
 		}
 
 		Ok(())
