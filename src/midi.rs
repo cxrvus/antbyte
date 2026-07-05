@@ -83,6 +83,13 @@ fn connect_out() -> Result<MidiOutputConnection> {
 			);
 			&out_ports[0]
 		}
+		2 => {
+			println!(
+				"Choosing the second output port: {}",
+				midi_out.port_name(&out_ports[1]).unwrap()
+			);
+			&out_ports[1]
+		}
 		_ => {
 			println!("\nAvailable output ports:");
 			for (i, p) in out_ports.iter().enumerate() {
