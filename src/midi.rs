@@ -37,25 +37,29 @@ impl MidiPlayer {
 
 	pub fn transmit(&mut self, new_notes: &[u8]) {
 		if let Some(conn_out) = self.conn_out.as_mut() {
-			let held_notes = self.held_notes.clone();
 			let offset = self.config.offset;
 
 			let channel = match self.config.out_ch {
-				ch @ 1..16 => ch - 1,
+				ch @ 1..=16 => ch - 1,
 				_ => panic!("channel is out of range"),
 			};
 
-			for note in new_notes {
-				let note = (note & 0x7f).saturating_add(offset).min(127);
+			let new_notes: Vec<u8> = new_notes
+				.iter()
+				.map(|n| (n & 0x7f).saturating_add(offset).min(127))
+				.collect();
 
-				if !held_notes.contains(&note) {
+			// send NOTE_ON for notes that are new
+			for &note in &new_notes {
+				if !self.held_notes.contains(&note) {
 					let status = NOTE_ON | channel;
 					let _ = conn_out.send(&[status, note, VELOCITY]);
 					self.held_notes.insert(note);
 				}
 			}
 
-			for held_note in held_notes {
+			// send NOTE_OFF for held notes that are no longer present
+			for held_note in self.held_notes.clone() {
 				if !new_notes.contains(&held_note) {
 					let status = NOTE_OFF | channel;
 					let _ = conn_out.send(&[status, held_note, VELOCITY]);
@@ -84,7 +88,7 @@ fn connect_out() -> Result<MidiOutputConnection> {
 			for (i, p) in out_ports.iter().enumerate() {
 				println!("{}: {}", i, midi_out.port_name(p).unwrap());
 			}
-			print!("Please select output port: ");
+			println!("Please select output port:");
 			stdout().flush()?;
 			let mut input = String::new();
 			stdin().read_line(&mut input)?;
@@ -94,7 +98,7 @@ fn connect_out() -> Result<MidiOutputConnection> {
 		}
 	};
 
-	println!("\nOpening MIDI OUT connection...");
+	println!("Opening MIDI OUT connection...");
 
 	midi_out
 		.connect(out_port, "ANTBYTE MIDI (OUT)")
