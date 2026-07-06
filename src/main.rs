@@ -14,7 +14,8 @@ pub fn run() -> Result<()> {
 		use antbyte::ui::term;
 
 		if let Some((world, args)) = antbyte::cli::create_world()? {
-			term::run(world, args.hide_title);
+			use anyhow::Context;
+			term::run(world, args.hide_title).context("simulation error!")?;
 		}
 
 		Ok(())
@@ -41,7 +42,7 @@ pub fn run() -> Result<()> {
 		let properties = compile_world(&path, &LogConfig::default(), &None)?;
 		let world = World::new(properties.clone()).context("world error!")?;
 
-		term::run(world, true);
+		term::run(world, true)?;
 
 		Ok(())
 	}

@@ -10,12 +10,12 @@ use crate::{
 	},
 };
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct FrameInput {
 	pub ext_in: u8,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FrameOutput {
 	pub fg: BTreeMap<Pos, u8>,
 	pub bg: BTreeMap<Pos, u8>,
