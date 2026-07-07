@@ -12,7 +12,7 @@ pub const FPS_CAP: u32 = 50;
 pub const SPEED_CAP: u32 = 0x4000;
 pub const SIZE_CAP: Coord = 0x200;
 pub const LAYER_CAP: u8 = 8;
-const ANT_LIMIT: u32 = 0x400;
+const ANT_LIMIT: u32 = 0x4000;
 
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
