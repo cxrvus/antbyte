@@ -286,7 +286,7 @@ impl Default for MidiConfig {
 	fn default() -> Self {
 		Self {
 			out_ch: 0,
-			offset: 48,
+			offset: 48, // C3
 		}
 	}
 }
