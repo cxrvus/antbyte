@@ -35,15 +35,18 @@ impl MidiPlayer {
 		Ok(player)
 	}
 
+	fn channel(&self) -> u8 {
+		match &self.config.out_ch {
+			ch @ 1..=16 => ch - 1,
+			_ => panic!("channel is out of range"),
+		}
+	}
+
 	pub fn transmit(&mut self, new_notes: &[u8]) {
+		let offset = self.config.offset;
+		let channel = self.channel();
+
 		if let Some(conn_out) = self.conn_out.as_mut() {
-			let offset = self.config.offset;
-
-			let channel = match self.config.out_ch {
-				ch @ 1..=16 => ch - 1,
-				_ => panic!("channel is out of range"),
-			};
-
 			let new_notes: Vec<u8> = new_notes
 				.iter()
 				.map(|n| (n & 0x7f).saturating_add(offset).saturating_sub(1).min(127))
@@ -65,6 +68,20 @@ impl MidiPlayer {
 					let _ = conn_out.send(&[status, held_note, VELOCITY]);
 					self.held_notes.remove(&held_note);
 				}
+			}
+		}
+	}
+}
+
+impl Drop for MidiPlayer {
+	fn drop(&mut self) {
+		let channel = self.channel();
+		// send NOTE_OFF for all held notes
+		if let Some(conn_out) = self.conn_out.as_mut() {
+			for held_note in self.held_notes.clone() {
+				let status = NOTE_OFF | channel;
+				let _ = conn_out.send(&[status, held_note, VELOCITY]);
+				self.held_notes.remove(&held_note);
 			}
 		}
 	}
