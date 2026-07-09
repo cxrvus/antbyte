@@ -75,14 +75,15 @@ impl MidiPlayer {
 
 impl Drop for MidiPlayer {
 	fn drop(&mut self) {
-		let channel = self.channel();
 		// send NOTE_OFF for all held notes
-		if let Some(conn_out) = self.conn_out.as_mut() {
+		if let Some(mut conn_out) = self.conn_out.take() {
+			let channel = self.channel();
 			for held_note in self.held_notes.clone() {
 				let status = NOTE_OFF | channel;
 				let _ = conn_out.send(&[status, held_note, VELOCITY]);
-				self.held_notes.remove(&held_note);
 			}
+
+			conn_out.close();
 		}
 	}
 }
