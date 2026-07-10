@@ -51,7 +51,12 @@ impl MidiPlayer {
 
 			let new_notes: Vec<u8> = new_notes
 				.iter()
-				.map(|n| (n & 0x7f).saturating_add(offset).saturating_sub(1).min(127))
+				.map(|n| {
+					(n & 0b111111)
+						.saturating_add(offset)
+						.saturating_sub(1)
+						.min(127)
+				})
 				.collect();
 
 			// send NOTE_ON for notes that are new
