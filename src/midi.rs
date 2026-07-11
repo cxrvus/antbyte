@@ -12,7 +12,7 @@ use crate::world::config::MidiConfig;
 
 const NOTE_ON: u8 = 0x90;
 const NOTE_OFF: u8 = 0x80;
-const VELOCITY: u8 = 0xff;
+const VELOCITY: u8 = 0x7f;
 
 pub struct MidiPlayer {
 	config: MidiConfig,
@@ -54,12 +54,15 @@ impl MidiPlayer {
 						.saturating_sub(1)
 						.min(127);
 
-					let slot = value & 0b11000000;
-					let ch = self.config.out_ch.get(&slot);
+					let slot = (value & 0b11000000) >> 6;
+					let ch = match self.config.out_ch.get(&slot) {
+						Some(0) | None => None,
+						Some(ch) => Some(ch - 1),
+					};
 
 					(ch, note)
 				})
-				.filter_map(|(ch, note)| ch.map(|ch| (*ch, note)))
+				.filter_map(|(ch, note)| ch.map(|ch| (ch, note)))
 				.collect();
 
 			// send NOTE_ON for notes that are new
