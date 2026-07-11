@@ -12,12 +12,13 @@ use crate::world::config::MidiConfig;
 
 const NOTE_ON: u8 = 0x90;
 const NOTE_OFF: u8 = 0x80;
-const VELOCITY: u8 = 0x7f;
+const VELOCITY: u8 = 90;
 
 pub struct MidiPlayer {
 	config: MidiConfig,
 	conn_out: Option<MidiOutputConnection>,
 	held_notes: BTreeSet<(u8, u8)>,
+	// TODO: add velocity_offset
 }
 
 impl MidiPlayer {
