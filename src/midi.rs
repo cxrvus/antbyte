@@ -12,12 +12,12 @@ use crate::world::config::MidiConfig;
 
 const NOTE_ON: u8 = 0x90;
 const NOTE_OFF: u8 = 0x80;
-const VELOCITY: u8 = 0x64;
+const VELOCITY: u8 = 0xff;
 
 pub struct MidiPlayer {
 	config: MidiConfig,
 	conn_out: Option<MidiOutputConnection>,
-	held_notes: BTreeSet<u8>,
+	held_notes: BTreeSet<(u8, u8)>,
 }
 
 impl MidiPlayer {
@@ -28,52 +28,53 @@ impl MidiPlayer {
 			held_notes: BTreeSet::new(),
 		};
 
-		if config.out_ch != 0 {
+		if !config.out_ch.is_empty() {
 			player.conn_out = Some(connect_out()?);
 		}
 
 		Ok(player)
 	}
 
-	fn channel(&self) -> Option<u8> {
-		match &self.config.out_ch {
-			0 => None,
-			ch @ 1..=16 => Some(ch - 1),
-			_ => panic!("channel is out of range"),
-		}
+	fn send_note(&mut self, ch: u8, note: u8, on: bool) {
+		let on_off = if on { NOTE_ON } else { NOTE_OFF };
+		let status = on_off | ch;
+		let conn_out = self.conn_out.as_mut().unwrap();
+		let _ = conn_out.send(&[status, note, VELOCITY]);
 	}
 
-	pub fn transmit(&mut self, new_notes: &[u8]) {
+	pub fn transmit(&mut self, values: &[u8]) {
 		let offset = self.config.offset;
 
-		if let Some(channel) = self.channel() {
-			let conn_out = self.conn_out.as_mut().unwrap();
-
-			let new_notes: Vec<u8> = new_notes
+		if !self.config.out_ch.is_empty() {
+			let new_notes: Vec<(u8, u8)> = values
 				.iter()
-				.map(|n| {
-					(n & 0b111111)
+				.map(|value| {
+					let note = (value & 0b111111)
 						.saturating_add(offset)
 						.saturating_sub(1)
-						.min(127)
+						.min(127);
+
+					let slot = value & 0b11000000;
+					let ch = self.config.out_ch.get(&slot);
+
+					(ch, note)
 				})
+				.filter_map(|(ch, note)| ch.map(|ch| (*ch, note)))
 				.collect();
 
 			// send NOTE_ON for notes that are new
-			for &note in &new_notes {
-				if !self.held_notes.contains(&note) {
-					let status = NOTE_ON | channel;
-					let _ = conn_out.send(&[status, note, VELOCITY]);
-					self.held_notes.insert(note);
+			for note in &new_notes {
+				if !self.held_notes.contains(note) {
+					self.send_note(note.0, note.1, true);
+					self.held_notes.insert(*note);
 				}
 			}
 
 			// send NOTE_OFF for held notes that are no longer present
-			for held_note in self.held_notes.clone() {
-				if !new_notes.contains(&held_note) {
-					let status = NOTE_OFF | channel;
-					let _ = conn_out.send(&[status, held_note, VELOCITY]);
-					self.held_notes.remove(&held_note);
+			for note in self.held_notes.clone() {
+				if !new_notes.contains(&note) {
+					self.send_note(note.0, note.1, false);
+					self.held_notes.remove(&note);
 				}
 			}
 		}
@@ -83,15 +84,12 @@ impl MidiPlayer {
 impl Drop for MidiPlayer {
 	fn drop(&mut self) {
 		// send NOTE_OFF for all held notes
-		if let Some(channel) = self.channel() {
-			let mut conn_out = self.conn_out.take().unwrap();
-
-			for held_note in self.held_notes.clone() {
-				let status = NOTE_OFF | channel;
-				let _ = conn_out.send(&[status, held_note, VELOCITY]);
+		if !self.config.out_ch.is_empty() {
+			for (ch, note) in self.held_notes.clone() {
+				self.send_note(ch, note, false);
 			}
 
-			conn_out.close();
+			self.conn_out.take().unwrap().close();
 		}
 	}
 }

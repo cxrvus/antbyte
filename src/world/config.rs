@@ -278,14 +278,14 @@ impl TryFrom<String> for RenderMask {
 #[serde(default)]
 pub struct MidiConfig {
 	/// set channel to 1-16 or set to 0 to ignore
-	pub out_ch: u8,
+	pub out_ch: BTreeMap<u8, u8>,
 	pub offset: u8,
 }
 
 impl Default for MidiConfig {
 	fn default() -> Self {
 		Self {
-			out_ch: 0,
+			out_ch: Default::default(),
 			offset: 48, // C3
 		}
 	}
@@ -308,6 +308,7 @@ impl WorldConfig {
 			bail!("main_layer must not exceed specified max layer")
 		}
 
+		// TODO: limit border slots to max layer count
 		if !self.border.contains_key(&0) {
 			bail!("border_0 needs to be specified")
 		}
@@ -353,7 +354,11 @@ impl WorldConfig {
 			}
 		}
 
-		Self::cap(self.midi.out_ch.into(), "MIDI Output Channel", 16)?;
+		for (i, ch) in &self.midi.out_ch {
+			Self::cap(*i as u32, &format!("MIDI Output Slot @{}", i), 3)?;
+			Self::cap(*ch as u32, &format!("MIDI Output Channel @{}", i), 16)?;
+		}
+
 		Self::cap(self.midi.offset.into(), "MIDI Output Offset", 60)?;
 
 		Ok(())
