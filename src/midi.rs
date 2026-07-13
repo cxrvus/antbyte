@@ -71,7 +71,7 @@ impl MidiPlayer {
 		let inv_vel = ((value >> 8) & 0b1111) << 3;
 		let vel = MAX_VELOCITY.saturating_sub(inv_vel as u8);
 
-		if vel == 0 {
+		if note | vel == 0 {
 			return None;
 		}
 
