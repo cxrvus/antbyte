@@ -77,12 +77,14 @@ impl MidiPlayer {
 
 	pub fn transmit(&mut self, values: &[u16]) {
 		if !self.config.out_ch.is_empty() {
-			let new_notes: Vec<Note> = values.iter().filter_map(|x| self.parse_note(*x)).collect();
+			let new_notes: BTreeSet<Note> =
+				values.iter().filter_map(|x| self.parse_note(*x)).collect();
+
 			let prev_notes = self.held_notes.clone();
 
 			// send NOTE_ON for notes that are new
 			for note in &new_notes {
-				if !self.held_notes.contains(note) {
+				if !prev_notes.contains(note) {
 					self.send_note(note, true);
 					self.held_notes.insert(note.clone());
 				}
