@@ -1,6 +1,8 @@
 pub mod pin;
 pub mod sub_pin;
 
+use std::ops::{Deref, DerefMut};
+
 use crate::util::{dir::Direction, hash_u32};
 
 pub mod behavior;
@@ -10,11 +12,18 @@ pub struct Ant {
 	pub behavior: u8,
 	pub birth_tick: u32,
 
-	pub last_input: u8,
 	pub clock: u8,
 	pub wait_ticks: u8,
-
 	pub dir: Direction,
+	pub memory: u8,
+
+	// todo: exclude from serialization
+	pub data: TickData,
+}
+
+#[derive(Clone, Copy, Default, Debug)]
+pub struct TickData {
+	pub last_input: u8,
 
 	pub will_halt: bool,
 	pub will_dash: bool,
@@ -22,12 +31,24 @@ pub struct Ant {
 	pub will_die: bool,
 	pub will_wait: bool,
 
-	pub memory: u8,
-
 	pub child_behavior: u8,
 	pub child_layer: u8,
 	pub child_dir: Direction,
 	pub child_memory: u8,
+}
+
+impl Deref for Ant {
+	type Target = TickData;
+
+	fn deref(&self) -> &Self::Target {
+		&self.data
+	}
+}
+
+impl DerefMut for Ant {
+	fn deref_mut(&mut self) -> &mut Self::Target {
+		&mut self.data
+	}
 }
 
 impl Ant {
