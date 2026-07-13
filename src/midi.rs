@@ -61,19 +61,16 @@ impl MidiPlayer {
 			Some(ch) => ch - 1,
 		};
 
-		let offset = self.config.offset;
-
-		let note = ((value & 0b111111) as u8)
-			.saturating_sub(1)
-			.saturating_add(offset)
-			.min(127);
-
 		let inv_vel = ((value >> 8) & 0b1111) << 3;
 		let vel = MAX_VELOCITY.saturating_sub(inv_vel as u8);
+		let note = (value & 0b111111) as u8;
 
-		if note | vel == 0 {
+		if note & vel == 0 {
 			return None;
 		}
+
+		let offset = self.config.offset;
+		let note = note.saturating_sub(1).saturating_add(offset).min(127);
 
 		Some((Note { ch, note }, vel))
 	}
