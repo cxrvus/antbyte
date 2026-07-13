@@ -43,19 +43,19 @@ impl MidiPlayer {
 		let _ = conn_out.send(&[status, note, VELOCITY]);
 	}
 
-	pub fn transmit(&mut self, values: &[u8]) {
+	pub fn transmit(&mut self, values: &[u16]) {
 		let offset = self.config.offset;
 
 		if !self.config.out_ch.is_empty() {
 			let new_notes: Vec<(u8, u8)> = values
 				.iter()
 				.map(|value| {
-					let note = (value & 0b111111)
+					let note = ((value & 0b111111) as u8)
 						.saturating_add(offset)
 						.saturating_sub(1)
 						.min(127);
 
-					let slot = (value & 0b11000000) >> 6;
+					let slot = ((value & 0b11000000) >> 6) as u8;
 					let ch = match self.config.out_ch.get(&slot) {
 						Some(0) | None => None,
 						Some(ch) => Some(ch - 1),

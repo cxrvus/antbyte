@@ -79,8 +79,8 @@ impl World {
 		let mut output_values: Vec<PinValue> = vec![];
 
 		for output_sub_pin in behavior.outputs.iter().rev() {
-			let output_bit = (output_bits & 1) as u8;
-			let bit_index = output_sub_pin.line;
+			let output_bit = (output_bits & 1) as u16;
+			let bit_index = (output_sub_pin.channel << 3) | output_sub_pin.line;
 			let new_value = output_bit << bit_index;
 
 			if let Some(output_value) = output_values
@@ -117,11 +117,13 @@ impl World {
 		for pin_value in output.iter() {
 			let PinValue { pin, value } = *pin_value;
 			let value_bool = value != 0;
+			let wide_value = value;
+			let value = value as u8;
 
 			match (pin, value_bool) {
 				(Mem, _) => ant.memory = value | (ant.memory & !mem_mask),
 				(Signal, true) => self.signal_out |= value,
-				(ExtOut, true) => self.ext_output.push(value),
+				(ExtOut, true) => self.ext_output.push(wide_value),
 
 				// tiles
 				(Clear, true) => clear = true,

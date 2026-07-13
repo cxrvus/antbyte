@@ -21,7 +21,7 @@ pub struct FrameOutput {
 	pub bg: BTreeMap<Pos, u8>,
 	pub ms: Option<u32>,
 	pub metadata: String, //todo: turn this into a map
-	pub ext_out: Vec<u8>,
+	pub ext_out: Vec<u16>,
 }
 
 impl World {

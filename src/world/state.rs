@@ -34,7 +34,7 @@ pub struct WorldState {
 	pub signal_in: u8,
 	pub signal_out: u8,
 	pub ext_input: u8,
-	pub ext_output: Vec<u8>,
+	pub ext_output: Vec<u16>,
 }
 
 impl WorldState {

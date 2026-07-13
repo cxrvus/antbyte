@@ -232,7 +232,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::ExtOut,
 			code: "X",
-			size: BYTE,
+			size: DOUBLE,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
@@ -269,8 +269,9 @@ impl Pin {
 	}
 
 	#[inline]
-	/// specifies that a pin needs the line bits to be the channel bits
-	/// currently only used for special treatment of `NearbyAnt`
+	/// specifies that a pin needs the line bits to be the channel bits.
+	///
+	/// currently only used for special treatment of `NearbyAnt`.
 	pub fn prefers_channel(&self) -> bool {
 		matches!(self, Self::NearbyAnt)
 	}
@@ -279,7 +280,7 @@ impl Pin {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PinValue {
 	pub pin: Pin,
-	pub value: u8,
+	pub value: u16,
 }
 
 #[cfg(test)]
