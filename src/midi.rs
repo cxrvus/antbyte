@@ -1,7 +1,7 @@
 #![cfg(feature = "midi")]
 
 use std::{
-	collections::BTreeSet,
+	collections::BTreeMap,
 	io::{Write, stdin, stdout},
 };
 
@@ -17,7 +17,7 @@ const MAX_VELOCITY: u8 = 0x7f;
 pub struct MidiPlayer {
 	config: MidiConfig,
 	conn_out: Option<MidiOutputConnection>,
-	held_notes: BTreeSet<Note>,
+	held_notes: BTreeMap<Note, u8>,
 	// TODO: add velocity_offset
 }
 
@@ -25,7 +25,6 @@ pub struct MidiPlayer {
 struct Note {
 	ch: u8,
 	note: u8,
-	vel: u8,
 }
 
 impl MidiPlayer {
@@ -33,7 +32,7 @@ impl MidiPlayer {
 		let mut player = Self {
 			config: config.clone(),
 			conn_out: None,
-			held_notes: BTreeSet::new(),
+			held_notes: Default::default(),
 		};
 
 		if !config.out_ch.is_empty() {
@@ -43,14 +42,18 @@ impl MidiPlayer {
 		Ok(player)
 	}
 
-	fn send_note(&mut self, note: &Note, on: bool) {
-		let on_off = if on { NOTE_ON } else { NOTE_OFF };
+	fn send_note(&mut self, note: &Note, vel: Option<u8>) {
+		let (on_off, vel) = match vel {
+			Some(vel) => (NOTE_ON, vel),
+			None => (NOTE_OFF, 0),
+		};
+
 		let status = on_off | note.ch;
 		let conn_out = self.conn_out.as_mut().unwrap();
-		let _ = conn_out.send(&[status, note.note, note.vel]);
+		let _ = conn_out.send(&[status, note.note, vel]);
 	}
 
-	fn parse_note(&self, value: u16) -> Option<Note> {
+	fn parse_note(&self, value: u16) -> Option<(Note, u8)> {
 		let slot = ((value >> 6) & 0b11) as u8;
 
 		let ch = match self.config.out_ch.get(&slot) {
@@ -72,28 +75,35 @@ impl MidiPlayer {
 			return None;
 		}
 
-		Some(Note { ch, note, vel })
+		Some((Note { ch, note }, vel))
 	}
 
 	pub fn transmit(&mut self, values: &[u16]) {
 		if !self.config.out_ch.is_empty() {
-			let new_notes: BTreeSet<Note> =
-				values.iter().filter_map(|x| self.parse_note(*x)).collect();
-
 			let prev_notes = self.held_notes.clone();
+			let mut new_notes = BTreeMap::<Note, u8>::new();
+
+			for &value in values {
+				if let Some((note, new_vel)) = self.parse_note(value) {
+					new_notes
+						.entry(note)
+						.and_modify(|old_vel| *old_vel = (*old_vel).max(new_vel))
+						.or_insert(new_vel);
+				}
+			}
 
 			// send NOTE_ON for notes that are new
-			for note in &new_notes {
-				if !prev_notes.contains(note) {
-					self.send_note(note, true);
-					self.held_notes.insert(note.clone());
+			for (note, &vel) in &new_notes {
+				if !prev_notes.contains_key(note) {
+					self.send_note(note, Some(vel));
+					self.held_notes.insert(note.clone(), vel);
 				}
 			}
 
 			// send NOTE_OFF for held notes that are no longer present
-			for note in &prev_notes {
-				if !new_notes.contains(note) {
-					self.send_note(note, false);
+			for note in prev_notes.keys() {
+				if !new_notes.contains_key(note) {
+					self.send_note(note, None);
 					self.held_notes.remove(note);
 				}
 			}
@@ -105,8 +115,8 @@ impl Drop for MidiPlayer {
 	fn drop(&mut self) {
 		// send NOTE_OFF for all held notes
 		if !self.config.out_ch.is_empty() {
-			for note in &self.held_notes.clone() {
-				self.send_note(note, false);
+			for note in self.held_notes.clone().keys() {
+				self.send_note(note, None);
 			}
 
 			self.conn_out.take().unwrap().close();
