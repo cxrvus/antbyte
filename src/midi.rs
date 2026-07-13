@@ -12,13 +12,20 @@ use crate::world::config::MidiConfig;
 
 const NOTE_ON: u8 = 0x90;
 const NOTE_OFF: u8 = 0x80;
-const VELOCITY: u8 = 90;
+const MAX_VELOCITY: u8 = 0x7f;
 
 pub struct MidiPlayer {
 	config: MidiConfig,
 	conn_out: Option<MidiOutputConnection>,
-	held_notes: BTreeSet<(u8, u8)>,
+	held_notes: BTreeSet<Note>,
 	// TODO: add velocity_offset
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+struct Note {
+	ch: u8,
+	note: u8,
+	vel: u8,
 }
 
 impl MidiPlayer {
@@ -36,49 +43,56 @@ impl MidiPlayer {
 		Ok(player)
 	}
 
-	fn send_note(&mut self, ch: u8, note: u8, on: bool) {
+	fn send_note(&mut self, note: &Note, on: bool) {
 		let on_off = if on { NOTE_ON } else { NOTE_OFF };
-		let status = on_off | ch;
+		let status = on_off | note.ch;
 		let conn_out = self.conn_out.as_mut().unwrap();
-		let _ = conn_out.send(&[status, note, VELOCITY]);
+		let _ = conn_out.send(&[status, note.note, note.vel]);
+	}
+
+	fn parse_note(&self, value: u16) -> Option<Note> {
+		let slot = ((value >> 6) & 0b11) as u8;
+
+		let ch = match self.config.out_ch.get(&slot) {
+			Some(0) | None => return None,
+			Some(ch) => ch - 1,
+		};
+
+		let offset = self.config.offset;
+
+		let note = ((value & 0b111111) as u8)
+			.saturating_sub(1)
+			.saturating_add(offset)
+			.min(127);
+
+		let inv_vel = ((value >> 8) & 0b1111) << 3;
+		let vel = MAX_VELOCITY.saturating_sub(inv_vel as u8);
+
+		if vel == 0 {
+			return None;
+		}
+
+		Some(Note { ch, note, vel })
 	}
 
 	pub fn transmit(&mut self, values: &[u16]) {
-		let offset = self.config.offset;
-
 		if !self.config.out_ch.is_empty() {
-			let new_notes: Vec<(u8, u8)> = values
-				.iter()
-				.map(|value| {
-					let note = ((value & 0b111111) as u8)
-						.saturating_add(offset)
-						.saturating_sub(1)
-						.min(127);
-
-					let slot = ((value & 0b11000000) >> 6) as u8;
-					let ch = match self.config.out_ch.get(&slot) {
-						Some(0) | None => None,
-						Some(ch) => Some(ch - 1),
-					};
-
-					(ch, note)
-				})
-				.filter_map(|(ch, note)| ch.map(|ch| (ch, note)))
-				.collect();
+			let new_notes: Vec<Note> = values.iter().filter_map(|x| self.parse_note(*x)).collect();
+			let prev_notes = self.held_notes.clone();
 
 			// send NOTE_ON for notes that are new
 			for note in &new_notes {
 				if !self.held_notes.contains(note) {
-					self.send_note(note.0, note.1, true);
-					self.held_notes.insert(*note);
+					self.send_note(note, true);
+					self.held_notes.insert(note.clone());
 				}
 			}
 
 			// send NOTE_OFF for held notes that are no longer present
-			for note in self.held_notes.clone() {
-				if !new_notes.contains(&note) {
-					self.send_note(note.0, note.1, false);
-					self.held_notes.remove(&note);
+			for note in &prev_notes {
+				if !new_notes.contains(note) {
+					self.send_note(note, false);
+					self.held_notes.remove(note);
 				}
 			}
 		}
@@ -89,8 +103,8 @@ impl Drop for MidiPlayer {
 	fn drop(&mut self) {
 		// send NOTE_OFF for all held notes
 		if !self.config.out_ch.is_empty() {
-			for (ch, note) in self.held_notes.clone() {
-				self.send_note(ch, note, false);
+			for note in &self.held_notes.clone() {
+				self.send_note(note, false);
 			}
 
 			self.conn_out.take().unwrap().close();
