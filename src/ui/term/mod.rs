@@ -27,11 +27,17 @@ pub fn run(world: World, hide_title: bool) -> Result<()> {
 	let mut player =
 		crate::midi::MidiPlayer::new(world.config().midi.clone()).context("MIDI error!")?;
 
+	let ctrl_c_rx = crate::util::setup_ctrl_c();
+
 	let mut last_frame = Instant::now();
 
 	while let Some(frame) = world.next_frame(&FrameInput {
 		ext_in: keyboard::get_keys(world.config()),
 	}) {
+		if ctrl_c_rx.as_ref().is_some_and(|rx| rx.try_recv().is_ok()) {
+			break;
+		}
+
 		renderer.render_frame(&frame);
 
 		#[cfg(feature = "midi")]

@@ -10,6 +10,7 @@ rand = "0.10.2"
 regex = "1.12.4"
 
 clap = { version = "4.6.1", features = ["derive"], optional = true }
+ctrlc = { version = "3.5.2", optional = true }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.150" }
 
@@ -22,6 +23,6 @@ ts-rs = { version = "12.0.1", features = ["no-serde-warnings"] }
 [features]
 default = ["term", "gif", "midi"]
 # default = ["term"]
-term = ["clap"]
+term = ["clap", "ctrlc"]
 gif = ["dep:gif"]
 midi = ["midir"]

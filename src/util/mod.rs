@@ -30,3 +30,16 @@ pub fn hash_u32(x: u32) -> u32 {
 
 	x ^ (x >> 16)
 }
+
+use std::sync::mpsc::{self, Receiver};
+
+pub fn setup_ctrl_c() -> Option<Receiver<()>> {
+	let (tx, rx) = mpsc::channel();
+
+	match ctrlc::set_handler(move || {
+		let _ = tx.send(());
+	}) {
+		Ok(_) => Some(rx),
+		Err(_) => None,
+	}
+}
