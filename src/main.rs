@@ -9,7 +9,7 @@ fn main() {
 }
 
 pub fn run() -> Result<()> {
-	#[cfg(feature = "clap")]
+	#[cfg(feature = "term")]
 	{
 		use antbyte::ui::term;
 
@@ -21,7 +21,7 @@ pub fn run() -> Result<()> {
 		Ok(())
 	}
 
-	#[cfg(not(feature = "clap"))]
+	#[cfg(not(feature = "term"))]
 	{
 		use antbyte::{
 			parser::compiler::LogConfig,

@@ -1,4 +1,4 @@
-#![cfg(feature = "clap")]
+#![cfg(feature = "term")]
 
 use std::{
 	fs::canonicalize,
