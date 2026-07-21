@@ -273,22 +273,13 @@ impl TryFrom<String> for RenderMask {
 }
 
 #[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct MidiConfig {
 	/// set channel to 1-16 or set to 0 to ignore
 	pub out_ch: BTreeMap<u8, u8>,
-	pub offset: u8,
-}
-
-impl Default for MidiConfig {
-	fn default() -> Self {
-		Self {
-			out_ch: Default::default(),
-			offset: 48, // C3
-		}
-	}
+	pub offset: BTreeMap<u8, u8>,
 }
 
 impl WorldConfig {
@@ -355,11 +346,13 @@ impl WorldConfig {
 		}
 
 		for (i, ch) in &self.midi.out_ch {
-			Self::cap(*i as u32, &format!("MIDI Output Slot @{}", i), 3)?;
-			Self::cap(*ch as u32, &format!("MIDI Output Channel @{}", i), 16)?;
+			Self::cap(*i as u32, &format!("MIDI Output Slot @{i}"), 3)?;
+			Self::cap(*ch as u32, &format!("MIDI Output Channel @{i}"), 16)?;
 		}
 
-		Self::cap(self.midi.offset.into(), "MIDI Output Offset", 60)?;
+		for (i, offset) in &self.midi.offset {
+			Self::cap(*offset as u32, &format!("MIDI Output Offset @{i}"), 96)?;
+		}
 
 		Ok(())
 	}

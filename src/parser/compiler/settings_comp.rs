@@ -94,15 +94,17 @@ impl Parser {
 				config.keys = if keys.is_empty() { None } else { Some(keys) };
 			}
 
+			#[rustfmt::skip]
 			"midi_out_ch" => {
-				_ = config
-					.midi
-					.out_ch
-					.insert(sub_index, self.next_number()?.unwrap_or_default() as u8)
-			}
+				_ = config.midi.out_ch.insert(sub_index, self.next_number()?.unwrap_or_default() as u8)
+			},
 
-			"midi_out_offset" => config.midi.offset = self.next_number()?.unwrap_or_default() as u8,
+			#[rustfmt::skip]
+			"midi_out_offset" => {
+				_ = config.midi.offset.insert(sub_index, self.next_number()?.unwrap_or_default() as u8)
+			},
 
+			// "midi_out_offset" => config.midi.offset = self.next_number()?.unwrap_or_default() as u8,
 			other => return Err(anyhow!("unknown setting: '{other}'")),
 		}
 
