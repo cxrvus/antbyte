@@ -42,6 +42,17 @@ impl MidiPlayer {
 		Ok(player)
 	}
 
+	pub fn close(&mut self) {
+		// send NOTE_OFF for all held notes
+		if !self.config.out_ch.is_empty() {
+			for note in self.held_notes.clone().keys() {
+				self.send_note(note, None);
+			}
+
+			self.conn_out.take().unwrap().close();
+		}
+	}
+
 	fn send_note(&mut self, note: &Note, vel: Option<u8>) {
 		let (on_off, vel) = match vel {
 			Some(vel) => (NOTE_ON, vel),
@@ -110,14 +121,7 @@ impl MidiPlayer {
 
 impl Drop for MidiPlayer {
 	fn drop(&mut self) {
-		// send NOTE_OFF for all held notes
-		if !self.config.out_ch.is_empty() {
-			for note in self.held_notes.clone().keys() {
-				self.send_note(note, None);
-			}
-
-			self.conn_out.take().unwrap().close();
-		}
+		self.close();
 	}
 }
 
