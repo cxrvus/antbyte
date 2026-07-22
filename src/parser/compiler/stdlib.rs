@@ -22,10 +22,37 @@ fn eq  = (a, b, c, d) => out { out = or(and(a, b, c, d), -or(a, b, c, d)); }
 
 fn imply = (a, b) => c { c = or(-a, b); }
 
+
+## Multiplexer
+
 fn mux = (s, a, b) => out { out = or(and(-s, a), and(s, b)); }
 
 fn mux = (s1, s0, a, b, c, d) => out {
 	out = mux(s1, mux(s0, a, b), mux(s0, c, d));
+}
+
+fn mux = (s2, s1, s0, o0, o1, o2, o3, o4, o5, o6, o7) => out {
+	out = mux(s2,
+		mux(s1, mux(s0, o0, o1), mux(s0, o2, o3)),
+		mux(s1, mux(s0, o4, o5), mux(s0, o6, o7)),
+	);
+}
+
+fn mux = (
+		s3, s2, s1, s0,
+		o00, o01, o02, o03, o04, o05, o06, o07,
+		o08, o09, o10, o11, o12, o13, o14, o15
+	) => out {
+	out = mux(s3,
+		mux(s2,
+			mux(s1, mux(s0, o00, o01), mux(s0, o02, o03)),
+			mux(s1, mux(s0, o04, o05), mux(s0, o06, o07)),
+		),
+		mux(s2,
+			mux(s1, mux(s0, o08, o09), mux(s0, o10, o11)),
+			mux(s1, mux(s0, o12, o13), mux(s0, o14, o15)),
+		),
+	);
 }
 
 
