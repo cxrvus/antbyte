@@ -98,6 +98,33 @@ fn fwd = (i0, i1, i2, i3) => (o0, o1, o2, o3) {
 }
 
 
+## Forward (AND)
+
+fn fwd_and = (e, i1, i0) => (o1, o0) {
+	o1 = and(e, i1); o0 = and(e, i0);
+}
+
+fn fwd_and = (e, i2, i1, i0) => (o2, o1, o0) {
+	o2 = and(e, i2); o1 = and(e, i1); o0 = and(e, i0);
+}
+
+fn fwd_and = (e, i3, i2, i1, i0) => (o3, o2, o1, o0) {
+	o3 = and(e, i3); o2 = and(e, i2); o1 = and(e, i1);
+	o0 = and(e, i0);
+}
+
+fn fwd_and = (e, i4, i3, i2, i1, i0) => (o4, o3, o2, o1, o0) {
+	o4 = and(e, i4); o3 = and(e, i3); o2 = and(e, i2);
+	o1 = and(e, i1); o0 = and(e, i0);
+}
+
+fn fwd_and = (e, i5, i4, i3, i2, i1, i0) => (o5, o4, o3, o2, o1, o0) {
+	o5 = and(e, i5); o4 = and(e, i4); o3 = and(e, i3);
+	o2 = and(e, i2); o1 = and(e, i1); o0 = and(e, i0);
+}
+
+
+
 ## And (5-8 parameters)
 
 fn and = (i0, i1, i2, i3, i4) => out {
@@ -140,32 +167,6 @@ fn p_eq = (a5, a4, a3, a2, a1, a0, b5, b4, b3, b2, b1, b0) => out {
 		eq(a5, b5), eq(a4, b4), eq(a3, b3),
 		eq(a2, b2), eq(a1, b1), eq(a0, b0),
 	);
-}
-
-
-## Enabler
-
-fn enb = (e, i1, i0) => (o1, o0) {
-	o1 = and(e, i1); o0 = and(e, i0);
-}
-
-fn enb = (e, i2, i1, i0) => (o2, o1, o0) {
-	o2 = and(e, i2); o1 = and(e, i1); o0 = and(e, i0);
-}
-
-fn enb = (e, i3, i2, i1, i0) => (o3, o2, o1, o0) {
-	o3 = and(e, i3); o2 = and(e, i2); o1 = and(e, i1);
-	o0 = and(e, i0);
-}
-
-fn enb = (e, i4, i3, i2, i1, i0) => (o4, o3, o2, o1, o0) {
-	o4 = and(e, i4); o3 = and(e, i3); o2 = and(e, i2);
-	o1 = and(e, i1); o0 = and(e, i0);
-}
-
-fn enb = (e, i5, i4, i3, i2, i1, i0) => (o5, o4, o3, o2, o1, o0) {
-	o5 = and(e, i5); o4 = and(e, i4); o3 = and(e, i3);
-	o2 = and(e, i2); o1 = and(e, i1); o0 = and(e, i0);
 }
 
 

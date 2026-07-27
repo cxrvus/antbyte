@@ -142,6 +142,13 @@ fn fwd3() {
 }
 
 #[test]
+fn fwd_and3() {
+	let signature = SignatureSpec::new("fwd_and", 4, 3);
+	let entries = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7];
+	test_func(signature, entries);
+}
+
+#[test]
 fn p_eq4() {
 	let signature = SignatureSpec::new("p_eq", 4, 1);
 	let entries = (0..(2u32.pow(4)))
@@ -169,8 +176,6 @@ fn p_eq8() {
 		.collect();
 	test_func(signature, entries);
 }
-
-// todo: test for enb()
 
 #[test]
 fn dec2() {
