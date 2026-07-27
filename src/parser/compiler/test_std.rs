@@ -149,6 +149,20 @@ fn fwd_and3() {
 }
 
 #[test]
+fn fwd_or3() {
+	let signature = SignatureSpec::new("fwd_or", 4, 3);
+	let entries = vec![0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7];
+	test_func(signature, entries);
+}
+
+#[test]
+fn fwd_xor3() {
+	let signature = SignatureSpec::new("fwd_xor", 4, 3);
+	let entries = vec![0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0];
+	test_func(signature, entries);
+}
+
+#[test]
 fn p_eq4() {
 	let signature = SignatureSpec::new("p_eq", 4, 1);
 	let entries = (0..(2u32.pow(4)))

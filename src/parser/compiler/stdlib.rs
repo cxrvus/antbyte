@@ -124,6 +124,37 @@ fn fwd_and = (e, i5, i4, i3, i2, i1, i0) => (o5, o4, o3, o2, o1, o0) {
 }
 
 
+## Forward (OR)
+
+fn fwd_or = (e, i1, i0) => (o1, o0) {
+	o1 = or(e, i1); o0 = or(e, i0);
+}
+
+fn fwd_or = (e, i2, i1, i0) => (o2, o1, o0) {
+	o2 = or(e, i2); o1 = or(e, i1); o0 = or(e, i0);
+}
+
+fn fwd_or = (e, i3, i2, i1, i0) => (o3, o2, o1, o0) {
+	o3 = or(e, i3); o2 = or(e, i2); o1 = or(e, i1);
+	o0 = or(e, i0);
+}
+
+
+## Forward (XOR)
+
+fn fwd_xor = (e, i1, i0) => (o1, o0) {
+	o1 = xor(e, i1); o0 = xor(e, i0);
+}
+
+fn fwd_xor = (e, i2, i1, i0) => (o2, o1, o0) {
+	o2 = xor(e, i2); o1 = xor(e, i1); o0 = xor(e, i0);
+}
+
+fn fwd_xor = (e, i3, i2, i1, i0) => (o3, o2, o1, o0) {
+	o3 = xor(e, i3); o2 = xor(e, i2); o1 = xor(e, i1);
+	o0 = xor(e, i0);
+}
+
 
 ## And (5-8 parameters)
 
