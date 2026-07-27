@@ -128,15 +128,15 @@ fn cpy2() {
 }
 
 #[test]
-fn buf2() {
-	let signature = SignatureSpec::new("buf", 2, 2);
+fn fwd2() {
+	let signature = SignatureSpec::new("fwd", 2, 2);
 	let entries = vec![0, 1, 2, 3];
 	test_func(signature, entries);
 }
 
 #[test]
-fn buf3() {
-	let signature = SignatureSpec::new("buf", 3, 3);
+fn fwd3() {
+	let signature = SignatureSpec::new("fwd", 3, 3);
 	let entries = vec![0, 1, 2, 3, 4, 5, 6, 7];
 	test_func(signature, entries);
 }

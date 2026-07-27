@@ -88,12 +88,12 @@ fn cpy = in => (o0, o1, o2) { o0 = in; o1 = in; o2 = in; }
 fn cpy = in => (o0, o1, o2, o3) { o0 = in; o1 = in; o2 = in; o3 = in; }
 
 
-## Buffer: passes multiple parameters to multiple assignees
+## Forward: passes multiple parameters to multiple assignees
 
-fn buf = (i0) => (o0) { o0 = i0; }
-fn buf = (i0, i1) => (o0, o1) { o0 = i0; o1 = i1; }
-fn buf = (i0, i1, i2) => (o0, o1, o2) { o0 = i0; o1 = i1; o2 = i2; }
-fn buf = (i0, i1, i2, i3) => (o0, o1, o2, o3) {
+fn fwd = (i0) => (o0) { o0 = i0; }
+fn fwd = (i0, i1) => (o0, o1) { o0 = i0; o1 = i1; }
+fn fwd = (i0, i1, i2) => (o0, o1, o2) { o0 = i0; o1 = i1; o2 = i2; }
+fn fwd = (i0, i1, i2, i3) => (o0, o1, o2, o3) {
 	o0 = i0; o1 = i1; o2 = i2; o3 = i3;
 }
 
