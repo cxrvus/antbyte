@@ -39,7 +39,12 @@ impl SubPin {
 			if self.pin.definition().size > 8 {
 				ident.push_str(&format!("{:x}", self.channel));
 			}
+
 			ident.push_str(&format!("{:x}", self.line));
+
+			if self.pin.prefers_channel() {
+				ident.push_str(&format!("{:x}", self.channel));
+			}
 		}
 
 		ident
