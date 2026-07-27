@@ -36,6 +36,9 @@ impl SubPin {
 		let mut ident = self.pin.short_ident().to_owned();
 
 		if self.pin.definition().size > 1 {
+			if self.pin.definition().size > 8 {
+				ident.push_str(&format!("{:x}", self.channel));
+			}
 			ident.push_str(&format!("{:x}", self.line));
 		}
 
