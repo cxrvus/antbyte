@@ -87,8 +87,13 @@ impl Parser {
 
 	pub fn parse_setting(&mut self) -> Result<(String, Token)> {
 		let key = self.next_ident()?;
-		self.expect_next(Token::Assign)?;
-		let value = self.next_token();
+
+		let value = if self.assume_next(Token::Assign).is_some() {
+			self.next_token()
+		} else {
+			Token::Bit(true)
+		};
+
 		self.expect_next(Token::Semicolon)?;
 
 		Ok((key, value))
