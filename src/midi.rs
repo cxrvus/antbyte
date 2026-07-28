@@ -44,10 +44,10 @@ impl MidiPlayer {
 	}
 
 	pub fn close(&mut self) {
-		println!("\nClosing MIDI connections...");
-
 		// send NOTE_OFF for all held notes
 		if !self.config.out_ch.is_empty() {
+			println!("\nClosing MIDI connections...");
+
 			for note in self.held_notes.clone().keys() {
 				self.send_note(note, None);
 			}
