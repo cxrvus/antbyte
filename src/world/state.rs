@@ -82,33 +82,44 @@ impl WorldState {
 		format!("T: {:0>8}", self.tick_count())
 	}
 
-	pub fn ext_out_str(&self) -> String {
+	pub fn ext_out_str(&self) -> Option<String> {
 		const MAX_LEN: usize = 16;
 
-		let mut ext_out_str = self
-			.ext_output
-			.iter()
-			.take(MAX_LEN)
-			.map(|x| format!("{x:03x}"))
-			.collect::<Vec<_>>()
-			.join(", ");
-
-		if self.ext_output.len() > MAX_LEN {
-			ext_out_str += ", ...";
-		}
-
-		if ext_out_str.is_empty() {
-			"--".into()
+		if self.ext_output.is_empty() {
+			None
 		} else {
-			ext_out_str
+			let mut ext_out_str = self
+				.ext_output
+				.iter()
+				.take(MAX_LEN)
+				.map(|x| format!("{x:03x}"))
+				.collect::<Vec<_>>()
+				.join(", ");
+
+			if self.ext_output.len() > MAX_LEN {
+				ext_out_str += ", ...";
+			}
+
+			Some(ext_out_str)
 		}
 	}
 
 	pub fn metadata_str(&self) -> String {
-		let tick_str = self.tick_str();
-		let ext_out_str = self.ext_out_str();
+		let mut metadata_str = self.tick_str();
 
-		format!("{tick_str}\nK: {:02x}\nX: {ext_out_str}\n", self.ext_input)
+		metadata_str += &format!(" | A: {:04}", self.ants.ant_count());
+
+		if self.signal_in != 0 {
+			metadata_str += &format!("\nS: {:08b}", self.signal_in);
+		}
+		if self.ext_input != 0 {
+			metadata_str += &format!("\nK: {:08b}", self.ext_input);
+		}
+		if let Some(ext_out_str) = self.ext_out_str() {
+			metadata_str += &format!("\nX: {}", ext_out_str);
+		}
+
+		metadata_str
 	}
 }
 
