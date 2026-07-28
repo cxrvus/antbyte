@@ -12,9 +12,9 @@ pub struct Args {
 	/// Path to the .ant file to execute
 	pub path: PathBuf,
 
-	/// Hide Title Banner
-	#[arg(short = 'T', long)]
-	pub hide_title: bool,
+	/// Hide title banner and metadata
+	#[arg(short, long)]
+	pub quiet: bool,
 
 	/// Step through the simulation, waiting for input after each frame (FPS = 0)
 	#[arg(short = 'S', long)]
@@ -40,15 +40,15 @@ pub struct Args {
 	#[arg(short = 'F', long)]
 	hide_fg: bool,
 
-	/// output data in machine-readable format
+	/// Output data in machine-readable format
 	#[arg(short, long)]
 	pub raw: bool,
 
-	/// pass args to sub-process, e.g. a nodejs file
+	/// Pass args to sub-process, e.g. a nodejs file
 	#[arg(short = 'a', long = "args")]
 	pub sub_args: Option<String>,
 
-	/// create a JSON world file upon compilation
+	/// Create a JSON world file upon compilation
 	#[arg(short, long)]
 	pub json: bool,
 

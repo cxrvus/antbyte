@@ -15,7 +15,7 @@ pub fn run() -> Result<()> {
 
 		if let Some((world, args)) = antbyte::cli::create_world()? {
 			use anyhow::Context;
-			term::run(world, args.hide_title).context("simulation error!")?;
+			term::run(world, args.quiet).context("simulation error!")?;
 		}
 
 		Ok(())

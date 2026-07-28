@@ -30,7 +30,7 @@ pub fn clear_screen() { print!("\x1B[2J\x1B[1;1H"); }
 pub fn print_title_short() { println!("<<ANTBYTE>>"); }
 
 pub(super) struct TermRenderer {
-	pub(super) hide_title: bool,
+	pub(super) quiet: bool,
 	pub(super) config: WorldConfig,
 	pub(super) name: Option<String>,
 }
@@ -41,16 +41,19 @@ impl TermRenderer {
 
 		clear_screen();
 
-		if !self.hide_title {
+		if !self.quiet {
 			print_title();
-		}
 
-		if let Some(name) = &self.name {
-			println!("{name}\n");
+			if let Some(name) = &self.name {
+				println!("{name}\n");
+			}
 		}
 
 		println!("\n\n{world_str}\n\n");
-		println!("{}", frame.metadata);
+
+		if !self.quiet {
+			println!("{}", frame.metadata);
+		}
 
 		io::stdout().flush().unwrap();
 	}

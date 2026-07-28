@@ -14,11 +14,11 @@ pub mod keyboard;
 pub mod raw;
 pub mod render;
 
-pub fn run(world: World, hide_title: bool) -> Result<()> {
+pub fn run(world: World, quiet: bool) -> Result<()> {
 	let mut world = world;
 
 	let renderer = TermRenderer {
-		hide_title,
+		quiet,
 		config: world.config().clone(),
 		name: world.name(),
 	};
