@@ -83,12 +83,19 @@ impl WorldState {
 	}
 
 	pub fn ext_out_str(&self) -> String {
-		let ext_out_str = self
+		const MAX_LEN: usize = 16;
+
+		let mut ext_out_str = self
 			.ext_output
 			.iter()
-			.map(|x| format!("{x:02x}"))
+			.take(MAX_LEN)
+			.map(|x| format!("{x:03x}"))
 			.collect::<Vec<_>>()
 			.join(", ");
+
+		if self.ext_output.len() > MAX_LEN {
+			ext_out_str += ", ...";
+		}
 
 		if ext_out_str.is_empty() {
 			"--".into()
