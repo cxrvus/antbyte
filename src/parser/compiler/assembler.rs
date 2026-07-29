@@ -93,9 +93,10 @@ impl CompFunc {
 
 		if Token::is_uppercase_ident(target) {
 			let original_target = target.clone();
+			let sub_pin = SubPin::from_ident(&original_target)?;
 
 			if io_type == IoType::Input {
-				let reassigned_output_name = format_pin(&original_target, IoType::Output);
+				let reassigned_output_name = format_pin(&sub_pin, IoType::Output);
 
 				if signature.assignees.contains(&reassigned_output_name) {
 					*target = reassigned_output_name;
@@ -103,9 +104,7 @@ impl CompFunc {
 				}
 			}
 
-			let pin = SubPin::from_ident(&original_target)?;
-
-			if let Some(req_io) = pin.pin.definition().io_type
+			if let Some(req_io) = sub_pin.pin.definition().io_type
 				&& req_io != io_type
 			{
 				return Err(match req_io {
@@ -116,10 +115,10 @@ impl CompFunc {
 				});
 			}
 
-			*target = format_pin(&original_target, io_type);
+			*target = format_pin(&sub_pin, io_type);
 
-			if !pins.contains(&pin) {
-				pins.push(pin);
+			if !pins.contains(&sub_pin) {
+				pins.push(sub_pin);
 
 				let signature_pins = match io_type {
 					IoType::Input => &mut signature.params,
@@ -217,15 +216,16 @@ fn int_from_bits(bits: &[bool]) -> u32 {
 	value
 }
 
-fn format_pin(ident: &str, io_type: IoType) -> String {
-	let ident = ident.to_ascii_lowercase();
+fn format_pin(sub_pin: &SubPin, io_type: IoType) -> String {
+	let code = sub_pin.pin.definition().code.to_ascii_lowercase();
+	let index = (sub_pin.channel << 3) | sub_pin.line;
 
 	let prefix = match io_type {
 		IoType::Input => "i",
 		IoType::Output => "o",
 	};
 
-	format!("_{prefix}_{ident}")
+	format!("_{prefix}_{code}{index:03o}")
 }
 
 #[cfg(test)]
