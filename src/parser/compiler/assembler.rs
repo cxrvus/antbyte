@@ -71,9 +71,9 @@ impl CompFunc {
 				inputs.len(),
 				inputs
 			))
-		} else if outputs.len() > 32 {
+		} else if outputs.len() > 16 {
 			Err(anyhow!(
-				"may not have more than 32 inputs, got {}\n{:?}:\n",
+				"may not have more than 16 outputs, got {}\n{:?}:\n",
 				outputs.len(),
 				outputs
 			))
