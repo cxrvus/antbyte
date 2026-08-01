@@ -218,7 +218,7 @@ fn int_from_bits(bits: &[bool]) -> u32 {
 
 fn format_pin(sub_pin: &SubPin, io_type: IoType) -> String {
 	let code = sub_pin.pin.definition().code.to_ascii_lowercase();
-	let index = (sub_pin.channel << 3) | sub_pin.line;
+	let index = sub_pin.bit_index;
 
 	let prefix = match io_type {
 		IoType::Input => "i",

@@ -8,8 +8,7 @@ use crate::ant::pin::{IoType, Pin};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SubPin {
 	pub pin: Pin,
-	pub line: u8,
-	pub channel: u8,
+	pub bit_index: u8,
 }
 
 impl Serialize for SubPin {
@@ -32,18 +31,33 @@ impl<'de> Deserialize<'de> for SubPin {
 }
 
 impl SubPin {
+	pub fn line(&self) -> u8 {
+		let Self { pin, bit_index } = self;
+		let lsb3 = bit_index & 0b00000111;
+
+		if pin.prefers_channel() { 0 } else { lsb3 }
+	}
+
+	pub fn channel(&self) -> u8 {
+		let Self { pin, bit_index } = self;
+		let lsb3 = bit_index & 0b00000111;
+		let msb3 = (bit_index & 0b00111000) >> 3;
+
+		if pin.prefers_channel() { lsb3 } else { msb3 }
+	}
+
 	pub fn to_ident(&self) -> String {
 		let mut ident = self.pin.short_ident().to_owned();
 
 		if self.pin.definition().size > 1 {
 			if self.pin.definition().size > 8 {
-				ident.push_str(&format!("{:x}", self.channel));
+				ident.push_str(&format!("{:x}", self.channel()));
 			}
 
-			ident.push_str(&format!("{:x}", self.line));
+			ident.push_str(&format!("{:x}", self.line()));
 
 			if self.pin.prefers_channel() {
-				ident.push_str(&format!("{:x}", self.channel));
+				ident.push_str(&format!("{:x}", self.channel()));
 			}
 		}
 
@@ -53,7 +67,7 @@ impl SubPin {
 	pub fn validate(&self, io_type: &IoType) -> Result<()> {
 		let definition = self.pin.definition();
 
-		let bit_exceeding_size = self.line >= definition.size;
+		let bit_exceeding_size = self.line() >= definition.size;
 
 		let wrong_io_type = match definition.io_type {
 			Some(req_io_type) => req_io_type != *io_type,
@@ -91,19 +105,10 @@ impl SubPin {
 		let explicit_index = bit_index.is_some();
 		let bit_index = bit_index.unwrap_or_default();
 
-		let lsb3 = bit_index & 0b00000111;
-		let msb3 = (bit_index & 0b00111000) >> 3;
-
 		// pin type...
 
 		let pin = Pin::from_ident(pin_ident).ok_or(anyhow!("invalid pin type:'{pin_ident}'"))?;
 		let size = pin.definition().size;
-
-		let (line, channel) = if pin.prefers_channel() {
-			(0, lsb3)
-		} else {
-			(lsb3, msb3)
-		};
 
 		// validation ...
 
@@ -113,6 +118,6 @@ impl SubPin {
 			bail!("bit index may not exceed pin bit cap:\n{bit_index} >= {size}\n(in '{ident}')");
 		}
 
-		Ok(Self { pin, line, channel })
+		Ok(Self { pin, bit_index })
 	}
 }

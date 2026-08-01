@@ -2,7 +2,6 @@ use crate::{
 	ant::{
 		Ant,
 		pin::{Pin, PinValue},
-		sub_pin::SubPin,
 	},
 	util::{dir::Direction, vec2::Pos},
 	world::{World, config::BorderMode},
@@ -23,13 +22,13 @@ impl World {
 		let mut input_bits = 0u8;
 
 		for input_sub_pin in behavior.inputs.iter() {
-			let SubPin { pin, line, channel } = *input_sub_pin;
+			let (line, channel) = (input_sub_pin.line(), input_sub_pin.channel());
 
 			let target_dir = Direction::from(channel) + ant.dir;
 			let target_pos = self.next_pos(pos, layer, target_dir);
 			let target_ant = target_pos.and_then(|pos| self.ants[&layer].get(&pos));
 
-			let input_value: u8 = match pin {
+			let input_value: u8 = match input_sub_pin.pin {
 				Tile => *self.tiles.get(pos).unwrap(),
 				Clear => (*self.tiles.get(pos).unwrap() == 0) as u8,
 				NearbyTile => target_pos
@@ -80,8 +79,7 @@ impl World {
 
 		for output_sub_pin in behavior.outputs.iter().rev() {
 			let output_bit = (output_bits & 1) as u16;
-			let bit_index = (output_sub_pin.channel << 3) | output_sub_pin.line;
-			let new_value = output_bit << bit_index;
+			let new_value = output_bit << output_sub_pin.bit_index;
 
 			if let Some(output_value) = output_values
 				.iter_mut()

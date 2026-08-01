@@ -98,9 +98,10 @@ impl Behavior {
 	pub fn pin_mask(&self, pin: Pin) -> u8 {
 		let mut mask = 0;
 
+		// idea: use bit_index instead of line?
 		for sub_pin in &self.outputs {
 			if pin == sub_pin.pin {
-				mask |= 1 << sub_pin.line;
+				mask |= 1 << sub_pin.line();
 			}
 		}
 
