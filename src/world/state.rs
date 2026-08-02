@@ -92,7 +92,7 @@ impl WorldState {
 				.ext_output
 				.iter()
 				.take(MAX_LEN)
-				.map(|x| format!("{x:03x}"))
+				.map(|x| format!("{x:02x}"))
 				.collect::<Vec<_>>()
 				.join(", ");
 

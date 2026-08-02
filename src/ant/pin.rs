@@ -84,7 +84,8 @@ const BIT: u8 = 1;
 const TRIPLET: u8 = 3;
 const ANT_ID: u8 = BYTE;
 const BYTE: u8 = 8;
-const DOUBLE: u8 = 64;
+const DOUBLE: u8 = 16;
+const SQUARED: u8 = 64;
 
 #[cfg_attr(test, derive(TS, Serialize))]
 #[cfg_attr(test, ts(export))]
@@ -208,19 +209,19 @@ impl Pin {
 		PinDefinition {
 			pin: Self::NearbyId,
 			code: "VA",
-			size: DOUBLE,
+			size: SQUARED,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::NearbyTile,
 			code: "VC",
-			size: DOUBLE,
+			size: SQUARED,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::NearbyMem,
 			code: "VM",
-			size: DOUBLE,
+			size: SQUARED,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {

@@ -70,7 +70,7 @@ impl MidiPlayer {
 	fn parse_note(&self, value: u16) -> Option<(Note, u8)> {
 		let inv_vel = ((value >> 8) & 0b1111) << 3;
 		let vel = MAX_VELOCITY.saturating_sub(inv_vel as u8);
-		let note = (value & 0b111111) as u8;
+		let note = (value & 0o77) as u8;
 
 		let slot = ((value >> 6) & 0b11) as u8;
 
