@@ -12,7 +12,7 @@ use crate::{
 
 #[derive(Debug, Default, Clone)]
 pub struct FrameInput {
-	pub ext_in: u8,
+	pub ext_in: u16,
 }
 
 #[derive(Debug, Clone)]

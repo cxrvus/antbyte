@@ -1,6 +1,6 @@
 pub mod term;
 
-pub fn chars_to_input(key_spec: &Option<String>, pressed_keys: &str) -> u8 {
+pub fn chars_to_input(key_spec: Option<&str>, pressed_keys: &str) -> u16 {
 	if let Some(key_spec) = key_spec {
 		let mut value = 0;
 

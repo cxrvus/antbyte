@@ -161,7 +161,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::ExtIn,
 			code: "K",
-			size: BYTE,
+			size: DOUBLE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {

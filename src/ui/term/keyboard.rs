@@ -3,14 +3,11 @@ use std::{
 	process::Command,
 };
 
-use crate::world::config::WorldConfig;
+use crate::{ui::chars_to_input, world::config::WorldConfig};
 
-pub fn get_keys(config: &WorldConfig) -> u8 {
+pub fn get_keys(config: &WorldConfig) -> u16 {
 	if let Some(bindings) = &config.keys {
-		// temporary convention: begin key binding string with a SPACE to select synchronous input mode
 		let input_str = if config.fps.is_none() {
-			// cross platform mode...
-
 			eprintln!("<i> Press <Enter> to send input");
 			let mut input_str = String::new();
 			stdin().read_line(&mut input_str).unwrap();
@@ -52,17 +49,7 @@ pub fn get_keys(config: &WorldConfig) -> u8 {
 			String::from(key_in.unwrap_or(' '))
 		};
 
-		let mut input_val = 0u8;
-
-		for key_in in input_str.chars() {
-			for (i, binding) in bindings.chars().enumerate() {
-				if key_in == binding {
-					input_val |= 1 << i;
-				}
-			}
-		}
-
-		input_val
+		chars_to_input(Some(bindings), &input_str)
 	} else {
 		0
 	}

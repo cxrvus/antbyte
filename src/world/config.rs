@@ -3,9 +3,12 @@ use std::collections::BTreeMap;
 use anyhow::{Error, Result, anyhow, bail};
 use serde::{Deserialize, Serialize};
 
-use crate::util::{
-	dir::Direction,
-	vec2::{Coord, Pos},
+use crate::{
+	ant::pin::Pin,
+	util::{
+		dir::Direction,
+		vec2::{Coord, Pos},
+	},
 };
 
 pub const FPS_CAP: u32 = 50;
@@ -340,8 +343,14 @@ impl WorldConfig {
 		if let Some(keys) = &self.keys {
 			if keys.is_empty() {
 				bail!("[keys] must not be an empty string")
-			} else if keys.len() > 8 {
-				bail!("can only specify up to 8 keys. found {}", keys.len())
+			} else {
+				let max_keys = Pin::ExtIn.definition().size as usize;
+				if keys.len() > max_keys {
+					bail!(
+						"can only specify up to {max_keys} keys. found {}",
+						keys.len()
+					)
+				}
 			}
 		}
 

@@ -48,7 +48,7 @@ pub fn run(world: World) {
 		// ## External Input
 		input_str.clear();
 		std::io::stdin().read_line(&mut input_str).unwrap();
-		input.ext_in = chars_to_input(&world.config().keys, &input_str);
+		input.ext_in = chars_to_input(world.config().keys.as_deref(), &input_str);
 	}
 }
 

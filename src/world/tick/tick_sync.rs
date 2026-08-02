@@ -22,9 +22,7 @@ impl World {
 		let mut input_bits = 0u8;
 
 		for input_sub_pin in behavior.inputs.iter() {
-			let (line, channel) = (input_sub_pin.line(), input_sub_pin.channel());
-
-			let target_dir = Direction::from(channel) + ant.dir;
+			let target_dir = Direction::from(input_sub_pin.channel()) + ant.dir;
 			let target_pos = self.next_pos(pos, layer, target_dir);
 			let target_ant = target_pos.and_then(|pos| self.ants[&layer].get(&pos));
 
@@ -52,12 +50,12 @@ impl World {
 
 				Mem => ant.memory,
 				Signal => self.signal_in,
-				ExtIn => self.ext_input,
+				ExtIn => (self.ext_input >> (input_sub_pin.channel() * 8)) as u8,
 
 				_ => panic!("unhandled input: {input_sub_pin:?}"),
 			};
 
-			let masked_input_value = (input_value >> line) & 1;
+			let masked_input_value = (input_value >> input_sub_pin.line()) & 1;
 			input_bits <<= 1;
 			input_bits |= masked_input_value;
 		}
