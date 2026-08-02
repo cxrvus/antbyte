@@ -225,7 +225,7 @@ fn format_pin(sub_pin: &SubPin, io_type: IoType) -> String {
 		IoType::Output => "o",
 	};
 
-	format!("_{prefix}_{code}{index:03o}")
+	format!("_{prefix}_{code}{index:o}")
 }
 
 #[cfg(test)]
