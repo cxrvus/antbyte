@@ -55,7 +55,7 @@ pub enum Pin {
 	// ## generic inputs
 	/// is 1 on the birth tick (+1) of the ant, else 0
 	Init,
-	/// clock value incrementing each tick
+	/// counter value incrementing each tick
 	Time,
 	/// clock value with bits being true every `2^(n+1)`-th tick
 	Pulse,
