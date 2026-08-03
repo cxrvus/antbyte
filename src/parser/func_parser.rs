@@ -67,7 +67,12 @@ impl Parser {
 		while self.assume_next(Token::BraceRight).is_none() {
 			let assignees = self.next_assignee_list()?;
 
-			let assignee_targets: &Vec<_> = &assignees.iter().map(|x| &x.target).collect();
+			let assignee_targets: &Vec<_> = &assignees
+				.iter()
+				.map(|x| &x.target)
+				.filter(|&x| x != "_")
+				.collect();
+
 			if let Some(dupe_target) = find_dupe(assignee_targets) {
 				bail!("found duplicate assignee targeting '{dupe_target}' in statement");
 			}
