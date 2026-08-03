@@ -301,7 +301,7 @@ fn one = (a, b, c, d) => out {
 }
 
 
-## Clock
+## Time
 
 fn on = (t1, t0) => out {
 	out = p_eq(T1, T0, t1, t0);
@@ -319,4 +319,11 @@ fn on = (t5, t4, t3, t2, t1, t0) => out {
 	out = p_eq(	T5, T4, T3, T2, T1, T0, 
 					t5, t4, t3, t2, t1, t0);
 }
+
+
+## Rotation
+
+fn rl  = (r, l) => () { D1 = or(r, l); D2 = l; }
+fn drl = (r, l) => () { D0 = or(r, l); D1 = l; D2 = l; }
+
 "#;
