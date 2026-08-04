@@ -56,7 +56,7 @@ fn mux = (
 }
 
 
-## Addition & Subtraction
+## Addition
 
 fn add = (a, b) => (cout, sum) {
 	sum = xor(a, b);
@@ -64,19 +64,42 @@ fn add = (a, b) => (cout, sum) {
 }
 
 fn add = (a, b, cin) => (cout, sum) {
-	(cout0, sum0) = add(a, b);
-	(cout1, sum) = add(sum0, cin);
+	(cout0, sum) = add(a, b);
+	(cout1, sum) = add(sum, cin);
 	cout = or(cout0, cout1);
 }
 
-fn add = (a1, a0, b1, b0) => (cout, sum1, sum0) {
-	(cout0, sum0) = add(a0, b0);
-	(cout, sum1) = add(a1, b1, cout0);
+fn add = (a1, a0, b1, b0, cin) => (cout, sum1, sum0) {
+	cout = cin;
+	(cout, sum0) = add(a0, b0, cout);
+	(cout, sum1) = add(a1, b1, cout);
 }
 
-fn add = (a1, a0, b1, b0, cin) => (cout, sum1, sum0) {
-	(cout0, sum0) = add(a0, b0, cin);
-	(cout, sum1) = add(a1, b1, cout0);
+fn add = (a1, a0, b1, b0) => (cout, sum1, sum0) {
+	(cout, sum1, sum0) = add(a1, a0, b1, b0, 0);
+}
+
+fn add = (a2, a1, a0, b2, b1, b0, cin) => (cout, sum2, sum1, sum0) {
+	cout = cin;
+	(cout, sum0) = add(a0, b0, cout);
+	(cout, sum1) = add(a1, b1, cout);
+	(cout, sum2) = add(a2, b2, cout);
+}
+
+fn add = (a2, a1, a0, b2, b1, b0) => (cout, sum2, sum1, sum0) {
+	(cout, sum2, sum1, sum0) = add(a2, a1, a0, b2, b1, b0, 0);
+}
+
+fn add = (a3, a2, a1, a0, b3, b2, b1, b0, cin) => (cout, sum3, sum2, sum1, sum0) {
+	cout = cin;
+	(cout, sum0) = add(a0, b0, cout);
+	(cout, sum1) = add(a1, b1, cout);
+	(cout, sum2) = add(a2, b2, cout);
+	(cout, sum3) = add(a3, b3, cout);
+}
+
+fn add = (a3, a2, a1, a0, b3, b2, b1, b0) => (cout, sum3, sum2, sum1, sum0) {
+	(cout, sum3, sum2, sum1, sum0) = add(a3, a2, a1, a0, b3, b2, b1, b0, 0);
 }
 
 
