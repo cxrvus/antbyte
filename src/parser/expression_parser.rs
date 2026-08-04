@@ -69,9 +69,9 @@ impl Parser {
 
 				Token::Comma => {}
 
-				semicolon @ Token::Semicolon => {
+				Token::Semicolon => {
 					// re-add semicolon for statement parsing
-					self.tokens.push(semicolon.clone());
+					self.tokens.push(Token::Semicolon);
 
 					return if expression_sets.len() == 1 {
 						Ok(expression_sets.pop().unwrap().pop().unwrap())

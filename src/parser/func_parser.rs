@@ -32,9 +32,18 @@ impl Parser {
 	}
 
 	pub(super) fn parse_func(&mut self, name: String) -> Result<Func> {
-		self.expect_next(Token::Assign)?;
+		let signature = if self.assume_next(Token::BraceLeft).is_some() {
+			self.tokens.push(Token::BraceLeft);
 
-		let signature = self.parse_signature(name)?;
+			Signature {
+				name,
+				..Default::default()
+			}
+		} else {
+			self.expect_next(Token::Assign)?;
+			self.parse_signature(name)?
+		};
+
 		let statements = self.parse_statements()?;
 
 		Ok(Func {
