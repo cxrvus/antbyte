@@ -62,7 +62,8 @@
 					"test",
 					"--no-run",
 					"--bin=antbyte",
-					"--package=antbyte"
+					"--package=antbyte",
+					"--nocapture"
 				],
 				"filter": {
 					"name": "antbyte",
