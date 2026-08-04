@@ -27,8 +27,13 @@ impl Direction {
 	}
 
 	#[inline]
-	pub fn inverted(&self) -> Self {
+	pub fn flipped(&self) -> Self {
 		Self::from(self.0 + Self::INV)
+	}
+
+	#[inline]
+	pub fn mirrored(&self) -> Self {
+		Self::from((!self.0 + 1) & Self::MAX)
 	}
 
 	pub fn as_vec(&self) -> Vec2 {

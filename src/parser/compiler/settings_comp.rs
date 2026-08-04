@@ -73,6 +73,8 @@ impl Parser {
 
 			"looping" | "loop" => config.looping = self.next_bit()?,
 
+			"rot_left" => config.rot_left = self.next_bit()?,
+
 			"border" => {
 				let border_mode = BorderMode::try_from(self.next_ident()?)?;
 				config.border.insert(sub_index, border_mode);

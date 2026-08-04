@@ -41,6 +41,8 @@ pub struct WorldConfig {
 	pub looping: bool,
 	/// behavior if ants touch the worlds border
 	pub border: BTreeMap<u8, BorderMode>,
+	/// counter-clockwise instead of clockwise rotation
+	pub rot_left: bool,
 	/// position of the first ant
 	pub start_pos: StartingPos,
 	/// first tick to render
@@ -83,6 +85,7 @@ impl Default for WorldConfig {
 			decay: None,
 			looping: false,
 			border: BTreeMap::from([(0, BorderMode::Wrap)]),
+			rot_left: false,
 			start_pos: StartingPos::Center,
 			start_dir: 0,
 			ant_limit: ANT_LIMIT,

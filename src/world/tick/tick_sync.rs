@@ -116,6 +116,11 @@ impl World {
 			let wide_value = value;
 			let value = value as u8;
 
+			let dir = match (Direction::from(value), self.config().rot_left) {
+				(dir, true) => dir.mirrored(),
+				(dir, false) => dir,
+			};
+
 			match (pin, value_bool) {
 				(Mem, _) => ant.memory = value | (ant.memory & !mem_mask),
 				(Signal, true) => self.signal_out |= value,
@@ -134,12 +139,12 @@ impl World {
 				(Halt, _) => ant.will_halt = value_bool,
 				(Dash, _) => ant.will_dash = value_bool,
 
-				(Dir, true) => ant.dir += Direction::from(value),
+				(Dir, true) => ant.dir += dir,
 
 				// spawn_tick
 				(SpawnId, _) => ant.child_behavior = value,
 				(SpawnLayer, _) => ant.child_layer = value,
-				(SpawnDir, _) => ant.child_dir = Direction::from(value),
+				(SpawnDir, _) => ant.child_dir = dir,
 				(SpawnMem, _) => ant.child_memory = value,
 
 				// end_tick

@@ -85,7 +85,7 @@ impl World {
 		for dir in 0..=Direction::MAX {
 			let dir = Direction::from(dir);
 
-			if let Some(source_pos) = self.next_pos(target_pos, layer, dir.inverted())
+			if let Some(source_pos) = self.next_pos(target_pos, layer, dir.flipped())
 				&& let Some(source_ant) = source.get(&source_pos)
 				&& !source_ant.halted()
 				&& source_ant.dir == dir

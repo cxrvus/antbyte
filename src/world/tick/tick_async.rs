@@ -151,7 +151,7 @@ impl World {
 		}
 
 		for (pos, ant) in &self.ants[&source_layer] {
-			if let Some(target_pos) = self.next_pos(*pos, source_layer, ant.dir.inverted())
+			if let Some(target_pos) = self.next_pos(*pos, source_layer, ant.dir.flipped())
 				&& ant.child_behavior != 0
 				&& !ant.waiting()
 				&& self.get_behavior(ant.child_behavior).is_some()
