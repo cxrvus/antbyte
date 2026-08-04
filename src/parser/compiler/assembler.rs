@@ -129,9 +129,7 @@ impl CompFunc {
 			}
 		} else if !variables.contains(target) {
 			match io_type {
-				IoType::Output if !signature.assignees.contains(target) => {
-					variables.push(target.clone())
-				}
+				IoType::Output => variables.push(target.clone()),
 				IoType::Input if !signature.params.contains(target) => {
 					bail!("unknown variable: '{target}'");
 				}
