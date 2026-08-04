@@ -5,8 +5,8 @@ use crate::{
 	util::vec2::Pos,
 	world::{
 		World,
-		config::RenderMask,
-		state::{Ants, WorldStatus},
+		config::{LAYER_CAP, RenderMask},
+		state::WorldStatus,
 	},
 };
 
@@ -122,28 +122,36 @@ impl World {
 	}
 
 	fn layer_occupations(&self) -> BTreeMap<Pos, u8> {
-		let mut occupations = BTreeMap::new();
+		let mut map = BTreeMap::new();
 
 		for (layer, ants) in self.ants.iter() {
 			let new_value = 1u8 << layer;
 
 			for (&pos, _) in ants.iter() {
-				occupations
-					.entry(pos)
+				map.entry(pos)
 					.and_modify(|old_value| *old_value |= new_value)
 					.or_insert(new_value);
 			}
 		}
 
-		occupations
+		map
 	}
 
 	fn map_ants(&self, func: impl Fn(&Ant) -> u8) -> BTreeMap<Pos, u8> {
-		self.ants
-			.get(&self.config().main_layer)
-			.unwrap_or(&Ants::new())
-			.iter()
-			.map(|(&pos, ant)| (pos, func(ant)))
-			.collect()
+		let mut map = BTreeMap::new();
+
+		for i in (0..LAYER_CAP).rev() {
+			let show_layer = (self.config().layer_filter >> i) & 1;
+
+			if show_layer == 1
+				&& let Some(layer) = self.ants.get(&i)
+			{
+				for (&pos, ant) in layer {
+					map.entry(pos).or_insert(func(ant));
+				}
+			}
+		}
+
+		map
 	}
 }
