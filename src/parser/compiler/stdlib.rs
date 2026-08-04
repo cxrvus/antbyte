@@ -323,7 +323,10 @@ fn on = (t5, t4, t3, t2, t1, t0) => out {
 
 ## Rotation
 
-fn lr  = (l, r) => () { D1 = or(r, l); D2 = l; }
-fn dlr = (l, r) => () { D0 = or(r, l); D1 = l; D2 = l; }
+fn rot  = (l, r) => (d2, d1) 		{ D1 = or(r, l); D2 = l; 			(d2, d1) = fwd(D2, D1); }
+fn rotd = (l, r) => (d2, d1, d0) 	{ D0 = or(r, l); D1 = l; D2 = l; 	(d2, d1, d0) = fwd(D2, D1, D0); }
+
+fn rot  = (l, r) => () { (_, _) = rot(l, r); }
+fn rotd = (l, r) => () { (_, _, _) = rotd(l, r); }
 
 "#;
