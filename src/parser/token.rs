@@ -52,7 +52,7 @@ impl Token {
 	const IDENT_PTN: &'static str = r"[a-zA-Z_]\w*";
 	const LOWER_IDENT: &'static str = r"_?[a-z][a-z0-9_]*";
 	const UPPER_IDENT: &'static str = r"[A-Z][A-Z0-9_]*";
-	const SYMBOL_PTN: &'static str = r"=>|[#={}(),;01]|\+|-";
+	const SYMBOL_PTN: &'static str = r"=>|,,|[#={}(),;01]|\+|-";
 
 	const SPACE_PTN: &'static str = r"\s+";
 	const WILD_PTN: &'static str = r".+";
@@ -92,6 +92,7 @@ impl Token {
 
 	fn simple_match(token: &str) -> Option<Self> {
 		match token {
+			"," | ",," => Some(Token::Comma),
 			"=>" => Some(Token::Arrow),
 			"#" => Some(Token::Comment),
 			"=" => Some(Token::Assign),
@@ -99,7 +100,6 @@ impl Token {
 			"}" => Some(Token::BraceRight),
 			"(" => Some(Token::ParenthesisLeft),
 			")" => Some(Token::ParenthesisRight),
-			"," => Some(Token::Comma),
 			";" => Some(Token::Semicolon),
 			"+" => Some(Token::Invert(false)),
 			"-" => Some(Token::Invert(true)),
