@@ -156,22 +156,37 @@ fn fwd_xor = (e, i3, i2, i1, i0) => (o3, o2, o1, o0) {
 }
 
 
-## And (5-8 parameters)
+## 5-8 Parameter Versions of Previous Functions
 
-fn and = (i0, i1, i2, i3, i4) => out {
-	out = -or(-i0, -i1, -i2, -i3, -i4);
+fn and = (i0, i1, i2, i3, i4) => out { out = -or(-i0, -i1, -i2, -i3, -i4); }
+fn and = (i0, i1, i2, i3, i4, i5) => out { out = -or(-i0, -i1, -i2, -i3, -i4, -i5); }
+fn and = (i0, i1, i2, i3, i4, i5, i6) => out { out = -or(-i0, -i1, -i2, -i3, -i4, -i5, -i6); }
+fn and = (i0, i1, i2, i3, i4, i5, i6, i7) => out { out = -or(-i0, -i1, -i2, -i3, -i4, -i5, -i6, -i7); }
+
+fn fwd = (i0, i1, i2, i3, i4) => (o0, o1, o2, o3, o4) {
+	o0 = i0; o1 = i1; o2 = i2; o3 = i3; o4 = i4;
+}
+fn fwd = (i0, i1, i2, i3, i4, i5) => (o0, o1, o2, o3, o4, o5) {
+	o0 = i0; o1 = i1; o2 = i2; o3 = i3; o4 = i4; o5 = i5;
+}
+fn fwd = (i0, i1, i2, i3, i4, i5, i6) => (o0, o1, o2, o3, o4, o5, o6) {
+	o0 = i0; o1 = i1; o2 = i2; o3 = i3; o4 = i4; o5 = i5; o6 = i6;
+}
+fn fwd = (i0, i1, i2, i3, i4, i5, i6, i7) => (o0, o1, o2, o3, o4, o5, o6, o7) {
+	o0 = i0; o1 = i1; o2 = i2; o3 = i3; o4 = i4; o5 = i5; o6 = i6; o7 = i7;
 }
 
-fn and = (i0, i1, i2, i3, i4, i5) => out {
-	out = -or(-i0, -i1, -i2, -i3, -i4, -i5);
+fn cpy = in => (o0, o1, o2, o3, o4) {
+	o0 = in; o1 = in; o2 = in; o3 = in; o4 = in;
 }
-
-fn and = (i0, i1, i2, i3, i4, i5, i6) => out {
-	out = -or(-i0, -i1, -i2, -i3, -i4, -i5, -i6);
+fn cpy = in => (o0, o1, o2, o3, o4, o5) {
+	o0 = in; o1 = in; o2 = in; o3 = in; o4 = in; o5 = in;
 }
-
-fn and = (i0, i1, i2, i3, i4, i5, i6, i7) => out {
-	out = -or(-i0, -i1, -i2, -i3, -i4, -i5, -i6, -i7);
+fn cpy = in => (o0, o1, o2, o3, o4, o5, o6) {
+	o0 = in; o1 = in; o2 = in; o3 = in; o4 = in; o5 = in; o6 = in;
+}
+fn cpy = in => (o0, o1, o2, o3, o4, o5, o6, o7) {
+	o0 = in; o1 = in; o2 = in; o3 = in; o4 = in; o5 = in; o6 = in; o7 = in;
 }
 
 
