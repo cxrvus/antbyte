@@ -50,6 +50,8 @@ impl World {
 
 				Mem => ant.memory,
 				Signal => self.signal_in,
+
+				// need channel because ext_input is 16 bits
 				ExtIn => (self.ext_input >> (input_sub_pin.channel() * 8)) as u8,
 
 				_ => panic!("unhandled input: {input_sub_pin:?}"),
