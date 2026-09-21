@@ -118,7 +118,12 @@ impl World {
 			let wide_value = value;
 			let value = value as u8;
 
-			let dir = match (Direction::from(value), self.config().rot_left) {
+			// temp solution to prepare for movement update
+			// todo: real solution
+			let dir = match (
+				Direction::from(value.reverse_bits() >> 5),
+				self.config().rot_left,
+			) {
 				(dir, true) => dir.mirrored(),
 				(dir, false) => dir,
 			};
