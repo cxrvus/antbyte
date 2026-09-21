@@ -106,34 +106,34 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::SpawnRotation,
-			code: "AR",
-			size: TRIPLET,
-			io_type: Some(IoType::Output),
-		},
-		PinDefinition {
 			pin: Self::SpawnMem,
 			code: "AM",
 			size: BYTE,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::Tile,
-			code: "T",
-			size: BYTE,
-			io_type: None,
+			pin: Self::SpawnRotation,
+			code: "AR",
+			size: TRIPLET,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::BirthTick,
+			code: "B",
+			size: BIT,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
+			pin: Self::Counter,
+			code: "C",
+			size: DOUBLE,
+			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::EmptyTile,
 			code: "E",
 			size: BIT,
 			io_type: None,
-		},
-		PinDefinition {
-			pin: Self::Rotation,
-			code: "R",
-			size: TRIPLET,
-			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
 			pin: Self::Fast,
@@ -148,16 +148,10 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::BirthTick,
-			code: "B",
+			pin: Self::Kill,
+			code: "K",
 			size: BIT,
-			io_type: Some(IoType::Input),
-		},
-		PinDefinition {
-			pin: Self::ExtIn,
-			code: "X",
-			size: DOUBLE,
-			io_type: Some(IoType::Input),
+			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
 			pin: Self::Mem,
@@ -172,16 +166,22 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
+			pin: Self::Rotation,
+			code: "R",
+			size: TRIPLET,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
 			pin: Self::Signal,
 			code: "S",
 			size: BYTE,
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::Counter,
-			code: "C",
-			size: DOUBLE,
-			io_type: Some(IoType::Input),
+			pin: Self::Tile,
+			code: "T",
+			size: BYTE,
+			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::NearbyAnt,
@@ -214,6 +214,12 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
+			pin: Self::ExtIn,
+			code: "X",
+			size: DOUBLE,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
 			pin: Self::ExtOut,
 			code: "Y",
 			size: DOUBLE,
@@ -222,12 +228,6 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Die,
 			code: "Z",
-			size: BIT,
-			io_type: Some(IoType::Output),
-		},
-		PinDefinition {
-			pin: Self::Kill,
-			code: "K",
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
