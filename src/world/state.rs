@@ -79,7 +79,7 @@ impl WorldState {
 
 	#[inline]
 	pub fn tick_str(&self) -> String {
-		format!("T: {:0>8}", self.tick_count())
+		format!("t: {:0>8}", self.tick_count())
 	}
 
 	pub fn ext_out_str(&self) -> Option<String> {
