@@ -12,7 +12,7 @@ pub enum Pin {
 	/// be spawned behind current ant, if not 0
 	SpawnId,
 	/// if ant is spawned by current ant,
-	/// set its direction to the current ants direction plus this
+	/// set its rotation to the current ants direction plus this
 	SpawnRotation,
 	/// if ant is spawned by current ant,
 	/// set its memory to this
@@ -39,7 +39,7 @@ pub enum Pin {
 	// ## current tile
 	/// current tile's value
 	Tile,
-	/// clear current tile (before writing)
+	/// empty current tile (before writing) or check if it's empty (if input)
 	EmptyTile,
 
 	// ## neighboring tiles
