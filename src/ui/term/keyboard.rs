@@ -19,7 +19,7 @@ pub fn get_keys(config: &WorldConfig) -> u16 {
 
 			if !cfg!(target_os = "linux") {
 				panic!(
-					"Input Mode is only supported on Linux. Set your K0 binding to a SPACE to use the cross-platform Input Mode"
+					"Input Mode is only supported on Linux. Set your X0 binding to a SPACE to use the cross-platform Input Mode"
 				);
 			}
 

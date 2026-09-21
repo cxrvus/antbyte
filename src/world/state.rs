@@ -113,10 +113,10 @@ impl WorldState {
 			metadata_str += &format!("\nS: {:08b}", self.signal_in);
 		}
 		if self.ext_input != 0 {
-			metadata_str += &format!("\nK: {:08b}", self.ext_input);
+			metadata_str += &format!("\nX: {:08b}", self.ext_input);
 		}
 		if let Some(ext_out_str) = self.ext_out_str() {
-			metadata_str += &format!("\nX: {}", ext_out_str);
+			metadata_str += &format!("\nY: {}", ext_out_str);
 		}
 
 		metadata_str

@@ -28,15 +28,15 @@ impl World {
 
 			let input_value: u8 = match input_sub_pin.pin {
 				Tile => *self.tiles.get(pos).unwrap(),
-				Clear => (*self.tiles.get(pos).unwrap() == 0) as u8,
+				EmptyTile => (*self.tiles.get(pos).unwrap() == 0) as u8,
 				NearbyTile => target_pos
 					.map(|pos| *self.tiles.get(pos).unwrap())
 					.unwrap_or(0u8),
 
-				Init => (ant.birth_tick + 1 == self.tick_count()) as u8,
-				Time => ant.clock,
+				BirthTick => (ant.birth_tick + 1 == self.tick_count()) as u8,
+				Counter => ant.clock,
 				Pulse => zero_count_mask(ant.clock),
-				Random => self.rng(),
+				Noise => self.rng(),
 				Chance => zero_count_mask(self.rng()),
 
 				NearbyAnt => {
@@ -129,7 +129,7 @@ impl World {
 				(ExtOut, true) => self.ext_output.push(wide_value),
 
 				// tiles
-				(Clear, true) => clear = true,
+				(EmptyTile, true) => clear = true,
 				(Tile, _) => self.set_tile(pos, value, tile_mask),
 
 				// deferred to async ticks...
@@ -139,14 +139,14 @@ impl World {
 
 				// move_tick
 				(Halt, _) => ant.will_halt = value_bool,
-				(Dash, _) => ant.will_dash = value_bool,
+				(Fast, _) => ant.will_dash = value_bool,
 
-				(Dir, true) => ant.dir += dir,
+				(Rotation, true) => ant.dir += dir,
 
 				// spawn_tick
 				(SpawnId, _) => ant.child_behavior = value,
 				(SpawnLayer, _) => ant.child_layer = value,
-				(SpawnDir, _) => ant.child_dir = dir,
+				(SpawnRotation, _) => ant.child_dir = dir,
 				(SpawnMem, _) => ant.child_memory = value,
 
 				// end_tick

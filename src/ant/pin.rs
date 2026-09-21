@@ -13,7 +13,7 @@ pub enum Pin {
 	SpawnId,
 	/// if ant is spawned by current ant,
 	/// set its direction to the current ants direction plus this
-	SpawnDir,
+	SpawnRotation,
 	/// if ant is spawned by current ant,
 	/// set its memory to this
 	SpawnMem,
@@ -22,9 +22,9 @@ pub enum Pin {
 
 	// ## moving ants
 	/// 3 bits indicating number of 45 degrees rotations
-	Dir,
+	Rotation,
 	/// ant is preferred in movement / spawning conflict resolution
-	Dash,
+	Fast,
 	/// current ant will not move this tick if true
 	Halt,
 	/// current ant will be skipped for this amount of ticks (remaining in its position)
@@ -40,7 +40,7 @@ pub enum Pin {
 	/// current tile's value
 	Tile,
 	/// clear current tile (before writing)
-	Clear,
+	EmptyTile,
 
 	// ## neighboring tiles
 	/// neighboring tile
@@ -54,15 +54,15 @@ pub enum Pin {
 
 	// ## generic inputs
 	/// is 1 on the birth tick (+1) of the ant, else 0
-	Init,
+	BirthTick,
 	/// counter value incrementing each tick
-	Time,
+	Counter,
 	/// clock value with bits being true every `2^(n+1)`-th tick
 	Pulse,
 	/// current ant's persistent memory
 	Mem,
 	/// 8 random bits
-	Random,
+	Noise,
 	/// random bits, where each value has
 	/// a chance of `1 / 2^(n+1)` of being true
 	Chance,
@@ -111,8 +111,8 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::SpawnDir,
-			code: "AD",
+			pin: Self::SpawnRotation,
+			code: "AR",
 			size: TRIPLET,
 			io_type: Some(IoType::Output),
 		},
@@ -124,25 +124,25 @@ impl Pin {
 		},
 		PinDefinition {
 			pin: Self::Tile,
-			code: "C",
+			code: "T",
 			size: BYTE,
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::Clear,
-			code: "CC",
+			pin: Self::EmptyTile,
+			code: "E",
 			size: BIT,
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::Dir,
-			code: "D",
+			pin: Self::Rotation,
+			code: "R",
 			size: TRIPLET,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::Dash,
-			code: "DD",
+			pin: Self::Fast,
+			code: "F",
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},
@@ -153,14 +153,14 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::Init,
-			code: "J",
+			pin: Self::BirthTick,
+			code: "B",
 			size: BIT,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::ExtIn,
-			code: "K",
+			code: "X",
 			size: DOUBLE,
 			io_type: Some(IoType::Input),
 		},
@@ -171,8 +171,8 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::Random,
-			code: "R",
+			pin: Self::Noise,
+			code: "N",
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
@@ -189,8 +189,8 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::Time,
-			code: "T",
+			pin: Self::Counter,
+			code: "C",
 			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
@@ -214,7 +214,7 @@ impl Pin {
 		},
 		PinDefinition {
 			pin: Self::NearbyTile,
-			code: "VC",
+			code: "VT",
 			size: SQUARED,
 			io_type: Some(IoType::Input),
 		},
@@ -232,7 +232,7 @@ impl Pin {
 		},
 		PinDefinition {
 			pin: Self::ExtOut,
-			code: "X",
+			code: "Y",
 			size: DOUBLE,
 			io_type: Some(IoType::Output),
 		},
@@ -244,7 +244,7 @@ impl Pin {
 		},
 		PinDefinition {
 			pin: Self::Kill,
-			code: "ZZ",
+			code: "K",
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},

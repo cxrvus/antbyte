@@ -67,7 +67,7 @@ pub struct WorldConfig {
 	pub sleep: Option<u32>,
 
 	// ## External I/O
-	/// 1 to 8 characters as key bindings, representing K0-K7 in ascending order
+	/// 1 to 8 characters as key bindings, representing X0-X7 in ascending order
 	pub keys: Option<String>,
 
 	pub midi: MidiConfig,
