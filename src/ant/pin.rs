@@ -57,15 +57,10 @@ pub enum Pin {
 	BirthTick,
 	/// counter value incrementing each tick
 	Counter,
-	/// clock value with bits being true every `2^(n+1)`-th tick
-	Pulse,
 	/// current ant's persistent memory
 	Mem,
 	/// 8 random bits
 	Noise,
-	/// random bits, where each value has
-	/// a chance of `1 / 2^(n+1)` of being true
-	Chance,
 
 	// ## global
 	Signal,
@@ -97,7 +92,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	const PIN_DEFINITIONS: [PinDefinition; 25] = [
+	const PIN_DEFINITIONS: [PinDefinition; 23] = [
 		PinDefinition {
 			pin: Self::SpawnId,
 			code: "A",
@@ -173,13 +168,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Noise,
 			code: "N",
-			size: BYTE,
-			io_type: Some(IoType::Input),
-		},
-		PinDefinition {
-			pin: Self::Chance,
-			code: "RR",
-			size: BYTE,
+			size: DOUBLE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
@@ -191,13 +180,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Counter,
 			code: "C",
-			size: BYTE,
-			io_type: Some(IoType::Input),
-		},
-		PinDefinition {
-			pin: Self::Pulse,
-			code: "TT",
-			size: BYTE,
+			size: DOUBLE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {

@@ -34,10 +34,17 @@ impl World {
 					.unwrap_or(0u8),
 
 				BirthTick => (ant.birth_tick + 1 == self.tick_count()) as u8,
-				Counter => ant.clock,
-				Pulse => zero_count_mask(ant.clock),
-				Noise => self.rng(),
-				Chance => zero_count_mask(self.rng()),
+
+				Counter => match input_sub_pin.channel() {
+					0 => ant.clock,
+					1 => zero_count_mask(ant.clock),
+					_ => panic!(),
+				},
+				Noise => match input_sub_pin.channel() {
+					0 => self.rng(),
+					1 => zero_count_mask(self.rng()),
+					_ => panic!(),
+				},
 
 				NearbyAnt => {
 					(target_ant.is_some()
