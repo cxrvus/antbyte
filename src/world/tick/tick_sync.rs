@@ -36,8 +36,8 @@ impl World {
 				BirthTick => (ant.birth_tick + 1 == self.tick_count()) as u8,
 
 				Counter => match input_sub_pin.channel() {
-					0 => ant.clock,
-					1 => zero_count_mask(ant.clock),
+					0 => ant.counter,
+					1 => zero_count_mask(ant.counter),
 					_ => panic!(),
 				},
 				Noise => match input_sub_pin.channel() {
@@ -175,7 +175,7 @@ impl World {
 		}
 
 		ant.last_input = input;
-		ant.clock = ant.clock.wrapping_add(1);
+		ant.counter = ant.counter.wrapping_add(1);
 
 		if clear {
 			self.set_tile(pos, 0, !tile_mask);

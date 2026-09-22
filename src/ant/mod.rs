@@ -12,7 +12,7 @@ pub struct Ant {
 	pub behavior: u8,
 	pub birth_tick: u32,
 
-	pub clock: u8,
+	pub counter: u8,
 	pub wait_ticks: u8,
 	pub dir: Direction,
 	pub memory: u8,

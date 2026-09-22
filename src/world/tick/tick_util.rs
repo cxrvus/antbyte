@@ -67,8 +67,7 @@ impl World {
 	fn set_value(&mut self, pos: Pos, value: u8) {
 		if let Some(decay) = self.config().decay {
 			if value != 0 {
-				let clock = self.tick_count as u16;
-				let expiration = clock.wrapping_add(decay);
+				let expiration = (self.tick_count as u16).wrapping_add(decay);
 				self.tile_decays.insert(pos, expiration);
 			} else {
 				self.tile_decays.remove(&pos);
