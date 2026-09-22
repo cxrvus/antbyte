@@ -130,6 +130,12 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
+			pin: Self::Die,
+			code: "D",
+			size: BIT,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
 			pin: Self::EmptyTile,
 			code: "E",
 			size: BIT,
@@ -223,12 +229,6 @@ impl Pin {
 			pin: Self::ExtOut,
 			code: "Y",
 			size: DOUBLE,
-			io_type: Some(IoType::Output),
-		},
-		PinDefinition {
-			pin: Self::Die,
-			code: "Z",
-			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 	];
