@@ -25,8 +25,8 @@ pub struct Ant {
 pub struct TickData {
 	pub last_input: u8,
 
+	pub tie_breaker: bool,
 	pub will_halt: bool,
-	pub will_dash: bool,
 	pub will_kill: bool,
 	pub will_die: bool,
 	pub will_wait: bool,
@@ -66,7 +66,7 @@ impl Ant {
 		let hashed_tick = (hash_u32(current_tick) & 0xFF) as u8;
 		let state = (self.dir.value() ^ layer) & Direction::MAX;
 		let luck = (hashed_tick ^ state) % Direction::MOD;
-		let bonus = (self.will_dash as u8) << Direction::BITS;
+		let bonus = (self.tie_breaker as u8) << Direction::BITS;
 		bonus | luck
 	}
 }

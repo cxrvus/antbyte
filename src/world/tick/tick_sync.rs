@@ -151,7 +151,7 @@ impl World {
 
 				// move_tick
 				(Halt, _) => ant.will_halt = value_bool,
-				(Fast, _) => ant.will_dash = value_bool,
+				(TieBreaker, _) => ant.tie_breaker = value_bool,
 
 				(Rotation, true) => ant.dir += dir,
 

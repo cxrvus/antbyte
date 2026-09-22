@@ -24,7 +24,7 @@ pub enum Pin {
 	/// 3 bits indicating number of 45 degrees rotations
 	Rotation,
 	/// ant is preferred in movement / spawning conflict resolution
-	Fast,
+	TieBreaker,
 	/// current ant will not move this tick if true
 	Halt,
 	/// current ant will be skipped for this amount of ticks (remaining in its position)
@@ -142,12 +142,6 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::Fast,
-			code: "F",
-			size: BIT,
-			io_type: Some(IoType::Output),
-		},
-		PinDefinition {
 			pin: Self::Halt,
 			code: "H",
 			size: BIT,
@@ -188,6 +182,12 @@ impl Pin {
 			code: "T",
 			size: BYTE,
 			io_type: None,
+		},
+		PinDefinition {
+			pin: Self::TieBreaker,
+			code: "TB",
+			size: BIT,
+			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
 			pin: Self::NearbyAnt,
