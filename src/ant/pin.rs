@@ -145,7 +145,7 @@ impl Pin {
 			pin: Self::Halt,
 			code: "H",
 			size: BIT,
-			io_type: Some(IoType::Output),
+			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Kill,

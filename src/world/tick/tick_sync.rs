@@ -34,6 +34,7 @@ impl World {
 					.unwrap_or(0u8),
 
 				BirthTick => (ant.birth_tick + 1 == self.tick_count()) as u8,
+				Halt => ant.halted() as u8,
 
 				Counter => match input_sub_pin.channel() {
 					0 => ant.counter,
