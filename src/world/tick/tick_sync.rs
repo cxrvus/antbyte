@@ -47,6 +47,8 @@ impl World {
 					_ => panic!(),
 				},
 
+				AntId => ant.behavior,
+
 				NearbyAnt => {
 					(target_ant.is_some()
 						|| (self.border_mode(layer) == BorderMode::Collide && target_pos.is_none()))
@@ -157,10 +159,10 @@ impl World {
 				(Rotation, true) => ant.dir += dir,
 
 				// spawn_tick
-				(SpawnId, _) => ant.child_behavior = value,
-				(SpawnLayer, _) => ant.child_layer = value,
-				(SpawnRotation, _) => ant.child_dir = dir,
-				(SpawnMem, _) => ant.child_memory = value,
+				(AntId, _) => ant.child_behavior = value,
+				(ChildLayer, _) => ant.child_layer = value,
+				(ChildRotation, _) => ant.child_dir = dir,
+				(ChildMem, _) => ant.child_memory = value,
 
 				// end_tick
 				(Die, _) => ant.will_die = value_bool,

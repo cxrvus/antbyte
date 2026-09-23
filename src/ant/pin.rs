@@ -10,15 +10,15 @@ pub enum Pin {
 	// ## creating ants
 	/// byte representing the ID of the ant, that will
 	/// be spawned behind current ant, if not 0
-	SpawnId,
+	AntId,
 	/// if ant is spawned by current ant,
 	/// set its rotation to the current ants direction plus this
-	SpawnRotation,
+	ChildRotation,
 	/// if ant is spawned by current ant,
 	/// set its memory to this
-	SpawnMem,
+	ChildMem,
 	/// this plus the current layer's index will be the target layer index
-	SpawnLayer,
+	ChildLayer,
 
 	// ## moving ants
 	/// 3 bits indicating number of 45 degrees rotations
@@ -94,25 +94,25 @@ pub struct PinDefinition {
 impl Pin {
 	const PIN_DEFINITIONS: [PinDefinition; 23] = [
 		PinDefinition {
-			pin: Self::SpawnId,
+			pin: Self::AntId,
 			code: "A",
 			size: ANT_ID,
-			io_type: Some(IoType::Output),
+			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::SpawnLayer,
+			pin: Self::ChildLayer,
 			code: "AA",
 			size: TRIPLET,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::SpawnMem,
+			pin: Self::ChildMem,
 			code: "AM",
 			size: BYTE,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::SpawnRotation,
+			pin: Self::ChildRotation,
 			code: "AR",
 			size: TRIPLET,
 			io_type: Some(IoType::Output),
