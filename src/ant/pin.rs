@@ -114,7 +114,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::ChildRotation,
 			code: "AR",
-			size: TRIPLET,
+			size: BYTE,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
@@ -168,7 +168,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Rotation,
 			code: "R",
-			size: TRIPLET,
+			size: BYTE,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
