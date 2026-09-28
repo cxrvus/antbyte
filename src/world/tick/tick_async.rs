@@ -81,13 +81,13 @@ impl World {
 				.unwrap();
 
 			// spawn
-			let mut child_rotation = ant.child_rotation;
-			child_rotation.rotate(ant.rotation.value(), false);
+			let rotation = ant.child_rotation.rotated(ant.rotation.value(), false);
 
 			let new_ant = Ant {
+				rotation,
+				birth_rot: rotation,
 				behavior: ant.child_behavior,
 				memory: ant.child_memory,
-				rotation: child_rotation,
 				birth_tick: self.tick_count,
 				..Default::default()
 			};

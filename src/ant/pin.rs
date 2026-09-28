@@ -185,7 +185,7 @@ impl Pin {
 			pin: Self::Rotation,
 			code: "R",
 			size: BYTE,
-			io_type: Some(IoType::Output),
+			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Signal,

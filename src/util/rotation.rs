@@ -21,12 +21,16 @@ impl Rotation {
 
 	pub fn rotate(&mut self, value: u8, left: bool) {
 		if value > 0 {
-			self.0 = if left {
-				self.0.wrapping_sub(value)
-			} else {
-				self.0.wrapping_add(value)
-			}
+			*self = self.rotated(value, left);
 		}
+	}
+
+	pub fn rotated(&self, value: u8, left: bool) -> Self {
+		Self(if left {
+			self.0.wrapping_sub(value)
+		} else {
+			self.0.wrapping_add(value)
+		})
 	}
 
 	pub fn as_dir(&self) -> Direction {

@@ -11,6 +11,7 @@ pub mod behavior;
 pub struct Ant {
 	pub behavior: u8,
 	pub birth_tick: u32,
+	pub birth_rot: Rotation,
 
 	pub counter: u8,
 	pub wait_ticks: u8,

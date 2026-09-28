@@ -49,6 +49,8 @@ impl World {
 
 				AntId => ant.behavior,
 
+				Rotation => ant.rotation.rotated(ant.birth_rot.value(), true).value(),
+
 				NearbyAnt => {
 					(target_ant.is_some()
 						|| (self.border_mode(layer) == BorderMode::Collide && target_pos.is_none()))
