@@ -76,7 +76,7 @@ impl TermRenderer {
 				None => "  ",
 				Some(&fg_value) => match self.config.fg {
 					RenderMask::Dir => {
-						let dir = Direction::from(fg_value);
+						let dir = Direction::from_u8(fg_value);
 						&dir.as_string()
 					}
 					RenderMask::None => "  ",

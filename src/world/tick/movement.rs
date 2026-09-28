@@ -190,7 +190,7 @@ fn coords_to_dir(vec: (i8, i8)) -> Option<Direction> {
 	if vec == (0, 0) {
 		None
 	} else {
-		Some(Direction::from(match vec {
+		Some(Direction::from_u8(match vec {
 			(1, 0) => 0,
 			(1, 1) => 1,
 			(0, 1) => 2,

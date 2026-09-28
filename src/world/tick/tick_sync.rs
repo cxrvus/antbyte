@@ -22,7 +22,7 @@ impl World {
 		let mut input_bits = 0u8;
 
 		for input_sub_pin in behavior.inputs.iter() {
-			let target_dir = Direction::from(input_sub_pin.channel()) + ant.look_dir();
+			let target_dir = Direction::from_u8(input_sub_pin.channel()) + ant.look_dir();
 			let target_pos = self.next_pos(pos, layer, target_dir);
 			let target_ant = target_pos.and_then(|pos| self.ants[&layer].get(&pos));
 

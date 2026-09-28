@@ -14,7 +14,7 @@ impl Direction {
 	pub const INV: u8 = Self::MOD / 2;
 
 	#[inline]
-	pub fn from(value: u8) -> Self {
+	pub fn from_u8(value: u8) -> Self {
 		Self(value % Self::MOD)
 	}
 
@@ -25,7 +25,7 @@ impl Direction {
 
 	#[inline]
 	pub fn flipped(&self) -> Self {
-		Self::from(self.0 + Self::INV)
+		Self::from_u8(self.0 + Self::INV)
 	}
 
 	#[inline]
@@ -62,7 +62,7 @@ impl Direction {
 
 	#[inline]
 	pub fn try_from_str(value: &str) -> Result<Self> {
-		Ok(Self::from(match value {
+		Ok(Self::from_u8(match value {
 			"E" => 0,
 			"SE" => 1,
 			"S" => 2,
@@ -88,7 +88,7 @@ impl ops::Add<Direction> for Direction {
 
 	#[inline]
 	fn add(self, rhs: Direction) -> Self::Output {
-		Self::from(self.0 + rhs.0)
+		Self::from_u8(self.0 + rhs.0)
 	}
 }
 

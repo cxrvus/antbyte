@@ -67,7 +67,7 @@ impl Ant {
 
 	#[inline]
 	pub fn look_dir(&self) -> Direction {
-		self.rotation.dir()
+		self.rotation.as_dir()
 	}
 
 	#[inline]

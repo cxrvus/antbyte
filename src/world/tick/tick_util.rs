@@ -82,7 +82,7 @@ impl World {
 		let mut positions = vec![];
 
 		for dir in 0..=Direction::MAX {
-			let dir = Direction::from(dir);
+			let dir = Direction::from_u8(dir);
 
 			if let Some(source_pos) = self.next_pos(target_pos, layer, dir.flipped())
 				&& let Some(source_ant) = source.get(&source_pos)

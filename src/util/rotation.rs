@@ -28,8 +28,8 @@ impl Rotation {
 		}
 	}
 
-	pub fn dir(&self) -> Direction {
-		Direction::from(match self.0.wrapping_add(16) {
+	pub fn as_dir(&self) -> Direction {
+		Direction::from_u8(match self.0.wrapping_add(16) {
 			0x00..=0x1f => 0,
 			0x20..=0x3f => 1,
 			0x40..=0x5f => 2,
