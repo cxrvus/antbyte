@@ -361,10 +361,10 @@ fn on = (c5, c4, c3, c2, c1, c0) => out {
 
 ## Rotation
 
-fn rot  = (l, r) => (r0, r1) 		{ R1 = or(r, l); R0 = l; 			(r0, r1) = fwd(R0, R1); }
-fn rotd = (l, r) => (r0, r1, r2) 	{ R2 = or(r, l); R1 = l; R0 = l; 	(r0, r1, r2) = fwd(R0, R1, R2); }
+fn rot_64  = (l, r) => (r0, r1) 	{ R1 = or(r, l); R0 = l; 			(r0, r1) = fwd(R0, R1); }
+fn rot_32 = (l, r) => (r0, r1, r2) 	{ R2 = or(r, l); R1 = l; R0 = l; 	(r0, r1, r2) = fwd(R0, R1, R2); }
 
-fn rot  = (l, r) => () { (_, _) = rot(l, r); }
-fn rotd = (l, r) => () { (_, _, _) = rotd(l, r); }
+fn rot_64  = (l, r) => () { (_, _) = rot_64(l, r); }
+fn rot_32 = (l, r) => () { (_, _, _) = rot_32(l, r); }
 
 "#;
