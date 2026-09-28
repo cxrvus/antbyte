@@ -1,5 +1,6 @@
 use anyhow::{Result, anyhow};
 use regex::Regex;
+use std::sync::LazyLock;
 
 use super::Keyword;
 
@@ -11,6 +12,12 @@ fn regex(ptn: &str) -> Regex {
 #[inline]
 fn regex_full(ptn: &str) -> Regex {
 	regex(&format!("^{ptn}$"))
+}
+
+macro_rules! lazy_regex_full {
+	($ptn:expr) => {
+		LazyLock::new(|| regex_full($ptn))
+	};
 }
 
 // idea: add Token line metadata
@@ -45,41 +52,50 @@ pub enum Token {
 	EndOfFile,
 }
 
+const COMMENT_PTN: &str = r"#.*(?:\r?\n|$)";
+const NUMBER_PTN: &str = r"(?:0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*)";
+const STRING_PTN: &str = r#""(.*?)""#;
+const IDENT_PTN: &str = r"[a-zA-Z_]\w*";
+const LOWER_IDENT: &str = r"_?[a-z][a-z0-9_]*";
+const UPPER_IDENT: &str = r"[A-Z][A-Z0-9_]*";
+const SYMBOL_PTN: &str = r"=>|,,|[#={}(),;01]|\+|-";
+
+const SPACE_PTN: &str = r"\s+";
+const WILD_PTN: &str = r".+";
+
+static TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| {
+	let pattern = [
+		COMMENT_PTN,
+		STRING_PTN,
+		IDENT_PTN,
+		NUMBER_PTN,
+		SYMBOL_PTN,
+		SPACE_PTN,
+		WILD_PTN,
+	]
+	.join("|");
+
+	regex(&pattern)
+});
+
+static WHITESPACE_RE: LazyLock<Regex> = lazy_regex_full!(SPACE_PTN);
+static COMMENT_RE: LazyLock<Regex> = lazy_regex_full!(COMMENT_PTN);
+static IDENT_RE: LazyLock<Regex> = lazy_regex_full!(IDENT_PTN);
+static LOWER_IDENT_RE: LazyLock<Regex> = lazy_regex_full!(LOWER_IDENT);
+static UPPER_IDENT_RE: LazyLock<Regex> = lazy_regex_full!(UPPER_IDENT);
+static NUMBER_RE: LazyLock<Regex> = lazy_regex_full!(NUMBER_PTN);
+static STRING_RE: LazyLock<Regex> = lazy_regex_full!(STRING_PTN);
+
 impl Token {
-	const COMMENT_PTN: &'static str = r"#.*(?:\r?\n|$)";
-	const NUMBER_PTN: &'static str = r"(?:0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*)";
-	const STRING_PTN: &'static str = r#""(.*?)""#;
-	const IDENT_PTN: &'static str = r"[a-zA-Z_]\w*";
-	const LOWER_IDENT: &'static str = r"_?[a-z][a-z0-9_]*";
-	const UPPER_IDENT: &'static str = r"[A-Z][A-Z0-9_]*";
-	const SYMBOL_PTN: &'static str = r"=>|,,|[#={}(),;01]|\+|-";
-
-	const SPACE_PTN: &'static str = r"\s+";
-	const WILD_PTN: &'static str = r".+";
-
 	pub fn tokenize(code: &str) -> Result<Vec<Self>> {
-		let pattern = [
-			Self::COMMENT_PTN,
-			Self::STRING_PTN,
-			Self::IDENT_PTN,
-			Self::NUMBER_PTN,
-			Self::SYMBOL_PTN,
-			Self::SPACE_PTN,
-			Self::WILD_PTN,
-		]
-		.join("|");
-
-		let token_strings = regex(&pattern).find_iter(code).collect::<Vec<_>>();
-
-		let whitespace_re = regex_full(Self::SPACE_PTN);
-		let comment_re = regex_full(Self::COMMENT_PTN);
+		let token_strings = TOKEN_RE.find_iter(code).collect::<Vec<_>>();
 
 		// dbg!(&token_strings.iter().map(|x| x.as_str()).collect::<Vec<_>>());
 
 		token_strings
 			.iter()
 			.map(|x| x.as_str())
-			.filter(|x| !(whitespace_re.is_match(x) || comment_re.is_match(x)))
+			.filter(|x| !(WHITESPACE_RE.is_match(x) || COMMENT_RE.is_match(x)))
 			.map(Token::from_token_str)
 			.collect::<Result<Vec<_>>>()
 	}
@@ -112,20 +128,17 @@ impl Token {
 	fn complex_match(token: &str) -> Result<Self> {
 		if let Some(keyword) = Keyword::from_ident(token) {
 			Ok(Token::Keyword(keyword))
-		} else if regex_full(Self::IDENT_PTN).is_match(token) {
-			if token == "_"
-				|| regex_full(Self::UPPER_IDENT).is_match(token)
-				|| regex_full(Self::LOWER_IDENT).is_match(token)
-			{
+		} else if IDENT_RE.is_match(token) {
+			if token == "_" || UPPER_IDENT_RE.is_match(token) || LOWER_IDENT_RE.is_match(token) {
 				Ok(Token::Ident(token.to_string()))
 			} else {
 				Err(anyhow!(
 					"identifiers must be either all upper or all lower-case, found '{token}'"
 				))
 			}
-		} else if regex_full(Self::NUMBER_PTN).is_match(token) {
+		} else if NUMBER_RE.is_match(token) {
 			Self::parse_number(token).map(Token::Number)
-		} else if let Some(captures) = regex_full(Self::STRING_PTN).captures(token) {
+		} else if let Some(captures) = STRING_RE.captures(token) {
 			let string = captures.get(1).unwrap().as_str().to_owned();
 			Ok(Token::String(string))
 		} else {
@@ -147,6 +160,6 @@ impl Token {
 	}
 
 	pub(super) fn is_uppercase_ident(ident: &str) -> bool {
-		regex_full(Self::UPPER_IDENT).is_match(ident)
+		UPPER_IDENT_RE.is_match(ident)
 	}
 }
