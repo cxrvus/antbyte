@@ -25,7 +25,11 @@ impl World {
 		// ants
 		for layer in (0..self.config().layers).rev() {
 			if self.ants.get(&layer).is_some() {
-				self.tick_layer(layer);
+				let sldn = self.config().slow_down.get(&layer).unwrap_or(&1);
+
+				if self.tick_count().is_multiple_of(*sldn as u32) {
+					self.tick_layer(layer);
+				}
 			}
 		}
 

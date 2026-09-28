@@ -80,6 +80,11 @@ impl Parser {
 				config.border.insert(sub_index, border_mode);
 			}
 
+			"slow_down" | "sldn" => {
+				let sldn = self.next_number()?.unwrap_or_default() as u16;
+				config.slow_down.insert(sub_index, sldn);
+			}
+
 			"start_pos" | "start" => config.start_pos = StartingPos::try_from(self.next_ident()?)?,
 			"start_dir" => config.start_dir = Rotation::try_from_str(&self.next_str()?)?.value(),
 
