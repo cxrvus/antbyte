@@ -22,7 +22,7 @@ impl World {
 		let mut input_bits = 0u8;
 
 		for input_sub_pin in behavior.inputs.iter() {
-			let target_dir = Direction::from(input_sub_pin.channel()) + ant.dir;
+			let target_dir = Direction::from(input_sub_pin.channel()) + ant.look_dir();
 			let target_pos = self.next_pos(pos, layer, target_dir);
 			let target_ant = target_pos.and_then(|pos| self.ants[&layer].get(&pos));
 
@@ -121,22 +121,16 @@ impl World {
 		let mem_mask = behavior.pin_mask(Pin::Mem);
 
 		let mut clear = false;
+		let (mut rot, mut left) = (0u8, false);
+		let (mut child_rot, mut child_left) = (0u8, false);
+
+		ant.child_rotation.reset();
 
 		for pin_value in output.iter() {
 			let PinValue { pin, value } = *pin_value;
 			let value_bool = value != 0;
 			let wide_value = value;
 			let value = value as u8;
-
-			// temp solution to prepare for movement update
-			// todo: real solution
-			let dir = match (
-				Direction::from(value.reverse_bits() >> 5),
-				self.config().rot_left,
-			) {
-				(dir, true) => dir.mirrored(),
-				(dir, false) => dir,
-			};
 
 			match (pin, value_bool) {
 				(Mem, _) => ant.memory = value | (ant.memory & !mem_mask),
@@ -156,12 +150,12 @@ impl World {
 				(Halt, _) => ant.will_halt = value_bool,
 				(TieBreaker, _) => ant.tie_breaker = value_bool,
 
-				(Rotation, true) => ant.dir += dir,
+				(Rotation, true) => rot = value.reverse_bits(),
 
 				// spawn_tick
 				(AntId, _) => ant.child_behavior = value,
 				(ChildLayer, _) => ant.child_layer = value,
-				(ChildRotation, _) => ant.child_dir = dir,
+				(ChildRotation, _) => child_rot = value.reverse_bits(),
 				(ChildMem, _) => ant.child_memory = value,
 
 				// end_tick
@@ -183,6 +177,14 @@ impl World {
 		if clear {
 			self.set_tile(pos, 0, !tile_mask);
 		}
+
+		let inv_rot = self.config().inv_rot;
+		(left, child_left) = (left ^ inv_rot, child_left ^ inv_rot);
+
+		ant.rotation.rotate(rot, left);
+		ant.child_rotation.rotate(child_rot, child_left);
+
+		ant.update_move_dir();
 
 		self.ants.get_mut(&layer).unwrap().insert(pos, ant);
 	}

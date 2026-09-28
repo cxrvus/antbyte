@@ -3,7 +3,7 @@ pub mod sub_pin;
 
 use std::ops::{Deref, DerefMut};
 
-use crate::util::{dir::Direction, hash_u32};
+use crate::util::{dir::Direction, hash_u32, rotation::Rotation, vec2::PosOffset};
 
 pub mod behavior;
 
@@ -14,8 +14,10 @@ pub struct Ant {
 
 	pub counter: u8,
 	pub wait_ticks: u8,
-	pub dir: Direction,
 	pub memory: u8,
+
+	pub rotation: Rotation,
+	pub pos_offset: PosOffset,
 
 	// todo: exclude from serialization
 	pub data: TickData,
@@ -24,6 +26,7 @@ pub struct Ant {
 #[derive(Clone, Copy, Default, Debug)]
 pub struct TickData {
 	pub last_input: u8,
+	pub move_dir: Direction,
 
 	pub tie_breaker: bool,
 	pub will_halt: bool,
@@ -33,7 +36,7 @@ pub struct TickData {
 
 	pub child_behavior: u8,
 	pub child_layer: u8,
-	pub child_dir: Direction,
+	pub child_rotation: Rotation,
 	pub child_memory: u8,
 }
 
@@ -62,9 +65,19 @@ impl Ant {
 		self.will_halt || self.waiting()
 	}
 
+	#[inline]
+	pub fn look_dir(&self) -> Direction {
+		self.rotation.dir()
+	}
+
+	#[inline]
+	pub fn move_dir(&self) -> Direction {
+		self.data.move_dir
+	}
+
 	pub fn luck(&self, current_tick: u32, layer: u8) -> u8 {
 		let hashed_tick = (hash_u32(current_tick) & 0xFF) as u8;
-		let state = (self.dir.value() ^ layer) & Direction::MAX;
+		let state = (self.look_dir().value() ^ layer) & Direction::MAX;
 		let luck = (hashed_tick ^ state) % Direction::MOD;
 		let bonus = (self.tie_breaker as u8) << Direction::BITS;
 		bonus | luck

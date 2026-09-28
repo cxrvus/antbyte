@@ -1,4 +1,5 @@
 use crate::world::World;
+mod movement;
 mod tick_async;
 mod tick_sync;
 mod tick_util;

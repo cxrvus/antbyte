@@ -97,3 +97,9 @@ impl ops::Rem<Vec2> for Vec2 {
 		}
 	}
 }
+
+#[derive(Debug, Default, Copy, Clone)]
+pub struct PosOffset {
+	pub x: i8,
+	pub y: i8,
+}

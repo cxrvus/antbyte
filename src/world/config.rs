@@ -5,10 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
 	ant::pin::Pin,
-	util::{
-		dir::Direction,
-		vec2::{Coord, Pos},
-	},
+	util::vec2::{Coord, Pos},
 };
 
 pub const FPS_CAP: u32 = 50;
@@ -42,7 +39,7 @@ pub struct WorldConfig {
 	/// behavior if ants touch the worlds border
 	pub border: BTreeMap<u8, BorderMode>,
 	/// counter-clockwise instead of clockwise rotation
-	pub rot_left: bool,
+	pub inv_rot: bool,
 	/// position of the first ant
 	pub start_pos: StartingPos,
 	/// first tick to render
@@ -85,7 +82,7 @@ impl Default for WorldConfig {
 			decay: None,
 			looping: false,
 			border: BTreeMap::from([(0, BorderMode::Wrap)]),
-			rot_left: false,
+			inv_rot: false,
 			start_pos: StartingPos::Center,
 			start_dir: 0,
 			ant_limit: ANT_LIMIT,
@@ -313,8 +310,6 @@ impl WorldConfig {
 		if self.ant_limit < self.layers.into() {
 			bail!("ant_limit must not be less than specified layers")
 		}
-
-		Self::cap(self.start_dir as u32, "start_dir", Direction::MAX as u32)?;
 
 		if let Some(max_ticks) = self.max_ticks
 			&& self.start_tick > max_ticks

@@ -1,5 +1,7 @@
 use std::ops;
 
+use anyhow::{Result, bail};
+
 use crate::util::vec2::Vec2;
 
 #[derive(Clone, Copy, Default, Debug, PartialEq)]
@@ -17,11 +19,6 @@ impl Direction {
 	}
 
 	#[inline]
-	pub fn set(&mut self, value: u8) {
-		self.0 = value % Self::MOD;
-	}
-
-	#[inline]
 	pub fn value(&self) -> u8 {
 		self.0
 	}
@@ -32,10 +29,6 @@ impl Direction {
 	}
 
 	#[inline]
-	pub fn mirrored(&self) -> Self {
-		Self::from((!self.0 + 1) & Self::MAX)
-	}
-
 	pub fn as_vec(&self) -> Vec2 {
 		let (x, y) = match self.0 {
 			0 => (1, 0),
@@ -65,6 +58,23 @@ impl Direction {
 			7 => ('/', '|'),
 			_ => panic!("dir overflow"),
 		}
+	}
+
+	#[inline]
+	pub fn try_from_str(value: &str) -> Result<Self> {
+		Ok(Self::from(match value {
+			"E" => 0,
+			"SE" => 1,
+			"S" => 2,
+			"SW" => 3,
+			"W" => 4,
+			"NW" => 5,
+			"N" => 6,
+			"NE" => 7,
+			_ => bail!(
+				"invalid direction string: '{value}'. Use a compass direction, like N, NE, W, etc."
+			),
+		}))
 	}
 
 	pub fn as_string(&self) -> String {

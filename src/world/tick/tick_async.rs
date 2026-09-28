@@ -1,19 +1,5 @@
-use std::{
-	collections::{BTreeMap, BTreeSet},
-	mem::swap,
-};
-
-use crate::{
-	ant::Ant,
-	util::vec2::Pos,
-	world::{World, config::BorderMode, state::Ants},
-};
-
-enum MoveAction {
-	Stay,
-	Move(Pos),
-	Nop,
-}
+use crate::{ant::Ant, util::vec2::Pos, world::World};
+use std::collections::{BTreeMap, BTreeSet};
 
 impl World {
 	pub(super) fn kill_tick(&mut self, layer: u8) {
@@ -22,7 +8,7 @@ impl World {
 		for (pos, ant) in &self.ants[&layer].clone() {
 			if ant.will_kill
 				&& !ant.waiting()
-				&& let Some(next_pos) = self.next_pos(*pos, layer, ant.dir)
+				&& let Some(next_pos) = self.next_pos(*pos, layer, ant.look_dir())
 				&& self.ants[&layer].contains_key(&next_pos)
 			{
 				kills.insert(next_pos);
@@ -48,101 +34,6 @@ impl World {
 		}
 	}
 
-	pub(super) fn move_tick(&mut self, layer: u8) {
-		let mut source = Ants::new();
-		let mut result = Ants::new();
-
-		swap(self.ants.layer_mut(layer), &mut source);
-
-		while let Some((pos, ant)) = source.pop_first() {
-			let mut stack = vec![(pos, ant)];
-
-			// used to resolve cycles
-			let mut cycle_pos: Option<Pos> = None;
-
-			while let Some((pos, ant)) = stack.pop() {
-				let action = if ant.halted() {
-					MoveAction::Stay
-				} else if let Some(cycle_pos_value) = cycle_pos {
-					if pos == cycle_pos_value {
-						// reached last ant in cycle
-						cycle_pos = None;
-					}
-
-					let target_pos = self
-						.next_pos(pos, layer, ant.dir)
-						.expect("no target position for ant in cycle");
-
-					// all ants in cycle can move
-					MoveAction::Move(target_pos)
-				} else if let Some(target_pos) = self.next_pos(pos, layer, ant.dir) {
-					if result.contains_key(&target_pos) {
-						// target pos is occupied in result => can't move
-						MoveAction::Stay
-					} else if let Some(&target_ant) = source.get(&target_pos) {
-						// target pos is occupied in source
-						if target_ant.halted() {
-							// dead end => stay
-							MoveAction::Stay
-						} else {
-							// chain => recurse
-							stack.push((pos, ant));
-							source.remove(&target_pos);
-							stack.push((target_pos, target_ant));
-							MoveAction::Nop
-						}
-					} else {
-						// target pos is free in source
-
-						if stack.iter().any(|(visited, _)| target_pos == *visited) {
-							// target is already part of the chain
-							// cycle => resolve
-							cycle_pos = Some(target_pos);
-							MoveAction::Move(target_pos)
-						} else {
-							let contestants = self
-								.get_contestants(&source, target_pos, layer)
-								.iter()
-								.map(|pos| source[pos])
-								.collect::<Vec<_>>();
-
-							if contestants.is_empty() || self.luck_check(layer, &contestants, &ant)
-							{
-								// target is uncontested or conflict has been won => move
-								MoveAction::Move(target_pos)
-							} else {
-								// conflict has been lost => stay
-								MoveAction::Stay
-							}
-						}
-					}
-				} else {
-					// target pos is outside of grid
-					match self.border_mode(layer) {
-						BorderMode::Collide => MoveAction::Stay,
-						BorderMode::Despawn => MoveAction::Nop,
-						_ => panic!("no target position, despite border mode guaranteeing one"),
-					}
-				};
-
-				match action {
-					MoveAction::Stay => commit(&mut result, pos, ant),
-					MoveAction::Move(target_pos) => commit(&mut result, target_pos, ant),
-					MoveAction::Nop => { /* ant will not be committed to result */ }
-				}
-			}
-
-			// reached end of ant chain
-		}
-
-		fn commit(result: &mut Ants, pos: Pos, ant: Ant) {
-			let prev = result.insert(pos, ant);
-			assert!(prev.is_none(), "tried to occupy occupied space")
-		}
-
-		swap(&mut result, self.ants.layer_mut(layer));
-	}
-
 	pub(super) fn spawn_tick(&mut self, source_layer: u8) {
 		let mut claims = BTreeMap::<(Pos, u8), Vec<Pos>>::new();
 
@@ -151,7 +42,7 @@ impl World {
 		}
 
 		for (pos, ant) in &self.ants[&source_layer] {
-			if let Some(target_pos) = self.next_pos(*pos, source_layer, ant.dir.flipped())
+			if let Some(target_pos) = self.next_pos(*pos, source_layer, ant.look_dir().flipped())
 				&& ant.child_behavior != 0
 				&& !ant.waiting()
 				&& self.get_behavior(ant.child_behavior).is_some()
@@ -190,12 +81,13 @@ impl World {
 				.unwrap();
 
 			// spawn
-			let child_dir = ant.dir + ant.child_dir;
+			let mut child_rotation = ant.child_rotation;
+			child_rotation.rotate(ant.rotation.value(), false);
 
 			let new_ant = Ant {
 				behavior: ant.child_behavior,
 				memory: ant.child_memory,
-				dir: child_dir,
+				rotation: child_rotation,
 				birth_tick: self.tick_count,
 				..Default::default()
 			};

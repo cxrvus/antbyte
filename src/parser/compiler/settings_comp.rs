@@ -73,7 +73,7 @@ impl Parser {
 
 			"looping" | "loop" => config.looping = self.next_bit()?,
 
-			"rot_left" => config.rot_left = self.next_bit()?,
+			"inv_rot" => config.inv_rot = self.next_bit()?,
 
 			"border" => {
 				let border_mode = BorderMode::try_from(self.next_ident()?)?;
@@ -81,7 +81,7 @@ impl Parser {
 			}
 
 			"start_pos" | "start" => config.start_pos = StartingPos::try_from(self.next_ident()?)?,
-			"start_dir" => config.start_dir = self.next_number()?.unwrap_or_default() as u8,
+			"start_dir" => config.start_dir = (self.next_number()?.unwrap_or_default() * 32) as u8,
 			"start_tick" => config.start_tick = self.next_number()?.unwrap_or_default(),
 			"ant_limit" => config.ant_limit = self.next_number()?.unwrap_or_default(),
 

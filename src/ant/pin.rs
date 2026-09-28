@@ -14,6 +14,8 @@ pub enum Pin {
 	/// if ant is spawned by current ant,
 	/// set its rotation to the current ants direction plus this
 	ChildRotation,
+	/// makes ChildRotation counterclockwise
+	ChildLeft,
 	/// if ant is spawned by current ant,
 	/// set its memory to this
 	ChildMem,
@@ -21,8 +23,10 @@ pub enum Pin {
 	ChildLayer,
 
 	// ## moving ants
-	/// 3 bits indicating number of 45 degrees rotations
+	/// represents clockwise rotation with reverse bit order, where 256 would be a full turn
 	Rotation,
+	/// makes Rotation counterclockwise
+	Left,
 	/// ant is preferred in movement / spawning conflict resolution
 	TieBreaker,
 	/// current ant will not move this tick if true
@@ -92,7 +96,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	const PIN_DEFINITIONS: [PinDefinition; 23] = [
+	const PIN_DEFINITIONS: [PinDefinition; 25] = [
 		PinDefinition {
 			pin: Self::AntId,
 			code: "A",
@@ -103,6 +107,12 @@ impl Pin {
 			pin: Self::ChildLayer,
 			code: "AA",
 			size: TRIPLET,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::ChildLeft,
+			code: "AL",
+			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
@@ -150,6 +160,12 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Kill,
 			code: "K",
+			size: BIT,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::Left,
+			code: "L",
 			size: BIT,
 			io_type: Some(IoType::Output),
 		},

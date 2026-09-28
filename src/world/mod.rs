@@ -17,7 +17,7 @@ use std::{
 
 use crate::{
 	ant::{Ant, behavior::Behavior},
-	util::dir::Direction,
+	util::rotation::Rotation,
 	world::{
 		config::BorderMode,
 		state::{WorldState, WorldStatus},
@@ -75,7 +75,7 @@ impl World {
 
 		let ant = if let Some(root_id) = behaviors.keys().min() {
 			Ant {
-				dir: Direction::from(start_dir),
+				rotation: Rotation::from(start_dir),
 				behavior: *root_id,
 				..Default::default()
 			}
