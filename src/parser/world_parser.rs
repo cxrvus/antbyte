@@ -1,7 +1,10 @@
-use crate::parser::compiler::linker::{WorldImport, WorldImportMode};
+use crate::parser::{
+	AntLink,
+	compiler::linker::{WorldImport, WorldImportMode},
+};
 
 use super::{Keyword, ParsedWorld, Parser, Token};
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 
 impl Parser {
 	pub(super) fn parse_world(&mut self) -> Result<ParsedWorld> {
@@ -48,9 +51,19 @@ impl Parser {
 				}
 				Fn => {
 					let name = self.next_ident()?;
+
+					let signature = if self.assume_next(Token::BraceLeft).is_some() {
+						self.tokens.push(Token::BraceLeft);
+						None
+					} else {
+						self.expect_next(Token::Assign)?;
+						Some(self.parse_signature(&name)?)
+					};
+
 					let func = self
-						.parse_func(name.clone())
+						.parse_func(&name, signature)
 						.with_context(|| format!("in function '{name}'!"))?;
+
 					world.funcs.push(func);
 				}
 				Ant => {
@@ -69,11 +82,22 @@ impl Parser {
 							(id, name)
 						};
 
-					let (func, ant) = self
-						.parse_ant(name.clone(), id)
+					if id > 0xff {
+						bail!("ant ID must not be greater than 255, found {id}");
+					}
+
+					let func = self
+						.parse_func(&name, None)
 						.with_context(|| format!("in ant '{name}'!"))?;
+
 					world.funcs.push(func);
-					world.ants.push(ant);
+
+					let link = AntLink {
+						func_name: name,
+						id: id as u8,
+					};
+
+					world.ants.push(link);
 				}
 				NoStd => {
 					world.no_std = true;

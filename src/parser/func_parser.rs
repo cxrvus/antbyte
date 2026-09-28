@@ -1,5 +1,5 @@
 use crate::{
-	parser::{AntFunc, Func, Signature},
+	parser::{Func, Signature},
 	util::find_dupe,
 };
 
@@ -8,57 +8,25 @@ use super::{Parser, Statement, Token};
 use anyhow::{Result, anyhow, bail};
 
 impl Parser {
-	pub(super) fn parse_ant(&mut self, name: String, id: u32) -> Result<(Func, AntFunc)> {
-		if id > 0xff {
-			bail!("ant ID must not be greater than 255, found {id}");
-		}
-
-		let ant = AntFunc {
-			target_name: name.clone(),
-			target_id: id as u8,
-		};
-
-		let statements = self.parse_statements()?;
-
-		let func = Func {
-			statements,
-			signature: Signature {
-				name,
-				..Default::default()
-			},
-		};
-
-		Ok((func, ant))
-	}
-
-	pub(super) fn parse_func(&mut self, name: String) -> Result<Func> {
-		let signature = if self.assume_next(Token::BraceLeft).is_some() {
-			self.tokens.push(Token::BraceLeft);
-
-			Signature {
-				name,
-				..Default::default()
-			}
-		} else {
-			self.expect_next(Token::Assign)?;
-			self.parse_signature(name)?
-		};
-
-		let statements = self.parse_statements()?;
+	pub(super) fn parse_func(&mut self, name: &str, signature: Option<Signature>) -> Result<Func> {
+		let signature = signature.unwrap_or(Signature {
+			name: name.to_owned(),
+			..Default::default()
+		});
 
 		Ok(Func {
-			statements,
+			statements: self.parse_statements()?,
 			signature,
 		})
 	}
 
-	fn parse_signature(&mut self, name: String) -> Result<Signature> {
+	pub(super) fn parse_signature(&mut self, name: &str) -> Result<Signature> {
 		let params = self.next_ident_list()?;
 		self.expect_next(Token::Arrow)?;
 		let assignees: Vec<String> = self.next_ident_list()?;
 
 		let signature = Signature {
-			name,
+			name: name.to_owned(),
 			params,
 			assignees,
 		};

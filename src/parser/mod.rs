@@ -32,9 +32,15 @@ impl Keyword {
 struct ParsedWorld {
 	settings: Vec<(String, Token)>,
 	funcs: Vec<Func>,
-	ants: Vec<AntFunc>,
+	ants: Vec<AntLink>,
 	imports: Vec<WorldImport>,
 	no_std: bool,
+}
+
+#[derive(Debug)]
+struct AntLink {
+	func_name: String,
+	id: u8,
 }
 
 #[derive(Debug)]
@@ -137,12 +143,6 @@ struct Expression {
 	sign: bool,
 	/// is a function if Some, else variable
 	params: Option<Vec<Self>>,
-}
-
-#[derive(Debug)]
-struct AntFunc {
-	target_name: String,
-	target_id: u8,
 }
 
 #[derive(Default)]

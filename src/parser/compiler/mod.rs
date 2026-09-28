@@ -17,7 +17,7 @@ use std::{
 use crate::{
 	ant::behavior::Behavior,
 	parser::{
-		AntFunc, ParamValue, Parser, Signature, SignatureSpec,
+		AntLink, ParamValue, Parser, Signature, SignatureSpec,
 		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
 	},
 	truth_table::TruthTable,
@@ -119,9 +119,9 @@ pub fn compile_world(
 
 	let mut behaviors: BTreeMap<u8, Behavior> = BTreeMap::new();
 
-	for AntFunc {
-		target_name,
-		target_id,
+	for AntLink {
+		func_name: target_name,
+		id: target_id,
 	} in parsed_world.ants
 	{
 		eprintln!("Assembling ant '{target_name}' @ {target_id}...");
