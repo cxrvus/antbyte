@@ -31,25 +31,31 @@ impl World {
 			while let Some((pos, ant)) = stack.pop() {
 				let action = if ant.halted() {
 					MoveAction::Stay
-				} else if let Some(cycle_pos_value) = cycle_pos {
+				} else if ant.move_dir().is_none() {
+					MoveAction::Move(pos)
+				} else if let Some(dir) = ant.move_dir()
+					&& let Some(cycle_pos_value) = cycle_pos
+				{
 					if pos == cycle_pos_value {
 						// reached last ant in cycle
 						cycle_pos = None;
 					}
 
 					let target_pos = self
-						.next_pos(pos, layer, ant.move_dir())
+						.next_pos(pos, layer, dir)
 						.expect("no target position for ant in cycle");
 
 					// all ants in cycle can move
 					MoveAction::Move(target_pos)
-				} else if let Some(target_pos) = self.next_pos(pos, layer, ant.move_dir()) {
+				} else if let Some(dir) = ant.move_dir()
+					&& let Some(target_pos) = self.next_pos(pos, layer, dir)
+				{
 					if result.contains_key(&target_pos) {
 						// target pos is occupied in result => can't move
 						MoveAction::Stay
 					} else if let Some(&target_ant) = source.get(&target_pos) {
 						// target pos is occupied in source
-						if target_ant.halted() {
+						if target_ant.halted() || target_ant.move_dir().is_none() {
 							// dead end => stay
 							MoveAction::Stay
 						} else {
@@ -139,8 +145,8 @@ impl Ant {
 	pub fn new_offset(&self) -> PosOffset {
 		let rot = self.rotation.value();
 		let delta = OFFSET_TABLE[rot as usize];
-		let x = add_delta(self.pos_offset.x, delta.x);
-		let y = add_delta(self.pos_offset.y, delta.y);
+		let x = self.pos_offset.x + delta.x;
+		let y = self.pos_offset.y + delta.y;
 		PosOffset { x, y }
 	}
 
@@ -157,14 +163,6 @@ impl Ant {
 		let x = clamp_offset(offset.x);
 		let y = clamp_offset(offset.y);
 		self.pos_offset = PosOffset { x, y };
-	}
-}
-
-fn add_delta(offset: i8, delta: i8) -> i8 {
-	if delta > 0 && offset < 0 || delta < 0 && offset > 0 {
-		delta
-	} else {
-		offset + delta
 	}
 }
 
@@ -188,19 +186,23 @@ fn clamp_offset(offset_coord: i8) -> i8 {
 	}
 }
 
-fn coords_to_dir(vec: (i8, i8)) -> Direction {
-	Direction::from(match vec {
-		(1, 0) => 0,
-		(1, 1) => 1,
-		(0, 1) => 2,
-		(-1, 1) => 3,
-		(-1, 0) => 4,
-		(-1, -1) => 5,
-		(0, -1) => 6,
-		(1, -1) => 7,
-		_ => panic!(
-			"rotation returned an invalid direction vector: ({}, {})",
-			vec.0, vec.1
-		),
-	})
+fn coords_to_dir(vec: (i8, i8)) -> Option<Direction> {
+	if vec == (0, 0) {
+		None
+	} else {
+		Some(Direction::from(match vec {
+			(1, 0) => 0,
+			(1, 1) => 1,
+			(0, 1) => 2,
+			(-1, 1) => 3,
+			(-1, 0) => 4,
+			(-1, -1) => 5,
+			(0, -1) => 6,
+			(1, -1) => 7,
+			_ => panic!(
+				"rotation returned an invalid direction vector: ({}, {})",
+				vec.0, vec.1
+			),
+		}))
+	}
 }

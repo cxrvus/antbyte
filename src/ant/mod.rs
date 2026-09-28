@@ -26,7 +26,7 @@ pub struct Ant {
 #[derive(Clone, Copy, Default, Debug)]
 pub struct TickData {
 	pub last_input: u8,
-	pub move_dir: Direction,
+	pub move_dir: Option<Direction>,
 
 	pub tie_breaker: bool,
 	pub will_halt: bool,
@@ -71,7 +71,7 @@ impl Ant {
 	}
 
 	#[inline]
-	pub fn move_dir(&self) -> Direction {
+	pub fn move_dir(&self) -> Option<Direction> {
 		self.data.move_dir
 	}
 

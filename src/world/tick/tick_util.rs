@@ -87,7 +87,8 @@ impl World {
 			if let Some(source_pos) = self.next_pos(target_pos, layer, dir.flipped())
 				&& let Some(source_ant) = source.get(&source_pos)
 				&& !source_ant.halted()
-				&& source_ant.move_dir() == dir
+				&& let Some(move_dir) = source_ant.move_dir()
+				&& move_dir == dir
 			{
 				positions.push(source_pos);
 			}

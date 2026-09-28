@@ -103,3 +103,14 @@ pub struct PosOffset {
 	pub x: i8,
 	pub y: i8,
 }
+
+impl ops::Add<PosOffset> for PosOffset {
+	type Output = Self;
+
+	fn add(self, other: PosOffset) -> Self::Output {
+		Self {
+			x: self.x + other.x,
+			y: self.y + other.y,
+		}
+	}
+}
