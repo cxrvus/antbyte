@@ -151,11 +151,13 @@ impl World {
 				(TieBreaker, _) => ant.tie_breaker = value_bool,
 
 				(Rotation, true) => rot = value.reverse_bits(),
+				(Left, true) => left = true,
 
 				// spawn_tick
 				(AntId, _) => ant.child_behavior = value,
 				(ChildLayer, _) => ant.child_layer = value,
 				(ChildRotation, _) => child_rot = value.reverse_bits(),
+				(ChildLeft, true) => child_left = true,
 				(ChildMem, _) => ant.child_memory = value,
 
 				// end_tick
