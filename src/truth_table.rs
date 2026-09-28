@@ -40,7 +40,7 @@ impl TruthTable {
 		self.output_count
 	}
 
-	pub fn entries(&self) -> &Vec<u32> {
+	pub fn entries(&self) -> &[u32] {
 		&self.entries
 	}
 

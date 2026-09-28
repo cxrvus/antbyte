@@ -9,6 +9,7 @@ use crate::{
 
 use anyhow::{Result, anyhow};
 use serde::{Deserialize, Serialize};
+
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(try_from = "BehaviorDTO", into = "BehaviorDTO")]
@@ -30,13 +31,11 @@ struct BehaviorDTO {
 }
 
 impl TryFrom<BehaviorDTO> for Behavior {
-	type Error = String;
+	type Error = anyhow::Error;
 
-	fn try_from(value: BehaviorDTO) -> std::result::Result<Self, Self::Error> {
-		let logic = TruthTable::new(value.inputs.len(), value.outputs.len(), value.logic)
-			.map_err(|e| e.to_string())?;
-
-		Behavior::new(value.name, logic, value.inputs, value.outputs).map_err(|e| e.to_string())
+	fn try_from(value: BehaviorDTO) -> Result<Self, Self::Error> {
+		let logic = TruthTable::new(value.inputs.len(), value.outputs.len(), value.logic)?;
+		Behavior::new(value.name, logic, value.inputs, value.outputs)
 	}
 }
 
@@ -44,7 +43,7 @@ impl From<Behavior> for BehaviorDTO {
 	fn from(value: Behavior) -> Self {
 		Self {
 			name: value.name,
-			logic: value.logic.entries().clone(),
+			logic: value.logic.entries().to_vec(),
 			inputs: value.inputs,
 			outputs: value.outputs,
 		}
