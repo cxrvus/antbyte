@@ -61,12 +61,16 @@ pub enum Pin {
 	// ## generic inputs
 	/// is 1 on the birth tick (+1) of the ant, else 0
 	BirthTick,
-	/// counter value incrementing each tick
-	Counter,
 	/// current ant's persistent memory
 	Mem,
+	/// counter value incrementing each tick
+	Counter,
+	/// is set every 2^nth local tick
+	Clock,
 	/// 8 random bits
 	Noise,
+	/// is set with a probability of 2^(-(n+1))
+	Probability,
 
 	// ## global
 	Signal,
@@ -98,7 +102,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	const PIN_DEFINITIONS: [PinDefinition; 26] = [
+	const PIN_DEFINITIONS: [PinDefinition; 28] = [
 		PinDefinition {
 			pin: Self::AntId,
 			code: "A",
@@ -138,7 +142,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Counter,
 			code: "C",
-			size: DOUBLE,
+			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
@@ -148,10 +152,10 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::EmptyTile,
+			pin: Self::Clock,
 			code: "E",
-			size: BIT,
-			io_type: None,
+			size: BYTE,
+			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::Halt,
@@ -180,7 +184,13 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Noise,
 			code: "N",
-			size: DOUBLE,
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
+			pin: Self::Probability,
+			code: "P",
+			size: BYTE,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
@@ -199,6 +209,12 @@ impl Pin {
 			pin: Self::Tile,
 			code: "T",
 			size: BYTE,
+			io_type: None,
+		},
+		PinDefinition {
+			pin: Self::EmptyTile,
+			code: "TZ",
+			size: BIT,
 			io_type: None,
 		},
 		PinDefinition {

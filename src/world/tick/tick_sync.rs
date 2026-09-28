@@ -36,16 +36,10 @@ impl World {
 				BirthTick => (ant.birth_tick + 1 == self.tick_count()) as u8,
 				Halt => ant.halted() as u8,
 
-				Counter => match input_sub_pin.channel() {
-					0 => ant.counter,
-					1 => zero_count_mask(ant.counter),
-					_ => panic!(),
-				},
-				Noise => match input_sub_pin.channel() {
-					0 => self.rng(),
-					1 => zero_count_mask(self.rng()),
-					_ => panic!(),
-				},
+				Counter => ant.counter,
+				Clock => zero_count_mask(ant.counter),
+				Noise => self.rng(),
+				Probability => zero_count_mask(self.rng()),
 
 				AntId => ant.behavior,
 
