@@ -305,7 +305,7 @@ impl WorldConfig {
 			bail!("specified layer count must be greater than 0")
 		}
 
-		// TODO: limit border slots to max layer count
+		// idea: limit border slots to max layer count
 		if !self.border.contains_key(&0) {
 			bail!("border_0 needs to be specified")
 		}

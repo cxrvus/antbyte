@@ -19,7 +19,6 @@ pub struct MidiPlayer {
 	config: MidiConfig,
 	conn_out: Option<MidiOutputConnection>,
 	held_notes: BTreeMap<Note, u8>,
-	// TODO: add velocity_offset
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
