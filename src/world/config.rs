@@ -250,6 +250,7 @@ pub enum RenderMask {
 
 	// ## Ant
 	Dir,
+	Rotation,
 	Id,
 	BirthTick,
 	InputBits,
@@ -265,6 +266,7 @@ impl TryFrom<String> for RenderMask {
 			"tile" => Ok(Self::Tile),
 			"layers" => Ok(Self::Layers),
 			"dir" => Ok(Self::Dir),
+			"rot" => Ok(Self::Rotation),
 			"id" => Ok(Self::Id),
 			"birth_tick" => Ok(Self::BirthTick),
 			"input_bits" => Ok(Self::InputBits),

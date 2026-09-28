@@ -100,6 +100,7 @@ impl World {
 			RenderMask::Tile => self.tiles_to_map(),
 			RenderMask::Layers => self.layer_occupations(),
 			RenderMask::Dir => self.map_ants(|ant| ant.look_dir().value()),
+			RenderMask::Rotation => self.map_ants(|ant| ant.rotation.value()),
 			RenderMask::Id => self.map_ants(|ant| ant.behavior),
 			RenderMask::BirthTick => self.map_ants(|ant| ant.birth_tick as u8),
 			RenderMask::InputBits => self.map_ants(|ant| ant.last_input),
