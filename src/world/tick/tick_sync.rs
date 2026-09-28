@@ -50,6 +50,7 @@ impl World {
 				AntId => ant.behavior,
 
 				Rotation => ant.rotation.rotated(ant.birth_rot.value(), true).value(),
+				RotateZero => (ant.rotation == ant.birth_rot) as u8,
 
 				NearbyAnt => {
 					(target_ant.is_some()
@@ -123,7 +124,7 @@ impl World {
 		let mem_mask = behavior.pin_mask(Pin::Mem);
 
 		let mut clear = false;
-		let (mut rot, mut left) = (0u8, false);
+		let (mut rot, mut left, mut rot_zero) = (0u8, false, false);
 		let (mut child_rot, mut child_left) = (0u8, false);
 
 		ant.child_rotation.reset();
@@ -153,7 +154,8 @@ impl World {
 				(TieBreaker, _) => ant.tie_breaker = value_bool,
 
 				(Rotation, true) => rot = value.reverse_bits(),
-				(Left, true) => left = true,
+				(RotateLeft, true) => left = true,
+				(RotateZero, true) => rot_zero = true,
 
 				// spawn_tick
 				(AntId, _) => ant.child_behavior = value,
@@ -180,6 +182,9 @@ impl World {
 
 		if clear {
 			self.set_tile(pos, 0, !tile_mask);
+		}
+		if rot_zero {
+			ant.rotation = ant.birth_rot;
 		}
 
 		let inv_rot = self.config().inv_rot;

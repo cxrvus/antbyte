@@ -26,7 +26,9 @@ pub enum Pin {
 	/// represents clockwise rotation with reverse bit order, where 256 would be a full turn
 	Rotation,
 	/// makes Rotation counterclockwise
-	Left,
+	RotateLeft,
+	/// resets Rotation to local birth rotation or is set to whether rotation equals birth rotation
+	RotateZero,
 	/// ant is preferred in movement / spawning conflict resolution
 	TieBreaker,
 	/// current ant will not move this tick if true
@@ -96,7 +98,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	const PIN_DEFINITIONS: [PinDefinition; 25] = [
+	const PIN_DEFINITIONS: [PinDefinition; 26] = [
 		PinDefinition {
 			pin: Self::AntId,
 			code: "A",
@@ -164,7 +166,7 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::Left,
+			pin: Self::RotateLeft,
 			code: "L",
 			size: BIT,
 			io_type: Some(IoType::Output),
@@ -246,6 +248,12 @@ impl Pin {
 			code: "Y",
 			size: DOUBLE,
 			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::RotateZero,
+			code: "Z",
+			size: BIT,
+			io_type: None,
 		},
 	];
 
