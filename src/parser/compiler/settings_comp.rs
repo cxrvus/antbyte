@@ -47,7 +47,7 @@ impl Parser {
 				}
 			}
 
-			"layers" => config.layers = self.next_number()?.unwrap_or_default() as u8,
+			"layer_limit" => config.layer_limit = self.next_number()?.unwrap_or_default() as u8,
 			"layer_filter" => config.layer_filter = self.next_number()?.unwrap_or_default() as u8,
 
 			"fps" => config.fps = self.next_number()?,

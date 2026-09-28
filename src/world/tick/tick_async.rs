@@ -49,7 +49,7 @@ impl World {
 			{
 				let target_layer = source_layer + ant.child_layer;
 
-				let target_layer_in_bounds = target_layer < self.config().layers;
+				let target_layer_in_bounds = target_layer < self.config().layer_limit;
 
 				let target_pos_occupied = self
 					.ants

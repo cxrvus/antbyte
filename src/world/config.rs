@@ -11,7 +11,7 @@ use crate::{
 pub const FPS_CAP: u32 = 50;
 pub const SPEED_CAP: u32 = 0x4000;
 pub const SIZE_CAP: Coord = 0x200;
-pub const LAYER_CAP: u8 = 8;
+pub const LAYER_LIMIT: u8 = 8;
 const ANT_LIMIT: u32 = 0x4000;
 
 #[cfg_attr(test, derive(ts_rs::TS))]
@@ -24,8 +24,8 @@ pub struct WorldConfig {
 	pub width: Coord,
 	/// height in pixels
 	pub height: Coord,
-	/// number of ant layers
-	pub layers: u8,
+	/// max number of ant layers
+	pub layer_limit: u8,
 	/// filter for layers that will be rendered
 	pub layer_filter: u8,
 	/// simulated ticks per frame (defaults to 1)
@@ -77,7 +77,7 @@ impl Default for WorldConfig {
 		Self {
 			width: 16,
 			height: 16,
-			layers: 1,
+			layer_limit: LAYER_LIMIT,
 			layer_filter: 0xff,
 			speed: Some(1),
 			max_ticks: None,
@@ -299,9 +299,9 @@ impl WorldConfig {
 		Self::cap(self.height as u32, "height", SIZE_CAP as u32)?;
 		Self::cap(self.width as u32, "width", SIZE_CAP as u32)?;
 
-		Self::cap(self.layers as u32, "layers", LAYER_CAP as u32)?;
+		Self::cap(self.layer_limit as u32, "layers", LAYER_LIMIT as u32)?;
 
-		if self.layers == 0 {
+		if self.layer_limit == 0 {
 			bail!("specified layer count must be greater than 0")
 		}
 
@@ -311,10 +311,6 @@ impl WorldConfig {
 		}
 
 		Self::cap(self.ant_limit, "ant_limit", ANT_LIMIT)?;
-
-		if self.ant_limit < self.layers.into() {
-			bail!("ant_limit must not be less than specified layers")
-		}
 
 		if let Some(max_ticks) = self.max_ticks
 			&& self.start_tick > max_ticks

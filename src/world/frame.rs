@@ -5,7 +5,7 @@ use crate::{
 	util::vec2::Pos,
 	world::{
 		World,
-		config::{LAYER_CAP, RenderMask},
+		config::{LAYER_LIMIT, RenderMask},
 		state::WorldStatus,
 	},
 };
@@ -141,7 +141,7 @@ impl World {
 	fn map_ants(&self, func: impl Fn(&Ant) -> u8) -> BTreeMap<Pos, u8> {
 		let mut map = BTreeMap::new();
 
-		for i in (0..LAYER_CAP).rev() {
+		for i in (0..LAYER_LIMIT).rev() {
 			let show_layer = (self.config().layer_filter >> i) & 1;
 
 			if show_layer == 1

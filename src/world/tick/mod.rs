@@ -23,7 +23,7 @@ impl World {
 		}
 
 		// ants
-		for layer in (0..self.config().layers).rev() {
+		for layer in (0..self.config().layer_limit).rev() {
 			if self.ants.get(&layer).is_some() {
 				let sldn = self.config().slow_down.get(&layer).unwrap_or(&1);
 
