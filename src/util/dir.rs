@@ -1,7 +1,5 @@
 use std::ops;
 
-use anyhow::{Result, bail};
-
 use crate::util::vec2::Vec2;
 
 #[derive(Clone, Copy, Default, Debug, PartialEq)]
@@ -58,23 +56,6 @@ impl Direction {
 			7 => ('/', '|'),
 			_ => panic!("dir overflow"),
 		}
-	}
-
-	#[inline]
-	pub fn try_from_str(value: &str) -> Result<Self> {
-		Ok(Self::from_u8(match value {
-			"E" => 0,
-			"SE" => 1,
-			"S" => 2,
-			"SW" => 3,
-			"W" => 4,
-			"NW" => 5,
-			"N" => 6,
-			"NE" => 7,
-			_ => bail!(
-				"invalid direction string: '{value}'. Use a compass direction, like N, NE, W, etc."
-			),
-		}))
 	}
 
 	pub fn as_string(&self) -> String {

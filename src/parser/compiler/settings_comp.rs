@@ -2,7 +2,7 @@ use anyhow::{Context, Result, anyhow};
 
 use crate::{
 	parser::{Parser, token::Token},
-	util::vec2::Coord,
+	util::{rotation::Rotation, vec2::Coord},
 	world::config::{BorderMode, ByteFilter, RenderMask, StartingPos, WorldConfig},
 };
 
@@ -81,7 +81,8 @@ impl Parser {
 			}
 
 			"start_pos" | "start" => config.start_pos = StartingPos::try_from(self.next_ident()?)?,
-			"start_dir" => config.start_dir = (self.next_number()?.unwrap_or_default() * 32) as u8,
+			"start_dir" => config.start_dir = Rotation::try_from_str(&self.next_str()?)?.value(),
+
 			"start_tick" => config.start_tick = self.next_number()?.unwrap_or_default(),
 			"ant_limit" => config.ant_limit = self.next_number()?.unwrap_or_default(),
 
