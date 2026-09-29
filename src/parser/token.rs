@@ -48,6 +48,7 @@ pub enum Token {
 
 	// ## Pre-Processor
 	NumberLiteral(u8, u8),
+	IdentRange(String, u8, u8),
 
 	// ## Other
 	Invalid(String),
@@ -61,6 +62,7 @@ pub enum Token {
 macro_rules! number_ptn { () => { r"0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*" }; }
 
 const COMMENT_PTN: &str = r"#.*(?:\r?\n|$)";
+const RANGE_PTN: &str = r"([a-zA-Z_]\w*?)([0-7])\.\.([0-7])";
 const IDENT_PTN: &str = r"[a-zA-Z_]\w*";
 const LITERAL_PTN: &str = concat!(r"([1-8])'(", number_ptn!(), ")");
 const NUMBER_PTN: &str = concat!(r"(?:", number_ptn!(), ")");
@@ -77,6 +79,7 @@ static TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| {
 	let pattern = [
 		COMMENT_PTN,
 		STRING_PTN,
+		RANGE_PTN,
 		IDENT_PTN,
 		LITERAL_PTN,
 		NUMBER_PTN,
@@ -90,6 +93,7 @@ static TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 static COMMENT_RE: LazyLock<Regex> = lazy_regex_full!(COMMENT_PTN);
+static RANGE_RE: LazyLock<Regex> = lazy_regex_full!(RANGE_PTN);
 static IDENT_RE: LazyLock<Regex> = lazy_regex_full!(IDENT_PTN);
 static LITERAL_RE: LazyLock<Regex> = lazy_regex_full!(LITERAL_PTN);
 static NUMBER_RE: LazyLock<Regex> = lazy_regex_full!(NUMBER_PTN);
@@ -143,14 +147,10 @@ impl Token {
 	fn complex_match(token: &str) -> Result<Self> {
 		if let Some(keyword) = Keyword::from_ident(token) {
 			Ok(Token::Keyword(keyword))
+		} else if RANGE_RE.is_match(token) {
+			Self::parse_range(token)
 		} else if IDENT_RE.is_match(token) {
-			if token == "_" || UPPER_IDENT_RE.is_match(token) || LOWER_IDENT_RE.is_match(token) {
-				Ok(Token::Ident(token.to_string()))
-			} else {
-				Err(anyhow!(
-					"identifiers must be either all upper or all lower-case, found '{token}'"
-				))
-			}
+			Self::parse_ident(token)
 		} else if LITERAL_RE.is_match(token) {
 			Self::parse_literal(token)
 		} else if NUMBER_RE.is_match(token) {
@@ -160,6 +160,25 @@ impl Token {
 			Ok(Token::String(string))
 		} else {
 			Ok(Token::Invalid(token.to_owned()))
+		}
+	}
+
+	fn parse_range(token: &str) -> Result<Token> {
+		let captures = RANGE_RE.captures(token).unwrap();
+		let ident = captures.get(1).unwrap().as_str().to_string();
+		let start = captures.get(2).unwrap().as_str().parse::<u8>().unwrap();
+		let end__ = captures.get(3).unwrap().as_str().parse::<u8>().unwrap();
+
+		Ok(Token::IdentRange(ident, start, end__))
+	}
+
+	pub fn parse_ident(token: &str) -> Result<Token> {
+		if token == "_" || UPPER_IDENT_RE.is_match(token) || LOWER_IDENT_RE.is_match(token) {
+			Ok(Token::Ident(token.to_string()))
+		} else {
+			Err(anyhow!(
+				"identifiers must be either all upper or all lower-case, found '{token}'"
+			))
 		}
 	}
 
