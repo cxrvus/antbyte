@@ -82,11 +82,11 @@ impl WorldState {
 		format!("t: {:0>8}", self.tick_count())
 	}
 
-	pub fn ext_out_str(&self) -> Option<String> {
+	pub fn ext_out_str(&self) -> String {
 		const MAX_LEN: usize = 16;
 
 		if self.ext_output.is_empty() {
-			None
+			"--".into()
 		} else {
 			let mut ext_out_str = self
 				.ext_output
@@ -100,7 +100,7 @@ impl WorldState {
 				ext_out_str += ", ...";
 			}
 
-			Some(ext_out_str)
+			ext_out_str
 		}
 	}
 
@@ -109,15 +109,9 @@ impl WorldState {
 
 		metadata_str += &format!(" | A: {:04}", self.ants.ant_count());
 
-		if self.signal_in != 0 {
-			metadata_str += &format!("\nS: {:08b}", self.signal_in);
-		}
-		if self.ext_input != 0 {
-			metadata_str += &format!("\nX: {:08b}", self.ext_input);
-		}
-		if let Some(ext_out_str) = self.ext_out_str() {
-			metadata_str += &format!("\nY: {}", ext_out_str);
-		}
+		metadata_str += &format!("\nS: {:08b}", self.signal_in);
+		metadata_str += &format!(" | X: {:08b}", self.ext_input);
+		metadata_str += &format!("\nY: {}", self.ext_out_str());
 
 		metadata_str
 	}
