@@ -1,14 +1,18 @@
 use crate::{parser::token::Token, util::bits_from_int};
 use anyhow::{Context, Result, bail};
 
-pub fn preprocess(tokens: &Vec<Token>) -> Result<Vec<Token>> {
-	let in_tokens = tokens;
-	let mut out_tokens = vec![];
+pub fn preprocess(tokens: &[Token]) -> Result<Vec<Token>> {
+	use Token::*;
 
-	for token in in_tokens {
-		let mut tokens = match token {
-			Token::NumberLiteral(width, value) => literal(*width, *value),
-			Token::IdentRange(ident, start, end) => range(ident, *start, *end),
+	let mut out_tokens = vec![];
+	let mut in_tokens = tokens.to_vec();
+	in_tokens.reverse();
+
+	while let Some(token) = in_tokens.pop() {
+		let mut tokens = match &token {
+			Ident(ident) if is_void_call(out_tokens.last(), in_tokens.last()) => void_call(ident),
+			NumberLiteral(width, value) => literal(*width, *value),
+			IdentRange(ident, start, end) => range(ident, *start, *end),
 			_ => Ok(vec![token.clone()]),
 		}
 		.context(format!("in token {token:?}"))?;
@@ -17,6 +21,27 @@ pub fn preprocess(tokens: &Vec<Token>) -> Result<Vec<Token>> {
 	}
 
 	Ok(out_tokens)
+}
+
+fn is_void_call(prev: Option<&Token>, next: Option<&Token>) -> bool {
+	use Token::*;
+
+	if let (Some(prev), Some(next)) = (prev, next) {
+		matches!((prev, next), (BraceLeft | Semicolon, ParenthesisLeft))
+	} else {
+		false
+	}
+}
+
+fn void_call(func_name: &str) -> Result<Vec<Token>> {
+	use Token::*;
+
+	Ok(vec![
+		ParenthesisLeft,
+		ParenthesisRight,
+		Assign,
+		Ident(func_name.to_string()),
+	])
 }
 
 fn literal(width: u8, value: u8) -> Result<Vec<Token>> {
