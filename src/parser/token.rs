@@ -48,7 +48,7 @@ pub enum Token {
 
 	// ## Pre-Processor
 	NumberLiteral(u8, u8),
-	IdentRange(String, u8, u8),
+	IdentRange(bool, String, u8, u8),
 
 	// ## Other
 	Invalid(String),
@@ -62,7 +62,7 @@ pub enum Token {
 macro_rules! number_ptn { () => { r"0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*" }; }
 
 const COMMENT_PTN: &str = r"#.*(?:\r?\n|$)";
-const RANGE_PTN: &str = r"([a-zA-Z_]\w*?)([0-7])\:([0-7])";
+const RANGE_PTN: &str = r"([+-]?)([a-zA-Z_]\w*?)([0-7])\:([0-7])";
 const IDENT_PTN: &str = r"[a-zA-Z_]\w*";
 const LITERAL_PTN: &str = concat!(r"([1-8])'(", number_ptn!(), ")");
 const NUMBER_PTN: &str = concat!(r"(?:", number_ptn!(), ")");
@@ -165,11 +165,12 @@ impl Token {
 
 	fn parse_range(token: &str) -> Result<Token> {
 		let captures = RANGE_RE.captures(token).unwrap();
-		let ident = captures.get(1).unwrap().as_str().to_string();
-		let start = captures.get(2).unwrap().as_str().parse::<u8>().unwrap();
-		let end__ = captures.get(3).unwrap().as_str().parse::<u8>().unwrap();
+		let sign_ = captures.get(1).unwrap().as_str() == "-";
+		let ident = captures.get(2).unwrap().as_str().to_string();
+		let start = captures.get(3).unwrap().as_str().parse::<u8>().unwrap();
+		let end__ = captures.get(4).unwrap().as_str().parse::<u8>().unwrap();
 
-		Ok(Token::IdentRange(ident, start, end__))
+		Ok(Token::IdentRange(sign_, ident, start, end__))
 	}
 
 	pub fn parse_ident(token: &str) -> Result<Token> {

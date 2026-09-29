@@ -12,7 +12,7 @@ pub fn preprocess(tokens: &[Token]) -> Result<Vec<Token>> {
 		let mut tokens = match &token {
 			Ident(ident) if is_void_call(out_tokens.last(), in_tokens.last()) => void_call(ident),
 			NumberLiteral(width, value) => literal(*width, *value),
-			IdentRange(ident, start, end) => range(ident, *start, *end),
+			IdentRange(sign, ident, start, end) => range(*sign, ident, *start, *end),
 			_ => Ok(vec![token.clone()]),
 		}
 		.context(format!("in token {token:?}"))?;
@@ -64,7 +64,7 @@ fn literal(width: u8, value: u8) -> Result<Vec<Token>> {
 	Ok(tokens)
 }
 
-fn range(ident: &str, start: u8, end: u8) -> Result<Vec<Token>> {
+fn range(sign: bool, ident: &str, start: u8, end: u8) -> Result<Vec<Token>> {
 	let mut tokens = vec![];
 
 	let range: Vec<u8> = if end > start {
@@ -76,8 +76,11 @@ fn range(ident: &str, start: u8, end: u8) -> Result<Vec<Token>> {
 	};
 
 	for index in range {
-		let full_ident = format!("{ident}{index}");
-		tokens.push(Token::parse_ident(&full_ident)?);
+		if sign {
+			tokens.push(Token::Invert(true));
+		}
+
+		tokens.push(Token::parse_ident(&format!("{ident}{index}"))?);
 		tokens.push(Token::Comma);
 	}
 
