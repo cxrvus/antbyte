@@ -1,6 +1,7 @@
 pub mod compiler;
 mod expression_parser;
 mod func_parser;
+mod preprocess;
 pub mod token;
 mod world_parser;
 

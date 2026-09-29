@@ -1,6 +1,8 @@
-use anyhow::{Result, anyhow};
+use anyhow::{Result, anyhow, bail};
 use regex::Regex;
 use std::sync::LazyLock;
+
+use crate::parser::preprocess::preprocess;
 
 use super::Keyword;
 
@@ -44,6 +46,9 @@ pub enum Token {
 	String(String),
 	Number(u32),
 
+	// ## Pre-Processor
+	NumberLiteral(u8, u8),
+
 	// ## Other
 	Invalid(String),
 	Comment,
@@ -54,6 +59,7 @@ pub enum Token {
 
 const COMMENT_PTN: &str = r"#.*(?:\r?\n|$)";
 const IDENT_PTN: &str = r"[a-zA-Z_]\w*";
+const LITERAL_PTN: &str = r"([1-8])'([b][01]+|[o][0-7]+|[x][0-9a-f]+|[d]\d+)";
 const NUMBER_PTN: &str = r"(?:0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*)";
 const SPACE_PTN: &str = r"\s+";
 const STRING_PTN: &str = r#""(.*?)""#;
@@ -69,6 +75,7 @@ static TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| {
 		COMMENT_PTN,
 		STRING_PTN,
 		IDENT_PTN,
+		LITERAL_PTN,
 		NUMBER_PTN,
 		SYMBOL_PTN,
 		SPACE_PTN,
@@ -81,6 +88,7 @@ static TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| {
 
 static COMMENT_RE: LazyLock<Regex> = lazy_regex_full!(COMMENT_PTN);
 static IDENT_RE: LazyLock<Regex> = lazy_regex_full!(IDENT_PTN);
+static LITERAL_RE: LazyLock<Regex> = lazy_regex_full!(LITERAL_PTN);
 static NUMBER_RE: LazyLock<Regex> = lazy_regex_full!(NUMBER_PTN);
 static SPACE_RE: LazyLock<Regex> = lazy_regex_full!(SPACE_PTN);
 static STRING_RE: LazyLock<Regex> = lazy_regex_full!(STRING_PTN);
@@ -94,12 +102,14 @@ impl Token {
 
 		// dbg!(&token_strings.iter().map(|x| x.as_str()).collect::<Vec<_>>());
 
-		token_strings
+		let tokens = token_strings
 			.iter()
 			.map(|x| x.as_str())
 			.filter(|x| !(SPACE_RE.is_match(x) || COMMENT_RE.is_match(x)))
 			.map(Token::from_token_str)
-			.collect::<Result<Vec<_>>>()
+			.collect::<Result<Vec<_>>>()?;
+
+		preprocess(&tokens)
 	}
 
 	fn from_token_str(value: &str) -> Result<Self> {
@@ -138,6 +148,8 @@ impl Token {
 					"identifiers must be either all upper or all lower-case, found '{token}'"
 				))
 			}
+		} else if LITERAL_RE.is_match(token) {
+			Self::parse_literal(token)
 		} else if NUMBER_RE.is_match(token) {
 			Self::parse_number(token).map(Token::Number)
 		} else if let Some(captures) = STRING_RE.captures(token) {
@@ -148,15 +160,32 @@ impl Token {
 		}
 	}
 
+	fn parse_literal(token: &str) -> Result<Token> {
+		let captures = LITERAL_RE.captures(token).unwrap();
+		let width = captures.get(1).unwrap().as_str().parse::<u8>().unwrap();
+		let value = captures.get(2).unwrap().as_str();
+
+		let number = match value.as_bytes().first().unwrap() {
+			b'd' => Self::parse_number(&value[1..])?,
+			_ => Self::parse_number(&format!("0{value}"))?,
+		};
+
+		if number > u8::MAX as u32 {
+			bail!("number literal may not be greater than 255, in [{token}]");
+		}
+
+		Ok(Token::NumberLiteral(width, number as u8))
+	}
+
 	fn parse_number(token: &str) -> Result<u32> {
 		fn parse_radix(digits: &str, radix: u32) -> Result<u32> {
 			u32::from_str_radix(digits, radix).map_err(|e| anyhow!(e))
 		}
 
 		match token.as_bytes() {
-			[b'0', b'b' | b'B', ..] => parse_radix(&token[2..], 2),
-			[b'0', b'o' | b'O', ..] => parse_radix(&token[2..], 8),
-			[b'0', b'x' | b'X', ..] => parse_radix(&token[2..], 16),
+			[b'0', b'b', ..] => parse_radix(&token[2..], 2),
+			[b'0', b'o', ..] => parse_radix(&token[2..], 8),
+			[b'0', b'x', ..] => parse_radix(&token[2..], 16),
 			_ => token.parse::<u32>().map_err(|e| anyhow!(e)),
 		}
 	}
