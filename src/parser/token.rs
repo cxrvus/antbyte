@@ -62,7 +62,7 @@ pub enum Token {
 macro_rules! number_ptn { () => { r"0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*" }; }
 
 const COMMENT_PTN: &str = r"#.*(?:\r?\n|$)";
-const RANGE_PTN: &str = r"([a-zA-Z_]\w*?)([0-7])\.\.([0-7])";
+const RANGE_PTN: &str = r"([a-zA-Z_]\w*?)([0-7])\:([0-7])";
 const IDENT_PTN: &str = r"[a-zA-Z_]\w*";
 const LITERAL_PTN: &str = concat!(r"([1-8])'(", number_ptn!(), ")");
 const NUMBER_PTN: &str = concat!(r"(?:", number_ptn!(), ")");
