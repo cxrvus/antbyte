@@ -57,10 +57,13 @@ pub enum Token {
 	EndOfFile,
 }
 
+#[rustfmt::skip]
+macro_rules! number_ptn { () => { r"0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*" }; }
+
 const COMMENT_PTN: &str = r"#.*(?:\r?\n|$)";
 const IDENT_PTN: &str = r"[a-zA-Z_]\w*";
-const LITERAL_PTN: &str = r"([1-8])'([b][01]+|[o][0-7]+|[x][0-9a-f]+|[d]\d+)";
-const NUMBER_PTN: &str = r"(?:0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*)";
+const LITERAL_PTN: &str = concat!(r"([1-8])'(", number_ptn!(), ")");
+const NUMBER_PTN: &str = concat!(r"(?:", number_ptn!(), ")");
 const SPACE_PTN: &str = r"\s+";
 const STRING_PTN: &str = r#""(.*?)""#;
 const SYMBOL_PTN: &str = r"=>|,,|[#={}(),;01]|\+|-";
@@ -165,10 +168,7 @@ impl Token {
 		let width = captures.get(1).unwrap().as_str().parse::<u8>().unwrap();
 		let value = captures.get(2).unwrap().as_str();
 
-		let number = match value.as_bytes().first().unwrap() {
-			b'd' => Self::parse_number(&value[1..])?,
-			_ => Self::parse_number(&format!("0{value}"))?,
-		};
+		let number = Self::parse_number(value)?;
 
 		if number > u8::MAX as u32 {
 			bail!("number literal may not be greater than 255, in [{token}]");
