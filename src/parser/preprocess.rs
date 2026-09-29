@@ -60,6 +60,7 @@ fn literal(width: u8, value: u8) -> Result<Vec<Token>> {
 		tokens.push(Token::Comma);
 	}
 
+	tokens.pop(); // remove trailing comma
 	Ok(tokens)
 }
 
@@ -80,5 +81,6 @@ fn range(ident: &str, start: u8, end: u8) -> Result<Vec<Token>> {
 		tokens.push(Token::Comma);
 	}
 
+	tokens.pop(); // remove trailing comma
 	Ok(tokens)
 }
