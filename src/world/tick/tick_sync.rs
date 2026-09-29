@@ -27,6 +27,12 @@ impl World {
 			let target_ant = target_pos.and_then(|pos| self.ants[&layer].get(&pos));
 
 			let input_value: u8 = match input_sub_pin.pin {
+				Mem => ant.memory,
+				Signal => self.signal_in,
+
+				// need channel because ext_input is 16 bits
+				ExtIn => (self.ext_input >> (input_sub_pin.channel() * 8)) as u8,
+
 				TileColor => *self.tiles.get(pos).unwrap(),
 				TileZero => (*self.tiles.get(pos).unwrap() == 0) as u8,
 				NearbyTile => target_pos
@@ -54,12 +60,6 @@ impl World {
 
 				NearbyId => target_ant.map(|target| target.behavior).unwrap_or_default(),
 				NearbyMem => target_ant.map(|target| target.memory).unwrap_or_default(),
-
-				Mem => ant.memory,
-				Signal => self.signal_in,
-
-				// need channel because ext_input is 16 bits
-				ExtIn => (self.ext_input >> (input_sub_pin.channel() * 8)) as u8,
 
 				_ => panic!("unhandled input: {input_sub_pin:?}"),
 			};
@@ -133,8 +133,6 @@ impl World {
 				(Mem, _) => ant.memory = value | (ant.memory & !mem_mask),
 				(Signal, true) => self.signal_out |= value,
 				(ExtOut, true) => self.ext_output.push(wide_value),
-
-				// tiles
 				(TileZero, true) => clear = true,
 				(TileColor, _) => self.set_tile(pos, value, tile_mask),
 
