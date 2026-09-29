@@ -1,26 +1,10 @@
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Result, anyhow};
 use regex::Regex;
 use std::sync::LazyLock;
 
 use crate::parser::preprocess::preprocess;
 
 use super::Keyword;
-
-#[inline]
-fn regex(ptn: &str) -> Regex {
-	Regex::new(ptn).unwrap()
-}
-
-#[inline]
-fn regex_full(ptn: &str) -> Regex {
-	regex(&format!("^{ptn}$"))
-}
-
-macro_rules! lazy_regex_full {
-	($ptn:expr) => {
-		LazyLock::new(|| regex_full($ptn))
-	};
-}
 
 // idea: add Token line metadata
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
@@ -47,8 +31,8 @@ pub enum Token {
 	Number(u32),
 
 	// ## Pre-Processor
-	NumberLiteral(u8, u8),
-	IdentRange(bool, String, u8, u8),
+	NumberLiteral(LiteralData),
+	IdentRange(RangeData),
 
 	// ## Other
 	Invalid(String),
@@ -57,6 +41,14 @@ pub enum Token {
 	#[default]
 	EndOfFile,
 }
+
+#[rustfmt::skip]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct LiteralData { pub width: u8, pub value: u8, }
+
+#[rustfmt::skip]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct RangeData { pub sign: bool, pub ident: String, pub start: u8, pub end: u8, }
 
 #[rustfmt::skip]
 macro_rules! number_ptn { () => { r"0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*" }; }
@@ -89,8 +81,14 @@ static TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| {
 	]
 	.join("|");
 
-	regex(&pattern)
+	Regex::new(&pattern).unwrap()
 });
+
+#[rustfmt::skip]
+fn regex_full(ptn: &str) -> Regex { Regex::new(&format!("^{ptn}$")).unwrap() }
+
+#[rustfmt::skip]
+macro_rules! lazy_regex_full { ($ptn:expr) => { LazyLock::new(|| regex_full($ptn)) }; }
 
 static COMMENT_RE: LazyLock<Regex> = lazy_regex_full!(COMMENT_PTN);
 static RANGE_RE: LazyLock<Regex> = lazy_regex_full!(RANGE_PTN);
@@ -165,12 +163,13 @@ impl Token {
 
 	fn parse_range(token: &str) -> Result<Token> {
 		let captures = RANGE_RE.captures(token).unwrap();
-		let sign_ = captures.get(1).unwrap().as_str() == "-";
-		let ident = captures.get(2).unwrap().as_str().to_string();
-		let start = captures.get(3).unwrap().as_str().parse::<u8>().unwrap();
-		let end__ = captures.get(4).unwrap().as_str().parse::<u8>().unwrap();
 
-		Ok(Token::IdentRange(sign_, ident, start, end__))
+		Ok(Token::IdentRange(RangeData {
+			sign: captures.get(1).unwrap().as_str() == "-",
+			ident: captures.get(2).unwrap().as_str().to_string(),
+			start: captures.get(3).unwrap().as_str().parse::<u8>().unwrap(),
+			end: captures.get(4).unwrap().as_str().parse::<u8>().unwrap(),
+		}))
 	}
 
 	pub fn parse_ident(token: &str) -> Result<Token> {
@@ -186,15 +185,12 @@ impl Token {
 	fn parse_literal(token: &str) -> Result<Token> {
 		let captures = LITERAL_RE.captures(token).unwrap();
 		let width = captures.get(1).unwrap().as_str().parse::<u8>().unwrap();
-		let value = captures.get(2).unwrap().as_str();
+		let value_str = captures.get(2).unwrap().as_str();
 
-		let number = Self::parse_number(value)?;
+		let value = u8::try_from(Self::parse_number(value_str)?)
+			.map_err(|_| anyhow!("number literal may not be greater than 255, in [{token}]"))?;
 
-		if number > u8::MAX as u32 {
-			bail!("number literal may not be greater than 255, in [{token}]");
-		}
-
-		Ok(Token::NumberLiteral(width, number as u8))
+		Ok(Token::NumberLiteral(LiteralData { width, value }))
 	}
 
 	fn parse_number(token: &str) -> Result<u32> {

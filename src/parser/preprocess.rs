@@ -1,4 +1,7 @@
-use crate::{parser::token::Token, util::bits_from_int};
+use crate::{
+	parser::token::{LiteralData, RangeData, Token},
+	util::bits_from_int,
+};
 use anyhow::{Context, Result, bail};
 
 pub fn preprocess(tokens: &[Token]) -> Result<Vec<Token>> {
@@ -11,8 +14,8 @@ pub fn preprocess(tokens: &[Token]) -> Result<Vec<Token>> {
 	while let Some(token) = in_tokens.pop() {
 		let mut tokens = match &token {
 			Ident(ident) if is_void_call(out_tokens.last(), in_tokens.last()) => void_call(ident),
-			NumberLiteral(width, value) => literal(*width, *value),
-			IdentRange(sign, ident, start, end) => range(*sign, ident, *start, *end),
+			NumberLiteral(data) => literal(data),
+			IdentRange(data) => range(data),
 			_ => Ok(vec![token.clone()]),
 		}
 		.context(format!("in token {token:?}"))?;
@@ -44,7 +47,9 @@ fn void_call(func_name: &str) -> Result<Vec<Token>> {
 	])
 }
 
-fn literal(width: u8, value: u8) -> Result<Vec<Token>> {
+fn literal(data: &LiteralData) -> Result<Vec<Token>> {
+	let LiteralData { width, value } = *data;
+
 	if width < 8 && value >= 1 << width {
 		bail!("value {value} must be less than {}", 1 << width);
 	}
@@ -64,7 +69,14 @@ fn literal(width: u8, value: u8) -> Result<Vec<Token>> {
 	Ok(tokens)
 }
 
-fn range(sign: bool, ident: &str, start: u8, end: u8) -> Result<Vec<Token>> {
+fn range(data: &RangeData) -> Result<Vec<Token>> {
+	let RangeData {
+		sign,
+		ident,
+		start,
+		end,
+	} = data.clone();
+
 	let mut tokens = vec![];
 
 	let range: Vec<u8> = if end > start {
