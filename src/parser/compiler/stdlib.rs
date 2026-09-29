@@ -341,21 +341,21 @@ fn one = (a, b, c, d) => out {
 
 ## Counter
 
-fn on = (c1, c0) => out {
-	out = p_eq(C1, C0, c1, c0);
+fn on = (t1, t0) => out {
+	out = p_eq(T1, T0, t1, t0);
 }
 
-fn on = (c2, c1, c0) => out {
-	out = p_eq(C2, C1, C0, c2, c1, c0);
+fn on = (t2, t1, t0) => out {
+	out = p_eq(T2, T1, T0, t2, t1, t0);
 }
 
-fn on = (c3, c2, c1, c0) => out {
-	out = p_eq(C3, C2, C1, C0, c3, c2, c1, c0);
+fn on = (t3, t2, t1, t0) => out {
+	out = p_eq(T3, T2, T1, T0, t3, t2, t1, t0);
 }
 
-fn on = (c5, c4, c3, c2, c1, c0) => out {
-	out = p_eq(C5, C4, C3, C2, C1, C0, 
-					c5, c4, c3, c2, c1, c0);
+fn on = (t5, t4, t3, t2, t1, t0) => out {
+	out = p_eq(T5, T4, T3, T2, T1, T0, 
+					t5, t4, t3, t2, t1, t0);
 }
 
 

@@ -44,9 +44,9 @@ pub enum Pin {
 
 	// ## current tile
 	/// current tile's value
-	Tile,
+	TileColor,
 	/// empty current tile (before writing) or check if it's empty (if input)
-	EmptyTile,
+	TileZero,
 
 	// ## neighboring tiles
 	/// neighboring tile
@@ -140,10 +140,16 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::Counter,
+			pin: Self::TileColor,
 			code: "C",
 			size: BYTE,
-			io_type: Some(IoType::Input),
+			io_type: None,
+		},
+		PinDefinition {
+			pin: Self::TileZero,
+			code: "CZ",
+			size: BIT,
+			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Die,
@@ -206,16 +212,10 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::Tile,
+			pin: Self::Counter,
 			code: "T",
 			size: BYTE,
-			io_type: None,
-		},
-		PinDefinition {
-			pin: Self::EmptyTile,
-			code: "TZ",
-			size: BIT,
-			io_type: None,
+			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::TieBreaker,
@@ -237,7 +237,7 @@ impl Pin {
 		},
 		PinDefinition {
 			pin: Self::NearbyTile,
-			code: "VT",
+			code: "VC",
 			size: SQUARED,
 			io_type: Some(IoType::Input),
 		},

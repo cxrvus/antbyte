@@ -27,8 +27,8 @@ impl World {
 			let target_ant = target_pos.and_then(|pos| self.ants[&layer].get(&pos));
 
 			let input_value: u8 = match input_sub_pin.pin {
-				Tile => *self.tiles.get(pos).unwrap(),
-				EmptyTile => (*self.tiles.get(pos).unwrap() == 0) as u8,
+				TileColor => *self.tiles.get(pos).unwrap(),
+				TileZero => (*self.tiles.get(pos).unwrap() == 0) as u8,
 				NearbyTile => target_pos
 					.map(|pos| *self.tiles.get(pos).unwrap())
 					.unwrap_or(0u8),
@@ -114,7 +114,7 @@ impl World {
 			.cloned()
 			.expect("invalid Behavior ID");
 
-		let tile_mask = behavior.pin_mask(Pin::Tile);
+		let tile_mask = behavior.pin_mask(Pin::TileColor);
 		let mem_mask = behavior.pin_mask(Pin::Mem);
 
 		let mut clear = false;
@@ -135,8 +135,8 @@ impl World {
 				(ExtOut, true) => self.ext_output.push(wide_value),
 
 				// tiles
-				(EmptyTile, true) => clear = true,
-				(Tile, _) => self.set_tile(pos, value, tile_mask),
+				(TileZero, true) => clear = true,
+				(TileColor, _) => self.set_tile(pos, value, tile_mask),
 
 				// deferred to async ticks...
 
