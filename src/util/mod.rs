@@ -44,3 +44,24 @@ pub fn setup_ctrl_c() -> Option<Receiver<()>> {
 		Err(_) => None,
 	}
 }
+
+pub fn bits_from_int(value: u16) -> [bool; 16] {
+	let mut bits = [false; 16];
+	for (i, bit) in bits.iter_mut().enumerate() {
+		*bit = (value >> i & 1) == 1;
+	}
+	bits.reverse();
+	bits
+}
+
+pub fn int_from_bits(bits: &[bool]) -> u32 {
+	let mut value = 0;
+
+	for (i, &bit) in bits.iter().rev().enumerate() {
+		if bit {
+			value |= 1 << i;
+		}
+	}
+
+	value
+}

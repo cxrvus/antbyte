@@ -8,6 +8,7 @@ use crate::{
 		token::Token,
 	},
 	truth_table::TruthTable,
+	util::{bits_from_int, int_from_bits},
 };
 
 use anyhow::{Result, anyhow, bail};
@@ -193,27 +194,6 @@ impl CompFunc {
 	}
 }
 
-fn bits_from_int(value: u16) -> [bool; 16] {
-	let mut bits = [false; 16];
-	for (i, bit) in bits.iter_mut().enumerate() {
-		*bit = (value >> i & 1) == 1;
-	}
-	bits.reverse();
-	bits
-}
-
-fn int_from_bits(bits: &[bool]) -> u32 {
-	let mut value = 0;
-
-	for (i, &bit) in bits.iter().rev().enumerate() {
-		if bit {
-			value |= 1 << i;
-		}
-	}
-
-	value
-}
-
 fn format_pin(sub_pin: &SubPin, io_type: IoType) -> String {
 	let code = sub_pin.pin.definition().code.to_ascii_lowercase();
 	let index = sub_pin.bit_index;
@@ -228,7 +208,7 @@ fn format_pin(sub_pin: &SubPin, io_type: IoType) -> String {
 
 #[cfg(test)]
 mod test {
-	use super::*;
+	use crate::util::{bits_from_int, int_from_bits};
 
 	#[test]
 	fn bit_conversion() {
