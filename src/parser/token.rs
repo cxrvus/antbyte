@@ -53,17 +53,18 @@ pub enum Token {
 }
 
 const COMMENT_PTN: &str = r"#.*(?:\r?\n|$)";
-const NUMBER_PTN: &str = r"(?:0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*)";
-const STRING_PTN: &str = r#""(.*?)""#;
 const IDENT_PTN: &str = r"[a-zA-Z_]\w*";
-const LOWER_IDENT: &str = r"_?[a-z][a-z0-9_]*";
-const UPPER_IDENT: &str = r"[A-Z][A-Z0-9_]*";
-const SYMBOL_PTN: &str = r"=>|,,|[#={}(),;01]|\+|-";
-
+const NUMBER_PTN: &str = r"(?:0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*)";
 const SPACE_PTN: &str = r"\s+";
+const STRING_PTN: &str = r#""(.*?)""#;
+const SYMBOL_PTN: &str = r"=>|,,|[#={}(),;01]|\+|-";
 const WILD_PTN: &str = r".+";
 
+const LOWER_IDENT: &str = r"_?[a-z][a-z0-9_]*";
+const UPPER_IDENT: &str = r"[A-Z][A-Z0-9_]*";
+
 static TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| {
+	// order matters!
 	let pattern = [
 		COMMENT_PTN,
 		STRING_PTN,
@@ -78,13 +79,14 @@ static TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| {
 	regex(&pattern)
 });
 
-static WHITESPACE_RE: LazyLock<Regex> = lazy_regex_full!(SPACE_PTN);
 static COMMENT_RE: LazyLock<Regex> = lazy_regex_full!(COMMENT_PTN);
 static IDENT_RE: LazyLock<Regex> = lazy_regex_full!(IDENT_PTN);
+static NUMBER_RE: LazyLock<Regex> = lazy_regex_full!(NUMBER_PTN);
+static SPACE_RE: LazyLock<Regex> = lazy_regex_full!(SPACE_PTN);
+static STRING_RE: LazyLock<Regex> = lazy_regex_full!(STRING_PTN);
+
 static LOWER_IDENT_RE: LazyLock<Regex> = lazy_regex_full!(LOWER_IDENT);
 static UPPER_IDENT_RE: LazyLock<Regex> = lazy_regex_full!(UPPER_IDENT);
-static NUMBER_RE: LazyLock<Regex> = lazy_regex_full!(NUMBER_PTN);
-static STRING_RE: LazyLock<Regex> = lazy_regex_full!(STRING_PTN);
 
 impl Token {
 	pub fn tokenize(code: &str) -> Result<Vec<Self>> {
@@ -95,7 +97,7 @@ impl Token {
 		token_strings
 			.iter()
 			.map(|x| x.as_str())
-			.filter(|x| !(WHITESPACE_RE.is_match(x) || COMMENT_RE.is_match(x)))
+			.filter(|x| !(SPACE_RE.is_match(x) || COMMENT_RE.is_match(x)))
 			.map(Token::from_token_str)
 			.collect::<Result<Vec<_>>>()
 	}
