@@ -14,7 +14,7 @@ impl<'a> SignatureSpec<'a> {
 
 fn test_func(signature: SignatureSpec, entries: Vec<u32>) {
 	let truth_table = compile_func(STDLIB, signature);
-	assert_eq!(truth_table.entries(), &entries)
+	assert_eq!(truth_table.entries(), entries)
 }
 
 #[test]

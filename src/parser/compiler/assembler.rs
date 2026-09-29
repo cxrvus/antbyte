@@ -12,6 +12,8 @@ use crate::{
 
 use anyhow::{Result, anyhow, bail};
 
+// idea: const MAX_BYTES: usize = (2usize.pow(12)) * (16 / 8);
+
 impl CompFunc {
 	pub fn assemble(&self, log_cfg: &LogConfig) -> Result<Behavior> {
 		let mut func = self.clone();
@@ -65,17 +67,15 @@ impl CompFunc {
 			)?;
 		}
 
-		if inputs.len() > 8 {
+		if inputs.len() > 12 {
 			Err(anyhow!(
-				"may not have more than 8 inputs, got {}\n{:?}:\n",
+				"may not have more than 12 inputs, got {}\n",
 				inputs.len(),
-				inputs
 			))
 		} else if outputs.len() > 16 {
 			Err(anyhow!(
-				"may not have more than 16 outputs, got {}\n{:?}:\n",
+				"may not have more than 16 outputs, got {}\n",
 				outputs.len(),
-				outputs
 			))
 		} else {
 			Ok((inputs, outputs))
@@ -143,7 +143,7 @@ impl CompFunc {
 	fn simulate(&self) -> TruthTable {
 		let input_bits = self.signature.params.len();
 		let output_bits = self.signature.assignees.len();
-		let max_input = 1u8.unbounded_shl(input_bits as u32).wrapping_sub(1);
+		let max_input = 1u16.unbounded_shl(input_bits as u32).wrapping_sub(1);
 
 		let mut entries = vec![];
 
@@ -154,7 +154,7 @@ impl CompFunc {
 		TruthTable::new(input_bits, output_bits, entries).unwrap()
 	}
 
-	fn tick(&self, input: u8) -> u32 {
+	fn tick(&self, input: u16) -> u32 {
 		let mut variables = HashMap::<String, bool>::new();
 		let mut input_bits = bits_from_int(input).to_vec();
 
@@ -193,8 +193,8 @@ impl CompFunc {
 	}
 }
 
-fn bits_from_int(value: u8) -> [bool; 8] {
-	let mut bits = [false; 8];
+fn bits_from_int(value: u16) -> [bool; 16] {
+	let mut bits = [false; 16];
 	for (i, bit) in bits.iter_mut().enumerate() {
 		*bit = (value >> i & 1) == 1;
 	}
@@ -234,7 +234,7 @@ mod test {
 	fn bit_conversion() {
 		for i in 0..=0xff {
 			let bits = bits_from_int(i);
-			let value = int_from_bits(&bits) as u8;
+			let value = int_from_bits(&bits) as u16;
 			assert_eq!(i, value);
 		}
 	}

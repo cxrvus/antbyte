@@ -43,7 +43,7 @@ impl From<Behavior> for BehaviorDTO {
 	fn from(value: Behavior) -> Self {
 		Self {
 			name: value.name,
-			logic: value.logic.entries().to_vec(),
+			logic: value.logic.entries(),
 			inputs: value.inputs,
 			outputs: value.outputs,
 		}
