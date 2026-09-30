@@ -20,87 +20,96 @@ const ANT_LIMIT: u32 = 0x4000;
 #[serde(default)]
 pub struct WorldConfig {
 	// ## Core
+	/// description
+	pub description: String,
 	/// width in pixels
 	pub width: Coord,
 	/// height in pixels
 	pub height: Coord,
-	/// max number of ant layers
-	pub layer_limit: u8,
-	/// filter for layers that will be rendered
-	pub layer_filter: u8,
 	/// simulated ticks per frame (defaults to 1)
 	pub speed: Option<u32>,
 	/// simulation tick limit
+
+	// ## @Start
+	/// position of the first ant
+	pub start_pos: StartingPos,
+	/// direction value (0-7) for start ant
+	pub start_dir: u8,
+
+	// ## @End
 	pub max_ticks: Option<u32>,
-	/// amount of ticks after which a tile will automatically reset
-	pub decay: Option<u16>,
 	/// re-run simulation after it ends
 	pub looping: bool,
+	/// amount of ms to sleep for after end of simulation, i.e. between loops
+	pub sleep: Option<u32>,
+
+	// ## Simulation
 	/// behavior if ants touch the worlds border
 	pub border: BTreeMap<u8, BorderMode>,
+	/// amount of ticks after which a tile will automatically reset
+	pub decay: Option<u16>,
+	/// max number of ants before additional spawning gets blocked
+	pub ant_limit: u32,
+	/// max number of ant layers
+	pub layer_limit: u8,
 	/// only tick layer every n ticks
 	pub slow_down: BTreeMap<u8, u16>,
 	/// counter-clockwise instead of clockwise rotation
 	pub inv_rot: bool,
-	/// position of the first ant
-	pub start_pos: StartingPos,
-	/// first tick to render
-	pub start_tick: u32,
-	/// direction value (0-7) for start ant
-	pub start_dir: u8,
-	/// max number of ants before additional spawning gets blocked
-	pub ant_limit: u32,
+	/// seed for random values
 	pub seed: Option<u32>,
-	pub description: String,
 
 	// ## Renderer
 	/// rendered frames per second
 	pub fps: Option<u32>,
+	/// first tick to render
+	pub start_tick: u32,
+	/// filter for layers that will be rendered
+	pub layer_filter: u8,
 	/// filter to get desired nibble (4 bits) out of BG byte
 	pub bg_filter: ByteFilter,
 	/// background render mask
 	pub bg: RenderMask,
 	/// foreground render mask
 	pub fg: RenderMask,
-	/// amount of ms to sleep for after end of simulation, i.e. between loops
-	pub sleep: Option<u32>,
 
 	// ## External I/O
 	/// 1 to 8 characters as key bindings, representing X0-X7 in ascending order
 	pub keys: Option<String>,
-
 	pub midi: MidiConfig,
 }
 
 impl Default for WorldConfig {
 	fn default() -> Self {
 		Self {
+			description: "".into(),
 			width: 16,
 			height: 16,
-			layer_limit: LAYER_LIMIT,
-			layer_filter: 0xff,
 			speed: Some(1),
-			max_ticks: None,
-			decay: None,
-			looping: false,
-			border: BTreeMap::from([(0, BorderMode::Wrap)]),
-			slow_down: Default::default(),
-			inv_rot: false,
+
 			start_pos: StartingPos::Center,
 			start_dir: 0,
+
+			max_ticks: None,
+			looping: false,
+			sleep: Some(200),
+
+			border: BTreeMap::from([(0, BorderMode::Wrap)]),
+			decay: None,
 			ant_limit: ANT_LIMIT,
+			layer_limit: LAYER_LIMIT,
+			slow_down: Default::default(),
+			inv_rot: false,
 			seed: None,
-			description: "".into(),
 
 			fps: Some(FPS_CAP),
 			start_tick: 0,
+			layer_filter: 0xff,
 			bg_filter: ByteFilter::Lsb,
 			bg: RenderMask::Tile,
 			fg: RenderMask::Dir,
-			sleep: Some(200),
 
 			keys: None,
-
 			midi: Default::default(),
 		}
 	}
