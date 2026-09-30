@@ -44,7 +44,7 @@ pub enum Token {
 
 #[rustfmt::skip]
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct LiteralData { pub width: u8, pub value: u8, }
+pub struct LiteralData { pub sign: bool, pub width: u8, pub value: u8, }
 
 #[rustfmt::skip]
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
@@ -56,7 +56,7 @@ macro_rules! number_ptn { () => { r"0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9
 const COMMENT_PTN: &str = r"#.*(?:\r?\n|$)";
 const RANGE_PTN: &str = r"([+-]?)([a-zA-Z_]\w*?)([0-7])\:([0-7])";
 const IDENT_PTN: &str = r"[a-zA-Z_]\w*";
-const LITERAL_PTN: &str = concat!(r"([1-8])'(", number_ptn!(), ")");
+const LITERAL_PTN: &str = concat!(r"([+-]?)([1-8])'(", number_ptn!(), ")");
 const NUMBER_PTN: &str = concat!(r"(?:", number_ptn!(), ")");
 const SPACE_PTN: &str = r"\s+";
 const STRING_PTN: &str = r#""(.*?)""#;
@@ -184,13 +184,14 @@ impl Token {
 
 	fn parse_literal(token: &str) -> Result<Token> {
 		let captures = LITERAL_RE.captures(token).unwrap();
-		let width = captures.get(1).unwrap().as_str().parse::<u8>().unwrap();
-		let value_str = captures.get(2).unwrap().as_str();
+		let sign = captures.get(1).unwrap().as_str() == "-";
+		let width = captures.get(2).unwrap().as_str().parse::<u8>().unwrap();
+		let value_str = captures.get(3).unwrap().as_str();
 
 		let value = u8::try_from(Self::parse_number(value_str)?)
 			.map_err(|_| anyhow!("number literal may not be greater than 255, in [{token}]"))?;
 
-		Ok(Token::NumberLiteral(LiteralData { width, value }))
+		Ok(Token::NumberLiteral(LiteralData { sign, width, value }))
 	}
 
 	fn parse_number(token: &str) -> Result<u32> {

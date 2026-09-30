@@ -48,19 +48,22 @@ fn void_call(func_name: &str) -> Result<Vec<Token>> {
 }
 
 fn literal(data: &LiteralData) -> Result<Vec<Token>> {
-	let LiteralData { width, value } = *data;
+	let LiteralData { sign, width, value } = *data;
 
 	if width < 8 && value >= 1 << width {
 		bail!("value {value} must be less than {}", 1 << width);
 	}
 
+	let value = match sign {
+		true => (!value).wrapping_add(1), // 2's complement
+		false => value,
+	};
+
+	let bits = &bits_from_int(value as u16);
+
 	let mut tokens = vec![];
 
-	let width = width as usize;
-	let value = value as u16;
-	let bits = &bits_from_int(value);
-
-	for &bit in bits[bits.len() - width..].iter() {
+	for &bit in bits[bits.len() - (width as usize)..].iter() {
 		tokens.push(Token::Bit(bit));
 		tokens.push(Token::Comma);
 	}
