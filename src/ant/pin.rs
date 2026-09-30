@@ -87,10 +87,9 @@ pub enum IoType {
 
 const BIT: u8 = 1;
 const TRIPLET: u8 = 3;
-const ANT_ID: u8 = BYTE;
 const BYTE: u8 = 8;
-const DOUBLE: u8 = 16;
-const SQUARED: u8 = 64;
+const WORD: u8 = 16;
+const QWORD: u8 = 64;
 
 #[cfg_attr(test, derive(TS, Serialize))]
 #[cfg_attr(test, ts(export))]
@@ -106,7 +105,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::AntId,
 			code: "A",
-			size: ANT_ID,
+			size: BYTE,
 			io_type: None,
 		},
 		PinDefinition {
@@ -232,19 +231,19 @@ impl Pin {
 		PinDefinition {
 			pin: Self::NearbyId,
 			code: "VA",
-			size: SQUARED,
+			size: QWORD,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::NearbyTile,
 			code: "VC",
-			size: SQUARED,
+			size: QWORD,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::NearbyMem,
 			code: "VM",
-			size: SQUARED,
+			size: QWORD,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
@@ -256,13 +255,13 @@ impl Pin {
 		PinDefinition {
 			pin: Self::ExtIn,
 			code: "X",
-			size: DOUBLE,
+			size: WORD,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::ExtOut,
 			code: "Y",
-			size: DOUBLE,
+			size: WORD,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
