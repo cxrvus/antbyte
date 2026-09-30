@@ -52,6 +52,8 @@ pub struct WorldConfig {
 	pub ant_limit: u32,
 	/// max number of ant layers
 	pub layer_limit: u8,
+	/// use Euclidean distances (don't normalize diagonal movement)
+	pub euclid: bool,
 	/// only tick layer every n ticks
 	pub slow_down: BTreeMap<u8, u16>,
 	/// counter-clockwise instead of clockwise rotation
@@ -98,6 +100,7 @@ impl Default for WorldConfig {
 			decay: None,
 			ant_limit: ANT_LIMIT,
 			layer_limit: LAYER_LIMIT,
+			euclid: false,
 			slow_down: Default::default(),
 			inv_rot: false,
 			seed: None,

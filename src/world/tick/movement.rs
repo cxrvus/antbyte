@@ -1,10 +1,10 @@
-use std::{mem::swap, sync::LazyLock};
+use std::mem::swap;
 
 use crate::{
 	ant::Ant,
 	util::{
 		dir::Direction,
-		vec2::{Pos, PosOffset},
+		vec2::{OFFSET_SCALE, Pos, PosOffset, PosOffsetTable},
 	},
 	world::{World, config::BorderMode, state::Ants},
 };
@@ -102,7 +102,7 @@ impl World {
 				match action {
 					MoveAction::Move(target_pos) => {
 						let mut ant = ant;
-						ant.update_offset();
+						ant.update_offset(&self.cache.offset_table());
 						commit(&mut result, target_pos, ant);
 					}
 					MoveAction::Stay => commit(&mut result, pos, ant),
@@ -122,44 +122,25 @@ impl World {
 	}
 }
 
-const OFFSET_SCALE: i8 = 64;
-
-static OFFSET_TABLE: LazyLock<[PosOffset; 0x100]> = LazyLock::new(|| {
-	std::array::from_fn(|dir| {
-		let angle = (dir as f64) * (2.0 * std::f64::consts::PI / 256.0);
-
-		let raw_dx = angle.cos();
-		let raw_dy = angle.sin();
-
-		// normalize so the larger axis == 1.0, then scale to SCALE
-		let largest = raw_dx.abs().max(raw_dy.abs());
-
-		let dx = ((raw_dx / largest) * OFFSET_SCALE as f64).round() as i8;
-		let dy = ((raw_dy / largest) * OFFSET_SCALE as f64).round() as i8;
-
-		PosOffset { x: dx, y: dy }
-	})
-});
-
 impl Ant {
-	pub fn new_offset(&self) -> PosOffset {
+	pub fn new_offset(&self, offset_table: &PosOffsetTable) -> PosOffset {
 		let rot = self.rotation.value();
-		let delta = OFFSET_TABLE[rot as usize];
+		let delta = offset_table[rot as usize];
 		let x = self.pos_offset.x + delta.x;
 		let y = self.pos_offset.y + delta.y;
 		PosOffset { x, y }
 	}
 
-	pub fn update_move_dir(&mut self) {
-		let offset = self.new_offset();
+	pub fn update_move_dir(&mut self, offset_table: &PosOffsetTable) {
+		let offset = self.new_offset(offset_table);
 		let dir_x = dir_coord(offset.x);
 		let dir_y = dir_coord(offset.y);
 		let dir = coords_to_dir((dir_x, dir_y));
 		self.move_dir = dir;
 	}
 
-	pub fn update_offset(&mut self) {
-		let offset = self.new_offset();
+	pub fn update_offset(&mut self, offset_table: &PosOffsetTable) {
+		let offset = self.new_offset(offset_table);
 		let x = clamp_offset(offset.x);
 		let y = clamp_offset(offset.y);
 		self.pos_offset = PosOffset { x, y };

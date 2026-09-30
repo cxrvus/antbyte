@@ -98,6 +98,9 @@ impl ops::Rem<Vec2> for Vec2 {
 	}
 }
 
+pub const OFFSET_SCALE: i8 = 64;
+pub type PosOffsetTable = [PosOffset; 0x100];
+
 #[derive(Debug, Default, Copy, Clone)]
 pub struct PosOffset {
 	pub x: i8,
@@ -113,4 +116,25 @@ impl ops::Add<PosOffset> for PosOffset {
 			y: self.y + other.y,
 		}
 	}
+}
+
+pub fn generate_offset_table(euclid: bool) -> PosOffsetTable {
+	std::array::from_fn(|dir| {
+		let angle = (dir as f64) * (2.0 * std::f64::consts::PI / 256.0);
+
+		let mut dx = angle.cos();
+		let mut dy = angle.sin();
+
+		if !euclid {
+			// normalize so the larger axis == 1.0, then scale to SCALE
+			let largest = dx.abs().max(dy.abs());
+			dx /= largest;
+			dy /= largest;
+		}
+
+		let dx = (dx * OFFSET_SCALE as f64).round() as i8;
+		let dy = (dy * OFFSET_SCALE as f64).round() as i8;
+
+		PosOffset { x: dx, y: dy }
+	})
 }

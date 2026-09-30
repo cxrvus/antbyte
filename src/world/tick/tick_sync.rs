@@ -185,7 +185,7 @@ impl World {
 		ant.rotation.rotate(rot, left);
 		ant.child_rotation.rotate(child_rot, child_left);
 
-		ant.update_move_dir();
+		ant.update_move_dir(&self.cache.offset_table());
 
 		self.ants.get_mut(&layer).unwrap().insert(pos, ant);
 	}

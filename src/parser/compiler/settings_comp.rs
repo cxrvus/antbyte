@@ -74,6 +74,7 @@ impl Parser {
 			"looping" | "loop" => config.looping = self.next_bit()?,
 
 			"inv_rot" => config.inv_rot = self.next_bit()?,
+			"euclid" => config.euclid = self.next_bit()?,
 
 			"border" => {
 				let border_mode = BorderMode::try_from(self.next_ident()?)?;

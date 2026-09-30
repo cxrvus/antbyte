@@ -1,3 +1,4 @@
+pub mod cache;
 pub mod config;
 pub mod file_compiler;
 pub mod frame;
@@ -19,6 +20,7 @@ use crate::{
 	ant::{Ant, behavior::Behavior},
 	util::rotation::Rotation,
 	world::{
+		cache::WorldCache,
 		config::BorderMode,
 		state::{WorldState, WorldStatus},
 	},
@@ -41,6 +43,7 @@ pub struct WorldProperties {
 pub struct World {
 	properties: WorldProperties,
 	pub state: WorldState,
+	pub cache: WorldCache,
 }
 
 impl World {
@@ -60,6 +63,7 @@ impl World {
 			height,
 			start_pos,
 			start_dir,
+			euclid,
 			..
 		} = config;
 
@@ -85,7 +89,13 @@ impl World {
 
 		state.ants.entry(0).or_default().insert(start_pos, ant);
 
-		Ok(Self { properties, state })
+		let cache = WorldCache::new(euclid);
+
+		Ok(Self {
+			properties,
+			state,
+			cache,
+		})
 	}
 
 	#[inline]
