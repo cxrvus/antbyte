@@ -14,7 +14,7 @@ pub struct Ant {
 	pub birth_rot: Rotation,
 
 	pub counter: u8,
-	pub wait_ticks: u8,
+	pub sleep_ticks: u8,
 	pub memory: u8,
 
 	pub rotation: Rotation,
@@ -33,7 +33,7 @@ pub struct TickData {
 	pub will_halt: bool,
 	pub will_kill: bool,
 	pub will_die: bool,
-	pub will_wait: bool,
+	pub will_sleep: bool,
 
 	pub child_behavior: u8,
 	pub child_layer: u8,
@@ -57,13 +57,13 @@ impl DerefMut for Ant {
 
 impl Ant {
 	#[inline]
-	pub fn waiting(&self) -> bool {
-		!self.will_wait && self.wait_ticks > 0
+	pub fn sleeping(&self) -> bool {
+		!self.will_sleep && self.sleep_ticks > 0
 	}
 
 	#[inline]
 	pub fn halted(&self) -> bool {
-		self.will_halt || self.waiting()
+		self.will_halt || self.sleeping()
 	}
 
 	#[inline]

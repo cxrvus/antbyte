@@ -160,8 +160,8 @@ impl World {
 				(Die, _) => ant.will_die = value_bool,
 
 				(Sleep, true) => {
-					ant.will_wait = true;
-					ant.wait_ticks = value
+					ant.will_sleep = true;
+					ant.sleep_ticks = value
 				}
 
 				// ignored

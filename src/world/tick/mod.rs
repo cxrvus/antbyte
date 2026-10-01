@@ -54,7 +54,7 @@ impl World {
 		let mut all_outputs = vec![];
 
 		for (pos, ant) in self.ants[&layer].clone() {
-			if !ant.waiting() {
+			if !ant.sleeping() {
 				let input = self.get_input(&ant, pos, layer);
 				let output = self.get_output(&ant, input);
 				all_outputs.push((pos, input, output));

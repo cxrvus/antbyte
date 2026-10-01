@@ -16,7 +16,7 @@ pub struct Args {
 	#[arg(short, long)]
 	pub quiet: bool,
 
-	/// Step through the simulation, waiting for input after each frame (FPS = 0)
+	/// Step through the simulation, sleeping for input after each frame (FPS = 0)
 	#[arg(short = 'S', long)]
 	stepped: bool,
 

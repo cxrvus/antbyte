@@ -44,7 +44,7 @@ pub fn run(world: World, quiet: bool) -> Result<()> {
 		player.transmit(&frame.ext_out);
 
 		if let Some(frame_ms) = frame.ms {
-			// wait for frame interval to elapse
+			// sleep for frame interval to elapse
 			let elapsed = last_frame.elapsed().as_millis() as u32;
 			if elapsed < frame_ms {
 				// add a small buffer to prevent flickering
@@ -53,7 +53,7 @@ pub fn run(world: World, quiet: bool) -> Result<()> {
 			}
 			last_frame = Instant::now();
 		} else {
-			// wait for key input to continue
+			// sleep for key input to continue
 			eprintln!("<i> Press <Enter> to step to next frame");
 			let mut input = String::new();
 			io::stdin().read_line(&mut input).unwrap();

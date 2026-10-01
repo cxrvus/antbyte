@@ -7,7 +7,7 @@ impl World {
 
 		for (pos, ant) in &self.ants[&layer].clone() {
 			if ant.will_kill
-				&& !ant.waiting()
+				&& !ant.sleeping()
 				&& let Some(next_pos) = self.next_pos(*pos, layer, ant.look_dir())
 				&& self.ants[&layer].contains_key(&next_pos)
 			{
@@ -24,12 +24,12 @@ impl World {
 		// die
 		self.ants.layer_mut(layer).retain(|_, ant| !ant.will_die);
 
-		// wait
+		// sleep
 		for ant in &mut self.ants.layer_mut(layer).values_mut() {
-			if ant.will_wait {
-				ant.will_wait = false;
-			} else if ant.waiting() {
-				ant.wait_ticks -= 1;
+			if ant.will_sleep {
+				ant.will_sleep = false;
+			} else if ant.sleeping() {
+				ant.sleep_ticks -= 1;
 			}
 		}
 	}
@@ -44,7 +44,7 @@ impl World {
 		for (pos, ant) in &self.ants[&source_layer] {
 			if let Some(target_pos) = self.next_pos(*pos, source_layer, ant.look_dir().flipped())
 				&& ant.child_behavior != 0
-				&& !ant.waiting()
+				&& !ant.sleeping()
 				&& self.get_behavior(ant.child_behavior).is_some()
 			{
 				let target_layer = source_layer + ant.child_layer;
