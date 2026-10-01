@@ -115,15 +115,15 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::ChildLeft,
-			code: "A_LFT",
-			size: BIT,
-			io_type: Some(IoType::Output),
-		},
-		PinDefinition {
 			pin: Self::ChildMem,
 			code: "A_MEM",
 			size: BYTE,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::ChildLeft,
+			code: "A_LFT",
+			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
@@ -133,10 +133,10 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::BirthTick,
-			code: "INL",
+			pin: Self::TileZero,
+			code: "CLR",
 			size: BIT,
-			io_type: Some(IoType::Input),
+			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::TileColor,
@@ -145,10 +145,10 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::TileZero,
-			code: "CLR",
-			size: BIT,
-			io_type: None,
+			pin: Self::Counter,
+			code: "CTR",
+			size: BYTE,
+			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::Die,
@@ -169,6 +169,12 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
+			pin: Self::BirthTick,
+			code: "INL",
+			size: BIT,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
 			pin: Self::Kill,
 			code: "KLL",
 			size: BIT,
@@ -187,56 +193,14 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::Noise,
-			code: "RND",
-			size: BYTE,
-			io_type: Some(IoType::Input),
-		},
-		PinDefinition {
-			pin: Self::Probability,
-			code: "PRB",
-			size: BYTE,
-			io_type: Some(IoType::Input),
-		},
-		PinDefinition {
-			pin: Self::Rotation,
-			code: "ROT",
-			size: BYTE,
-			io_type: None,
-		},
-		PinDefinition {
-			pin: Self::Signal,
-			code: "SIG",
-			size: BYTE,
-			io_type: None,
-		},
-		PinDefinition {
-			pin: Self::Counter,
-			code: "CTR",
-			size: BYTE,
-			io_type: Some(IoType::Input),
-		},
-		PinDefinition {
-			pin: Self::TieBreaker,
-			code: "TBK",
-			size: BIT,
-			io_type: Some(IoType::Output),
-		},
-		PinDefinition {
-			pin: Self::NearbyAnt,
-			code: "OBS",
-			size: BYTE,
+			pin: Self::NearbyTile,
+			code: "N_COL",
+			size: QWORD,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::NearbyId,
 			code: "N_ID",
-			size: QWORD,
-			io_type: Some(IoType::Input),
-		},
-		PinDefinition {
-			pin: Self::NearbyTile,
-			code: "N_COL",
 			size: QWORD,
 			io_type: Some(IoType::Input),
 		},
@@ -247,9 +211,51 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
+			pin: Self::NearbyAnt,
+			code: "OBS",
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
+			pin: Self::Probability,
+			code: "PRB",
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
+			pin: Self::Noise,
+			code: "RND",
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
+			pin: Self::Rotation,
+			code: "ROT",
+			size: BYTE,
+			io_type: None,
+		},
+		PinDefinition {
+			pin: Self::RotateZero,
+			code: "RST",
+			size: BIT,
+			io_type: None,
+		},
+		PinDefinition {
+			pin: Self::Signal,
+			code: "SIG",
+			size: BYTE,
+			io_type: None,
+		},
+		PinDefinition {
 			pin: Self::Wait,
 			code: "SLP",
 			size: BYTE,
+			io_type: Some(IoType::Output),
+		},
+		PinDefinition {
+			pin: Self::TieBreaker,
+			code: "TBK",
+			size: BIT,
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
@@ -263,12 +269,6 @@ impl Pin {
 			code: "X_OUT",
 			size: WORD,
 			io_type: Some(IoType::Output),
-		},
-		PinDefinition {
-			pin: Self::RotateZero,
-			code: "RST",
-			size: BIT,
-			io_type: None,
 		},
 	];
 
