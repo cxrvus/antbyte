@@ -54,7 +54,7 @@ impl World {
 
 				NearbyAnt => {
 					(target_ant.is_some()
-						|| (self.border_mode(layer) == BorderMode::Collide && target_pos.is_none()))
+						|| (self.border_mode(layer) == BorderMode::Obs && target_pos.is_none()))
 						as u8
 				}
 

@@ -122,15 +122,15 @@ impl Default for WorldConfig {
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
-pub enum BorderMode { Collide, Despawn, Cycle, Wrap }
+pub enum BorderMode { Obs, Die, Cycle, Wrap }
 
 impl TryFrom<String> for BorderMode {
 	type Error = Error;
 
 	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
 		match value.as_str() {
-			"obs" | "collide" => Ok(Self::Collide),
-			"die" | "despawn" => Ok(Self::Despawn),
+			"obs" => Ok(Self::Obs),
+			"die" => Ok(Self::Die),
 			"cycle" => Ok(Self::Cycle),
 			"wrap" => Ok(Self::Wrap),
 			invalid => Err(anyhow!("invalid border mode: '{invalid}'")),

@@ -19,7 +19,7 @@ impl World {
 			let border_mode = self.border_mode(layer);
 
 			match border_mode {
-				Collide | Despawn => None,
+				Obs | Die => None,
 				Cycle | Wrap => {
 					let dimensions = self.tiles.dimensions().sign();
 
