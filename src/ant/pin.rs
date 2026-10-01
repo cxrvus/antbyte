@@ -133,6 +133,12 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
+			pin: Self::Clock,
+			code: "CLK",
+			size: BYTE,
+			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
 			pin: Self::Clear,
 			code: "CLR",
 			size: BIT,
@@ -155,12 +161,6 @@ impl Pin {
 			code: "DIE",
 			size: BIT,
 			io_type: Some(IoType::Output),
-		},
-		PinDefinition {
-			pin: Self::Clock,
-			code: "EVR",
-			size: BYTE,
-			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::Halt,
