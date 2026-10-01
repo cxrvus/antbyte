@@ -33,26 +33,26 @@ impl World {
 				// need channel because ext_input is 16 bits
 				ExtIn => (self.ext_input >> (input_sub_pin.channel() * 8)) as u8,
 
-				TileColor => *self.tiles.get(pos).unwrap(),
-				TileZero => (*self.tiles.get(pos).unwrap() == 0) as u8,
-				NearbyTile => target_pos
+				Color => *self.tiles.get(pos).unwrap(),
+				Clear => (*self.tiles.get(pos).unwrap() == 0) as u8,
+				NearbyColor => target_pos
 					.map(|pos| *self.tiles.get(pos).unwrap())
 					.unwrap_or(0u8),
 
-				BirthTick => (ant.birth_tick + 1 == self.tick_count()) as u8,
+				Initial => (ant.birth_tick + 1 == self.tick_count()) as u8,
 				Halt => ant.halted() as u8,
 
 				Counter => ant.counter,
 				Clock => zero_count_mask(ant.counter),
-				Noise => self.rng(),
+				Random => self.rng(),
 				Probability => zero_count_mask(self.rng()),
 
 				AntId => ant.behavior,
 
 				Rotation => ant.rotation.rotated(ant.birth_rot.value(), true).value(),
-				RotateZero => (ant.rotation == ant.birth_rot) as u8,
+				RotateReset => (ant.rotation == ant.birth_rot) as u8,
 
-				NearbyAnt => {
+				Obstacle => {
 					(target_ant.is_some()
 						|| (self.border_mode(layer) == BorderMode::Obs && target_pos.is_none()))
 						as u8
@@ -114,7 +114,7 @@ impl World {
 			.cloned()
 			.expect("invalid Behavior ID");
 
-		let tile_mask = behavior.pin_mask(Pin::TileColor);
+		let tile_mask = behavior.pin_mask(Pin::Color);
 		let mem_mask = behavior.pin_mask(Pin::Mem);
 
 		let mut clear = false;
@@ -133,8 +133,8 @@ impl World {
 				(Mem, _) => ant.memory = value | (ant.memory & !mem_mask),
 				(Signal, true) => self.signal_out |= value,
 				(ExtOut, true) => self.ext_output.push(wide_value),
-				(TileZero, true) => clear = true,
-				(TileColor, _) => self.set_tile(pos, value, tile_mask),
+				(Clear, true) => clear = true,
+				(Color, _) => self.set_tile(pos, value, tile_mask),
 
 				// deferred to async ticks...
 
@@ -147,7 +147,7 @@ impl World {
 
 				(Rotation, true) => rot = value.reverse_bits(),
 				(RotateLeft, true) => left = true,
-				(RotateZero, true) => rot_zero = true,
+				(RotateReset, true) => rot_zero = true,
 
 				// spawn_tick
 				(AntId, _) => ant.child_behavior = value,
@@ -159,7 +159,7 @@ impl World {
 				// end_tick
 				(Die, _) => ant.will_die = value_bool,
 
-				(Wait, true) => {
+				(Sleep, true) => {
 					ant.will_wait = true;
 					ant.wait_ticks = value
 				}

@@ -28,13 +28,13 @@ pub enum Pin {
 	/// makes Rotation counterclockwise
 	RotateLeft,
 	/// resets Rotation to local birth rotation or is set to whether rotation equals birth rotation
-	RotateZero,
+	RotateReset,
 	/// ant is preferred in movement / spawning conflict resolution
 	TieBreaker,
 	/// current ant will not move this tick if true
 	Halt,
 	/// current ant will be skipped for this amount of ticks (remaining in its position)
-	Wait,
+	Sleep,
 
 	// ## removing ants
 	/// kill current ant
@@ -44,15 +44,15 @@ pub enum Pin {
 
 	// ## current tile
 	/// current tile's value
-	TileColor,
+	Color,
 	/// empty current tile (before writing) or check if it's empty (if input)
-	TileZero,
+	Clear,
 
 	// ## neighboring tiles
 	/// neighboring tile
-	NearbyTile,
+	NearbyColor,
 	/// true if neighboring tile contains an ant or other obstacle (i.e. border)
-	NearbyAnt,
+	Obstacle,
 	/// neighboring ant's ID
 	NearbyId,
 	/// neighboring ant's Memory
@@ -60,7 +60,7 @@ pub enum Pin {
 
 	// ## generic inputs
 	/// is 1 on the birth tick (+1) of the ant, else 0
-	BirthTick,
+	Initial,
 	/// current ant's persistent memory
 	Mem,
 	/// counter value incrementing each tick
@@ -68,7 +68,7 @@ pub enum Pin {
 	/// is set every 2^nth local tick
 	Clock,
 	/// 8 random bits
-	Noise,
+	Random,
 	/// is set with a probability of 2^(-(n+1))
 	Probability,
 
@@ -133,13 +133,13 @@ impl Pin {
 			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
-			pin: Self::TileZero,
+			pin: Self::Clear,
 			code: "CLR",
 			size: BIT,
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::TileColor,
+			pin: Self::Color,
 			code: "COL",
 			size: BYTE,
 			io_type: None,
@@ -169,7 +169,7 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::BirthTick,
+			pin: Self::Initial,
 			code: "INL",
 			size: BIT,
 			io_type: Some(IoType::Input),
@@ -193,7 +193,7 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::NearbyTile,
+			pin: Self::NearbyColor,
 			code: "N_COL",
 			size: QWORD,
 			io_type: Some(IoType::Input),
@@ -211,7 +211,7 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::NearbyAnt,
+			pin: Self::Obstacle,
 			code: "OBS",
 			size: BYTE,
 			io_type: Some(IoType::Input),
@@ -223,7 +223,7 @@ impl Pin {
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
-			pin: Self::Noise,
+			pin: Self::Random,
 			code: "RND",
 			size: BYTE,
 			io_type: Some(IoType::Input),
@@ -235,7 +235,7 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::RotateZero,
+			pin: Self::RotateReset,
 			code: "RST",
 			size: BIT,
 			io_type: None,
@@ -247,7 +247,7 @@ impl Pin {
 			io_type: None,
 		},
 		PinDefinition {
-			pin: Self::Wait,
+			pin: Self::Sleep,
 			code: "SLP",
 			size: BYTE,
 			io_type: Some(IoType::Output),
@@ -296,7 +296,7 @@ impl Pin {
 	///
 	/// currently only used for special treatment of `NearbyAnt`.
 	pub fn prefers_channel(&self) -> bool {
-		matches!(self, Self::NearbyAnt)
+		matches!(self, Self::Obstacle)
 	}
 }
 
