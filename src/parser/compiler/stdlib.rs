@@ -342,27 +342,27 @@ fn one = (a, b, c, d) => out {
 ## Counter
 
 fn on = (t1, t0) => out {
-	out = p_eq(T1, T0, t1, t0);
+	out = p_eq(CTR_1, CTR_0, t1, t0);
 }
 
 fn on = (t2, t1, t0) => out {
-	out = p_eq(T2, T1, T0, t2, t1, t0);
+	out = p_eq(CTR_2, CTR_1, CTR_0, t2, t1, t0);
 }
 
 fn on = (t3, t2, t1, t0) => out {
-	out = p_eq(T3, T2, T1, T0, t3, t2, t1, t0);
+	out = p_eq(CTR_3, CTR_2, CTR_1, CTR_0, t3, t2, t1, t0);
 }
 
 fn on = (t5, t4, t3, t2, t1, t0) => out {
-	out = p_eq(T5, T4, T3, T2, T1, T0, 
+	out = p_eq(CTR_5, CTR_4, CTR_3, CTR_2, CTR_1, CTR_0, 
 					t5, t4, t3, t2, t1, t0);
 }
 
 
 ## Rotation
 
-fn rot_64  = (l, r) => (r0, r1) 	{ R1 = or(r, l); R0 = l; 			(r0, r1) = fwd(R0, R1); }
-fn rot_32 = (l, r) => (r0, r1, r2) 	{ R2 = or(r, l); R1 = l; R0 = l; 	(r0, r1, r2) = fwd(R0, R1, R2); }
+fn rot_64  = (l, r) => (r0, r1) 	{ ROT_1 = or(r, l); ROT_0 = l; 			(r0, r1) = fwd(ROT_0, ROT_1); }
+fn rot_32 = (l, r) => (r0, r1, r2) 	{ ROT_2 = or(r, l); ROT_1 = l; ROT_0 = l; 	(r0, r1, r2) = fwd(ROT_0, ROT_1, ROT_2); }
 
 fn rot_64  = (l, r) => () { (_, _) = rot_64(l, r); }
 fn rot_32 = (l, r) => () { (_, _, _) = rot_32(l, r); }

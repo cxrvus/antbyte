@@ -11,7 +11,7 @@ use crate::{
 	util::{bits_from_int, int_from_bits},
 };
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Context, Result, anyhow, bail};
 
 // idea: const MAX_BYTES: usize = (2usize.pow(12)) * (16 / 8);
 
@@ -19,7 +19,9 @@ impl CompFunc {
 	pub fn assemble(&self, log_cfg: &LogConfig) -> Result<Behavior> {
 		let mut func = self.clone();
 
-		let (inputs, outputs) = func.extract_pins()?;
+		let (inputs, outputs) = func
+			.extract_pins()
+			.context(format!("in function {:?}!", func.signature.name))?;
 
 		// dbg!((&inputs, &outputs));
 

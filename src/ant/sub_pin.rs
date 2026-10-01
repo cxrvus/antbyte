@@ -1,3 +1,5 @@
+use std::sync::LazyLock;
+
 use anyhow::{Ok, Result, anyhow, bail};
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -75,18 +77,14 @@ impl SubPin {
 		}
 	}
 
-	const PIN_PTN: &str = r"^([A-Z_]+)([0-7]{1,2})?$";
-
 	pub fn from_ident(ident: &str) -> Result<Self> {
 		// parsing...
 
-		let re = Regex::new(Self::PIN_PTN).unwrap();
-
-		let captures = re
+		let captures = PIN_RE
 			.captures(ident)
 			.ok_or(anyhow!("'{ident}' is not a valid pin"))?;
 
-		let pin_ident = captures.get(1).unwrap().as_str();
+		let mut pin_ident = captures.get(1).unwrap().as_str();
 
 		let bit_index = captures
 			.get(2)
@@ -96,6 +94,14 @@ impl SubPin {
 
 		let explicit_index = bit_index.is_some();
 		let bit_index = bit_index.unwrap_or_default();
+
+		if explicit_index {
+			if pin_ident.ends_with('_') {
+				pin_ident = &pin_ident[..pin_ident.len() - 1];
+			} else {
+				bail!("need to separate pin identifier and index using underscore (in '{ident}')")
+			}
+		}
 
 		// pin type...
 
@@ -113,3 +119,6 @@ impl SubPin {
 		Ok(Self { pin, bit_index })
 	}
 }
+
+const PIN_PTN: &str = r"^([A-Z_]+)([0-7]{1,2})?$";
+static PIN_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(PIN_PTN).unwrap());
