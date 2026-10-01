@@ -341,14 +341,6 @@ impl WorldConfig {
 		Self::cap_opt(self.speed, "speed", SPEED_CAP)?;
 		Self::cap_opt(self.sleep, "sleep", 10000)?;
 
-		// either FG or BG must be something
-
-		if let RenderMask::None = self.bg
-			&& let RenderMask::None = self.fg
-		{
-			bail!("need to render either fg or bg or both. found both set to [none]")
-		}
-
 		if let Some(keys) = &self.keys {
 			if keys.is_empty() {
 				bail!("[keys] must not be an empty string")
