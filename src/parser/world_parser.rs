@@ -1,5 +1,5 @@
 use crate::parser::{
-	AntLink,
+	AntLink, Signature,
 	compiler::linker::{WorldImport, WorldImportMode},
 };
 
@@ -49,19 +49,11 @@ impl Parser {
 						world.settings.push((key, value));
 					}
 				}
-				Fn => {
+				Def => {
 					let name = self.next_ident()?;
-
-					let signature = if self.assume_next(Token::BraceLeft).is_some() {
-						self.tokens.push(Token::BraceLeft);
-						None
-					} else {
-						self.expect_next(Token::Assign)?;
-						Some(self.parse_signature(&name)?)
-					};
-
+					let signature = self.parse_signature(&name)?;
 					let func = self
-						.parse_func(&name, signature)
+						.parse_func(signature)
 						.with_context(|| format!("in function '{name}'!"))?;
 
 					world.funcs.push(func);
@@ -87,7 +79,10 @@ impl Parser {
 					}
 
 					let func = self
-						.parse_func(&name, None)
+						.parse_func(Signature {
+							name: name.clone(),
+							..Default::default()
+						})
 						.with_context(|| format!("in ant '{name}'!"))?;
 
 					world.funcs.push(func);

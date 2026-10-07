@@ -13,13 +13,13 @@ use std::fmt::Display;
 
 #[rustfmt::skip]
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Keyword { Set, Fn, Ant, Use, UseCfg, NoStd }
+pub enum Keyword { Set, Def, Ant, Use, UseCfg, NoStd }
 
 impl Keyword {
 	pub(super) fn from_ident(ident: &str) -> Option<Self> {
 		match ident {
 			"set" => Some(Self::Set),
-			"fn" => Some(Self::Fn),
+			"def" => Some(Self::Def),
 			"ant" => Some(Self::Ant),
 			"use" => Some(Self::Use),
 			"use_cfg" => Some(Self::UseCfg),

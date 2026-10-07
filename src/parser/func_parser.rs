@@ -8,12 +8,7 @@ use super::{Parser, Statement, Token};
 use anyhow::{Result, anyhow, bail};
 
 impl Parser {
-	pub(super) fn parse_func(&mut self, name: &str, signature: Option<Signature>) -> Result<Func> {
-		let signature = signature.unwrap_or(Signature {
-			name: name.to_owned(),
-			..Default::default()
-		});
-
+	pub(super) fn parse_func(&mut self, signature: Signature) -> Result<Func> {
 		Ok(Func {
 			statements: self.parse_statements()?,
 			signature,
@@ -22,8 +17,12 @@ impl Parser {
 
 	pub(super) fn parse_signature(&mut self, name: &str) -> Result<Signature> {
 		let params = self.next_ident_list()?;
-		self.expect_next(Token::Arrow)?;
-		let assignees: Vec<String> = self.next_ident_list()?;
+
+		let assignees = if self.assume_next(Token::Arrow).is_some() {
+			self.next_ident_list()?
+		} else {
+			vec![]
+		};
 
 		let signature = Signature {
 			name: name.to_owned(),
