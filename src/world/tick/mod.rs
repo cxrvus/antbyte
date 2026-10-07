@@ -18,9 +18,7 @@ impl World {
 		self.signal_out = 0;
 
 		// tile decay
-		if self.config().decay.is_some() {
-			self.tile_decay();
-		}
+		self.tile_decay();
 
 		// ants
 		for layer in (0..self.config().layer_limit).rev() {

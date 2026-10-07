@@ -35,9 +35,7 @@ impl World {
 
 				Color => *self.tiles.get(pos).unwrap(),
 				Clear => (*self.tiles.get(pos).unwrap() == 0) as u8,
-				NearbyColor => target_pos
-					.map(|pos| *self.tiles.get(pos).unwrap())
-					.unwrap_or(0u8),
+				Decay => (self.relative_decay(pos) >> (input_sub_pin.channel() * 8)) as u8,
 
 				Initial => (ant.birth_tick + 1 == self.tick_count()) as u8,
 				Halt => ant.halted() as u8,
@@ -60,6 +58,9 @@ impl World {
 
 				NearbyId => target_ant.map(|target| target.behavior).unwrap_or_default(),
 				NearbyMem => target_ant.map(|target| target.memory).unwrap_or_default(),
+				NearbyColor => target_pos
+					.map(|pos| *self.tiles.get(pos).unwrap())
+					.unwrap_or(0u8),
 
 				_ => panic!("unhandled input: {input_sub_pin:?}"),
 			};
@@ -115,9 +116,11 @@ impl World {
 			.expect("invalid Behavior ID");
 
 		let tile_mask = behavior.pin_mask(Pin::Color);
+		let decay_mask = behavior.pin_mask(Pin::Decay);
 		let mem_mask = behavior.pin_mask(Pin::Mem);
 
 		let mut clear = false;
+		let (mut color, mut decay) = (0u8, 0u16);
 		let (mut rot, mut left, mut rot_zero) = (0u8, false, false);
 		let (mut child_rot, mut child_left) = (0u8, false);
 
@@ -133,8 +136,10 @@ impl World {
 				(Mem, _) => ant.memory = value | (ant.memory & !mem_mask),
 				(Signal, true) => self.signal_out |= value,
 				(ExtOut, true) => self.ext_output.push(wide_value),
+
 				(Clear, true) => clear = true,
-				(Color, _) => self.set_tile(pos, value, tile_mask),
+				(Color, _) => color = value,
+				(Decay, _) => decay = wide_value,
 
 				// deferred to async ticks...
 
@@ -173,8 +178,13 @@ impl World {
 		ant.counter = ant.counter.wrapping_add(1);
 
 		if clear {
-			self.set_tile(pos, 0, !tile_mask);
+			self.set_tile(pos, 0, !tile_mask, 0);
 		}
+
+		if tile_mask | decay_mask != 0 {
+			self.set_tile(pos, color, tile_mask, decay);
+		}
+
 		if rot_zero {
 			ant.rotation = ant.birth_rot;
 		}

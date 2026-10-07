@@ -261,6 +261,9 @@ impl ByteFilter {
 pub enum RenderMask {
 	None,
 	Tile,
+	Decay,
+	DecayMsb,
+
 	Layers,
 
 	// ## Ant
@@ -279,6 +282,8 @@ impl TryFrom<String> for RenderMask {
 		match value.as_str() {
 			"none" => Ok(Self::None),
 			"tile" => Ok(Self::Tile),
+			"decay" => Ok(Self::Decay),
+			"decay_msb" => Ok(Self::DecayMsb),
 			"layers" => Ok(Self::Layers),
 			"dir" => Ok(Self::Dir),
 			"rot" => Ok(Self::Rotation),

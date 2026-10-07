@@ -75,6 +75,13 @@ impl WorldState {
 		}
 	}
 
+	pub(super) fn relative_decay(&self, pos: Pos) -> u16 {
+		self.tile_decays
+			.get(&pos)
+			.map(|expiration| expiration.wrapping_sub(self.tick_count as u16))
+			.unwrap_or(0)
+	}
+
 	// formatting ...
 
 	#[inline]

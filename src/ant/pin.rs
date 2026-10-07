@@ -47,6 +47,8 @@ pub enum Pin {
 	Color,
 	/// empty current tile (before writing) or check if it's empty (if input)
 	Clear,
+	/// current tile's decay value
+	Decay,
 
 	// ## neighboring tiles
 	/// neighboring tile
@@ -101,7 +103,7 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	const PIN_DEFINITIONS: [PinDefinition; 28] = [
+	const PIN_DEFINITIONS: [PinDefinition; 29] = [
 		PinDefinition {
 			pin: Self::AntId,
 			code: "A_ID",
@@ -155,6 +157,12 @@ impl Pin {
 			code: "CTR",
 			size: BYTE,
 			io_type: Some(IoType::Input),
+		},
+		PinDefinition {
+			pin: Self::Decay,
+			code: "DCY",
+			size: WORD,
+			io_type: None,
 		},
 		PinDefinition {
 			pin: Self::Die,

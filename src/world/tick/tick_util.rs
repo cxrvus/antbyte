@@ -58,19 +58,24 @@ impl World {
 		}
 	}
 
-	pub(super) fn set_tile(&mut self, pos: Pos, value: u8, mask: u8) {
+	pub(super) fn set_tile(&mut self, pos: Pos, value: u8, mask: u8, decay: u16) {
 		let old_value = self.tiles.get(pos).unwrap();
 		let new_value = value | (old_value & !mask);
-		self.set_value(pos, new_value);
+		self.set_value(pos, new_value, decay);
 	}
 
-	fn set_value(&mut self, pos: Pos, value: u8) {
-		if let Some(decay) = self.config().decay {
-			if value != 0 {
+	fn set_value(&mut self, pos: Pos, value: u8, decay: u16) {
+		if value == 0 {
+			self.tile_decays.remove(&pos);
+		} else {
+			let decay = match (decay, self.config().decay) {
+				(0, default_decay) => default_decay,
+				(explicit_decay, _) => Some(explicit_decay),
+			};
+
+			if let Some(decay) = decay {
 				let expiration = (self.tick_count as u16).wrapping_add(decay);
 				self.tile_decays.insert(pos, expiration);
-			} else {
-				self.tile_decays.remove(&pos);
 			}
 		}
 

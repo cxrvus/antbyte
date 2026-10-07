@@ -98,6 +98,8 @@ impl World {
 		match mask {
 			RenderMask::None => Default::default(),
 			RenderMask::Tile => self.tiles_to_map(),
+			RenderMask::Decay => self.map_decays(false),
+			RenderMask::DecayMsb => self.map_decays(true),
 			RenderMask::Layers => self.layer_occupations(),
 			RenderMask::Dir => self.map_ants(|ant| ant.look_dir().value()),
 			RenderMask::Rotation => self.map_ants(|ant| ant.rotation.value()),
@@ -151,6 +153,21 @@ impl World {
 					map.entry(pos).or_insert(func(ant));
 				}
 			}
+		}
+
+		map
+	}
+
+	fn map_decays(&self, msb: bool) -> BTreeMap<Pos, u8> {
+		let mut map = BTreeMap::new();
+
+		for &pos in self.tiles_to_map().keys() {
+			let decay = match msb {
+				true => self.relative_decay(pos) >> 8,
+				false => self.relative_decay(pos),
+			};
+
+			map.insert(pos, decay as u8);
 		}
 
 		map
