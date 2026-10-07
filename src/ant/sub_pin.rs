@@ -90,7 +90,7 @@ impl SubPin {
 			.get(2)
 			.map(|m| u8::from_str_radix(m.as_str(), 8).unwrap());
 
-		// indexes...
+		// indices...
 
 		let explicit_index = bit_index.is_some();
 		let bit_index = bit_index.unwrap_or_default();
