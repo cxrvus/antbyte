@@ -1,5 +1,4 @@
 use crate::util::dir::Direction;
-use anyhow::{Result, bail};
 
 #[derive(Clone, Copy, Default, Debug, PartialEq)]
 pub struct Rotation(u8);
@@ -44,24 +43,5 @@ impl Rotation {
 			0xc0..=0xdf => 6,
 			0xe0..=0xff => 7,
 		})
-	}
-
-	#[inline]
-	pub fn try_from_str(value: &str) -> Result<Self> {
-		Ok(Self(
-			(match value {
-				"E" => 0,
-				"SE" => 1,
-				"S" => 2,
-				"SW" => 3,
-				"W" => 4,
-				"NW" => 5,
-				"N" => 6,
-				"NE" => 7,
-				_ => bail!(
-					"invalid direction string: '{value}'. Use a compass direction, like N, NE, W, etc."
-				),
-			}) * 32,
-		))
 	}
 }

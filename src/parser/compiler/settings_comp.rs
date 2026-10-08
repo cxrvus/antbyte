@@ -1,8 +1,8 @@
-use anyhow::{Context, Result, anyhow};
+use anyhow::{Context, Result, anyhow, bail};
 
 use crate::{
 	parser::{Parser, token::Token},
-	util::{rotation::Rotation, vec2::Coord},
+	util::vec2::Coord,
 	world::config::{BorderMode, ByteFilter, RenderMask, StartingPos, WorldConfig},
 };
 
@@ -86,7 +86,15 @@ impl Parser {
 			}
 
 			"start_pos" | "start" => config.start_pos = StartingPos::try_from(self.next_ident()?)?,
-			"start_dir" => config.start_dir = Rotation::try_from_str(&self.next_str()?)?.value(),
+			"start_dir" => {
+				let dir = self.next_number()?;
+
+				if dir > 7 {
+					bail!("start_dir must be a number between 0 and 7");
+				} else {
+					config.start_dir = (dir as u8) * 32;
+				}
+			}
 
 			"start_tick" => config.start_tick = self.next_number()?,
 			"ant_limit" => config.ant_limit = self.next_number()?,
@@ -113,7 +121,7 @@ impl Parser {
 			},
 
 			// "midi_out_offset" => config.midi.offset = self.next_number()?.unwrap_or_default() as u8,
-			other => return Err(anyhow!("unknown setting: '{other}'")),
+			other => bail!(anyhow!("unknown setting: '{other}'")),
 		}
 
 		// double-check config validity
