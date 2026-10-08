@@ -64,6 +64,8 @@ pub struct WorldConfig {
 	// ## Renderer
 	/// rendered frames per second
 	pub fps: u32,
+	/// only render new frame on key presses
+	pub stepped: bool,
 	/// first tick to render
 	pub start_tick: u32,
 	/// filter for layers that will be rendered
@@ -106,6 +108,7 @@ impl Default for WorldConfig {
 			seed: None,
 
 			fps: FPS_CAP,
+			stepped: false,
 			start_tick: 0,
 			layer_filter: 0xff,
 			bg_filter: ByteFilter::Lsb,
@@ -316,18 +319,16 @@ impl WorldConfig {
 		Self::cap(self.height as u32, "height", SIZE_CAP as u32)?;
 		Self::cap(self.width as u32, "width", SIZE_CAP as u32)?;
 
-		Self::cap(self.layer_limit as u32, "layers", LAYER_LIMIT as u32)?;
-
-		if self.layer_limit == 0 {
-			bail!("specified layer count must be greater than 0")
-		}
-
 		// idea: limit border slots to max layer count
 		if !self.border.contains_key(&0) {
 			bail!("border_0 needs to be specified")
 		}
 
 		Self::cap(self.ant_limit, "ant_limit", ANT_LIMIT)?;
+		Self::non_zero(self.ant_limit, "ant_limit")?;
+
+		Self::cap(self.layer_limit as u32, "layer_limit", LAYER_LIMIT as u32)?;
+		Self::non_zero(self.layer_limit as u32, "layer_limit")?;
 
 		if let Some(max_ticks) = self.max_ticks
 			&& self.start_tick > max_ticks
@@ -338,12 +339,12 @@ impl WorldConfig {
 			)
 		}
 
-		if self.speed == 0 {
-			bail!("speed must be greater than 0")
-		}
-
 		Self::cap(self.fps, "FPS", FPS_CAP)?;
+		Self::non_zero(self.fps, "FPS")?;
+
 		Self::cap(self.speed, "speed", SPEED_CAP)?;
+		Self::non_zero(self.speed, "speed")?;
+
 		Self::cap_opt(self.sleep, "sleep", 10000)?;
 
 		if let Some(keys) = &self.keys {
@@ -378,7 +379,15 @@ impl WorldConfig {
 		if number > max { bail!("[{property}] must not exceed {max}") } Ok(())
 	}
 
+	#[inline]
 	fn cap_opt(number: Option<u32>, property: &str, max: u32) -> Result<()> {
 		Self::cap(number.unwrap_or_default(), property, max)
+	}
+
+	#[inline]
+	#[rustfmt::skip]
+	fn non_zero(number: u32, property: &str) -> Result<()> {
+		// Self::cap(number.unwrap_or_default(), property, max)
+		if number == 0 { bail!("[{property}] must not be greater than 0") } Ok(())
 	}
 }

@@ -70,7 +70,7 @@ fn render_frame(
 		width, height, fps, ..
 	} = *config;
 
-	let fps = fps.clamp(1, 30);
+	let fps = fps.min(30);
 	let delay = (100.0 / fps as f32).round() as u16;
 
 	let scaled_width = width * scale;

@@ -38,8 +38,7 @@ pub fn run(world: World) {
 		println!();
 
 		// ## Metadata
-		let ms = frame.ms.map(|ms| ms.to_string()).unwrap_or("--".into());
-		println!("t: {ms}");
+		println!("ms: {}", frame.ms);
 
 		let metadata = world.metadata_str();
 		println!("{metadata}");

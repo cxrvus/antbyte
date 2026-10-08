@@ -43,20 +43,20 @@ pub fn run(world: World, quiet: bool) -> Result<()> {
 		#[cfg(feature = "midi")]
 		player.transmit(&frame.ext_out);
 
-		if let Some(frame_ms) = frame.ms {
-			// sleep for frame interval to elapse
-			let elapsed = last_frame.elapsed().as_millis() as u32;
-			if elapsed < frame_ms {
-				// add a small buffer to prevent flickering
-				let sleep_ms = (frame_ms - elapsed).max(8);
-				sleep(sleep_ms);
-			}
-			last_frame = Instant::now();
-		} else {
+		if world.config().stepped {
 			// sleep for key input to continue
 			eprintln!("<i> Press <Enter> to step to next frame");
 			let mut input = String::new();
 			io::stdin().read_line(&mut input).unwrap();
+		} else {
+			// sleep for frame interval to elapse
+			let elapsed = last_frame.elapsed().as_millis() as u32;
+			if elapsed < frame.ms {
+				// add a small buffer to prevent flickering
+				let sleep_ms = (frame.ms - elapsed).max(8);
+				sleep(sleep_ms);
+			}
+			last_frame = Instant::now();
 		}
 	}
 

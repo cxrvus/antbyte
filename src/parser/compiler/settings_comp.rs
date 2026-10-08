@@ -50,6 +50,7 @@ impl Parser {
 			"layer_limit" => config.layer_limit = self.next_number()? as u8,
 			"layer_filter" => config.layer_filter = self.next_number()? as u8,
 
+			"stepped" => config.stepped = self.next_bit()?,
 			"fps" => config.fps = self.next_number()?,
 			"speed" => config.speed = self.next_number()?,
 			"decay" => config.decay = self.next_opt_number().map(|x| x.map(|v| v as u16))?,
@@ -59,16 +60,14 @@ impl Parser {
 
 			"dur" => {
 				// set tick limit: ticks = duration (seconds) * speed (ticks / frame) * fps (frames / second)
-				if (config.fps | config.speed) != 0 {
-					let duration = self
-						.next_opt_number()?
-						.ok_or(anyhow!("duration must be greater than 0"))?;
+				let duration = self
+					.next_opt_number()?
+					.ok_or(anyhow!("duration must be greater than 0"))?;
 
-					let ticks = duration
-						.saturating_mul(config.speed)
-						.saturating_mul(config.fps);
-					config.max_ticks = Some(ticks);
-				}
+				let ticks = duration
+					.saturating_mul(config.speed)
+					.saturating_mul(config.fps);
+				config.max_ticks = Some(ticks);
 			}
 
 			"looping" | "loop" => config.looping = self.next_bit()?,

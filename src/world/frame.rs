@@ -19,7 +19,7 @@ pub struct FrameInput {
 pub struct FrameOutput {
 	pub fg: BTreeMap<Pos, u8>,
 	pub bg: BTreeMap<Pos, u8>,
-	pub ms: Option<u32>,
+	pub ms: u32,
 	pub metadata: String, //todo: turn this into a map
 	pub ext_out: Vec<u16>,
 }
@@ -32,10 +32,7 @@ impl World {
 	}
 
 	pub fn next_frame(&mut self, input: &FrameInput) -> Option<FrameOutput> {
-		let mut frame_ms = match self.config().fps {
-			0 => None,
-			fps => Some(1000 / fps),
-		};
+		let mut frame_ms = 1000 / self.config().fps;
 
 		match self.status {
 			WorldStatus::Init => {
@@ -68,7 +65,7 @@ impl World {
 
 					if !active {
 						// current tick is last tick to be simulated
-						frame_ms = self.config().sleep;
+						frame_ms = self.config().sleep.unwrap_or_default();
 						self.status = WorldStatus::Inactive;
 						break;
 					}
