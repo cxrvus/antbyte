@@ -224,7 +224,7 @@ impl Parser {
 		else { Err(Self::unexpected(token, "bit")) }
 	}
 
-	fn next_number(&mut self) -> Result<Option<u32>> {
+	fn next_opt_number(&mut self) -> Result<Option<u32>> {
 		let token = self.next_token();
 
 		match token {
@@ -238,6 +238,10 @@ impl Parser {
 			}),
 			token => Err(Self::unexpected(token, "number")),
 		}
+	}
+
+	fn next_number(&mut self) -> Result<u32> {
+		self.next_opt_number().map(|x| x.unwrap_or_default())
 	}
 
 	pub fn next_ident_list(&mut self) -> Result<Vec<String>> {

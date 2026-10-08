@@ -32,7 +32,7 @@ impl Parser {
 
 		match key.as_str() {
 			key @ ("height" | "width" | "size") => {
-				let value = self.next_number()?.ok_or(anyhow!(
+				let value = self.next_opt_number()?.ok_or(anyhow!(
 					"size settings must be greater than zero.\nfound in: {key}"
 				))? as usize;
 
@@ -47,26 +47,26 @@ impl Parser {
 				}
 			}
 
-			"layer_limit" => config.layer_limit = self.next_number()?.unwrap_or_default() as u8,
-			"layer_filter" => config.layer_filter = self.next_number()?.unwrap_or_default() as u8,
+			"layer_limit" => config.layer_limit = self.next_number()? as u8,
+			"layer_filter" => config.layer_filter = self.next_number()? as u8,
 
 			"fps" => config.fps = self.next_number()?,
 			"speed" => config.speed = self.next_number()?,
-			"decay" => config.decay = self.next_number().map(|x| x.map(|v| v as u16))?,
-			"sleep" => config.sleep = self.next_number()?,
-			"ticks" => config.max_ticks = self.next_number()?,
-			"seed" => config.seed = self.next_number()?,
+			"decay" => config.decay = self.next_opt_number().map(|x| x.map(|v| v as u16))?,
+			"sleep" => config.sleep = self.next_opt_number()?,
+			"ticks" => config.max_ticks = self.next_opt_number()?,
+			"seed" => config.seed = self.next_opt_number()?,
 
 			"dur" => {
 				// set tick limit: ticks = duration (seconds) * speed (ticks / frame) * fps (frames / second)
-				if let Some(fps) = config.fps
-					&& let Some(speed) = config.speed
-				{
+				if (config.fps | config.speed) != 0 {
 					let duration = self
-						.next_number()?
+						.next_opt_number()?
 						.ok_or(anyhow!("duration must be greater than 0"))?;
 
-					let ticks = duration.saturating_mul(speed).saturating_mul(fps);
+					let ticks = duration
+						.saturating_mul(config.speed)
+						.saturating_mul(config.fps);
 					config.max_ticks = Some(ticks);
 				}
 			}
@@ -82,15 +82,15 @@ impl Parser {
 			}
 
 			"slow_down" | "sldn" => {
-				let sldn = self.next_number()?.unwrap_or_default() as u16;
+				let sldn = self.next_number()? as u16;
 				config.slow_down.insert(sub_index, sldn);
 			}
 
 			"start_pos" | "start" => config.start_pos = StartingPos::try_from(self.next_ident()?)?,
 			"start_dir" => config.start_dir = Rotation::try_from_str(&self.next_str()?)?.value(),
 
-			"start_tick" => config.start_tick = self.next_number()?.unwrap_or_default(),
-			"ant_limit" => config.ant_limit = self.next_number()?.unwrap_or_default(),
+			"start_tick" => config.start_tick = self.next_number()?,
+			"ant_limit" => config.ant_limit = self.next_number()?,
 
 			"bg_filter" => config.bg_filter = ByteFilter::try_from(self.next_ident()?)?,
 			"bg" => config.bg = RenderMask::try_from(self.next_ident()?)?,
@@ -105,12 +105,12 @@ impl Parser {
 
 			#[rustfmt::skip]
 			"midi_out_ch" => {
-				_ = config.midi.out_ch.insert(sub_index, self.next_number()?.unwrap_or_default() as u8)
+				_ = config.midi.out_ch.insert(sub_index, self.next_number()? as u8)
 			},
 
 			#[rustfmt::skip]
 			"midi_out_offset" => {
-				_ = config.midi.offset.insert(sub_index, self.next_number()?.unwrap_or_default() as u8)
+				_ = config.midi.offset.insert(sub_index, self.next_number()? as u8)
 			},
 
 			// "midi_out_offset" => config.midi.offset = self.next_number()?.unwrap_or_default() as u8,

@@ -33,9 +33,8 @@ impl World {
 
 	pub fn next_frame(&mut self, input: &FrameInput) -> Option<FrameOutput> {
 		let mut frame_ms = match self.config().fps {
-			Some(0) => panic!(),
-			Some(fps) => Some(1000 / fps),
-			None => None,
+			0 => None,
+			fps => Some(1000 / fps),
 		};
 
 		match self.status {
@@ -56,7 +55,7 @@ impl World {
 				self.ext_output.clear();
 				self.ext_input = input.ext_in;
 
-				let mut speed = self.config().speed.unwrap_or_default();
+				let mut speed = self.config().speed;
 
 				if self.tick_count() == 0 && self.config().start_tick > 0 {
 					// ignore external input and tick until start_tick is reached

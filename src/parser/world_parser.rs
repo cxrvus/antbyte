@@ -70,7 +70,7 @@ impl Parser {
 						} else {
 							let name = self.next_ident()?;
 							self.expect_next(Token::Assign)?;
-							let id = self.next_number()?.unwrap_or_default();
+							let id = self.next_number()?;
 							(id, name)
 						};
 

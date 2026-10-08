@@ -68,9 +68,9 @@ fn render_frame(
 ) {
 	let WorldConfig {
 		width, height, fps, ..
-	} = config;
+	} = *config;
 
-	let fps = fps.unwrap_or(30).clamp(1, 30);
+	let fps = fps.clamp(1, 30);
 	let delay = (100.0 / fps as f32).round() as u16;
 
 	let scaled_width = width * scale;
@@ -78,10 +78,10 @@ fn render_frame(
 
 	let mut scaled_pixels = Vec::with_capacity(scaled_width as usize * scaled_height as usize);
 
-	for y in 0..*height {
+	for y in 0..height {
 		let mut scaled_row = Vec::with_capacity(scaled_width as usize);
 
-		for x in 0..*width {
+		for x in 0..width {
 			let pos = Pos { x, y };
 			let pixel = *frame.bg.get(&pos).unwrap_or(&0);
 			let pixel = pixel & 0xf; // only take LSB half

@@ -7,7 +7,7 @@ use crate::{ui::chars_to_input, world::config::WorldConfig};
 
 pub fn get_keys(config: &WorldConfig) -> u16 {
 	if let Some(bindings) = &config.keys {
-		let input_str = if config.fps.is_none() {
+		let input_str = if config.fps == 0 {
 			eprintln!("<i> Press <Enter> to send input");
 			let mut input_str = String::new();
 			stdin().read_line(&mut input_str).unwrap();

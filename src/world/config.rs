@@ -27,7 +27,7 @@ pub struct WorldConfig {
 	/// height in pixels
 	pub height: Coord,
 	/// simulated ticks per frame (defaults to 1)
-	pub speed: Option<u32>,
+	pub speed: u32,
 	/// simulation tick limit
 
 	// ## @Start
@@ -63,7 +63,7 @@ pub struct WorldConfig {
 
 	// ## Renderer
 	/// rendered frames per second
-	pub fps: Option<u32>,
+	pub fps: u32,
 	/// first tick to render
 	pub start_tick: u32,
 	/// filter for layers that will be rendered
@@ -87,7 +87,7 @@ impl Default for WorldConfig {
 			description: "".into(),
 			width: 16,
 			height: 16,
-			speed: Some(1),
+			speed: 1,
 
 			start_pos: StartingPos::Center,
 			start_dir: 0,
@@ -105,7 +105,7 @@ impl Default for WorldConfig {
 			inv_rot: false,
 			seed: None,
 
-			fps: Some(FPS_CAP),
+			fps: FPS_CAP,
 			start_tick: 0,
 			layer_filter: 0xff,
 			bg_filter: ByteFilter::Lsb,
@@ -338,12 +338,12 @@ impl WorldConfig {
 			)
 		}
 
-		if self.speed.is_none() {
+		if self.speed == 0 {
 			bail!("speed must be greater than 0")
 		}
 
-		Self::cap_opt(self.fps, "FPS", FPS_CAP)?;
-		Self::cap_opt(self.speed, "speed", SPEED_CAP)?;
+		Self::cap(self.fps, "FPS", FPS_CAP)?;
+		Self::cap(self.speed, "speed", SPEED_CAP)?;
 		Self::cap_opt(self.sleep, "sleep", 10000)?;
 
 		if let Some(keys) = &self.keys {

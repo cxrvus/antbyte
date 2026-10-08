@@ -83,7 +83,7 @@ impl Args {
 		}
 
 		if self.hide_fg { config.fg = RenderMask::None; }
-		if self.stepped { config.fps = None; }
+		if self.stepped { config.fps = 0; }
 		if self.looping { config.looping = true; }
 		if self.ticks.is_some() { config.max_ticks = self.ticks; }
 
@@ -92,7 +92,7 @@ impl Args {
 			config.max_ticks = config.max_ticks.or(Some(MAX_TICKS));
 		}
 
-		if self.gif.is_some() && (config.speed.is_none() | config.fps.is_none()) {
+		if self.gif.is_some() && (config.speed | config.fps) == 0 {
 			anyhow::bail!("need a speed and an FPS of at least 1 to export as GIF");
 		}
 
