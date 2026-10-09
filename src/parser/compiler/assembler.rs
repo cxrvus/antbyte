@@ -1,7 +1,11 @@
 use std::collections::HashMap;
 
 use crate::{
-	ant::{behavior::Behavior, pin::IoType, sub_pin::SubPin},
+	ant::{
+		behavior::{Behavior, MAX_INPUTS, MAX_OUTPUTS},
+		pin::IoType,
+		sub_pin::SubPin,
+	},
 	parser::{
 		ParamValue, Signature,
 		compiler::{CompFunc, LogConfig},
@@ -70,12 +74,12 @@ impl CompFunc {
 			)?;
 		}
 
-		if inputs.len() > 12 {
+		if inputs.len() > MAX_INPUTS {
 			Err(anyhow!(
 				"may not have more than 12 inputs, got {}\n",
 				inputs.len(),
 			))
-		} else if outputs.len() > 16 {
+		} else if outputs.len() > MAX_OUTPUTS {
 			Err(anyhow!(
 				"may not have more than 16 outputs, got {}\n",
 				outputs.len(),

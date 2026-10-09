@@ -10,6 +10,9 @@ use crate::{
 use anyhow::{Result, anyhow};
 use serde::{Deserialize, Serialize};
 
+pub const MAX_INPUTS: usize = 12;
+pub const MAX_OUTPUTS: usize = 16;
+
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(try_from = "BehaviorDTO", into = "BehaviorDTO")]
@@ -57,15 +60,15 @@ impl Behavior {
 		inputs: Vec<SubPin>,
 		outputs: Vec<SubPin>,
 	) -> Result<Self> {
-		if inputs.len() > 8 {
+		if inputs.len() > MAX_INPUTS {
 			return Err(anyhow!(
-				"may not have more than 8 inputs, got {}\n{:?}:\n",
+				"may not have more than {MAX_INPUTS} inputs, got {}\n{:?}:\n",
 				inputs.len(),
 				inputs
 			));
-		} else if outputs.len() > 32 {
+		} else if outputs.len() > MAX_OUTPUTS {
 			return Err(anyhow!(
-				"may not have more than 32 inputs, got {}\n{:?}:\n",
+				"may not have more than {MAX_OUTPUTS} inputs, got {}\n{:?}:\n",
 				outputs.len(),
 				outputs
 			));
