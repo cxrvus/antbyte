@@ -51,7 +51,7 @@ pub struct LiteralData { pub sign: bool, pub width: u8, pub value: u8, }
 pub struct RangeData { pub sign: bool, pub ident: String, pub start: u8, pub end: u8, }
 
 #[rustfmt::skip]
-macro_rules! number_ptn { () => { r"0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|0\d+|[1-9]\d*" }; }
+macro_rules! number_ptn { () => { r"0[b][01]+|0[o][0-7]+|0[x][0-9a-f]+|\d+" }; }
 
 const COMMENT_PTN: &str = r"#.*(?:\r?\n|$)";
 const RANGE_PTN: &str = r"([+-]?)([a-zA-Z_]\w*?)([0-9])\:([0-9])";
