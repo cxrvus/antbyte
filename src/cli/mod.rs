@@ -1,9 +1,6 @@
 #![cfg(feature = "term")]
 
-use std::{
-	fs::canonicalize,
-	path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Ok, Result};
 use clap::{self, Parser};
@@ -19,15 +16,13 @@ mod args;
 use args::Args;
 
 pub fn create_world() -> Result<Option<(World, Args)>> {
-	let mut args = Args::parse();
+	let args = Args::parse();
 
-	args.path = canonicalize(&args.path).unwrap_or(args.path);
-
-	let args = args;
+	let path = args.path()?;
 
 	let log_config = LogConfig { all: args.debug };
 
-	let mut properties = compile_world(&args.path, &log_config, &args.sub_args)?;
+	let mut properties = compile_world(&path, &log_config, &args.sub_args)?;
 
 	if args.json {
 		// idea: remove properties with default values
@@ -48,7 +43,7 @@ pub fn create_world() -> Result<Option<(World, Args)>> {
 		let world = World::new(properties.clone()).context("world error!")?;
 
 		if let Some(target) = args.gif {
-			export_gif(world, &args.path, target).context("GIF export error!")?;
+			export_gif(world, &path, target).context("GIF export error!")?;
 		} else if args.raw {
 			term::raw::run(world);
 		} else {

@@ -3,14 +3,15 @@ use crate::{
 	world::config::{RenderMask, WorldConfig},
 };
 
+use anyhow::{Result, bail};
 use clap::{self, Parser as ClapParser};
-use std::path::PathBuf;
+use std::{fs::canonicalize, path::PathBuf};
 
 #[derive(ClapParser, Debug, Default, Clone)]
 #[command(version, about, long_about = None)]
 pub struct Args {
 	/// Path to the .ant file to execute
-	pub path: PathBuf,
+	path: Option<PathBuf>,
 
 	/// Hide title banner and metadata
 	#[arg(short, long)]
@@ -93,5 +94,14 @@ impl Args {
 		}
 
 		Ok(())
+	}
+
+	pub fn path(&self) -> Result<PathBuf> {
+		let path = match &self.path {
+			Some(path) => path.clone(),
+			None => bail!("need to provide a path to an antlet"),
+		};
+
+		Ok(canonicalize(&path).unwrap_or(path))
 	}
 }
