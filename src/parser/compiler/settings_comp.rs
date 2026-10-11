@@ -103,8 +103,6 @@ impl Parser {
 			"bg" => config.bg = RenderMask::try_from(self.next_ident()?)?,
 			"fg" => config.fg = RenderMask::try_from(self.next_ident()?)?,
 
-			"desc" | "description" => config.description = self.next_str()?,
-
 			"keys" => {
 				let keys = self.next_str()?;
 				config.keys = if keys.is_empty() { None } else { Some(keys) };
@@ -120,8 +118,15 @@ impl Parser {
 				_ = config.midi.offset.insert(sub_index, self.next_number()? as u8)
 			},
 
-			// "midi_out_offset" => config.midi.offset = self.next_number()?.unwrap_or_default() as u8,
-			other => bail!(anyhow!("unknown setting: '{other}'")),
+			other => {
+				if let Some(key) = other.strip_prefix('_')
+					&& !key.is_empty()
+				{
+					config.custom.insert(key.to_owned(), self.next_str()?);
+				} else {
+					bail!(anyhow!("unknown setting: '{other}'"));
+				}
+			}
 		}
 
 		// double-check config validity

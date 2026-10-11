@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use anyhow::{Error, Result, anyhow, bail};
 use serde::{Deserialize, Serialize};
@@ -20,8 +20,8 @@ const ANT_LIMIT: u32 = 0x4000;
 #[serde(default)]
 pub struct WorldConfig {
 	// ## Core
-	/// description
-	pub description: String,
+	/// custom string settings for 3rd-party add-ons
+	pub custom: HashMap<String, String>,
 	/// width in pixels
 	pub width: Coord,
 	/// height in pixels
@@ -86,7 +86,7 @@ pub struct WorldConfig {
 impl Default for WorldConfig {
 	fn default() -> Self {
 		Self {
-			description: "".into(),
+			custom: Default::default(),
 			width: 16,
 			height: 16,
 			speed: 1,
