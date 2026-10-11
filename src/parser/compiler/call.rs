@@ -49,7 +49,7 @@ impl FuncCall {
 #[inline]
 fn prefix_var(value: &mut ParamValue, var_prefix: &str) {
 	if !Token::is_uppercase_ident(&value.target) {
-		value.target = format!("{var_prefix}{}", &value.target);
+		value.target = format!("{var_prefix}{}", value.target);
 	}
 }
 
@@ -81,10 +81,7 @@ impl From<FuncCall> for CompStatement {
 
 		let assignee = assignees.into_iter().next().unwrap();
 
-		Self {
-			assignee,
-			params,
-		}
+		Self { assignee, params }
 	}
 }
 

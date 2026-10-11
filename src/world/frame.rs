@@ -126,7 +126,7 @@ impl World {
 		for (layer, ants) in self.ants.iter() {
 			let new_value = 1u8 << layer;
 
-			for (&pos, _) in ants.iter() {
+			for &pos in ants.keys() {
 				map.entry(pos)
 					.and_modify(|old_value| *old_value |= new_value)
 					.or_insert(new_value);

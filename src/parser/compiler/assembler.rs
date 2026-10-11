@@ -176,7 +176,7 @@ impl CompFunc {
 				debug_assert!(
 					variables.contains_key(&param.target),
 					"unknown variable: {}",
-					&param.target
+					param.target
 				);
 
 				let param_value = param.sign ^ variables[&param.target];
