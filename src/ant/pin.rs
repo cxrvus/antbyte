@@ -259,7 +259,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Signal,
 			code: "SIG",
-			size: BYTE,
+			size: WORD,
 			io_type: None,
 		},
 		PinDefinition {

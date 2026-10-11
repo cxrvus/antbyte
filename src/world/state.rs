@@ -31,8 +31,8 @@ pub struct WorldState {
 	pub tiles: Tiles,
 	pub tile_decays: BTreeMap<Pos, u16>,
 	pub ants: Layers,
-	pub signal_in: u8,
-	pub signal_out: u8,
+	pub signal_in: u16,
+	pub signal_out: u16,
 	pub ext_input: u16,
 	pub ext_output: Vec<u16>,
 }

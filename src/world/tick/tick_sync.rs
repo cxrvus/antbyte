@@ -28,7 +28,7 @@ impl World {
 
 			let input_value: u8 = match input_sub_pin.pin {
 				Mem => ant.memory,
-				Signal => self.signal_in,
+				Signal => (self.signal_in >> (input_sub_pin.channel() * 8)) as u8,
 
 				// need channel because ext_input is 16 bits
 				ExtIn => (self.ext_input >> (input_sub_pin.channel() * 8)) as u8,
@@ -134,7 +134,7 @@ impl World {
 
 			match (pin, value_bool) {
 				(Mem, _) => ant.memory = value | (ant.memory & !mem_mask),
-				(Signal, true) => self.signal_out |= value,
+				(Signal, true) => self.signal_out |= wide_value,
 				(ExtOut, true) => self.ext_output.push(wide_value),
 
 				(Clear, true) => clear = true,
