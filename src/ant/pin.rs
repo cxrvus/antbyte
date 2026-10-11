@@ -8,9 +8,11 @@ use ts_rs::TS;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Pin {
 	// ## creating ants
+	/// current ant's ID
+	AntId,
 	/// byte representing the ID of the ant, that will
 	/// be spawned behind current ant, if not 0
-	AntId,
+	ChildId,
 	/// if ant is spawned by current ant,
 	/// set its rotation to the current ants direction plus this
 	ChildRotation,
@@ -103,12 +105,12 @@ pub struct PinDefinition {
 }
 
 impl Pin {
-	const PIN_DEFINITIONS: [PinDefinition; 29] = [
+	const PIN_DEFINITIONS: [PinDefinition; 30] = [
 		PinDefinition {
-			pin: Self::AntId,
+			pin: Self::ChildId,
 			code: "A_ID",
 			size: BYTE,
-			io_type: None,
+			io_type: Some(IoType::Output),
 		},
 		PinDefinition {
 			pin: Self::ChildLayer,
@@ -175,6 +177,12 @@ impl Pin {
 			code: "HLT",
 			size: BIT,
 			io_type: None,
+		},
+		PinDefinition {
+			pin: Self::AntId,
+			code: "ID",
+			size: BYTE,
+			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
 			pin: Self::Initial,

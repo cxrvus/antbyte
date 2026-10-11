@@ -155,7 +155,7 @@ impl World {
 				(RotateReset, true) => rot_zero = true,
 
 				// spawn_tick
-				(AntId, _) => ant.child_behavior = value,
+				(ChildId, _) => ant.child_behavior = value,
 				(ChildLayer, _) => ant.child_layer = value,
 				(ChildRotation, _) => child_rot = value.reverse_bits(),
 				(ChildLeft, true) => child_left = true,
