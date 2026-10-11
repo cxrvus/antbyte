@@ -77,9 +77,13 @@ impl World {
 			}
 		}
 
+		// TODO: create constructor for ant
+		let rotation = Rotation::from(start_dir);
+
 		let ant = if let Some(root_id) = behaviors.keys().min() {
 			Ant {
-				rotation: Rotation::from(start_dir),
+				rotation,
+				birth_rot: rotation,
 				behavior: *root_id,
 				..Default::default()
 			}
