@@ -117,8 +117,8 @@ impl WorldState {
 		metadata_str += &format!(" | A: {:04}", self.ants.ant_count());
 
 		metadata_str += &format!("\nS: {:08b}", self.signal_in);
-		metadata_str += &format!(" | X: {:08b}", self.ext_input);
-		metadata_str += &format!("\nY: {}", self.ext_out_str());
+		metadata_str += &format!(" | I: {:08b}", self.ext_input);
+		metadata_str += &format!("\nO: {}", self.ext_out_str());
 
 		metadata_str
 	}
