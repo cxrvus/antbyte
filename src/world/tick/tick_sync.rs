@@ -13,13 +13,13 @@ fn zero_count_mask(x: u8) -> u8 {
 
 use Pin::*;
 impl World {
-	pub(super) fn get_input(&mut self, ant: &Ant, pos: Pos, layer: u8) -> u8 {
+	pub(super) fn get_input(&mut self, ant: &Ant, pos: Pos, layer: u8) -> u16 {
 		let behavior = self
 			.get_behavior(ant.behavior)
 			.cloned()
 			.expect("invalid Behavior ID");
 
-		let mut input_bits = 0u8;
+		let mut input_bits = 0u16;
 
 		for input_sub_pin in behavior.inputs.iter() {
 			let target_dir = Direction::from_u8(input_sub_pin.channel()) + ant.look_dir();
@@ -65,7 +65,7 @@ impl World {
 				_ => panic!("unhandled input: {input_sub_pin:?}"),
 			};
 
-			let masked_input_value = (input_value >> input_sub_pin.line()) & 1;
+			let masked_input_value = ((input_value >> input_sub_pin.line()) & 1) as u16;
 			input_bits <<= 1;
 			input_bits |= masked_input_value;
 		}
@@ -73,14 +73,14 @@ impl World {
 		input_bits
 	}
 
-	pub(super) fn get_output(&self, ant: &Ant, input: u8) -> Vec<PinValue> {
+	pub(super) fn get_output(&self, ant: &Ant, input: u16) -> Vec<PinValue> {
 		let behavior = self
 			.get_behavior(ant.behavior)
 			.cloned()
 			.expect("invalid Behavior ID");
 
 		// calculating the output
-		let mut output_bits = behavior.logic.get(input);
+		let mut output_bits = behavior.logic.get(input as usize);
 
 		// condense output bits into bytes
 		let mut output_values: Vec<PinValue> = vec![];
@@ -107,7 +107,7 @@ impl World {
 		output_values
 	}
 
-	pub(super) fn sync_tick(&mut self, pos: Pos, layer: u8, input: u8, output: &[PinValue]) {
+	pub(super) fn sync_tick(&mut self, pos: Pos, layer: u8, input: u16, output: &[PinValue]) {
 		let mut ant = self.ants[&layer][&pos];
 
 		let behavior = self
@@ -174,7 +174,8 @@ impl World {
 			};
 		}
 
-		ant.last_input = input;
+		// idea: add setting to choose between msb and lsb
+		ant.last_input = input as u8;
 		ant.counter = ant.counter.wrapping_add(1);
 
 		if clear {

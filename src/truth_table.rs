@@ -62,16 +62,16 @@ impl TruthTable {
 
 	pub fn entries(&self) -> Vec<u32> {
 		(0..(1usize << self.input_count))
-			.map(|input| self.get(input as u8))
+			.map(|input| self.get(input))
 			.collect()
 	}
 
-	pub fn get(&self, input: u8) -> u32 {
-		if input as usize >= 1 << self.input_count {
+	pub fn get(&self, input: usize) -> u32 {
+		if input >= 1 << self.input_count {
 			return 0;
 		}
 
-		let bit_offset = input as usize * self.output_count as usize;
+		let bit_offset = input * self.output_count as usize;
 		let word_index = bit_offset / 32;
 		let bit_index = bit_offset % 32;
 		let value = (self.entries.get(word_index).copied().unwrap_or_default() as u64)
