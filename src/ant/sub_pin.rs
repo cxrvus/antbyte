@@ -52,7 +52,7 @@ impl SubPin {
 		let mut ident = self.pin.short_ident().to_owned();
 
 		if self.pin.definition().size > 1 {
-			ident.push_str(&format!("{:o}", self.bit_index));
+			ident.push_str(&format!("_{:o}", self.bit_index));
 		}
 
 		ident
