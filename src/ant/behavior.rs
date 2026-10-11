@@ -62,15 +62,23 @@ impl Behavior {
 	) -> Result<Self> {
 		if inputs.len() > MAX_INPUTS {
 			return Err(anyhow!(
-				"may not have more than {MAX_INPUTS} inputs, got {}\n{:?}:\n",
+				"may not have more than {MAX_INPUTS} inputs, got {}\n{}:\n",
 				inputs.len(),
 				inputs
+					.iter()
+					.map(|x| x.to_ident())
+					.collect::<Vec<_>>()
+					.join(", ")
 			));
 		} else if outputs.len() > MAX_OUTPUTS {
 			return Err(anyhow!(
-				"may not have more than {MAX_OUTPUTS} inputs, got {}\n{:?}:\n",
+				"may not have more than {MAX_OUTPUTS} outputs, got {}\n{}:\n",
 				outputs.len(),
 				outputs
+					.iter()
+					.map(|x| x.to_ident())
+					.collect::<Vec<_>>()
+					.join(", ")
 			));
 		}
 

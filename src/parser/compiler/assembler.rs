@@ -76,12 +76,12 @@ impl CompFunc {
 
 		if inputs.len() > MAX_INPUTS {
 			Err(anyhow!(
-				"may not have more than 12 inputs, got {}\n",
+				"may not have more than {MAX_INPUTS} inputs, got {}\n",
 				inputs.len(),
 			))
 		} else if outputs.len() > MAX_OUTPUTS {
 			Err(anyhow!(
-				"may not have more than 16 outputs, got {}\n",
+				"may not have more than {MAX_OUTPUTS} outputs, got {}\n",
 				outputs.len(),
 			))
 		} else {
