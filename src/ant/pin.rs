@@ -309,7 +309,6 @@ impl Pin {
 
 	#[inline]
 	/// specifies that a pin needs the line bits to be the channel bits.
-	///
 	/// currently only used for special treatment of `NearbyAnt`.
 	pub fn prefers_channel(&self) -> bool {
 		matches!(self, Self::Obstacle)
@@ -324,41 +323,10 @@ pub struct PinValue {
 
 #[cfg(test)]
 mod test {
-	use crate::ant::pin::IoType;
-
-	use super::Pin;
-
 	#[test]
-	#[rustfmt::skip]
 	fn export_pin_definitions() {
-		println!("{}", serde_json::to_string_pretty(&Pin::PIN_DEFINITIONS).unwrap());
-
-	}
-
-	#[test]
-	fn export_pin_stats() {
-		let pin_definitions: Vec<_> = Pin::PIN_DEFINITIONS.iter().collect();
-
-		let inputs = pin_definitions
-			.iter()
-			.filter(|pin| pin.io_type != Some(IoType::Output));
-
-		let outputs = pin_definitions
-			.iter()
-			.filter(|pin| pin.io_type != Some(IoType::Input));
-
-		let in_count = inputs.clone().count();
-
-		let out_count = outputs.clone().count();
-
-		let total_count = pin_definitions.len();
-
-		let in_size: u16 = inputs.map(|pin| pin.size as u16).sum();
-		let out_size: u16 = outputs.map(|pin| pin.size as u16).sum();
-		let total_size: u16 = pin_definitions.iter().map(|pin| pin.size as u16).sum();
-
-		println!(
-			"input types: {in_count}\noutput types: {out_count}\ntotal types: {total_count}\n\ninput size: {in_size}\noutput size: {out_size}\ntotal size: {total_size}"
-		);
+		let pin_def = serde_json::to_string_pretty(&super::Pin::PIN_DEFINITIONS).unwrap();
+		println!("{pin_def}");
+		std::fs::write("./js/bindings/PINS.json", pin_def).unwrap();
 	}
 }
