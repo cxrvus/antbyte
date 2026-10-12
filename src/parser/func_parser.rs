@@ -1,5 +1,8 @@
+use std::mem::take;
+
 use crate::{
-	parser::{Func, Signature},
+	ant::sub_pin::SubPin,
+	parser::{Expression, Func, ParamValue, ParsedWorld, Signature},
 	util::find_dupe,
 };
 
@@ -24,15 +27,7 @@ impl Parser {
 			vec![]
 		};
 
-		let signature = Signature {
-			name: name.to_owned(),
-			params,
-			assignees,
-		};
-
-		signature.validate()?;
-
-		Ok(signature)
+		Signature::new(name, &params, &assignees)
 	}
 
 	fn parse_statements(&mut self) -> Result<Vec<Statement>> {
@@ -67,35 +62,99 @@ impl Parser {
 
 		Ok(statements)
 	}
+
+	pub(super) fn parse_link(&mut self, world: &mut ParsedWorld) -> Result<()> {
+		let name = self.next_ident()?;
+		let targets = self.next_ident_list()?;
+		self.expect_next(Token::Semicolon)?;
+
+		if targets.is_empty() {
+			bail!("link must have at least one target");
+		} else if let Some(err) = targets.iter().find_map(|x| SubPin::from_ident(x).err()) {
+			bail!("all link targets must be valid pins.\n    {err}")
+		}
+
+		let params: Vec<String> = (0..targets.len()).map(|i| format!("x{i:02o}")).collect();
+
+		fn assignment(assignee: &str, expression: &str) -> Statement {
+			Statement {
+				assignees: vec![ParamValue {
+					target: assignee.to_owned(),
+					sign: false,
+				}],
+				expression: Expression {
+					ident: expression.to_owned(),
+					sign: false,
+					params: None,
+				},
+			}
+		}
+
+		let mut statements = vec![];
+
+		// Setter...
+
+		for (i, target) in targets.iter().enumerate() {
+			statements.push(assignment(target, &params[i]));
+		}
+
+		let signature = Signature::new(&name, &params, &[])?;
+
+		let setter = Func {
+			signature,
+			statements: take(&mut statements),
+		};
+
+		// Getter...
+
+		let signature = Signature::new(&name, &[], &params)?;
+
+		for (i, target) in targets.iter().enumerate() {
+			statements.push(assignment(&params[i], target));
+		}
+
+		let getter = Func {
+			signature,
+			statements,
+		};
+
+		world.funcs.push(setter);
+		world.funcs.push(getter);
+
+		Ok(())
+	}
 }
 
 impl Signature {
-	fn validate(&self) -> Result<()> {
-		if self.name == "or" {
+	pub fn new(name: &str, params: &[String], assignees: &[String]) -> Result<Self> {
+		if name == "or" {
 			bail!("may not use 'or' as a function name")
 		}
 
-		self.validate_keywords()?;
-
-		if let Some(collision) = self
-			.params
+		if let Some(collision) = params
 			.iter()
-			.find(|param| self.assignees.iter().any(|assignee| assignee == *param))
+			.find(|param| assignees.iter().any(|assignee| assignee == *param))
 		{
 			Err(anyhow!(
 				"identifier '{collision}' used both as a parameter and an assignee"
 			))
-		} else if self.params.contains(&self.name) || self.assignees.contains(&self.name) {
+		} else if params.contains(&name.to_string()) || assignees.contains(&name.to_string()) {
 			Err(anyhow!(
 				"cannot use func name '{}' as parameter or assignee",
-				self.name
+				name
 			))
-		} else if let Some(dupe) = find_dupe(&self.params) {
+		} else if let Some(dupe) = find_dupe(params) {
 			Err(anyhow!("identifier '{dupe}' used for multiple parameters"))
-		} else if let Some(dupe) = find_dupe(&self.assignees) {
+		} else if let Some(dupe) = find_dupe(assignees) {
 			Err(anyhow!("identifier '{dupe}' used for multiple assignees"))
 		} else {
-			Ok(())
+			let signature = Self {
+				name: name.to_owned(),
+				params: params.into(),
+				assignees: assignees.into(),
+			};
+			signature.validate_keywords()?;
+			Ok(signature)
 		}
 	}
 

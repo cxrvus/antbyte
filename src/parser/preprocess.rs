@@ -1,21 +1,36 @@
 use crate::{
-	parser::token::{LiteralData, RangeData, Token},
+	parser::{
+		Keyword,
+		token::{LiteralData, RangeData, Token},
+	},
 	util::bits_from_int,
 };
 use anyhow::{Context, Result, bail};
 
 pub fn preprocess(tokens: &[Token]) -> Result<Vec<Token>> {
-	use Token::*;
-
+	let mut in_link_block = false;
 	let mut out_tokens = vec![];
 	let mut in_tokens = tokens.to_vec();
 	in_tokens.reverse();
 
 	while let Some(token) = in_tokens.pop() {
+		if let Some(prev) = out_tokens.last()
+			&& *prev == Token::Keyword(Keyword::Link)
+			&& token == Token::BraceLeft
+		{
+			in_link_block = true;
+		} else if token == Token::BraceRight {
+			in_link_block = false;
+		}
+
 		let mut tokens = match &token {
-			Ident(ident) if is_void_call(out_tokens.last(), in_tokens.last()) => void_call(ident),
-			NumberLiteral(data) => literal(data),
-			IdentRange(data) => range(data),
+			Token::Ident(ident)
+				if is_void_call(out_tokens.last(), in_tokens.last()) && !in_link_block =>
+			{
+				void_call(ident)
+			}
+			Token::NumberLiteral(data) => literal(data),
+			Token::IdentRange(data) => range(data),
 			_ => Ok(vec![token.clone()]),
 		}
 		.context(format!("in token {token:?}"))?;

@@ -41,12 +41,21 @@ impl Parser {
 				Set => {
 					if self.assume_next(Token::BraceLeft).is_some() {
 						while self.assume_next(Token::BraceRight).is_none() {
-							let (key, value) = self.parse_setting()?;
-							world.settings.push((key, value));
+							let (k, v) = self.parse_setting().context("in settings block!")?;
+							world.settings.push((k, v));
 						}
 					} else {
-						let (key, value) = self.parse_setting()?;
-						world.settings.push((key, value));
+						let (k, v) = self.parse_setting().context("in setting!")?;
+						world.settings.push((k, v));
+					}
+				}
+				Link => {
+					if self.assume_next(Token::BraceLeft).is_some() {
+						while self.assume_next(Token::BraceRight).is_none() {
+							self.parse_link(&mut world).context("in link block!")?;
+						}
+					} else {
+						self.parse_link(&mut world).context("in link!")?;
 					}
 				}
 				Def => {
