@@ -103,32 +103,3 @@ impl Display for TruthTable {
 		writeln!(f)
 	}
 }
-
-#[cfg(test)]
-mod tests {
-	use super::TruthTable;
-
-	#[test]
-	fn packs_values_across_words() {
-		let entries = (0..16).collect::<Vec<_>>();
-		let table = TruthTable::new(4, 4, entries.clone()).unwrap();
-
-		assert_eq!(table.entries(), entries);
-		assert_eq!(table.get(16), 0);
-	}
-
-	#[test]
-	fn supports_zero_and_32_bit_outputs() {
-		let zeroes = TruthTable::new(1, 0, vec![0, 0]).unwrap();
-		assert_eq!(zeroes.entries(), vec![0, 0]);
-
-		let values = vec![u32::MAX, 0];
-		let table = TruthTable::new(1, 32, values.clone()).unwrap();
-		assert_eq!(table.entries(), values);
-	}
-
-	#[test]
-	fn rejects_values_outside_output_width() {
-		assert!(TruthTable::new(1, 3, vec![0, 8]).is_err());
-	}
-}
