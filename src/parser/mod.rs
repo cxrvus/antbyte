@@ -23,7 +23,7 @@ impl Keyword {
 			"ant" => Some(Self::Ant),
 			"lnk" => Some(Self::Link),
 			"use" => Some(Self::Use),
-			"use_cfg" => Some(Self::UseCfg),
+			"cfg" => Some(Self::UseCfg),
 			"no_std" => Some(Self::NoStd),
 			_ => None,
 		}
