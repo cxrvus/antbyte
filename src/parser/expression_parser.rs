@@ -74,7 +74,16 @@ impl Parser {
 					self.tokens.push(Token::Semicolon);
 
 					return if expression_sets.len() == 1 {
-						Ok(expression_sets.pop().unwrap().pop().unwrap())
+						let mut top_level_set = expression_sets.pop().unwrap();
+
+						if top_level_set.len() == 1 {
+							Ok(top_level_set.pop().unwrap())
+						} else {
+							Err(anyhow!(
+								"may not have more than 1 top-level expression per statement, found {}",
+								top_level_set.len()
+							))
+						}
 					} else {
 						Err(anyhow!(
 							"unmatched left parentheses (depth = {})",
