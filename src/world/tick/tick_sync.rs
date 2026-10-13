@@ -47,7 +47,12 @@ impl World {
 
 				AntId => ant.behavior,
 
-				Rotation => ant.rotation.rotated(ant.birth_rot.value(), true).value(),
+				Rotation => ant
+					.rotation
+					.rotated(ant.birth_rot.value(), true)
+					.value()
+					.reverse_bits(),
+
 				RotateReset => (ant.rotation == ant.birth_rot) as u8,
 
 				Obstacle => {
