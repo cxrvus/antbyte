@@ -67,11 +67,15 @@ impl WorldState {
 	pub(super) fn tile_decay(&mut self) {
 		let current_tick = self.tick_count as u16;
 
-		for (pos, expiration) in self.tile_decays.clone() {
-			if current_tick == expiration {
-				self.tiles.set(pos, 0);
-				self.tile_decays.remove(&pos);
-			}
+		let expired = self
+			.tile_decays
+			.iter()
+			.filter_map(|(&pos, &expiration)| (current_tick == expiration).then_some(pos))
+			.collect::<Vec<_>>();
+
+		for pos in expired {
+			self.tiles.set(pos, 0);
+			self.tile_decays.remove(&pos);
 		}
 	}
 

@@ -19,11 +19,13 @@ impl World {
 	pub(super) fn move_tick(&mut self, layer: u8) {
 		let mut source = Ants::new();
 		let mut result = Ants::new();
+		let mut stack = Vec::new();
 
 		swap(self.ants.layer_mut(layer), &mut source);
 
 		while let Some((pos, ant)) = source.pop_first() {
-			let mut stack = vec![(pos, ant)];
+			stack.clear();
+			stack.push((pos, ant));
 
 			// used to resolve cycles
 			let mut cycle_pos: Option<Pos> = None;

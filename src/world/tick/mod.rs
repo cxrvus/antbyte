@@ -49,9 +49,14 @@ impl World {
 
 	fn tick_layer(&mut self, layer: u8) {
 		// tick ants (sync)
-		let mut all_outputs = vec![];
+		let layer_ants = self.ants[&layer]
+			.iter()
+			.map(|(&pos, &ant)| (pos, ant))
+			.collect::<Vec<_>>();
 
-		for (pos, ant) in self.ants[&layer].clone() {
+		let mut all_outputs = Vec::with_capacity(layer_ants.len());
+
+		for (pos, ant) in layer_ants {
 			if !ant.sleeping() {
 				let input = self.get_input(&ant, pos, layer);
 				let output = self.get_output(&ant, input);

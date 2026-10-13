@@ -15,13 +15,14 @@ use Pin::*;
 impl World {
 	pub(super) fn get_input(&mut self, ant: &Ant, pos: Pos, layer: u8) -> u16 {
 		let behavior = self
-			.get_behavior(ant.behavior)
-			.cloned()
+			.properties
+			.behaviors
+			.get(&ant.behavior)
 			.expect("invalid Behavior ID");
 
 		let mut input_bits = 0u16;
 
-		for sub_pin in behavior.inputs.iter() {
+		for sub_pin in &behavior.inputs {
 			let target_dir = Direction::from_u8(sub_pin.channel()) + ant.look_dir();
 			let target_pos = self.next_pos(pos, layer, target_dir);
 			let target_ant = target_pos.and_then(|pos| self.ants[&layer].get(&pos));
@@ -41,8 +42,8 @@ impl World {
 
 				Counter => sub_pin.sub_byte(ant.counter),
 				Clock => sub_pin.sub_byte(zero_count_mask(ant.counter)),
-				Random => self.rng() as u8,
-				Probability => sub_pin.sub_byte(zero_count_mask(self.rng())),
+				Random => self.state.rng() as u8,
+				Probability => sub_pin.sub_byte(zero_count_mask(self.state.rng())),
 
 				AntId => ant.behavior,
 
@@ -75,14 +76,13 @@ impl World {
 	pub(super) fn get_output(&self, ant: &Ant, input: u16) -> Vec<PinValue> {
 		let behavior = self
 			.get_behavior(ant.behavior)
-			.cloned()
 			.expect("invalid Behavior ID");
 
 		// calculating the output
 		let mut output_bits = behavior.logic.get(input as usize);
 
 		// condense output bits into bytes
-		let mut output_values: Vec<PinValue> = vec![];
+		let mut output_values: Vec<PinValue> = Vec::with_capacity(behavior.outputs.len());
 
 		for sub_pin in behavior.outputs.iter().rev() {
 			let output_bit = (output_bits & 1) as u16;
@@ -111,7 +111,6 @@ impl World {
 
 		let behavior = self
 			.get_behavior(ant.behavior)
-			.cloned()
 			.expect("invalid Behavior ID");
 
 		let tile_mask = behavior.pin_mask(Pin::Color);

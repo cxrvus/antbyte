@@ -5,7 +5,7 @@ impl World {
 	pub(super) fn kill_tick(&mut self, layer: u8) {
 		let mut kills = BTreeSet::new();
 
-		for (pos, ant) in &self.ants[&layer].clone() {
+		for (pos, ant) in &self.ants[&layer] {
 			if ant.will_kill
 				&& !ant.sleeping()
 				&& let Some(next_pos) = self.next_pos(*pos, layer, ant.look_dir())
