@@ -38,7 +38,7 @@ pub struct Args {
 	cfg: Option<String>,
 
 	/// Hide Ants
-	#[arg(short = 'F', long)]
+	#[arg(short = 'H', long)]
 	hide_fg: bool,
 
 	/// Output data in machine-readable format
