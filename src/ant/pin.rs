@@ -139,7 +139,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Clock,
 			code: "CLK",
-			size: BYTE,
+			size: WORD,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
@@ -157,7 +157,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Counter,
 			code: "CTR",
-			size: BYTE,
+			size: WORD,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {
@@ -235,7 +235,7 @@ impl Pin {
 		PinDefinition {
 			pin: Self::Probability,
 			code: "PRB",
-			size: BYTE,
+			size: WORD,
 			io_type: Some(IoType::Input),
 		},
 		PinDefinition {

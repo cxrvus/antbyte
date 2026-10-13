@@ -60,7 +60,7 @@ impl WorldState {
 	}
 
 	#[inline]
-	pub(super) fn rng(&mut self) -> u8 {
+	pub(super) fn rng(&mut self) -> u16 {
 		self.rng.as_mut().expect("rng must be Some").random()
 	}
 

@@ -48,6 +48,10 @@ impl SubPin {
 		if pin.prefers_channel() { lsb3 } else { msb3 }
 	}
 
+	pub fn sub_byte(&self, value: u16) -> u8 {
+		value.unbounded_shr(self.channel() as u32 * 8) as u8
+	}
+
 	pub fn to_ident(&self) -> String {
 		let mut ident = self.pin.short_ident().to_owned();
 

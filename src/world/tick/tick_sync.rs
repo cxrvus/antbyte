@@ -7,8 +7,8 @@ use crate::{
 	world::{World, config::BorderMode},
 };
 
-fn zero_count_mask(x: u8) -> u8 {
-	0xff_u8.unbounded_shr(8 - x.trailing_zeros())
+fn zero_count_mask(x: u16) -> u16 {
+	u16::MAX.unbounded_shr(16 - x.trailing_zeros())
 }
 
 use Pin::*;
@@ -21,29 +21,28 @@ impl World {
 
 		let mut input_bits = 0u16;
 
-		for input_sub_pin in behavior.inputs.iter() {
-			let target_dir = Direction::from_u8(input_sub_pin.channel()) + ant.look_dir();
+		for sub_pin in behavior.inputs.iter() {
+			let target_dir = Direction::from_u8(sub_pin.channel()) + ant.look_dir();
 			let target_pos = self.next_pos(pos, layer, target_dir);
 			let target_ant = target_pos.and_then(|pos| self.ants[&layer].get(&pos));
 
-			let input_value: u8 = match input_sub_pin.pin {
+			let input_value: u8 = match sub_pin.pin {
 				Mem => ant.memory,
-				Signal => (self.signal_in >> (input_sub_pin.channel() * 8)) as u8,
+				Signal => sub_pin.sub_byte(self.signal_in),
 
-				// need channel because ext_input is 16 bits
-				ExtIn => (self.ext_input >> (input_sub_pin.channel() * 8)) as u8,
+				ExtIn => sub_pin.sub_byte(self.ext_input),
 
 				Color => *self.tiles.get(pos).unwrap(),
 				Clear => (*self.tiles.get(pos).unwrap() == 0) as u8,
-				Decay => (self.relative_decay(pos) >> (input_sub_pin.channel() * 8)) as u8,
+				Decay => sub_pin.sub_byte(self.relative_decay(pos)),
 
 				Initial => (ant.birth_tick + 1 == self.tick_count()) as u8,
 				Halt => ant.halted() as u8,
 
-				Counter => ant.counter,
-				Clock => zero_count_mask(ant.counter),
-				Random => self.rng(),
-				Probability => zero_count_mask(self.rng()),
+				Counter => sub_pin.sub_byte(ant.counter),
+				Clock => sub_pin.sub_byte(zero_count_mask(ant.counter)),
+				Random => self.rng() as u8,
+				Probability => sub_pin.sub_byte(zero_count_mask(self.rng())),
 
 				AntId => ant.behavior,
 
@@ -62,10 +61,10 @@ impl World {
 					.map(|pos| *self.tiles.get(pos).unwrap())
 					.unwrap_or(0u8),
 
-				_ => panic!("unhandled input: {input_sub_pin:?}"),
+				_ => panic!("unhandled input: {sub_pin:?}"),
 			};
 
-			let masked_input_value = ((input_value >> input_sub_pin.line()) & 1) as u16;
+			let masked_input_value = ((input_value >> sub_pin.line()) & 1) as u16;
 			input_bits <<= 1;
 			input_bits |= masked_input_value;
 		}
@@ -85,18 +84,18 @@ impl World {
 		// condense output bits into bytes
 		let mut output_values: Vec<PinValue> = vec![];
 
-		for output_sub_pin in behavior.outputs.iter().rev() {
+		for sub_pin in behavior.outputs.iter().rev() {
 			let output_bit = (output_bits & 1) as u16;
-			let new_value = output_bit << output_sub_pin.bit_index;
+			let new_value = output_bit << sub_pin.bit_index;
 
 			if let Some(output_value) = output_values
 				.iter_mut()
-				.find(|output_value| output_value.pin == output_sub_pin.pin)
+				.find(|output_value| output_value.pin == sub_pin.pin)
 			{
 				output_value.value |= new_value;
 			} else {
 				output_values.push(PinValue {
-					pin: output_sub_pin.pin,
+					pin: sub_pin.pin,
 					value: new_value,
 				});
 			}

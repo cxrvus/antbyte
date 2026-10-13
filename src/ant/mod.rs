@@ -13,7 +13,7 @@ pub struct Ant {
 	pub birth_tick: u32,
 	pub birth_rot: Rotation,
 
-	pub counter: u8,
+	pub counter: u16,
 	pub sleep_ticks: u8,
 	pub memory: u8,
 
