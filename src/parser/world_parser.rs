@@ -38,14 +38,11 @@ impl Parser {
 					world.imports.push(import);
 					self.expect_next(Token::Semicolon)?;
 				}
-				Set => {
-					if self.assume_next(Token::BraceLeft).is_some() {
-						while self.assume_next(Token::BraceRight).is_none() {
-							let (k, v) = self.parse_setting().context("in settings block!")?;
-							world.settings.push((k, v));
-						}
-					} else {
-						let (k, v) = self.parse_setting().context("in setting!")?;
+				Cfg => {
+					self.expect_next(Token::BraceLeft)?;
+
+					while self.assume_next(Token::BraceRight).is_none() {
+						let (k, v) = self.parse_setting().context("in config!")?;
 						world.settings.push((k, v));
 					}
 				}

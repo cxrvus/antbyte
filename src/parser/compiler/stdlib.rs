@@ -2,7 +2,7 @@ pub const STDLIB: &str = r#"
 # THE ANTBYTE STANDARD LIBRARY
 
 no_std;
-set _desc = "antbyte standard library";
+cfg { _desc = "antbyte standard library"; }
 
 
 ## And (2-4 parameters)
