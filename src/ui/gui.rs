@@ -77,13 +77,15 @@ impl GameState for State {
 					let bg_value = (value & 0x0f) * 17;
 					let bg_color = RGB::from_u8(bg_value, bg_value, bg_value);
 					let fg_color: RGB = BLACK.into();
-					context.set(pos.x, pos.y, fg_color, bg_color, 0);
+					context.set(pos.x, pos.y, fg_color, bg_color, 0x20);
 				}
 			}
 
 			// TODO: fix FG
 			if self.world.config().fg != RenderMask::None {
 				for (&pos, &fg_value) in &frame.fg {
+					// font texture needs to be offset because space (CLS) is at 0x20
+					let fg_value = fg_value.wrapping_add(0x20);
 					let bg_value = frame.bg.get(&pos).copied().unwrap_or(0) * 17;
 					let bg_color = RGB::from_u8(bg_value, bg_value, bg_value);
 					let fg_color: RGB = WHITE.into();
