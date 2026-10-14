@@ -95,11 +95,13 @@ pub fn run(world: World, fullscreen: bool) -> BError {
 	} = world.config();
 	let (width, height) = (*width as u32, *height as u32);
 
+	let assets_path = concat!(env!("CARGO_MANIFEST_DIR"), "/assets");
+
 	let context = BTermBuilder::new()
 		.with_advanced_input(true)
 		.with_dimensions(width, height)
 		.with_simple_console(width, height, "hex_font.png")
-		.with_resource_path("assets")
+		.with_resource_path(assets_path)
 		.with_font("hex_font.png", TILE_WIDTH, TILE_HEIGHT)
 		.with_fitscreen(true)
 		.with_fullscreen(fullscreen)
