@@ -311,6 +311,11 @@ pub struct MidiConfig {
 }
 
 impl WorldConfig {
+	#[inline]
+	pub fn dimensions(&self) -> (u16, u16) {
+		(self.width, self.height)
+	}
+
 	pub fn validate(&self) -> Result<()> {
 		if self.height < 3 || self.width < 3 {
 			bail!("height / width must not be less than 3")

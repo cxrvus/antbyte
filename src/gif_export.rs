@@ -1,31 +1,24 @@
 #![cfg(feature = "gif")]
 
 use crate::{
-	ui::term::render::{clear_screen, print_title_short},
-	util::vec2::Pos,
+	util::{clear_screen, print_title_short, vec2::Pos},
 	world::{World, config::WorldConfig, frame::FrameOutput},
 };
 
 use anyhow::Result;
 use gif::{Encoder, Frame, Repeat};
-use std::{
-	fs::File,
-	path::{Path, PathBuf},
-};
+use std::{fs::File, path::Path};
 
 const MAX_FRAMES: u32 = 0x400;
 const MAX_PX: u16 = 0x200;
 
-pub fn gif_export(world: &World, source: &Path, target: Option<PathBuf>) -> Result<()> {
-	let path = match target {
-		Some(path) => path,
-		None => {
-			let mut path = source.to_path_buf();
-			let mut file_name = path.file_name().unwrap().to_string_lossy().to_string();
-			file_name.push_str(".gif");
-			path.set_file_name(file_name);
-			path
-		}
+pub fn gif_export(world: &World, source: &Path) -> Result<()> {
+	let path = {
+		let mut path = source.to_path_buf();
+		let mut file_name = path.file_name().unwrap().to_string_lossy().to_string();
+		file_name.push_str(".gif");
+		path.set_file_name(file_name);
+		path
 	};
 
 	let WorldConfig { width, height, .. } = world.config();

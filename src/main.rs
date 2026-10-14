@@ -9,19 +9,12 @@ fn main() {
 }
 
 pub fn run() -> Result<()> {
-	#[cfg(feature = "term")]
+	#[cfg(feature = "clap")]
 	{
-		use antbyte::ui::term;
-
-		if let Some((world, args)) = antbyte::cli::create_world()? {
-			use anyhow::Context;
-			term::run(world, args.quiet).context("simulation error!")?;
-		}
-
-		Ok(())
+		antbyte::cli::run_world()
 	}
 
-	#[cfg(not(feature = "term"))]
+	#[cfg(not(feature = "clap"))]
 	{
 		use antbyte::{
 			parser::compiler::LogConfig,

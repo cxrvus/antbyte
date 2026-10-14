@@ -41,9 +41,13 @@ pub struct Args {
 	#[arg(short = 'H', long)]
 	hide_fg: bool,
 
-	/// Output data in machine-readable format
+	/// Render Mode
 	#[arg(short, long)]
-	pub raw: bool,
+	pub render: Option<String>,
+
+	/// Full Screen
+	#[arg(short, long)]
+	pub fullscreen: bool,
 
 	/// Pass args to sub-process, e.g. a nodejs file
 	#[arg(short = 'a', long = "args")]

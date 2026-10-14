@@ -11,6 +11,14 @@ pub fn print_error(e: anyhow::Error) {
 
 #[inline]
 #[rustfmt::skip]
+pub fn clear_screen() { print!("\x1B[2J\x1B[1;1H"); }
+
+#[inline]
+#[rustfmt::skip]
+pub fn print_title_short() { println!("<<ANTBYTE>>"); }
+
+#[inline]
+#[rustfmt::skip]
 pub fn sleep(ms: u32) { std::thread::sleep(std::time::Duration::from_millis(ms as u64)); }
 
 pub fn find_dupe<T: PartialEq>(vec: &[T]) -> Option<&T> {

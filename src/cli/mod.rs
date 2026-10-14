@@ -1,13 +1,13 @@
-#![cfg(feature = "term")]
+#![cfg(feature = "clap")]
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-use anyhow::{Context, Ok, Result};
+use anyhow::{Context, Result, bail};
 use clap::{self, Parser};
 
 use crate::{
 	parser::compiler::LogConfig,
-	ui::term,
+	ui::{RenderMode, gui, raw},
 	world::{World, config::WorldConfig, file_compiler::compile_world},
 };
 
@@ -15,7 +15,7 @@ mod args;
 
 use args::Args;
 
-pub fn create_world() -> Result<Option<(World, Args)>> {
+pub fn run_world() -> Result<()> {
 	let args = Args::parse();
 
 	let path = args.path()?;
@@ -42,20 +42,27 @@ pub fn create_world() -> Result<Option<(World, Args)>> {
 			.context("config-arg error!")?;
 		let world = World::new(properties.clone()).context("world error!")?;
 
-		if let Some(target) = args.gif {
-			export_gif(world, &path, target).context("GIF export error!")?;
-		} else if args.raw {
-			term::raw::run(world);
-		} else {
-			return Ok(Some((world, args)));
-		}
-	}
+		let render_mode = match args.render {
+			Some(render_mode) if !render_mode.is_empty() => RenderMode::try_from(render_mode)?,
+			_ => bail!("must provide a render mode"),
+		};
 
-	Ok(None)
+		// TODO: simulation error
+		match render_mode {
+			RenderMode::Gui => gui::run(world, args.fullscreen)
+				.map_err(|err| anyhow::anyhow!(err.to_string()))
+				.context("in GUI!")?,
+			RenderMode::Raw => raw::run(world),
+			RenderMode::Term => todo!(),
+			RenderMode::None => todo!(),
+			RenderMode::Gif => export_gif(world, &path).context("GIF export error!")?,
+		};
+	}
+	Ok(())
 }
 
 #[rustfmt::skip]
-fn export_gif(world: World, source: &Path, target: Option<PathBuf>) -> Result<()> {
-	#[cfg(feature = "gif")] { crate::gif_export::gif_export(&world, source, target) }
-	#[cfg(not(feature = "gif"))] { _ = (world, source, target); anyhow::bail!("need to enable the `gif` feature-flag in the antbyte crate"); }
+fn export_gif(world: World, source: &Path) -> Result<()> {
+	#[cfg(feature = "gif")] { crate::gif_export::gif_export(&world, source) }
+	#[cfg(not(feature = "gif"))] { _ = (world, source); anyhow::bail!("need to enable the `gif` feature-flag in the antbyte crate"); }
 }
