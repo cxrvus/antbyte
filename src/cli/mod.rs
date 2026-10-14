@@ -43,8 +43,11 @@ pub fn run_world() -> Result<()> {
 		let world = World::new(properties.clone()).context("world error!")?;
 
 		let render_mode = match args.render {
-			Some(render_mode) if !render_mode.is_empty() => RenderMode::try_from(render_mode)?,
-			_ => bail!("must provide a render mode"),
+			Some(render_mode) => match render_mode.as_str() {
+				"" => bail!("must provide a render mode"),
+				render_mode => RenderMode::try_from(render_mode)?,
+			},
+			None => Default::default(),
 		};
 
 		// TODO: simulation error

@@ -23,16 +23,16 @@ pub enum RenderMode {
 	#[default]
 	Gui,
 	Raw,
-	Term,
 	None,
+	Term,
 	Gif,
 }
 
-impl TryFrom<String> for RenderMode {
+impl TryFrom<&str> for RenderMode {
 	type Error = anyhow::Error;
 
-	fn try_from(value: String) -> Result<Self, Self::Error> {
-		match value.as_str() {
+	fn try_from(value: &str) -> Result<Self, Self::Error> {
+		match value {
 			"gui" => Ok(RenderMode::Gui),
 			"raw" => Ok(RenderMode::Raw),
 			"term" => Ok(RenderMode::Term),
