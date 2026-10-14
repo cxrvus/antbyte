@@ -88,7 +88,9 @@ impl GameState for State {
 					let fg_value = fg_value.wrapping_add(0x20);
 					let bg_value = frame.bg.get(&pos).copied().unwrap_or(0) * 17;
 					let bg_color = RGB::from_u8(bg_value, bg_value, bg_value);
-					let fg_color: RGB = WHITE.into();
+					// let fg_color = bg_color.desaturate();
+					let (neg_bg_value, _) = bg_value.overflowing_neg();
+					let fg_color = RGB::from_u8(neg_bg_value, neg_bg_value, neg_bg_value);
 
 					context.set(pos.x, pos.y, fg_color, bg_color, fg_value);
 				}
