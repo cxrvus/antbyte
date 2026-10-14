@@ -10,7 +10,7 @@ use crate::{
 	},
 };
 
-pub fn run(world: World) {
+pub fn run(world: World, metadata_only: bool) {
 	let mut world = world;
 
 	print!("\n\n");
@@ -19,35 +19,37 @@ pub fn run(world: World) {
 	let mut input = FrameInput::default();
 
 	while let Some(frame) = world.next_frame(&input) {
-		// ## FG
-		if let RenderMask::None = world.config().fg {
-			println!("--");
-		} else {
-			print_grid(world.config(), &frame.fg);
+		if !metadata_only {
+			// ## FG
+			if let RenderMask::None = world.config().fg {
+				println!("--");
+			} else {
+				print_grid(world.config(), &frame.fg);
+			}
+
+			println!();
+
+			// ## BG
+			if let RenderMask::None = world.config().bg {
+				println!("--");
+			} else {
+				print_grid(world.config(), &frame.bg);
+			}
+
+			println!();
+
+			// ## Metadata
+			println!("ms: {}", frame.ms);
+
+			// ## External Input
+			input_str.clear();
+			std::io::stdin().read_line(&mut input_str).unwrap();
+			input.ext_in = chars_to_input(world.config().keys.as_deref(), &input_str);
 		}
-
-		println!();
-
-		// ## BG
-		if let RenderMask::None = world.config().bg {
-			println!("--");
-		} else {
-			print_grid(world.config(), &frame.bg);
-		}
-
-		println!();
-
-		// ## Metadata
-		println!("ms: {}", frame.ms);
 
 		let metadata = world.metadata_str();
 		println!("{metadata}");
 		println!();
-
-		// ## External Input
-		input_str.clear();
-		std::io::stdin().read_line(&mut input_str).unwrap();
-		input.ext_in = chars_to_input(world.config().keys.as_deref(), &input_str);
 	}
 }
 

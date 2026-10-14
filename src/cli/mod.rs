@@ -55,10 +55,11 @@ pub fn run_world() -> Result<()> {
 			RenderMode::Gui => gui::run(world, args.fullscreen)
 				.map_err(|err| anyhow::anyhow!(err.to_string()))
 				.context("in GUI!")?,
-			RenderMode::Raw => raw::run(world),
-			RenderMode::Term => todo!(),
-			RenderMode::None => todo!(),
+
+			RenderMode::Raw => raw::run(world, false),
+			RenderMode::None => raw::run(world, true),
 			RenderMode::Gif => export_gif(world, &path).context("GIF export error!")?,
+			RenderMode::Term => todo!(),
 		};
 	}
 	Ok(())
