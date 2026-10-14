@@ -98,7 +98,13 @@ pub fn run(world: World, fullscreen: bool) -> BError {
 
 	let assets_path = concat!(env!("CARGO_MANIFEST_DIR"), "/assets");
 
+	let title = match world.name() {
+		Some(name) => format!("{name}   -   AntByte"),
+		None => "AntByte".into(),
+	};
+
 	let context = BTermBuilder::new()
+		.with_title(title)
 		.with_advanced_input(true)
 		.with_dimensions(width, height)
 		.with_simple_console(width, height, "hex_font.png")
