@@ -1,3 +1,5 @@
+use std::io::{self, Write};
+
 pub mod dir;
 pub mod grid;
 pub mod rotation;
@@ -8,6 +10,19 @@ pub mod vec2;
 /// need to conventionally make all anyhow context messages end in a '!'
 pub fn print_error(e: anyhow::Error) {
 	eprintln!("{}", format!("<!> {e:#}").replace("!: ", ":\n    "));
+}
+
+pub fn print_stationary(str: &str) {
+	let mut stdout = io::stdout().lock();
+
+	let line_count = str.lines().count();
+	write!(stdout, "\x1b[{line_count}A").unwrap();
+
+	for line in str.lines() {
+		write!(stdout, "\r\x1b[2K{line}\n").unwrap();
+	}
+
+	stdout.flush().unwrap();
 }
 
 #[inline]

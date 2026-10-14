@@ -1,9 +1,12 @@
 #![cfg(feature = "gui")]
 use bracket_lib::prelude::*;
 
-use crate::world::{
-	World,
-	config::{RenderMask, WorldConfig},
+use crate::{
+	util::print_stationary,
+	world::{
+		World,
+		config::{RenderMask, WorldConfig},
+	},
 };
 
 const TILE_WIDTH: u32 = 8;
@@ -11,6 +14,7 @@ const TILE_HEIGHT: u32 = 8;
 const MAX_ZOOM: f32 = 4.0;
 const ZOOM_STEP: f32 = 1.0;
 const PAN_STEP: f32 = 4.0;
+const METADATA_LINES: usize = 3;
 
 struct State {
 	zoom: f32,
@@ -87,6 +91,9 @@ impl GameState for State {
 					context.set(pos.x, pos.y, fg_color, bg_color, fg_value);
 				}
 			}
+
+			debug_assert_eq!(frame.metadata.lines().count(), METADATA_LINES);
+			print_stationary(&frame.metadata);
 		}
 	}
 }
@@ -103,6 +110,8 @@ pub fn run(world: World, fullscreen: bool) -> BError {
 		Some(name) => format!("{name}   -   AntByte"),
 		None => "AntByte".into(),
 	};
+
+	println!("{}", "\n".repeat(METADATA_LINES));
 
 	let context = BTermBuilder::new()
 		.with_title(title)
