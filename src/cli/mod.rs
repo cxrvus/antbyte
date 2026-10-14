@@ -7,7 +7,7 @@ use clap::{self, Parser};
 
 use crate::{
 	parser::compiler::LogConfig,
-	ui::{RenderMode, gui, raw},
+	ui::{RenderMode, raw},
 	world::{World, config::WorldConfig, file_compiler::compile_world},
 };
 
@@ -17,11 +17,8 @@ use args::Args;
 
 pub fn run_world() -> Result<()> {
 	let args = Args::parse();
-
 	let path = args.path()?;
-
 	let log_config = LogConfig { all: args.debug };
-
 	let mut properties = compile_world(&path, &log_config, &args.sub_args)?;
 
 	if args.json {
@@ -52,9 +49,18 @@ pub fn run_world() -> Result<()> {
 
 		// TODO: simulation error
 		match render_mode {
-			RenderMode::Gui => gui::run(world, args.fullscreen)
-				.map_err(|err| anyhow::anyhow!(err.to_string()))
-				.context("in GUI!")?,
+			RenderMode::Gui => {
+				#[cfg(not(feature = "gui"))]
+				{
+					anyhow::bail!("need to enable the gui feature flag to render in GUI")
+				}
+				#[cfg(feature = "gui")]
+				{
+					crate::ui::gui::run(world, args.fullscreen)
+						.map_err(|err| anyhow::anyhow!(err.to_string()))
+						.context("in GUI!")?
+				}
+			}
 
 			RenderMode::Raw => raw::run(world, false),
 			RenderMode::None => raw::run(world, true),

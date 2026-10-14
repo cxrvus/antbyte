@@ -58,10 +58,6 @@ pub struct Args {
 	pub json: bool,
 
 	// idea: turn these into sub-commands, since the config args are ignored anyway
-	/// Export as GIF
-	#[arg(long)]
-	pub gif: Option<Option<PathBuf>>,
-
 	/// Log debug info instead of running the simulation
 	#[arg(short, long)]
 	pub debug: bool,

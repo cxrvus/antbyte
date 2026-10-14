@@ -18,7 +18,7 @@ pub fn run() -> Result<()> {
 	{
 		use antbyte::{
 			parser::compiler::LogConfig,
-			ui::term,
+			ui::raw,
 			world::{World, file_compiler::compile_world},
 		};
 
@@ -35,7 +35,7 @@ pub fn run() -> Result<()> {
 		let properties = compile_world(&path, &LogConfig::default(), &None)?;
 		let world = World::new(properties.clone()).context("world error!")?;
 
-		term::run(world, true)?;
+		raw::run(world, false);
 
 		Ok(())
 	}

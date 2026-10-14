@@ -1,3 +1,4 @@
+#![cfg(feature = "gui")]
 use bracket_lib::prelude::*;
 
 use crate::world::{
