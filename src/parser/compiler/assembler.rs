@@ -11,8 +11,7 @@ use crate::{
 		compiler::{CompFunc, LogConfig},
 		token::Token,
 	},
-	truth_table::TruthTable,
-	util::{bits_from_int, int_from_bits},
+	util::{bits_from_int, int_from_bits, truth_table::TruthTable},
 };
 
 use anyhow::{Context, Result, anyhow, bail};

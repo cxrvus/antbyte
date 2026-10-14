@@ -20,7 +20,7 @@ use crate::{
 		AntLink, ParamValue, Parser, Signature, SignatureSpec,
 		compiler::{func_comp::compile_funcs, stdlib::STDLIB},
 	},
-	truth_table::TruthTable,
+	util::truth_table::TruthTable,
 	world::WorldProperties,
 };
 

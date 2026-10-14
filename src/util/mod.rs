@@ -1,6 +1,7 @@
 pub mod dir;
 pub mod grid;
 pub mod rotation;
+pub mod truth_table;
 pub mod vec2;
 
 #[inline]
