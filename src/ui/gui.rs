@@ -27,6 +27,7 @@ impl State {
 		let mut input = INPUT.lock();
 
 		input.for_each_message(|event| match event {
+			BEvent::CloseRequested => context.quit(),
 			BEvent::Character { .. } => {}
 			BEvent::KeyboardInput { key, pressed, .. } => {
 				if !pressed {
@@ -37,7 +38,7 @@ impl State {
 					match key {
 						Key::Equals => self.zoom = (self.zoom + ZOOM_STEP).min(MAX_ZOOM),
 						Key::Minus => self.zoom = (self.zoom - ZOOM_STEP).max(1.0),
-						Key::Q => std::process::exit(1),
+						Key::Q => context.quit(),
 						_ => {}
 					}
 				} else {
