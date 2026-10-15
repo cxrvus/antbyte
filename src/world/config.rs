@@ -259,7 +259,7 @@ impl ByteFilter {
 }
 
 #[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum RenderMask {
 	None,
