@@ -18,7 +18,7 @@ pub fn run() -> Result<()> {
 	{
 		use antbyte::{
 			parser::compiler::LogConfig,
-			ui::raw,
+			render::raw,
 			world::{World, file_compiler::compile_world},
 		};
 

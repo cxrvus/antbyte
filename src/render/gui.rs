@@ -5,7 +5,7 @@ use bracket_lib::prelude::*;
 use std::collections::HashSet;
 
 use crate::{
-	ui::{chars::key_to_char, chars_to_input},
+	render::{chars::key_to_char, chars_to_input},
 	util::{print_stationary, sleep},
 	world::{
 		World,

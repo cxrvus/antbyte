@@ -7,7 +7,7 @@ use clap::{self, Parser};
 
 use crate::{
 	parser::compiler::LogConfig,
-	ui::{RenderMode, raw},
+	render::{RenderMode, raw},
 	world::{World, file_compiler::compile_world},
 };
 
@@ -49,7 +49,7 @@ pub fn run_world() -> Result<()> {
 				}
 				#[cfg(feature = "gui")]
 				{
-					crate::ui::gui::run(world, args.fullscreen)
+					crate::render::gui::run(world, args.fullscreen)
 						.map_err(|err| anyhow::anyhow!(err.to_string()))
 						.context("in GUI!")?
 				}

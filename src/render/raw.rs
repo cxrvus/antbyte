@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::{
-	ui::chars_to_input,
+	render::chars_to_input,
 	util::vec2::Pos,
 	world::{
 		World,
