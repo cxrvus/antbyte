@@ -113,27 +113,26 @@ impl GameState for State {
 		} else if let Some(frame) = self.world.next_frame(&input) {
 			context.cls();
 
-			if self.world.config().bg != RenderMask::None {
-				for (&pos, &value) in &frame.bg {
-					let bg_value = (value & 0x0f) * 17;
-					let bg_color = RGB::from_u8(bg_value, bg_value, bg_value);
-					let fg_color: RGB = BLACK.into();
-					context.set(pos.x, pos.y, fg_color, bg_color, 0x20);
-				}
-			}
+			for (&pos, &bg_value) in &frame.bg {
+				let bg_value = match self.world.config().bg {
+					RenderMask::None => 0,
+					_ => bg_value,
+				};
+				let bg_value = (bg_value & 0x0f) * 17;
 
-			// TODO: fix FG
-			if self.world.config().fg != RenderMask::None {
-				for (&pos, &fg_value) in &frame.fg {
-					// font texture needs to be offset because space (CLS) is at 0x20
-					let fg_value = fg_value.wrapping_add(0x20);
-					let bg_value = frame.bg.get(&pos).copied().unwrap_or(0) * 17;
-					let bg_color = RGB::from_u8(bg_value, bg_value, bg_value);
-					let (neg_bg_value, _) = bg_value.overflowing_neg();
-					let fg_color = RGB::from_u8(neg_bg_value, neg_bg_value, neg_bg_value);
+				let bg_color = RGB::from_u8(bg_value, bg_value, bg_value);
+				let neg_bg_value = bg_value.wrapping_neg();
+				let fg_color = RGB::from_u8(neg_bg_value, neg_bg_value, neg_bg_value);
 
-					context.set(pos.x, pos.y, fg_color, bg_color, fg_value);
-				}
+				let fg_value = *frame.fg.get(&pos).unwrap_or(&0);
+				let fg_value = match self.world.config().fg {
+					RenderMask::None => 0,
+					_ => fg_value,
+				};
+				// font texture needs to be offset because space (CLS) is at 0x20
+				let fg_value = fg_value.wrapping_add(0x20);
+
+				context.set(pos.x, pos.y, fg_color, bg_color, fg_value);
 			}
 
 			if frame.after_reset {
