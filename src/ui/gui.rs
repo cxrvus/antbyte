@@ -2,7 +2,7 @@
 use bracket_lib::prelude::*;
 
 use crate::{
-	util::print_stationary,
+	util::{print_stationary, sleep},
 	world::{
 		World,
 		config::{RenderMask, WorldConfig},
@@ -21,6 +21,9 @@ struct State {
 	pan_x: f32,
 	pan_y: f32,
 	world: World,
+	metadata: String,
+	quit: bool,
+	sleep: Option<u32>,
 }
 
 impl State {
@@ -61,13 +64,34 @@ impl State {
 			_ => {}
 		});
 	}
+
+	#[inline]
+	fn try_sleep(&mut self) {
+		if let Some(ms) = self.sleep {
+			sleep(ms);
+			self.sleep = None;
+		}
+	}
+
+	#[inline]
+	fn print_metadata(&self) {
+		if !self.metadata.is_empty() {
+			debug_assert_eq!(self.metadata.lines().count(), METADATA_LINES);
+			print_stationary(&self.metadata);
+		}
+	}
 }
 
 impl GameState for State {
 	fn tick(&mut self, context: &mut BTerm) {
+		self.print_metadata();
 		self.handle_keys(context);
 
-		if let Some(frame) = self.world.next_frame_auto() {
+		let mut schedule_sleep = false;
+
+		if self.quit {
+			context.quit();
+		} else if let Some(frame) = self.world.next_frame_auto() {
 			// TODO: ext. input
 
 			context.cls();
@@ -96,8 +120,20 @@ impl GameState for State {
 				}
 			}
 
-			debug_assert_eq!(frame.metadata.lines().count(), METADATA_LINES);
-			print_stationary(&frame.metadata);
+			if frame.after_reset {
+				schedule_sleep = true;
+			} else {
+				self.metadata = frame.metadata;
+			}
+		} else {
+			self.quit = true;
+			schedule_sleep = true;
+		}
+
+		self.try_sleep();
+
+		if schedule_sleep {
+			self.sleep = self.world.config().sleep;
 		}
 	}
 }
@@ -117,7 +153,7 @@ pub fn run(world: World, fullscreen: bool) -> BError {
 
 	println!("{}", "\n".repeat(METADATA_LINES));
 
-	let context = BTermBuilder::new()
+	let mut context = BTermBuilder::new()
 		.with_title(title)
 		.with_advanced_input(true)
 		.with_dimensions(width, height)
@@ -129,6 +165,8 @@ pub fn run(world: World, fullscreen: bool) -> BError {
 		.with_fps_cap(*fps as f32)
 		.build()?;
 
+	context.cls();
+
 	main_loop(
 		context,
 		State {
@@ -136,6 +174,9 @@ pub fn run(world: World, fullscreen: bool) -> BError {
 			pan_x: 0.0,
 			pan_y: 0.0,
 			world,
+			metadata: "".into(),
+			quit: false,
+			sleep: None,
 		},
 	)
 }
