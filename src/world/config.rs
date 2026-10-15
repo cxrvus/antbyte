@@ -113,7 +113,7 @@ impl Default for WorldConfig {
 			layer_filter: 0xff,
 			bg_filter: ByteFilter::Lsb,
 			bg: RenderMask::Tile,
-			fg: RenderMask::Dir,
+			fg: RenderMask::Id,
 
 			keys: None,
 			midi: Default::default(),
