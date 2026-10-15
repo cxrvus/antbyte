@@ -37,19 +37,18 @@ pub fn run(world: World, metadata_only: bool) {
 			}
 
 			println!();
-
-			// ## Metadata
-			println!("ms: {}", frame.ms);
-
-			// ## External Input
-			input_str.clear();
-			std::io::stdin().read_line(&mut input_str).unwrap();
-			input.ext_in = chars_to_input(world.config().keys.as_deref(), &input_str);
 		}
 
-		let metadata = world.metadata_str();
+		// ## Metadata
+		println!("ms: {}", frame.ms);
+		let metadata = frame.metadata;
 		println!("{metadata}");
 		println!();
+
+		// ## External Input
+		input_str.clear();
+		std::io::stdin().read_line(&mut input_str).unwrap();
+		input.ext_in = chars_to_input(world.config().keys.as_deref(), &input_str);
 	}
 }
 
