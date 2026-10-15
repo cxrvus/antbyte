@@ -18,7 +18,7 @@ pub struct Args {
 	pub quiet: bool,
 
 	/// Step through the simulation, sleeping for input after each frame (FPS = 0)
-	#[arg(short = 'S', long)]
+	#[arg(short, long)]
 	stepped: bool,
 
 	/// Looping simulation
@@ -38,7 +38,7 @@ pub struct Args {
 	cfg: Option<String>,
 
 	/// Hide Ants
-	#[arg(short = 'H', long)]
+	#[arg(short = 'h', long)]
 	hide_fg: bool,
 
 	/// Render Mode
