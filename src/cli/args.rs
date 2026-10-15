@@ -61,10 +61,6 @@ pub struct Args {
 	/// Log debug info instead of running the simulation
 	#[arg(short, long)]
 	pub debug: bool,
-
-	/// Show a preview of the dimensions of the antlet
-	#[arg(short, long)]
-	pub preview: bool,
 }
 
 const MAX_TICKS: u32 = u16::MAX as u32;

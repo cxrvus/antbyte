@@ -8,7 +8,7 @@ use clap::{self, Parser};
 use crate::{
 	parser::compiler::LogConfig,
 	ui::{RenderMode, raw},
-	world::{World, config::WorldConfig, file_compiler::compile_world},
+	world::{World, file_compiler::compile_world},
 };
 
 mod args;
@@ -27,14 +27,7 @@ pub fn run_world() -> Result<()> {
 		println!("{json}");
 	}
 
-	if args.preview {
-		let WorldConfig { width, height, .. } = properties.config;
-		let preview_str =
-			"\\/\n".repeat(height as usize) + "|_" + &">>".repeat(width as usize) + "\n\n";
-		print!("{preview_str}");
-	} else if args.debug || args.json {
-		// logging happens on compilation
-	} else {
+	if !(args.debug || args.json) {
 		args.set_config(&mut properties.config)
 			.context("config-arg error!")?;
 		let world = World::new(properties.clone()).context("world error!")?;
