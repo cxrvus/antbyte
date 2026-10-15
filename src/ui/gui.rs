@@ -104,6 +104,10 @@ impl GameState for State {
 			ext_in: input_value,
 		};
 
+		if self.world.config().stepped && input_chars.is_empty() {
+			return;
+		}
+
 		if self.quit {
 			context.quit();
 		} else if let Some(frame) = self.world.next_frame(&input) {
