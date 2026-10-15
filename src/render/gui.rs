@@ -16,8 +16,9 @@ use crate::{
 
 const TILE_WIDTH: u32 = 8;
 const TILE_HEIGHT: u32 = 8;
-const MAX_ZOOM: f32 = 4.0;
-const ZOOM_STEP: f32 = 1.0;
+const MAX_ZOOM: f32 = 8.0;
+const MIN_ZOOM: f32 = 0.5;
+const ZOOM_STEP: f32 = 0.5;
 const PAN_STEP: f32 = 4.0;
 const METADATA_LINES: usize = 3;
 
@@ -44,7 +45,7 @@ impl State {
 				if pressed && control {
 					match key {
 						Key::Equals => self.zoom = (self.zoom + ZOOM_STEP).min(MAX_ZOOM),
-						Key::Minus => self.zoom = (self.zoom - ZOOM_STEP).max(1.0),
+						Key::Minus => self.zoom = (self.zoom - ZOOM_STEP).max(MIN_ZOOM),
 						Key::Q => context.quit(),
 						_ => {}
 					}
@@ -166,12 +167,21 @@ pub fn run(world: World, fullscreen: bool) -> BError {
 		None => "AntByte".into(),
 	};
 
+	let window_scale = match height.max(width) {
+		0..=128 => 1.0,
+		129..196 => 0.75,
+		_ => 0.5,
+	};
+
+	let window_width = (width as f32 * window_scale).ceil() as u32;
+	let window_height = (height as f32 * window_scale).ceil() as u32;
+
 	println!("{}", "\n".repeat(METADATA_LINES));
 
 	let mut context = BTermBuilder::new()
 		.with_title(title)
 		.with_advanced_input(true)
-		.with_dimensions(width, height)
+		.with_dimensions(window_width, window_height)
 		.with_simple_console(width, height, "hex_font.png")
 		.with_resource_path(assets_path)
 		.with_font("hex_font.png", TILE_WIDTH, TILE_HEIGHT)
