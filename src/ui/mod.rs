@@ -1,5 +1,6 @@
 use anyhow::anyhow;
 
+pub mod chars;
 pub mod gui;
 pub mod raw;
 

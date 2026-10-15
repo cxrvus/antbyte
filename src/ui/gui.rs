@@ -1,11 +1,16 @@
 #![cfg(feature = "gui")]
+
+use VirtualKeyCode as Key;
 use bracket_lib::prelude::*;
+use std::collections::HashSet;
 
 use crate::{
+	ui::{chars::key_to_char, chars_to_input},
 	util::{print_stationary, sleep},
 	world::{
 		World,
 		config::{RenderMask, WorldConfig},
+		frame::FrameInput,
 	},
 };
 
@@ -22,26 +27,21 @@ struct State {
 	pan_y: f32,
 	world: World,
 	metadata: String,
+	held_keys: HashSet<Key>,
 	quit: bool,
 	sleep: Option<u32>,
 }
 
 impl State {
-	fn handle_keys(&mut self, context: &mut BTerm) {
-		use VirtualKeyCode as Key;
-
+	fn handle_keys(&mut self, context: &mut BTerm) -> String {
 		let control = context.control;
 		let mut input = INPUT.lock();
 
 		input.for_each_message(|event| match event {
 			BEvent::CloseRequested => context.quit(),
-			BEvent::Character { .. } => {}
+			BEvent::Focused { focused: false } => self.held_keys.clear(),
 			BEvent::KeyboardInput { key, pressed, .. } => {
-				if !pressed {
-					return;
-				}
-
-				if control {
+				if pressed && control {
 					match key {
 						Key::Equals => self.zoom = (self.zoom + ZOOM_STEP).min(MAX_ZOOM),
 						Key::Minus => self.zoom = (self.zoom - ZOOM_STEP).max(1.0),
@@ -49,12 +49,21 @@ impl State {
 						_ => {}
 					}
 				} else {
-					match key {
-						Key::Left => self.pan_x -= PAN_STEP,
-						Key::Right => self.pan_x += PAN_STEP,
-						Key::Up => self.pan_y -= PAN_STEP,
-						Key::Down => self.pan_y += PAN_STEP,
-						_ => {}
+					if pressed {
+						match key {
+							Key::Left => self.pan_x -= PAN_STEP,
+							Key::Right => self.pan_x += PAN_STEP,
+							Key::Up => self.pan_y -= PAN_STEP,
+							Key::Down => self.pan_y += PAN_STEP,
+
+							_ if key_to_char(&key).is_some() => {
+								self.held_keys.insert(key);
+							}
+
+							_ => {}
+						}
+					} else {
+						self.held_keys.remove(&key);
 					}
 				}
 
@@ -63,6 +72,8 @@ impl State {
 			}
 			_ => {}
 		});
+
+		self.held_keys.iter().filter_map(key_to_char).collect()
 	}
 
 	#[inline]
@@ -85,15 +96,17 @@ impl State {
 impl GameState for State {
 	fn tick(&mut self, context: &mut BTerm) {
 		self.print_metadata();
-		self.handle_keys(context);
-
 		let mut schedule_sleep = false;
+
+		let input_chars = self.handle_keys(context);
+		let input_value = chars_to_input(self.world.config().keys.as_deref(), &input_chars);
+		let input = FrameInput {
+			ext_in: input_value,
+		};
 
 		if self.quit {
 			context.quit();
-		} else if let Some(frame) = self.world.next_frame_auto() {
-			// TODO: ext. input
-
+		} else if let Some(frame) = self.world.next_frame(&input) {
 			context.cls();
 
 			if self.world.config().bg != RenderMask::None {
@@ -112,7 +125,6 @@ impl GameState for State {
 					let fg_value = fg_value.wrapping_add(0x20);
 					let bg_value = frame.bg.get(&pos).copied().unwrap_or(0) * 17;
 					let bg_color = RGB::from_u8(bg_value, bg_value, bg_value);
-					// let fg_color = bg_color.desaturate();
 					let (neg_bg_value, _) = bg_value.overflowing_neg();
 					let fg_color = RGB::from_u8(neg_bg_value, neg_bg_value, neg_bg_value);
 
@@ -175,6 +187,7 @@ pub fn run(world: World, fullscreen: bool) -> BError {
 			pan_y: 0.0,
 			world,
 			metadata: "".into(),
+			held_keys: HashSet::new(),
 			quit: false,
 			sleep: None,
 		},
