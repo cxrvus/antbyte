@@ -113,18 +113,24 @@ impl Parser {
 					.insert(sub_index, Palette::parse_color(&self.next_str()?)?);
 			}
 			"palette" => {
-				self.next_str()?
-					.trim()
-					.trim_end_matches(";")
-					.split(";")
-					.map(|c| c.trim())
-					.enumerate()
-					.try_for_each(|(i, c)| -> Result<()> {
-						config
-							.palette
-							.insert(i.try_into().unwrap(), Palette::parse_color(c)?);
-						Ok(())
-					})?;
+				let value = self.next_str()?;
+
+				if value.is_empty() {
+					config.palette.clear();
+				} else {
+					value
+						.trim()
+						.trim_end_matches(";")
+						.split(";")
+						.map(|c| c.trim())
+						.enumerate()
+						.try_for_each(|(i, c)| -> Result<()> {
+							config
+								.palette
+								.insert(i.try_into().unwrap(), Palette::parse_color(c)?);
+							Ok(())
+						})?;
+				}
 			}
 
 			"keys" => {
