@@ -15,8 +15,10 @@ const MAX_PX: u16 = 0x200;
 pub fn gif_export(world: &World, source: &Path) -> Result<()> {
 	let path = {
 		let mut path = source.to_path_buf();
-		let mut file_name = path.file_name().unwrap().to_string_lossy().to_string();
+
+		let mut file_name = world.name().unwrap_or("untitled.ant".into());
 		file_name.push_str(".gif");
+
 		path.set_file_name(file_name);
 		path
 	};
