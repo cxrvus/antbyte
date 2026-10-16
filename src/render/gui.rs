@@ -29,8 +29,7 @@ struct State {
 	world: World,
 	metadata: String,
 	held_keys: HashSet<Key>,
-	quit: bool,
-	sleep: Option<u32>,
+	end: bool,
 }
 
 impl State {
@@ -78,14 +77,6 @@ impl State {
 	}
 
 	#[inline]
-	fn try_sleep(&mut self) {
-		if let Some(ms) = self.sleep {
-			sleep(ms);
-			self.sleep = None;
-		}
-	}
-
-	#[inline]
 	fn print_metadata(&self) {
 		if !self.metadata.is_empty() {
 			debug_assert_eq!(self.metadata.lines().count(), METADATA_LINES);
@@ -96,9 +87,6 @@ impl State {
 
 impl GameState for State {
 	fn tick(&mut self, context: &mut BTerm) {
-		self.print_metadata();
-		let mut schedule_sleep = false;
-
 		let input_chars = self.handle_keys(context);
 		let input_value = chars_to_input(self.world.config().keys.as_deref(), &input_chars);
 		let input = FrameInput {
@@ -109,9 +97,10 @@ impl GameState for State {
 			return;
 		}
 
-		if self.quit {
-			context.quit();
+		if self.end {
+			// context.quit();
 		} else if let Some(frame) = self.world.next_frame(&input) {
+			self.print_metadata();
 			context.cls();
 
 			for (&pos, &bg_value) in &frame.bg {
@@ -141,20 +130,16 @@ impl GameState for State {
 				context.set(pos.x, pos.y, fg_color, bg_color, fg_value);
 			}
 
-			if frame.after_reset {
-				schedule_sleep = true;
+			if let Some(ms) = self.world.config().sleep
+				&& frame.after_reset
+			{
+				sleep(ms);
 			} else {
 				self.metadata = frame.metadata;
 			}
 		} else {
-			self.quit = true;
-			schedule_sleep = true;
-		}
-
-		self.try_sleep();
-
-		if schedule_sleep {
-			self.sleep = self.world.config().sleep;
+			println!("\nSimulation terminated.");
+			self.end = true;
 		}
 	}
 }
@@ -210,8 +195,7 @@ pub fn run(world: World, fullscreen: bool, simple: bool) -> BError {
 			world,
 			metadata: "".into(),
 			held_keys: HashSet::new(),
-			quit: false,
-			sleep: None,
+			end: false,
 		},
 	)
 }
