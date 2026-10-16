@@ -19,7 +19,7 @@ const MAX_ZOOM: f32 = 8.0;
 const MIN_ZOOM: f32 = 0.5;
 const ZOOM_STEP: f32 = 0.5;
 const PAN_STEP: f32 = 4.0;
-const METADATA_LINES: usize = 3;
+const METADATA_LINES: usize = 5;
 
 struct State {
 	zoom: f32,
@@ -29,6 +29,8 @@ struct State {
 	metadata: String,
 	held_keys: HashSet<Key>,
 	end: bool,
+	original_fg: RenderMask,
+	path: String,
 }
 
 impl State {
@@ -41,10 +43,40 @@ impl State {
 			BEvent::Focused { focused: false } => self.held_keys.clear(),
 			BEvent::KeyboardInput { key, pressed, .. } => {
 				if pressed && control {
+					let mut config = self.world.config().clone();
+
 					match key {
 						Key::Equals => self.zoom = (self.zoom + ZOOM_STEP).min(MAX_ZOOM),
 						Key::Minus => self.zoom = (self.zoom - ZOOM_STEP).max(MIN_ZOOM),
+
 						Key::Q => context.quit(),
+						Key::S => self.world.config_mut().stepped = !self.world.config().stepped,
+						Key::F => {
+							self.world.config_mut().fg = match config.fg {
+								RenderMask::None => self.original_fg,
+								_ => RenderMask::None,
+							}
+						}
+						Key::P => {
+							let mut path = self.path.clone();
+							path.push_str(&format!(".{:08}.png", self.world.tick_count()));
+							context.screenshot(path);
+						}
+
+						Key::A | Key::D | Key::G | Key::J => {
+							match key {
+								Key::A => config.speed += 1,
+								Key::D => config.speed -= 1,
+								Key::G => config.speed *= 2,
+								Key::J => config.speed /= 2,
+								_ => {}
+							}
+
+							if config.validate().is_ok() {
+								*self.world.config_mut() = config;
+							}
+						}
+
 						_ => {}
 					}
 				} else {
@@ -76,10 +108,12 @@ impl State {
 	}
 
 	#[inline]
-	fn print_metadata(&self) {
+	fn print_metadata(&self, context: &BTerm) {
 		if !self.metadata.is_empty() {
-			debug_assert_eq!(self.metadata.lines().count(), METADATA_LINES);
-			print_stationary(&self.metadata);
+			let mut metadata = format!("real_fps: {};\n", context.fps);
+			metadata.push_str(&self.metadata);
+			debug_assert_eq!(metadata.lines().count(), METADATA_LINES);
+			print_stationary(&metadata);
 		}
 	}
 }
@@ -97,7 +131,8 @@ impl GameState for State {
 		}
 
 		if let Some(frame) = self.world.next_frame(&input) {
-			self.print_metadata();
+			self.print_metadata(context);
+
 			cls(context, &self.world);
 
 			let mut tiles: BTreeMap<Pos, (u8, u8)> = frame
@@ -142,7 +177,7 @@ impl GameState for State {
 	}
 }
 
-pub fn run(world: World, fullscreen: bool, simple: bool) -> BError {
+pub fn run(world: World, path: &str, fullscreen: bool, simple: bool) -> BError {
 	println!("{}", "\n".repeat(METADATA_LINES));
 
 	let WorldConfig {
@@ -184,6 +219,9 @@ pub fn run(world: World, fullscreen: bool, simple: bool) -> BError {
 	main_loop(
 		context,
 		State {
+			original_fg: world.clone().config().fg,
+			path: path.to_owned(),
+
 			zoom: 1.0,
 			pan_x: 0.0,
 			pan_y: 0.0,
