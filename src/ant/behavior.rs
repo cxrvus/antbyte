@@ -3,8 +3,7 @@ use crate::{
 		pin::{IoType, Pin},
 		sub_pin::SubPin,
 	},
-	truth_table::TruthTable,
-	util::find_dupe,
+	util::{find_dupe, truth_table::TruthTable},
 };
 
 use anyhow::{Result, anyhow};

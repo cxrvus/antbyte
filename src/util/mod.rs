@@ -1,6 +1,9 @@
+use std::io::{self, Write};
+
 pub mod dir;
 pub mod grid;
 pub mod rotation;
+pub mod truth_table;
 pub mod vec2;
 
 #[inline]
@@ -8,6 +11,27 @@ pub mod vec2;
 pub fn print_error(e: anyhow::Error) {
 	eprintln!("{}", format!("<!> {e:#}").replace("!: ", ":\n    "));
 }
+
+pub fn print_stationary(str: &str) {
+	let mut stdout = io::stdout().lock();
+
+	let line_count = str.lines().count();
+	write!(stdout, "\x1b[{line_count}A").unwrap();
+
+	for line in str.lines() {
+		write!(stdout, "\r\x1b[2K{line}\n").unwrap();
+	}
+
+	stdout.flush().unwrap();
+}
+
+#[inline]
+#[rustfmt::skip]
+pub fn clear_screen() { print!("\x1B[2J\x1B[1;1H"); }
+
+#[inline]
+#[rustfmt::skip]
+pub fn print_title_short() { println!("<<ANTBYTE>>"); }
 
 #[inline]
 #[rustfmt::skip]
@@ -30,19 +54,6 @@ pub fn hash_u32(x: u32) -> u32 {
 	let x = x.wrapping_mul(0x45d9f3b);
 
 	x ^ (x >> 16)
-}
-
-use std::sync::mpsc::{self, Receiver};
-
-pub fn setup_ctrl_c() -> Option<Receiver<()>> {
-	let (tx, rx) = mpsc::channel();
-
-	match ctrlc::set_handler(move || {
-		let _ = tx.send(());
-	}) {
-		Ok(_) => Some(rx),
-		Err(_) => None,
-	}
 }
 
 pub fn bits_from_int(value: u16) -> [bool; 16] {

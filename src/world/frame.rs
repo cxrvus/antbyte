@@ -20,6 +20,7 @@ pub struct FrameOutput {
 	pub fg: BTreeMap<Pos, u8>,
 	pub bg: BTreeMap<Pos, u8>,
 	pub ms: u32,
+	pub after_reset: bool,
 	pub metadata: String, //todo: turn this into a map
 	pub ext_out: Vec<u16>,
 }
@@ -33,6 +34,7 @@ impl World {
 
 	pub fn next_frame(&mut self, input: &FrameInput) -> Option<FrameOutput> {
 		let mut frame_ms = 1000 / self.config().fps;
+		let mut after_reset = false;
 
 		match self.status {
 			WorldStatus::Init => {
@@ -42,7 +44,8 @@ impl World {
 				if self.config().looping {
 					// reset
 					self.reset();
-					self.status = WorldStatus::Active;
+					after_reset = true;
+					self.status = WorldStatus::Init;
 				} else {
 					// stop
 					return None;
@@ -65,7 +68,8 @@ impl World {
 
 					if !active {
 						// current tick is last tick to be simulated
-						frame_ms = self.config().sleep.unwrap_or_default();
+						frame_ms = self.config().loop_delay.unwrap_or_default();
+
 						self.status = WorldStatus::Inactive;
 						break;
 					}
@@ -85,6 +89,7 @@ impl World {
 			fg,
 			bg,
 			ms: frame_ms,
+			after_reset,
 			metadata: self.metadata_str(),
 			ext_out: self.ext_output.clone(),
 		})

@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::{
-	ui::chars_to_input,
+	render::chars_to_input,
 	util::vec2::Pos,
 	world::{
 		World,
@@ -10,7 +10,7 @@ use crate::{
 	},
 };
 
-pub fn run(world: World) {
+pub fn run(world: World, metadata_only: bool) {
 	let mut world = world;
 
 	print!("\n\n");
@@ -19,28 +19,29 @@ pub fn run(world: World) {
 	let mut input = FrameInput::default();
 
 	while let Some(frame) = world.next_frame(&input) {
-		// ## FG
-		if let RenderMask::None = world.config().fg {
-			println!("--");
-		} else {
-			print_grid(world.config(), &frame.fg);
+		if !metadata_only {
+			// ## FG
+			if let RenderMask::None = world.config().fg {
+				println!("--");
+			} else {
+				print_grid(world.config(), &frame.fg);
+			}
+
+			println!();
+
+			// ## BG
+			if let RenderMask::None = world.config().bg {
+				println!("--");
+			} else {
+				print_grid(world.config(), &frame.bg);
+			}
+
+			println!();
 		}
-
-		println!();
-
-		// ## BG
-		if let RenderMask::None = world.config().bg {
-			println!("--");
-		} else {
-			print_grid(world.config(), &frame.bg);
-		}
-
-		println!();
 
 		// ## Metadata
 		println!("ms: {}", frame.ms);
-
-		let metadata = world.metadata_str();
+		let metadata = frame.metadata;
 		println!("{metadata}");
 		println!();
 

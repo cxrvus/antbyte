@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
 	ant::pin::Pin,
 	util::vec2::{Coord, Pos},
+	world::palette::Palette,
 };
 
 pub const FPS_CAP: u32 = 50;
@@ -40,8 +41,8 @@ pub struct WorldConfig {
 	pub max_ticks: Option<u32>,
 	/// re-run simulation after it ends
 	pub looping: bool,
-	/// amount of ms to sleep for after end of simulation, i.e. between loops
-	pub sleep: Option<u32>,
+	/// delay in ms after each loop
+	pub loop_delay: Option<u32>,
 
 	// ## Simulation
 	/// behavior if ants touch the worlds border
@@ -66,12 +67,16 @@ pub struct WorldConfig {
 	pub fps: u32,
 	/// only render new frame on key presses
 	pub stepped: bool,
+	/// color palette
+	pub palette: Palette,
 	/// first tick to render
 	pub start_tick: u32,
 	/// filter for layers that will be rendered
 	pub layer_filter: u8,
 	/// filter to get desired nibble (4 bits) out of BG byte
 	pub bg_filter: ByteFilter,
+	/// render fg as symbols instead of hex
+	pub fg_symbols: bool,
 	/// background render mask
 	pub bg: RenderMask,
 	/// foreground render mask
@@ -96,7 +101,7 @@ impl Default for WorldConfig {
 
 			max_ticks: None,
 			looping: false,
-			sleep: Some(200),
+			loop_delay: Some(200),
 
 			border: BTreeMap::from([(0, BorderMode::Wrap)]),
 			decay: None,
@@ -109,9 +114,11 @@ impl Default for WorldConfig {
 
 			fps: FPS_CAP,
 			stepped: false,
+			palette: Default::default(),
 			start_tick: 0,
 			layer_filter: 0xff,
 			bg_filter: ByteFilter::Lsb,
+			fg_symbols: false,
 			bg: RenderMask::Tile,
 			fg: RenderMask::Dir,
 
@@ -216,6 +223,8 @@ impl StartingPos {
 #[serde(rename_all = "snake_case")]
 /// filter specified nibble from a byte
 pub enum ByteFilter {
+	/// all bits
+	All,
 	/// least significant
 	Lsb,
 	/// most significant
@@ -231,6 +240,7 @@ impl TryFrom<String> for ByteFilter {
 
 	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
 		match value.as_str() {
+			"all" => Ok(Self::All),
 			"lsb" => Ok(Self::Lsb),
 			"msb" => Ok(Self::Msb),
 			"bin" => Ok(Self::Bin),
@@ -244,7 +254,8 @@ impl TryFrom<String> for ByteFilter {
 impl ByteFilter {
 	pub fn apply(&self, input: u8) -> u8 {
 		match self {
-			ByteFilter::Lsb => input & 0xf,
+			ByteFilter::All => input,
+			ByteFilter::Lsb => input & 0x0f,
 			ByteFilter::Msb => (input & 0xf0) >> 4,
 			ByteFilter::Bin => match input {
 				0 => 0,
@@ -259,7 +270,7 @@ impl ByteFilter {
 }
 
 #[cfg_attr(test, derive(ts_rs::TS))]
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum RenderMask {
 	None,
@@ -311,6 +322,11 @@ pub struct MidiConfig {
 }
 
 impl WorldConfig {
+	#[inline]
+	pub fn dimensions(&self) -> (u16, u16) {
+		(self.width, self.height)
+	}
+
 	pub fn validate(&self) -> Result<()> {
 		if self.height < 3 || self.width < 3 {
 			bail!("height / width must not be less than 3")
@@ -345,7 +361,7 @@ impl WorldConfig {
 		Self::cap(self.speed, "speed", SPEED_CAP)?;
 		Self::non_zero(self.speed, "speed")?;
 
-		Self::cap_opt(self.sleep, "sleep", 10000)?;
+		Self::cap_opt(self.loop_delay, "loop_delay", 10000)?;
 
 		if let Some(keys) = &self.keys {
 			if keys.is_empty() {

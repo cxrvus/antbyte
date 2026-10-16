@@ -17,8 +17,8 @@ pub struct Args {
 	#[arg(short, long)]
 	pub quiet: bool,
 
-	/// Step through the simulation, sleeping for input after each frame (FPS = 0)
-	#[arg(short = 'S', long)]
+	/// Step through the simulation, waiting for input after each frame
+	#[arg(short, long)]
 	stepped: bool,
 
 	/// Looping simulation
@@ -37,13 +37,21 @@ pub struct Args {
 	#[arg(short, long)]
 	cfg: Option<String>,
 
-	/// Hide Ants
+	/// Hide FG
 	#[arg(short = 'H', long)]
 	hide_fg: bool,
 
-	/// Output data in machine-readable format
+	/// Render Mode
 	#[arg(short, long)]
-	pub raw: bool,
+	pub render: Option<String>,
+
+	/// Simpler rendering
+	#[arg(short = 'S', long)]
+	pub simple: bool,
+
+	/// Full Screen
+	#[arg(short, long)]
+	pub fullscreen: bool,
 
 	/// Pass args to sub-process, e.g. a nodejs file
 	#[arg(short = 'a', long = "args")]
@@ -54,17 +62,9 @@ pub struct Args {
 	pub json: bool,
 
 	// idea: turn these into sub-commands, since the config args are ignored anyway
-	/// Export as GIF
-	#[arg(long)]
-	pub gif: Option<Option<PathBuf>>,
-
 	/// Log debug info instead of running the simulation
 	#[arg(short, long)]
 	pub debug: bool,
-
-	/// Show a preview of the dimensions of the antlet
-	#[arg(short, long)]
-	pub preview: bool,
 }
 
 const MAX_TICKS: u32 = u16::MAX as u32;
@@ -73,9 +73,11 @@ impl Args {
 	#[rustfmt::skip]
 	pub fn set_config(&self, config: &mut WorldConfig) -> anyhow::Result<()> {
 		if let Some(cfg) = &self.cfg {
-			let cfg = if cfg.trim().ends_with(';') { cfg } else { &format!("{cfg};") };
+			let cfg = cfg.trim().to_owned();
+			let mut cfg = cfg.replace('\'', "\"");
+			if !cfg.ends_with(';') { cfg.push(';'); }
 
-			let mut parser = Parser::new(cfg)?;
+			let mut parser = Parser::new(&cfg)?;
 
 			while parser.assume_next(Token::EndOfFile).is_none() {
 				let (key, value) = parser.parse_setting()?;

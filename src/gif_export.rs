@@ -1,31 +1,24 @@
 #![cfg(feature = "gif")]
 
 use crate::{
-	ui::term::render::{clear_screen, print_title_short},
-	util::vec2::Pos,
+	util::{clear_screen, print_title_short, vec2::Pos},
 	world::{World, config::WorldConfig, frame::FrameOutput},
 };
 
 use anyhow::Result;
 use gif::{Encoder, Frame, Repeat};
-use std::{
-	fs::File,
-	path::{Path, PathBuf},
-};
+use std::{fs::File, path::Path};
 
 const MAX_FRAMES: u32 = 0x400;
 const MAX_PX: u16 = 0x200;
 
-pub fn gif_export(world: &World, source: &Path, target: Option<PathBuf>) -> Result<()> {
-	let path = match target {
-		Some(path) => path,
-		None => {
-			let mut path = source.to_path_buf();
-			let mut file_name = path.file_name().unwrap().to_string_lossy().to_string();
-			file_name.push_str(".gif");
-			path.set_file_name(file_name);
-			path
-		}
+pub fn gif_export(world: &World, source: &Path) -> Result<()> {
+	let path = {
+		let mut path = source.to_path_buf();
+		let mut file_name = path.file_name().unwrap().to_string_lossy().to_string();
+		file_name.push_str(".gif");
+		path.set_file_name(file_name);
+		path
 	};
 
 	let WorldConfig { width, height, .. } = world.config();
@@ -38,8 +31,16 @@ pub fn gif_export(world: &World, source: &Path, target: Option<PathBuf>) -> Resu
 	let scaled_width = width * scale;
 	let scaled_height = height * scale;
 
+	let palette = world
+		.config()
+		.palette
+		.to_vec()
+		.iter()
+		.flat_map(|&(r, g, b)| vec![r, g, b])
+		.collect::<Vec<_>>();
+
 	let mut image = File::create(&path)?;
-	let mut encoder = Encoder::new(&mut image, scaled_width, scaled_height, &PALETTE)?;
+	let mut encoder = Encoder::new(&mut image, scaled_width, scaled_height, palette.as_slice())?;
 	encoder.set_repeat(Repeat::Infinite)?;
 
 	let mut world = world.clone();
@@ -84,7 +85,6 @@ fn render_frame(
 		for x in 0..width {
 			let pos = Pos { x, y };
 			let pixel = *frame.bg.get(&pos).unwrap_or(&0);
-			let pixel = pixel & 0xf; // only take LSB half
 
 			for _ in 0..scale {
 				scaled_row.push(pixel);
@@ -106,22 +106,3 @@ fn render_frame(
 
 	encoder.write_frame(&frame).unwrap();
 }
-
-const PALETTE: [u8; 0x10 * 3] = [
-	0x00, 0x00, 0x00, // 0: Black
-	0x80, 0x00, 0x00, // 1: Dark Red
-	0x00, 0x80, 0x00, // 2: Dark Green
-	0x80, 0x80, 0x00, // 3: Dark Yellow/Brown
-	0x00, 0x00, 0x80, // 4: Dark Blue
-	0x80, 0x00, 0x80, // 5: Dark Magenta
-	0x00, 0x80, 0x80, // 6: Dark Cyan
-	0xC0, 0xC0, 0xC0, // 7: Light Gray
-	0x80, 0x80, 0x80, // 8: Dark Gray
-	0xFF, 0x00, 0x00, // 9: Bright Red
-	0x00, 0xFF, 0x00, // 10: Bright Green
-	0xFF, 0xFF, 0x00, // 11: Bright Yellow
-	0x00, 0x00, 0xFF, // 12: Bright Blue
-	0xFF, 0x00, 0xFF, // 13: Bright Magenta
-	0x00, 0xFF, 0xFF, // 14: Bright Cyan
-	0xFF, 0xFF, 0xFF, // 15: White
-];

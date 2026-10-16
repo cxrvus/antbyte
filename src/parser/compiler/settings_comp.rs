@@ -3,7 +3,10 @@ use anyhow::{Context, Result, anyhow, bail};
 use crate::{
 	parser::{Parser, token::Token},
 	util::vec2::Coord,
-	world::config::{BorderMode, ByteFilter, RenderMask, StartingPos, WorldConfig},
+	world::{
+		config::{BorderMode, ByteFilter, RenderMask, StartingPos, WorldConfig},
+		palette::Palette,
+	},
 };
 
 impl WorldConfig {
@@ -54,7 +57,6 @@ impl Parser {
 			"fps" => config.fps = self.next_number()?,
 			"speed" => config.speed = self.next_number()?,
 			"decay" => config.decay = self.next_opt_number().map(|x| x.map(|v| v as u16))?,
-			"sleep" => config.sleep = self.next_opt_number()?,
 			"ticks" => config.max_ticks = self.next_opt_number()?,
 			"seed" => config.seed = self.next_opt_number()?,
 
@@ -71,6 +73,7 @@ impl Parser {
 			}
 
 			"looping" | "loop" => config.looping = self.next_bit()?,
+			"loop_delay" => config.loop_delay = self.next_opt_number()?,
 
 			"inv_rot" => config.inv_rot = self.next_bit()?,
 			"euclid" => config.euclid = self.next_bit()?,
@@ -100,8 +103,29 @@ impl Parser {
 			"ant_limit" => config.ant_limit = self.next_number()?,
 
 			"bg_filter" => config.bg_filter = ByteFilter::try_from(self.next_ident()?)?,
+			"fg_symbols" => config.fg_symbols = self.next_bit()?,
 			"bg" => config.bg = RenderMask::try_from(self.next_ident()?)?,
 			"fg" => config.fg = RenderMask::try_from(self.next_ident()?)?,
+
+			"pal" => {
+				config
+					.palette
+					.insert(sub_index, Palette::parse_color(&self.next_str()?)?);
+			}
+			"palette" => {
+				self.next_str()?
+					.trim()
+					.trim_end_matches(";")
+					.split(";")
+					.map(|c| c.trim())
+					.enumerate()
+					.try_for_each(|(i, c)| -> Result<()> {
+						config
+							.palette
+							.insert(i.try_into().unwrap(), Palette::parse_color(c)?);
+						Ok(())
+					})?;
+			}
 
 			"keys" => {
 				let keys = self.next_str()?;
