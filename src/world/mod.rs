@@ -135,6 +135,53 @@ impl World {
 			.unwrap_or(&self.config().border[&0])
 			.clone()
 	}
+
+	fn ext_out_str(&self) -> String {
+		const MAX_LEN: usize = 16;
+
+		if self.ext_output.is_empty() {
+			"--".into()
+		} else {
+			let mut ext_out_str = self
+				.ext_output
+				.iter()
+				.take(MAX_LEN)
+				.map(|x| format!("{x:02x}"))
+				.collect::<Vec<_>>()
+				.join(", ");
+
+			if self.ext_output.len() > MAX_LEN {
+				ext_out_str += ", ...";
+			}
+
+			ext_out_str
+		}
+	}
+
+	pub fn metadata_str(&self) -> String {
+		let WorldConfig {
+			speed,
+			fps,
+			stepped,
+			..
+		} = self.config();
+
+		let mut metadata_str = String::new();
+
+		let stepped = match stepped {
+			true => "(stepped);",
+			false => "",
+		};
+
+		metadata_str += &format!("fps: {fps:02}; tpf: {speed:03}; {stepped}\n");
+		metadata_str += &self.tick_str();
+		metadata_str += &format!(" | A: {:04}", self.ants.ant_count());
+		metadata_str += &format!("\nS: {:08b}", self.signal_in);
+		metadata_str += &format!(" | I: {:08b}", self.ext_input);
+		metadata_str += &format!("\nO: {}", self.ext_out_str());
+
+		metadata_str
+	}
 }
 
 impl Deref for World {

@@ -92,40 +92,6 @@ impl WorldState {
 	pub fn tick_str(&self) -> String {
 		format!("t: {:0>8}", self.tick_count())
 	}
-
-	pub fn ext_out_str(&self) -> String {
-		const MAX_LEN: usize = 16;
-
-		if self.ext_output.is_empty() {
-			"--".into()
-		} else {
-			let mut ext_out_str = self
-				.ext_output
-				.iter()
-				.take(MAX_LEN)
-				.map(|x| format!("{x:02x}"))
-				.collect::<Vec<_>>()
-				.join(", ");
-
-			if self.ext_output.len() > MAX_LEN {
-				ext_out_str += ", ...";
-			}
-
-			ext_out_str
-		}
-	}
-
-	pub fn metadata_str(&self) -> String {
-		let mut metadata_str = self.tick_str();
-
-		metadata_str += &format!(" | A: {:04}", self.ants.ant_count());
-
-		metadata_str += &format!("\nS: {:08b}", self.signal_in);
-		metadata_str += &format!(" | I: {:08b}", self.ext_input);
-		metadata_str += &format!("\nO: {}", self.ext_out_str());
-
-		metadata_str
-	}
 }
 
 #[derive(Debug, Clone, Default)]
