@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
 	ant::pin::Pin,
 	util::vec2::{Coord, Pos},
+	world::palette::Palette,
 };
 
 pub const FPS_CAP: u32 = 50;
@@ -66,6 +67,8 @@ pub struct WorldConfig {
 	pub fps: u32,
 	/// only render new frame on key presses
 	pub stepped: bool,
+	/// color palette
+	pub palette: Palette,
 	/// first tick to render
 	pub start_tick: u32,
 	/// filter for layers that will be rendered
@@ -109,6 +112,7 @@ impl Default for WorldConfig {
 
 			fps: FPS_CAP,
 			stepped: false,
+			palette: Default::default(),
 			start_tick: 0,
 			layer_filter: 0xff,
 			bg_filter: ByteFilter::Lsb,

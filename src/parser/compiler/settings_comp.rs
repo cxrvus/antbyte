@@ -3,7 +3,10 @@ use anyhow::{Context, Result, anyhow, bail};
 use crate::{
 	parser::{Parser, token::Token},
 	util::vec2::Coord,
-	world::config::{BorderMode, ByteFilter, RenderMask, StartingPos, WorldConfig},
+	world::{
+		config::{BorderMode, ByteFilter, RenderMask, StartingPos, WorldConfig},
+		palette::Palette,
+	},
 };
 
 impl WorldConfig {
@@ -102,6 +105,24 @@ impl Parser {
 			"bg_filter" => config.bg_filter = ByteFilter::try_from(self.next_ident()?)?,
 			"bg" => config.bg = RenderMask::try_from(self.next_ident()?)?,
 			"fg" => config.fg = RenderMask::try_from(self.next_ident()?)?,
+
+			"pal" => {
+				config
+					.palette
+					.insert(sub_index, Palette::parse_color(&self.next_str()?)?);
+			}
+			"palette" => {
+				self.next_str()?
+					.split(";")
+					.map(|c| c.trim())
+					.enumerate()
+					.try_for_each(|(i, c)| -> Result<()> {
+						config
+							.palette
+							.insert(i.try_into().unwrap(), Palette::parse_color(c)?);
+						Ok(())
+					})?;
+			}
 
 			"keys" => {
 				let keys = self.next_str()?;

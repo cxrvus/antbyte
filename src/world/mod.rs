@@ -2,6 +2,7 @@ pub mod cache;
 pub mod config;
 pub mod file_compiler;
 pub mod frame;
+pub mod palette;
 
 use config::WorldConfig;
 

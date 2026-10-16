@@ -119,11 +119,16 @@ impl GameState for State {
 					RenderMask::None => 0,
 					_ => bg_value,
 				};
-				let bg_value = (bg_value & 0x0f) * 17;
 
-				let bg_color = RGB::from_u8(bg_value, bg_value, bg_value);
-				let neg_bg_value = bg_value.wrapping_neg();
-				let fg_color = RGB::from_u8(neg_bg_value, neg_bg_value, neg_bg_value);
+				let &(r, g, b) = self
+					.world
+					.config()
+					.palette
+					.get(&bg_value)
+					.unwrap_or(&(0, 0, 0));
+
+				let bg_color = RGB::from_u8(r, g, b);
+				let fg_color = RGB::from_u8(0xff - r, 0xff - g, 0xff - b);
 
 				let fg_value = *frame.fg.get(&pos).unwrap_or(&0);
 				let fg_value = match self.world.config().fg {
