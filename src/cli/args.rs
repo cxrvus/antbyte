@@ -45,9 +45,9 @@ pub struct Args {
 	#[arg(short, long)]
 	pub render: Option<String>,
 
-	/// Fancier rendering
-	#[arg(short = 'F', long)]
-	pub fancy: bool,
+	/// Simpler rendering
+	#[arg(short = 'S', long)]
+	pub simple: bool,
 
 	/// Full Screen
 	#[arg(short, long)]

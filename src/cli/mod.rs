@@ -49,7 +49,7 @@ pub fn run_world() -> Result<()> {
 				}
 				#[cfg(feature = "gui")]
 				{
-					crate::render::gui::run(world, args.fullscreen, args.fancy)
+					crate::render::gui::run(world, args.fullscreen, args.simple)
 						.map_err(|err| anyhow::anyhow!(err.to_string()))
 						.context("in GUI!")?
 				}

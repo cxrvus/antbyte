@@ -159,7 +159,7 @@ impl GameState for State {
 	}
 }
 
-pub fn run(world: World, fullscreen: bool, fancy: bool) -> BError {
+pub fn run(world: World, fullscreen: bool, simple: bool) -> BError {
 	let WorldConfig {
 		width, height, fps, ..
 	} = world.config();
@@ -195,7 +195,7 @@ pub fn run(world: World, fullscreen: bool, fancy: bool) -> BError {
 		.with_fps_cap(*fps as f32)
 		.build()?;
 
-	if fancy {
+	if !simple {
 		context.with_post_scanlines(false);
 	}
 
