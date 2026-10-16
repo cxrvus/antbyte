@@ -96,9 +96,7 @@ impl GameState for State {
 			return;
 		}
 
-		if self.end {
-			// context.quit();
-		} else if let Some(frame) = self.world.next_frame(&input) {
+		if let Some(frame) = self.world.next_frame(&input) {
 			self.print_metadata();
 			cls(context, &self.world);
 
@@ -137,7 +135,7 @@ impl GameState for State {
 			} else {
 				self.metadata = frame.metadata;
 			}
-		} else {
+		} else if !self.end {
 			println!("\nSimulation terminated.");
 			self.end = true;
 		}
