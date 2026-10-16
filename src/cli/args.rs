@@ -37,7 +37,7 @@ pub struct Args {
 	#[arg(short, long)]
 	cfg: Option<String>,
 
-	/// Hide Ants
+	/// Hide FG
 	#[arg(short = 'H', long)]
 	hide_fg: bool,
 
@@ -73,9 +73,11 @@ impl Args {
 	#[rustfmt::skip]
 	pub fn set_config(&self, config: &mut WorldConfig) -> anyhow::Result<()> {
 		if let Some(cfg) = &self.cfg {
-			let cfg = if cfg.trim().ends_with(';') { cfg } else { &format!("{cfg};") };
+			let cfg = cfg.trim().to_owned();
+			let mut cfg = cfg.replace('\'', "\"");
+			if !cfg.ends_with(';') { cfg.push(';'); }
 
-			let mut parser = Parser::new(cfg)?;
+			let mut parser = Parser::new(&cfg)?;
 
 			while parser.assume_next(Token::EndOfFile).is_none() {
 				let (key, value) = parser.parse_setting()?;
