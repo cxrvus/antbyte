@@ -3,12 +3,15 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::ops::{Deref, DerefMut};
 
+type Color = (u8, u8, u8);
+const BLACK: Color = (0, 0, 0);
+
 #[cfg_attr(test, derive(ts_rs::TS))]
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Palette(BTreeMap<u8, (u8, u8, u8)>);
+pub struct Palette(BTreeMap<u8, Color>);
 
 impl Palette {
-	pub fn parse_color(value: &str) -> Result<(u8, u8, u8)> {
+	pub fn parse_color(value: &str) -> Result<Color> {
 		if value.is_empty() {
 			return Ok((0, 0, 0));
 		}
@@ -38,6 +41,12 @@ impl Palette {
 			(red, green, blue)
 		})
 	}
+
+	pub fn to_vec(&self) -> Vec<Color> {
+		(0..0x100)
+			.map(|i| *self.get(&(i as u8)).unwrap_or(&BLACK))
+			.collect()
+	}
 }
 
 impl Default for Palette {
@@ -46,7 +55,7 @@ impl Default for Palette {
 			(0x00, (0x00, 0x00, 0x00)), // black
 			(0x01, (0xaa, 0x00, 0x00)), // red
 			(0x02, (0x00, 0xaa, 0x00)), // green
-			(0x03, (0xaa, 0x55, 0x00)), // yellow
+			(0x03, (0xaa, 0xaa, 0x00)), // yellow
 			(0x04, (0x00, 0x00, 0xaa)), // blue
 			(0x05, (0xaa, 0x00, 0xaa)), // magenta
 			(0x06, (0x00, 0xaa, 0xaa)), // cyan

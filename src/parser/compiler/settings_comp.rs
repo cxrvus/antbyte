@@ -113,6 +113,8 @@ impl Parser {
 			}
 			"palette" => {
 				self.next_str()?
+					.trim()
+					.trim_end_matches(";")
 					.split(";")
 					.map(|c| c.trim())
 					.enumerate()

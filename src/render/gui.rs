@@ -97,7 +97,7 @@ impl GameState for State {
 			// context.quit();
 		} else if let Some(frame) = self.world.next_frame(&input) {
 			self.print_metadata();
-			context.cls();
+			cls(context, &self.world);
 
 			let mut tiles: BTreeMap<Pos, (u8, u8)> = frame
 				.bg
@@ -113,13 +113,7 @@ impl GameState for State {
 			}
 
 			for (&pos, &(bg_value, fg_value)) in &tiles {
-				let &(r, g, b) = self
-					.world
-					.config()
-					.palette
-					.get(&bg_value)
-					.unwrap_or(&(0, 0, 0));
-
+				let (r, g, b) = get_color(&self.world, bg_value);
 				let bg_color = RGB::from_u8(r, g, b);
 				let fg_color = RGB::from_u8(0xff - r, 0xff - g, 0xff - b);
 
@@ -183,7 +177,7 @@ pub fn run(world: World, fullscreen: bool, simple: bool) -> BError {
 		context.with_post_scanlines(false);
 	}
 
-	context.cls();
+	cls(&mut context, &world);
 
 	main_loop(
 		context,
@@ -197,4 +191,15 @@ pub fn run(world: World, fullscreen: bool, simple: bool) -> BError {
 			end: false,
 		},
 	)
+}
+
+#[inline]
+fn cls(context: &mut BTerm, world: &World) {
+	context.cls();
+	context.cls_bg(get_color(world, 0));
+}
+
+#[inline]
+fn get_color(world: &World, value: u8) -> (u8, u8, u8) {
+	*world.config().palette.get(&value).unwrap_or(&BLACK)
 }
