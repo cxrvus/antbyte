@@ -7,7 +7,11 @@ use std::collections::{BTreeMap, HashSet};
 use crate::{
 	render::{chars::key_to_char, chars_to_input},
 	util::{print_stationary, sleep, vec2::Pos},
-	world::{World, config::WorldConfig, frame::FrameInput},
+	world::{
+		World,
+		config::{RenderMask, WorldConfig},
+		frame::FrameInput,
+	},
 };
 
 const TILE_WIDTH: u32 = 8;
@@ -105,7 +109,11 @@ impl GameState for State {
 				.map(|(&pos, &value)| (pos, (value, 0u8)))
 				.collect();
 
+			let fg_mode = self.world.config().fg;
+
 			for (&pos, &fg_value) in &frame.fg {
+				let fg_value = map_fg_value(&fg_mode, fg_value);
+
 				tiles
 					.entry(pos)
 					.and_modify(|(_, value)| *value = fg_value)
@@ -113,14 +121,14 @@ impl GameState for State {
 			}
 
 			for (&pos, &(bg_value, fg_value)) in &tiles {
+				let Pos { x, y } = pos;
 				let (r, g, b) = get_color(&self.world, bg_value);
+
 				let bg_color = RGB::from_u8(r, g, b);
 				let fg_color = RGB::from_u8(0xff - r, 0xff - g, 0xff - b);
+				let fg_value = fg_value.wrapping_add(0x20); // needs to be offset because space (CLS) is at 0x20
 
-				// font texture needs to be offset because space (CLS) is at 0x20
-				let fg_value = fg_value.wrapping_add(0x20);
-
-				context.set(pos.x, pos.y, fg_color, bg_color, fg_value);
+				context.set(x, y, fg_color, bg_color, fg_value);
 			}
 
 			if let Some(ms) = self.world.config().loop_delay
@@ -138,6 +146,8 @@ impl GameState for State {
 }
 
 pub fn run(world: World, fullscreen: bool, simple: bool) -> BError {
+	println!("{}", "\n".repeat(METADATA_LINES));
+
 	let WorldConfig {
 		width, height, fps, ..
 	} = world.config();
@@ -159,15 +169,15 @@ pub fn run(world: World, fullscreen: bool, simple: bool) -> BError {
 	let window_width = (width as f32 * window_scale).ceil() as u32;
 	let window_height = (height as f32 * window_scale).ceil() as u32;
 
-	println!("{}", "\n".repeat(METADATA_LINES));
+	let font = choose_font(&world.config().fg);
 
 	let mut context = BTermBuilder::new()
 		.with_title(title)
 		.with_advanced_input(true)
 		.with_dimensions(window_width, window_height)
-		.with_simple_console(width, height, "hex_font.png")
+		.with_simple_console(width, height, font.clone())
 		.with_resource_path(assets_path)
-		.with_font("hex_font.png", TILE_WIDTH, TILE_HEIGHT)
+		.with_font(font, TILE_WIDTH, TILE_HEIGHT)
 		.with_fitscreen(true)
 		.with_fullscreen(fullscreen)
 		.with_fps_cap(*fps as f32)
@@ -202,4 +212,20 @@ fn cls(context: &mut BTerm, world: &World) {
 #[inline]
 fn get_color(world: &World, value: u8) -> (u8, u8, u8) {
 	*world.config().palette.get(&value).unwrap_or(&BLACK)
+}
+
+fn map_fg_value(mode: &RenderMask, value: u8) -> u8 {
+	match mode {
+		RenderMask::Dir => value + 1,
+		RenderMask::Id if value == 0 => 0xff,
+		_ => value,
+	}
+}
+
+fn choose_font(mode: &RenderMask) -> String {
+	match mode {
+		RenderMask::Dir => "dir_font.png",
+		_ => "hex_font.png",
+	}
+	.into()
 }
