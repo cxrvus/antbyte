@@ -68,7 +68,7 @@ impl World {
 
 					if !active {
 						// current tick is last tick to be simulated
-						frame_ms = self.config().sleep.unwrap_or_default();
+						frame_ms = self.config().loop_delay.unwrap_or_default();
 
 						self.status = WorldStatus::Inactive;
 						break;

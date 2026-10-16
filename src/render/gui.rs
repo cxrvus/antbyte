@@ -130,7 +130,7 @@ impl GameState for State {
 				context.set(pos.x, pos.y, fg_color, bg_color, fg_value);
 			}
 
-			if let Some(ms) = self.world.config().sleep
+			if let Some(ms) = self.world.config().loop_delay
 				&& frame.after_reset
 			{
 				sleep(ms);

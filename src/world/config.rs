@@ -41,8 +41,8 @@ pub struct WorldConfig {
 	pub max_ticks: Option<u32>,
 	/// re-run simulation after it ends
 	pub looping: bool,
-	/// amount of ms to sleep for after end of simulation, i.e. between loops
-	pub sleep: Option<u32>,
+	/// delay in ms after each loop
+	pub loop_delay: Option<u32>,
 
 	// ## Simulation
 	/// behavior if ants touch the worlds border
@@ -99,7 +99,7 @@ impl Default for WorldConfig {
 
 			max_ticks: None,
 			looping: false,
-			sleep: Some(200),
+			loop_delay: Some(200),
 
 			border: BTreeMap::from([(0, BorderMode::Wrap)]),
 			decay: None,
@@ -354,7 +354,7 @@ impl WorldConfig {
 		Self::cap(self.speed, "speed", SPEED_CAP)?;
 		Self::non_zero(self.speed, "speed")?;
 
-		Self::cap_opt(self.sleep, "sleep", 10000)?;
+		Self::cap_opt(self.loop_delay, "loop_delay", 10000)?;
 
 		if let Some(keys) = &self.keys {
 			if keys.is_empty() {

@@ -57,7 +57,6 @@ impl Parser {
 			"fps" => config.fps = self.next_number()?,
 			"speed" => config.speed = self.next_number()?,
 			"decay" => config.decay = self.next_opt_number().map(|x| x.map(|v| v as u16))?,
-			"sleep" => config.sleep = self.next_opt_number()?,
 			"ticks" => config.max_ticks = self.next_opt_number()?,
 			"seed" => config.seed = self.next_opt_number()?,
 
@@ -74,6 +73,7 @@ impl Parser {
 			}
 
 			"looping" | "loop" => config.looping = self.next_bit()?,
+			"loop_delay" => config.loop_delay = self.next_opt_number()?,
 
 			"inv_rot" => config.inv_rot = self.next_bit()?,
 			"euclid" => config.euclid = self.next_bit()?,
