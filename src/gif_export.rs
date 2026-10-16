@@ -85,7 +85,6 @@ fn render_frame(
 		for x in 0..width {
 			let pos = Pos { x, y };
 			let pixel = *frame.bg.get(&pos).unwrap_or(&0);
-			let pixel = pixel & 0xf; // only take LSB half
 
 			for _ in 0..scale {
 				scaled_row.push(pixel);

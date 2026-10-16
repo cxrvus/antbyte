@@ -223,6 +223,8 @@ impl StartingPos {
 #[serde(rename_all = "snake_case")]
 /// filter specified nibble from a byte
 pub enum ByteFilter {
+	/// all bits
+	All,
 	/// least significant
 	Lsb,
 	/// most significant
@@ -238,6 +240,7 @@ impl TryFrom<String> for ByteFilter {
 
 	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
 		match value.as_str() {
+			"all" => Ok(Self::All),
 			"lsb" => Ok(Self::Lsb),
 			"msb" => Ok(Self::Msb),
 			"bin" => Ok(Self::Bin),
@@ -251,7 +254,8 @@ impl TryFrom<String> for ByteFilter {
 impl ByteFilter {
 	pub fn apply(&self, input: u8) -> u8 {
 		match self {
-			ByteFilter::Lsb => input & 0xf,
+			ByteFilter::All => input,
+			ByteFilter::Lsb => input & 0x0f,
 			ByteFilter::Msb => (input & 0xf0) >> 4,
 			ByteFilter::Bin => match input {
 				0 => 0,
