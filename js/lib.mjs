@@ -13,7 +13,7 @@ export function run(world) {
 }
 
 /** @returns {import('./lib').World} */
-export const newWorld = () => ({ cfg: {}, ants: {} })
+export const newWorld = () => ({ name: null, cfg: {}, ants: {} })
 
 /** @param {number} value */
 export const size = value => ({ height: value, width: value})

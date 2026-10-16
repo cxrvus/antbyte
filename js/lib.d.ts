@@ -12,6 +12,7 @@ import type { WorldConfig as WorldConfigFull } from "./bindings/WorldConfig";
 export type WorldConfig = Partial<WorldConfigFull>
 
 export type World = {
+	name: string | null,
 	cfg: WorldConfig,
 	ants: Behaviors,
 }
