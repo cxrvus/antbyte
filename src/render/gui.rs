@@ -14,6 +14,7 @@ use crate::{
 	},
 };
 
+const WIN_SIZE: f32 = 96.0;
 const MAX_ZOOM: f32 = 8.0;
 const MIN_ZOOM: f32 = 0.5;
 const ZOOM_STEP: f32 = 0.5;
@@ -158,12 +159,7 @@ pub fn run(world: World, fullscreen: bool, simple: bool) -> BError {
 		None => "AntByte".into(),
 	};
 
-	let window_scale = match height.max(width) {
-		0..=128 => 1.0,
-		129..196 => 0.75,
-		_ => 0.5,
-	};
-
+	let window_scale = WIN_SIZE / (height.max(width) as f32);
 	let window_width = (width as f32 * window_scale).ceil() as u32;
 	let window_height = (height as f32 * window_scale).ceil() as u32;
 
