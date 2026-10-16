@@ -2,16 +2,12 @@
 
 use VirtualKeyCode as Key;
 use bracket_lib::prelude::*;
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 
 use crate::{
 	render::{chars::key_to_char, chars_to_input},
-	util::{print_stationary, sleep},
-	world::{
-		World,
-		config::{RenderMask, WorldConfig},
-		frame::FrameInput,
-	},
+	util::{print_stationary, sleep, vec2::Pos},
+	world::{World, config::WorldConfig, frame::FrameInput},
 };
 
 const TILE_WIDTH: u32 = 8;
@@ -103,12 +99,20 @@ impl GameState for State {
 			self.print_metadata();
 			context.cls();
 
-			for (&pos, &bg_value) in &frame.bg {
-				let bg_value = match self.world.config().bg {
-					RenderMask::None => 0,
-					_ => bg_value,
-				};
+			let mut tiles: BTreeMap<Pos, (u8, u8)> = frame
+				.bg
+				.iter()
+				.map(|(&pos, &value)| (pos, (value, 0u8)))
+				.collect();
 
+			for (&pos, &fg_value) in &frame.fg {
+				tiles
+					.entry(pos)
+					.and_modify(|(_, value)| *value = fg_value)
+					.or_insert((0, fg_value));
+			}
+
+			for (&pos, &(bg_value, fg_value)) in &tiles {
 				let &(r, g, b) = self
 					.world
 					.config()
@@ -119,11 +123,6 @@ impl GameState for State {
 				let bg_color = RGB::from_u8(r, g, b);
 				let fg_color = RGB::from_u8(0xff - r, 0xff - g, 0xff - b);
 
-				let fg_value = *frame.fg.get(&pos).unwrap_or(&0);
-				let fg_value = match self.world.config().fg {
-					RenderMask::None => 0,
-					_ => fg_value,
-				};
 				// font texture needs to be offset because space (CLS) is at 0x20
 				let fg_value = fg_value.wrapping_add(0x20);
 
