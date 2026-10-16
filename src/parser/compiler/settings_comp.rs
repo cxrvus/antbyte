@@ -103,6 +103,7 @@ impl Parser {
 			"ant_limit" => config.ant_limit = self.next_number()?,
 
 			"bg_filter" => config.bg_filter = ByteFilter::try_from(self.next_ident()?)?,
+			"fg_symbols" => config.fg_symbols = self.next_bit()?,
 			"bg" => config.bg = RenderMask::try_from(self.next_ident()?)?,
 			"fg" => config.fg = RenderMask::try_from(self.next_ident()?)?,
 

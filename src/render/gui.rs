@@ -14,8 +14,6 @@ use crate::{
 	},
 };
 
-const TILE_WIDTH: u32 = 8;
-const TILE_HEIGHT: u32 = 8;
 const MAX_ZOOM: f32 = 8.0;
 const MIN_ZOOM: f32 = 0.5;
 const ZOOM_STEP: f32 = 0.5;
@@ -169,7 +167,7 @@ pub fn run(world: World, fullscreen: bool, simple: bool) -> BError {
 	let window_width = (width as f32 * window_scale).ceil() as u32;
 	let window_height = (height as f32 * window_scale).ceil() as u32;
 
-	let font = choose_font(&world.config().fg);
+	let (font, tile_size) = choose_font(world.config().fg, world.config().fg_symbols);
 
 	let mut context = BTermBuilder::new()
 		.with_title(title)
@@ -177,7 +175,7 @@ pub fn run(world: World, fullscreen: bool, simple: bool) -> BError {
 		.with_dimensions(window_width, window_height)
 		.with_simple_console(width, height, font.clone())
 		.with_resource_path(assets_path)
-		.with_font(font, TILE_WIDTH, TILE_HEIGHT)
+		.with_font(font, tile_size, tile_size)
 		.with_fitscreen(true)
 		.with_fullscreen(fullscreen)
 		.with_fps_cap(*fps as f32)
@@ -215,17 +213,21 @@ fn get_color(world: &World, value: u8) -> (u8, u8, u8) {
 }
 
 fn map_fg_value(mode: &RenderMask, value: u8) -> u8 {
+	const QUEEN_GLYPH: u8 = 0xe0;
+
 	match mode {
 		RenderMask::Dir => value + 1,
-		RenderMask::Id if value == 0 => 0xff,
+		RenderMask::Id if value == 0 => QUEEN_GLYPH,
 		_ => value,
 	}
 }
 
-fn choose_font(mode: &RenderMask) -> String {
-	match mode {
-		RenderMask::Dir => "dir_font.png",
-		_ => "hex_font.png",
+fn choose_font(mode: RenderMask, fg_symbols: bool) -> (String, u8) {
+	if mode == RenderMask::Dir {
+		("dir_font.png".into(), 8)
+	} else if fg_symbols {
+		("cp437_font.png".into(), 10)
+	} else {
+		("hex_font.png".into(), 8)
 	}
-	.into()
 }

@@ -75,6 +75,8 @@ pub struct WorldConfig {
 	pub layer_filter: u8,
 	/// filter to get desired nibble (4 bits) out of BG byte
 	pub bg_filter: ByteFilter,
+	/// render fg as symbols instead of hex
+	pub fg_symbols: bool,
 	/// background render mask
 	pub bg: RenderMask,
 	/// foreground render mask
@@ -116,6 +118,7 @@ impl Default for WorldConfig {
 			start_tick: 0,
 			layer_filter: 0xff,
 			bg_filter: ByteFilter::Lsb,
+			fg_symbols: false,
 			bg: RenderMask::Tile,
 			fg: RenderMask::Dir,
 
