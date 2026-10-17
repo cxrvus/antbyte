@@ -8,8 +8,7 @@ export * from './random.mjs'
 import { readFileSync } from 'node:fs'
 
 export const PINS = JSON.parse(
-	// @ts-ignore
-	readFileSync(`${import.meta.dirname}/bindings/PINS.json`, 'utf8'),
+	readFileSync(new URL('./bindings/PINS.json', import.meta.url), 'utf8'),
 )
 
 /** @param {World} world */
