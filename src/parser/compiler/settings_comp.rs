@@ -55,7 +55,7 @@ impl Parser {
 
 			"stepped" => config.stepped = self.next_bit()?,
 			"fps" => config.fps = self.next_number()?,
-			"speed" => config.speed = self.next_number()?,
+			"speed" | "tpf" => config.speed = self.next_number()?,
 			"decay" => config.decay = self.next_opt_number().map(|x| x.map(|v| v as u16))?,
 			"ticks" => config.max_ticks = self.next_opt_number()?,
 			"seed" => config.seed = self.next_opt_number()?,
