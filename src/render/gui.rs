@@ -82,10 +82,10 @@ impl State {
 				} else {
 					if pressed {
 						match key {
-							Key::Left => self.pan_x -= PAN_STEP,
-							Key::Right => self.pan_x += PAN_STEP,
-							Key::Up => self.pan_y -= PAN_STEP,
+							Key::Left => self.pan_x += PAN_STEP,
+							Key::Right => self.pan_x -= PAN_STEP,
 							Key::Down => self.pan_y += PAN_STEP,
+							Key::Up => self.pan_y -= PAN_STEP,
 
 							_ if key_to_char(&key).is_some() => {
 								self.held_keys.insert(key);
