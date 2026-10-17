@@ -4,8 +4,12 @@
 
 export * from './random.mjs'
 
-import PINS from './bindings/PINS.json' with { type: 'json' }
-export { PINS }
+// @ts-ignore
+import { readFileSync } from 'node:fs'
+
+export const PINS = JSON.parse(
+	readFileSync(new URL('./bindings/PINS.json', import.meta.url), 'utf8'),
+)
 
 /** @param {World} world */
 export function run(world) {
