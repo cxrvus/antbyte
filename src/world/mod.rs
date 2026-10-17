@@ -173,7 +173,7 @@ impl World {
 			false => "",
 		};
 
-		metadata_str += &format!("fps: {fps:02}; tpf: {speed:03}; {stepped}\n");
+		metadata_str += &format!("fps: {fps:02};      tpf: {speed:03}; {stepped}\n");
 		metadata_str += &self.tick_str();
 		metadata_str += &format!(" | A: {:04}", self.ants.ant_count());
 		metadata_str += &format!("\nS: {:08b}", self.signal_in);

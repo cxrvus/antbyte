@@ -110,7 +110,8 @@ impl State {
 	#[inline]
 	fn print_metadata(&self, context: &BTerm) {
 		if !self.metadata.is_empty() {
-			let mut metadata = format!("real_fps: {};\n", context.fps);
+			let zoom = (self.zoom * 100.0) as u32;
+			let mut metadata = format!("real_fps: {:02}; zoom: {zoom:02}%;\n", context.fps);
 			metadata.push_str(&self.metadata);
 			debug_assert_eq!(metadata.lines().count(), METADATA_LINES);
 			print_stationary(&metadata);
