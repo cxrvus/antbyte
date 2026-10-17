@@ -48,6 +48,11 @@ impl State {
 					match key {
 						Key::Equals => self.zoom = (self.zoom + ZOOM_STEP).min(MAX_ZOOM),
 						Key::Minus => self.zoom = (self.zoom - ZOOM_STEP).max(MIN_ZOOM),
+						Key::T => {
+							self.zoom = 1.0;
+							self.pan_x = 0.0;
+							self.pan_y = 0.0;
+						}
 
 						Key::Q => context.quit(),
 						Key::S => self.world.config_mut().stepped = !self.world.config().stepped,
